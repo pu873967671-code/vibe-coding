@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GP's Vibe Coding | 个人工具站</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --bg-card-hover: #222230;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --border: #2a2a3a;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .lang-switch {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .lang-switch:hover {
+      background: var(--bg-card-hover);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      box-shadow: 0 0 60px rgba(99, 102, 241, 0.3);
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #f0f0f5, #a5a5c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Search */
+    .search-section {
+      padding: 0 0 40px;
+    }
+
+    .search-box {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 16px 24px 16px 52px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      padding-bottom: 80px;
+    }
+
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .tool-card.hidden {
+      display: none;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .tool-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .tool-info .category {
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .tool-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-price {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tool-price.free {
+      color: var(--success);
+    }
+
+    .tool-price.paid {
+      color: var(--warning);
+    }
+
+    .tool-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tool-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* No results */
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      display: none;
+    }
+
+    .no-results.show {
+      display: block;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      padding: 24px 0;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <span class="logo-text">GP's Vibe Coding</span>
+        </div>
+        <button class="lang-switch" onclick="toggleLang()">EN / 中文</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="avatar">👨‍💻</div>
+        <h1 data-zh="GP's Vibe Coding" data-en="GP's Vibe Coding">GP's Vibe Coding</h1>
+        <p data-zh="分享我日常发现的 AI 工具、开发资源和好玩项目。Vibe coding，让开发更有趣！" data-en="Sharing AI tools, dev resources and fun projects I discover. Vibe coding, making development more fun!">
+          分享我日常发现的 AI 工具、开发资源和好玩项目。Vibe coding，让开发更有趣！
+        </p>
+        <div class="tags">
+          <span class="tag">#VibeCoding</span>
+          <span class="tag">#AI</span>
+          <span class="tag">#DevTools</span>
+          <span class="tag">#OpenSource</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <div class="container">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" data-zh-placeholder="搜索工具或资源..." data-en-placeholder="Search tools or resources..." placeholder="搜索工具或资源...">
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all" data-zh="全部" data-en="All">全部</button>
+          <button class="filter-btn" data-filter="ai" data-zh="AI 工具" data-en="AI Tools">AI 工具</button>
+          <button class="filter-btn" data-filter="dev" data-zh="开发工具" data-en="Dev Tools">开发工具</button>
+          <button class="filter-btn" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
+          <button class="filter-btn" data-filter="project" data-zh="项目" data-en="Projects">项目</button>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="totalCount">0</div>
+            <div class="stat-label" data-zh="工具总数" data-en="Total Tools">工具总数</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="freeCount">0</div>
+            <div class="stat-label" data-zh="免费" data-en="Free">免费</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="tools-grid" id="toolsGrid"></div>
+        <div class="no-results" id="noResults" data-zh="没有找到相关工具 😢" data-en="No tools found 😢">
+          没有找到相关工具 😢
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p data-zh="© 2026 GP's Vibe Coding. 用 ❤️ 打造" data-en="© 2026 GP's Vibe Coding. Made with ❤️">© 2026 GP's Vibe Coding. 用 ❤️ 打造</p>
+    </div>
+  </footer>
+
+  <script>
+    const tools = [
+      {
+        id: 1,
+        name: "ChatGPT",
+        nameZh: "ChatGPT",
+        icon: "💬",
+        iconBg: "#10a37f",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "OpenAI 出品的对话 AI，编程、写作、思考全能助手",
+        descZh: "OpenAI 出品的对话 AI，编程、写作、思考全能助手",
+        descEn: "OpenAI's conversational AI, the all-powerful assistant for coding, writing, and thinking",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://chat.openai.com",
+        featured: true
+      },
+      {
+        id: 2,
+        name: "Claude",
+        nameZh: "Claude",
+        icon: "🧠",
+        iconBg: "#d97706",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "Anthropic 出品的 AI 助手，长文本处理能力强，适合深度分析",
+        descZh: "Anthropic 出品的 AI 助手，长文本处理能力强，适合深度分析",
+        descEn: "Anthropic's AI assistant, strong at long text processing, great for deep analysis",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://claude.ai",
+        featured: true
+      },
+      {
+        id: 3,
+        name: "DeepSeek",
+        nameZh: "DeepSeek",
+        icon: "🔮",
+        iconBg: "#6366f1",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "国产开源大模型，性价比高，代码能力超强",
+        descZh: "国产开源大模型，性价比高，代码能力超强",
+        descEn: "Chinese open-source LLM, high cost-performance, excellent code capabilities",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://deepseek.com",
+        featured: true
+      },
+      {
+        id: 4,
+        name: "Cursor",
+        nameZh: "Cursor",
+        icon: "⚡",
+        iconBg: "#22c55e",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "AI 驱动的代码编辑器，基于 VS Code，编程效率提升 10 倍",
+        descZh: "AI 驱动的代码编辑器，基于 VS Code，编程效率提升 10 倍",
+        descEn: "AI-powered code editor, based on VS Code, 10x programming efficiency",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://cursor.sh",
+        featured: true
+      },
+      {
+        id: 5,
+        name: "Windsurf",
+        nameZh: "Windsurf",
+        icon: "🌊",
+        iconBg: "#0ea5e9",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "Codeium 出品的 AI IDE，Flow 模式让你专注于业务逻辑",
+        descZh: "Codeium 出品的 AI IDE，Flow 模式让你专注于业务逻辑",
+        descEn: "Codeium's AI IDE, Flow mode lets you focus on business logic",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://codeium.com/windsurf",
+        featured: false
+      },
+      {
+        id: 6,
+        name: "GitHub Copilot",
+        nameZh: "GitHub Copilot",
+        icon: "🐙",
+        iconBg: "#f0f0f5",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "GitHub 官方 AI 编程助手，代码补全神器",
+        descZh: "GitHub 官方 AI 编程助手，代码补全神器",
+        descEn: "GitHub's official AI programming assistant, code completion god",
+        price: "paid",
+        priceZh: "付费",
+        priceEn: "Paid",
+        link: "https://github.com/features/copilot",
+        featured: false
+      },
+      {
+        id: 7,
+        name: "Vercel AI SDK",
+        nameZh: "Vercel AI SDK",
+        icon: "▲",
+        iconBg: "#000",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "构建 AI 应用的开发套件，支持所有主流 LLM",
+        descZh: "构建 AI 应用的开发套件，支持所有主流 LLM",
+        descEn: "Development kit for building AI apps, supports all major LLMs",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://sdk.vercel.ai",
+        featured: false
+      },
+      {
+        id: 8,
+        name: "OpenClaw",
+        nameZh: "OpenClaw",
+        icon: "🦀",
+        iconBg: "#f97316",
+        category: "project",
+        categoryZh: "项目",
+        categoryEn: "Projects",
+        desc: "我正在用的 AI 助手框架，支持多模型、多渠道、超好用！",
+        descZh: "我正在用的 AI 助手框架，支持多模型、多渠道、超好用！",
+        descEn: "The AI assistant framework I use, supports multiple models and channels, awesome!",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://github.com/openclaw/openclaw",
+        featured: true
+      },
+      {
+        id: 9,
+        name: "Obsidian",
+        nameZh: "Obsidian",
+        icon: "💎",
+        iconBg: "#7c3aed",
+        category: "free",
+        categoryZh: "免费资源",
+        categoryEn: "Free Resources",
+        desc: "本地优先的笔记软件，Markdown 格式，插件生态丰富",
+        descZh: "本地优先的笔记软件，Markdown 格式，插件生态丰富",
+        descEn: "Local-first note-taking app, Markdown format, rich plugin ecosystem",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://obsidian.md",
+        featured: false
+      },
+      {
+        id: 10,
+        name: "Figma",
+        nameZh: "Figma",
+        icon: "🎨",
+        iconBg: "#f24e1e",
+        category: "free",
+        categoryZh: "免费资源",
+        categoryEn: "Free Resources",
+        desc: "协 UI 设计工具，浏览器端就能做设计",
+        descZh: "协作式 UI 设计工具，浏览器端就能做设计",
+        descEn: "Collaborative UI design tool, works right in the browser",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://figma.com",
+        featured: false
+      },
+      {
+        id: 11,
+        name: "Kimi",
+        nameZh: "Kimi",
+        icon: "🌙",
+        iconBg: "#8b5cf6",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "月之暗面出品的国产 AI，支持超长上下文，适合文档处理",
+        descZh: "月之暗面出品的国产 AI，支持超长上下文，适合文档处理",
+        descEn: "Moonshot's Chinese AI, supports ultra-long context, great for document processing",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://kimi.moonshot.cn",
+        featured: true
+      },
+      {
+        id: 12,
+        name: "通义千问",
+        nameZh: "通义千问",
+        icon: "🏮",
+        iconBg: "#f59e0b",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "阿里出品的国产大模型，多模态能力强",
+        descZh: "阿里出品的国产大模型，多模态能力强",
+        descEn: "Alibaba's Chinese LLM, strong multimodal capabilities",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://tongyi.aliyun.com",
+        featured: false
+      }
+    ];
+
+    let currentLang = 'zh';
+    let currentFilter = 'all';
+
+    function renderTools() {
+      const grid = document.getElementById('toolsGrid');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      let filtered = tools;
+
+      // Filter by category
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(t => t.category === currentFilter);
+      }
+
+      // Filter by search
+      if (searchTerm) {
+        filtered = filtered.filter(t => {
+          const name = currentLang === 'zh' ? t.nameZh : t.name;
+          const desc = currentLang === 'zh' ? t.descZh : t.descEn;
+          return name.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm);
+        });
+      }
+
+      // Update counts
+      document.getElementById('totalCount').textContent = tools.length;
+      document.getElementById('freeCount').textContent = tools.filter(t => t.price === 'free').length;
+
+      // Show/hide no results
+      const noResults = document.getElementById('noResults');
+      if (filtered.length === 0) {
+        noResults.classList.add('show');
+        grid.innerHTML = '';
+        return;
+      }
+      noResults.classList.remove('show');
+
+      // Render cards
+      grid.innerHTML = filtered.map(tool => {
+        const name = currentLang === 'zh' ? tool.nameZh : tool.name;
+        const desc = currentLang === 'zh' ? tool.descZh : tool.descEn;
+        const category = currentLang === 'zh' ? tool.categoryZh : tool.categoryEn;
+        const priceText = currentLang === 'zh' ? tool.priceZh : tool.priceEn;
+        
+        return `
+          <div class="tool-card" onclick="window.open('${tool.link}', '_blank')">
+            <div class="tool-header">
+              <div class="tool-icon" style="background: ${tool.iconBg}">${tool.icon}</div>
+              <div class="tool-info">
+                <h3>${name}</h3>
+                <span class="category">${category}</span>
+              </div>
+            </div>
+            <p class="tool-desc">${desc}</p>
+            <div class="tool-footer">
+              <span class="tool-price ${tool.price === 'free' ? 'free' : tool.price === 'paid' ? 'paid' : ''}">${priceText}</span>
+              <a href="${tool.link}" target="_blank" class="tool-link" onclick="event.stopPropagation()">${currentLang === 'zh' ? '访问' : 'Visit'} →</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleLang() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      
+      // Update placeholders
+      const searchInput = document.getElementById('searchInput');
+      searchInput.placeholder = searchInput.dataset[currentLang === 'zh' ? 'zh-placeholder' : 'en-placeholder'];
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.textContent = btn.dataset[currentLang === 'zh' ? 'zh' : 'en'];
+      });
+      
+      // Update stats labels
+      document.querySelectorAll('.stat-label').forEach(label => {
+        label.textContent = label.dataset[currentLang === 'zh' ? 'zh' : 'en'];
+      });
+      
+      // Update hero text
+      document.querySelectorAll('[data-zh][data-en]').forEach(el => {
+        el.textContent = el.dataset[currentLang];
+      });
+      
+      // Update footer
+      document.querySelectorAll('footer p').forEach(el => {
+        el.textContent = el.dataset[currentLang];
+      });
+      
+      renderTools();
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderTools();
+      });
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', renderTools);
+
+    // Initial render
+    renderTools();
+  </script>
+</body>
+</html>
