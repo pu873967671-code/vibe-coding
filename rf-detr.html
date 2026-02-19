@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 图片标签生成器 | GP's Vibe Coding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --bg-card-hover: #222230;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --border: #2a2a3a;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      padding: 60px 0;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .tool-header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #f0f0f5, #a5a5c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tool-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .upload-area {
+      background: var(--bg-card);
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 60px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 32px;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .upload-area.dragging {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .upload-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .upload-hint {
+      font-size: 14px;
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .preview-section {
+      display: none;
+      margin-bottom: 32px;
+    }
+
+    .preview-section.show {
+      display: block;
+    }
+
+    .preview-container {
+      position: relative;
+      background: var(--bg-card);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    #previewImage {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      display: block;
+    }
+
+    #canvasOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 15, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .loading-overlay.hidden {
+      display: none;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .results-section {
+      display: none;
+    }
+
+    .results-section.show {
+      display: block;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .result-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-confidence {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .json-output {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 400px;
+      overflow-y: auto;
+      color: var(--text-secondary);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .status-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+    }
+
+    .status-dot.ready {
+      background: var(--success);
+    }
+
+    .status-dot.error {
+      background: var(--error);
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="/" class="logo">
+          <div class="logo-icon">🏷️</div>
+          <span class="logo-text">AI 图片标签生成器</span>
+        </a>
+        <a href="/" class="back-link">← 返回首页</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="tool-header">
+        <h1>AI 图片标签生成器</h1>
+        <p>上传图片，自动识别物体并生成标签 | 基于 RF-DETR 模型，完全在浏览器端运行</p>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">正在加载模型...</span>
+      </div>
+
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">点击或拖拽上传图片</div>
+        <div class="upload-hint">支持 JPG、PNG、WebP 格式</div>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+
+      <div class="preview-section" id="previewSection">
+        <div class="preview-container">
+          <img id="previewImage" alt="预览">
+          <canvas id="canvasOverlay"></canvas>
+          <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <div class="loading-text">正在分析图片...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-section" id="resultsSection">
+        <div class="results-grid">
+          <div class="result-card">
+            <h3>🏷️ 检测到的标签</h3>
+            <div class="tag-list" id="tagList"></div>
+            <div class="stats-row">
+              <div class="stat-item">
+                <div class="stat-value" id="objectCount">0</div>
+                <div class="stat-label">检测物体</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="classCount">0</div>
+                <div class="stat-label">类别数</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <h3>📋 JSON 输出</h3>
+            <div class="json-output" id="jsonOutput"></div>
+            <div class="actions">
+              <button class="btn btn-primary" id="copyBtn">复制 JSON</button>
+              <button class="btn btn-secondary" id="downloadBtn">下载 JSON</button>
+              <button class="btn btn-secondary" id="resetBtn">重新上传</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 GP's Vibe Coding | 基于 Transformers.js + RF-DETR</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.1.2';
+
+    // 配置
+    env.allowLocalModels = false;
+
+    // COCO 类别名称
+    const COCO_CLASSES = [
+      'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
+      'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat',
+      'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack',
+      'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+      'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+      'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+      'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake',
+      'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop',
+      'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink',
+      'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+    ];
+
+    // 中文翻译
+    const COCO_CLASSES_ZH = {
+      'person': '人', 'bicycle': '自行车', 'car': '汽车', 'motorcycle': '摩托车',
+      'airplane': '飞机', 'bus': '公交车', 'train': '火车', 'truck': '卡车',
+      'boat': '船', 'traffic light': '交通灯', 'fire hydrant': '消防栓',
+      'stop sign': '停止标志', 'parking meter': '停车计时器', 'bench': '长椅',
+      'bird': '鸟', 'cat': '猫', 'dog': '狗', 'horse': '马', 'sheep': '羊',
+      'cow': '牛', 'elephant': '大象', 'bear': '熊', 'zebra': '斑马',
+      'giraffe': '长颈鹿', 'backpack': '背包', 'umbrella': '雨伞', 'handbag': '手提包',
+      'tie': '领带', 'suitcase': '行李箱', 'frisbee': '飞盘', 'skis': '滑雪板',
+      'snowboard': '单板滑雪', 'sports ball': '运动球', 'kite': '风筝',
+      'baseball bat': '棒球棒', 'baseball glove': '棒球手套', 'skateboard': '滑板',
+      'surfboard': '冲浪板', 'tennis racket': '网球拍', 'bottle': '瓶子',
+      'wine glass': '酒杯', 'cup': '杯子', 'fork': '叉子', 'knife': '刀',
+      'spoon': '勺子', 'bowl': '碗', 'banana': '香蕉', 'apple': '苹果',
+      'sandwich': '三明治', 'orange': '橙子', 'broccoli': '西兰花', 'carrot': '胡萝卜',
+      'hot dog': '热狗', 'pizza': '披萨', 'donut': '甜甜圈', 'cake': '蛋糕',
+      'chair': '椅子', 'couch': '沙发', 'potted plant': '盆栽', 'bed': '床',
+      'dining table': '餐桌', 'toilet': '马桶', 'tv': '电视', 'laptop': '笔记本电脑',
+      'mouse': '鼠标', 'remote': '遥控器', 'keyboard': '键盘', 'cell phone': '手机',
+      'microwave': '微波炉', 'oven': '烤箱', 'toaster': '烤面包机', 'sink': '水槽',
+      'refrigerator': '冰箱', 'book': '书', 'clock': '时钟', 'vase': '花瓶',
+      'scissors': '剪刀', 'teddy bear': '泰迪熊', 'hair drier': '吹风机', 'toothbrush': '牙刷'
+    };
+
+    // DOM 元素
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const previewSection = document.getElementById('previewSection');
+    const previewImage = document.getElementById('previewImage');
+    const canvasOverlay = document.getElementById('canvasOverlay');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const resultsSection = document.getElementById('resultsSection');
+    const tagList = document.getElementById('tagList');
+    const jsonOutput = document.getElementById('jsonOutput');
+    const objectCount = document.getElementById('objectCount');
+    const classCount = document.getElementById('classCount');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let detector = null;
+    let currentResults = null;
+
+    // 初始化模型
+    async function initModel() {
+      try {
+        statusText.textContent = '正在加载模型（首次加载约 358MB）...';
+        detector = await pipeline('object-detection', 'onnx-community/rfdetr_medium-ONNX');
+        statusDot.classList.add('ready');
+        statusText.textContent = '模型已就绪，可以上传图片';
+      } catch (error) {
+        statusDot.classList.add('error');
+        statusText.textContent = '模型加载失败: ' + error.message;
+        console.error('Model loading error:', error);
+      }
+    }
+
+    // 处理文件上传
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('请上传图片文件');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        previewImage.src = e.target.result;
+        previewSection.classList.add('show');
+        resultsSection.classList.remove('show');
+        loadingOverlay.classList.remove('hidden');
+        
+        await detectObjects(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 检测物体
+    async function detectObjects(imageSrc) {
+      if (!detector) {
+        alert('模型尚未加载完成');
+        loadingOverlay.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const results = await detector(imageSrc, { threshold: 0.5 });
+        currentResults = results;
+        
+        // 绘制检测框
+        drawBoundingBoxes(results);
+        
+        // 显示结果
+        displayResults(results);
+        
+      } catch (error) {
+        console.error('Detection error:', error);
+        alert('检测失败: ' + error.message);
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    }
+
+    // 绘制边界框
+    function drawBoundingBoxes(results) {
+      const img = previewImage;
+      canvasOverlay.width = img.clientWidth;
+      canvasOverlay.height = img.clientHeight;
+      
+      const ctx = canvasOverlay.getContext('2d');
+      const scaleX = img.clientWidth / img.naturalWidth;
+      const scaleY = img.clientHeight / img.naturalHeight;
+      
+      ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+      
+      const colors = [
+        '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316',
+        '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6'
+      ];
+      
+      results.forEach((result, index) => {
+        const { xmin, ymin, xmax, ymax } = result.box;
+        const x = xmin * scaleX;
+        const y = ymin * scaleY;
+        const width = (xmax - xmin) * scaleX;
+        const height = (ymax - ymin) * scaleY;
+        
+        const color = colors[index % colors.length];
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        
+        // 标签背景
+        const label = `${COCO_CLASSES_ZH[result.label] || result.label} ${(result.score * 100).toFixed(0)}%`;
+        ctx.font = '12px Inter, sans-serif';
+        const textWidth = ctx.measureText(label).width;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - 20, textWidth + 8, 20);
+        
+        // 标签文字
+        ctx.fillStyle = 'white';
+        ctx.fillText(label, x + 4, y - 6);
+      });
+    }
+
+    // 显示结果
+    function displayResults(results) {
+      // 统计
+      const classes = new Set(results.map(r => r.label));
+      objectCount.textContent = results.length;
+      classCount.textContent = classes.size;
+      
+      // 标签列表
+      tagList.innerHTML = results.map(result => `
+        <div class="tag">
+          ${COCO_CLASSES_ZH[result.label] || result.label}
+          <span class="tag-confidence">${(result.score * 100).toFixed(0)}%</span>
+        </div>
+      `).join('');
+      
+      // JSON 输出
+      const jsonOutputData = {
+        timestamp: new Date().toISOString(),
+        totalObjects: results.length,
+        uniqueClasses: classes.size,
+        detections: results.map(r => ({
+          label: r.label,
+          labelZh: COCO_CLASSES_ZH[r.label] || r.label,
+          confidence: parseFloat((r.score * 100).toFixed(2)),
+          bbox: {
+            x: Math.round(r.box.xmin),
+            y: Math.round(r.box.ymin),
+            width: Math.round(r.box.xmax - r.box.xmin),
+            height: Math.round(r.box.ymax - r.box.ymin)
+          }
+        }))
+      };
+      
+      jsonOutput.textContent = JSON.stringify(jsonOutputData, null, 2);
+      resultsSection.classList.add('show');
+    }
+
+    // 事件监听
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragging');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragging');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragging');
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(jsonOutput.textContent);
+      copyBtn.textContent = '已复制!';
+      setTimeout(() => copyBtn.textContent = '复制 JSON', 2000);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([jsonOutput.textContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `labels-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      previewSection.classList.remove('show');
+      resultsSection.classList.remove('show');
+      fileInput.value = '';
+      currentResults = null;
+    });
+
+    // 初始化
+    initModel();
+  </script>
+</body>
+</html>

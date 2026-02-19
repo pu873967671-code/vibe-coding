@@ -1,0 +1,6 @@
+https://zenmux.ai/  优点：原生直连 
+https://api.mcxhm.cn/  优点：稳定少掉线，线路多，站主维护勤快，包回复
+https://platform.iflow.cn/profile?tab=apiKey 优点：免费! ,缺点：使用 /auth 切换至"通过iFlow登录"的方式，才享受API Key自动续期服务，openclaw不支持/AUTH登录，api有效期7天，到期需手动续
+
+https://ai.9w7.cn/  优点： 按次收费，量大管饱，偶尔抽风，胜在性价比高
+所有站点建议先试用再上车，有问题联系站点管理
