@@ -553,8 +553,8 @@
     async function initModel() {
       try {
         statusText.textContent = '正在加载模型...';
-        // 使用 DETR-resnet-50，Transformers.js 官方支持
-        detector = await pipeline('object-detection', 'facebook/detr-resnet-50');
+        // 使用 YOLOS-tiny，Transformers.js 官方支持且较小
+        detector = await pipeline('object-detection', 'hustvl/yolos-tiny');
         statusDot.classList.add('ready');
         statusText.textContent = '模型已就绪，可以上传图片';
       } catch (error) {
