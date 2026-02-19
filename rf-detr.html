@@ -420,7 +420,7 @@
     <div class="container">
       <div class="tool-header">
         <h1>AI 图片标签生成器</h1>
-        <p>上传图片，自动识别物体并生成标签 | 基于 RF-DETR 模型，完全在浏览器端运行</p>
+        <p>上传图片，自动识别物体并生成标签 | 基于 COCO-SSD 模型，完全在浏览器端运行</p>
       </div>
 
       <div class="status-bar">
@@ -479,15 +479,14 @@
 
   <footer>
     <div class="container">
-      <p>© 2026 GP's Vibe Coding | 基于 Transformers.js + DETR-resnet-50</p>
+      <p>© 2026 GP's Vibe Coding | 基于 TensorFlow.js + COCO-SSD</p>
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
   <script type="module">
-    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.1.2';
-
-    // 配置
-    env.allowLocalModels = false;
+    // 使用 TensorFlow.js COCO-SSD 模型（浏览器原生支持）
 
     // COCO 类别名称
     const COCO_CLASSES = [
@@ -553,8 +552,8 @@
     async function initModel() {
       try {
         statusText.textContent = '正在加载模型...';
-        // 使用 owlvit-base-patch32，Transformers.js 官方支持
-        detector = await pipeline('object-detection', 'google/owlvit-base-patch32');
+        // 使用 TensorFlow.js COCO-SSD
+        detector = await cocoSsd.load();
         statusDot.classList.add('ready');
         statusText.textContent = '模型已就绪，可以上传图片';
       } catch (error) {
@@ -592,7 +591,21 @@
       }
 
       try {
-        const results = await detector(imageSrc, { threshold: 0.5 });
+        // COCO-SSD 检测
+        const predictions = await detector.detect(previewImage);
+        
+        // 转换格式
+        const results = predictions.map(p => ({
+          label: p.class,
+          score: p.score,
+          box: {
+            xmin: p.bbox[0],
+            ymin: p.bbox[1],
+            xmax: p.bbox[0] + p.bbox[2],
+            ymax: p.bbox[1] + p.bbox[3]
+          }
+        }));
+        
         currentResults = results;
         
         // 绘制检测框
