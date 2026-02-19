@@ -479,7 +479,7 @@
 
   <footer>
     <div class="container">
-      <p>© 2026 GP's Vibe Coding | 基于 Transformers.js + RF-DETR</p>
+      <p>© 2026 GP's Vibe Coding | 基于 Transformers.js + DETR-resnet-50</p>
     </div>
   </footer>
 
@@ -552,8 +552,9 @@
     // 初始化模型
     async function initModel() {
       try {
-        statusText.textContent = '正在加载模型（首次加载约 358MB）...';
-        detector = await pipeline('object-detection', 'onnx-community/rfdetr_medium-ONNX');
+        statusText.textContent = '正在加载模型...';
+        // 使用 DETR-resnet-50，Transformers.js 官方支持
+        detector = await pipeline('object-detection', 'facebook/detr-resnet-50');
         statusDot.classList.add('ready');
         statusText.textContent = '模型已就绪，可以上传图片';
       } catch (error) {
