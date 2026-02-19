@@ -553,8 +553,8 @@
     async function initModel() {
       try {
         statusText.textContent = '正在加载模型...';
-        // 使用 YOLOS-tiny，Transformers.js 官方支持且较小
-        detector = await pipeline('object-detection', 'hustvl/yolos-tiny');
+        // 使用 owlvit-base-patch32，Transformers.js 官方支持
+        detector = await pipeline('object-detection', 'google/owlvit-base-patch32');
         statusDot.classList.add('ready');
         statusText.textContent = '模型已就绪，可以上传图片';
       } catch (error) {
