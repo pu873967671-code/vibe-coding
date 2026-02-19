@@ -420,18 +420,18 @@
     <div class="container">
       <div class="tool-header">
         <h1>AI 图片标签生成器</h1>
-        <p>上传图片，自动识别物体并生成标签 | 基于 COCO-SSD 模型，完全在浏览器端运行</p>
+        <p>上传图片，自动识别物体并生成标签 | 基于 RF-DETR 模型，完全在浏览器端运行</p>
       </div>
 
       <div class="status-bar">
         <div class="status-dot" id="statusDot"></div>
-        <span class="status-text" id="statusText">正在加载模型...</span>
+        <span class="status-text" id="statusText">正在加载 RF-DETR 模型 (358MB)...</span>
       </div>
 
       <div class="upload-area" id="uploadArea">
         <div class="upload-icon">📷</div>
         <div class="upload-text">点击或拖拽上传图片</div>
-        <div class="upload-hint">支持 JPG、PNG、WebP 格式</div>
+        <div class="upload-hint">支持 JPG、PNG、WebP 格式 | 需要 WebGPU 支持</div>
         <input type="file" id="fileInput" accept="image/*">
       </div>
 
@@ -479,30 +479,17 @@
 
   <footer>
     <div class="container">
-      <p>© 2026 GP's Vibe Coding | 基于 TensorFlow.js + COCO-SSD</p>
+      <p>© 2026 GP's Vibe Coding | 基于 Transformers.js + RF-DETR</p>
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
   <script type="module">
-    // 使用 TensorFlow.js COCO-SSD 模型（浏览器原生支持）
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.1.2';
 
-    // COCO 类别名称
-    const COCO_CLASSES = [
-      'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
-      'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat',
-      'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack',
-      'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-      'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-      'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-      'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake',
-      'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop',
-      'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink',
-      'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
-    ];
+    // 配置 Transformers.js
+    env.allowLocalModels = false;
 
-    // 中文翻译
+    // COCO 类别中文翻译
     const COCO_CLASSES_ZH = {
       'person': '人', 'bicycle': '自行车', 'car': '汽车', 'motorcycle': '摩托车',
       'airplane': '飞机', 'bus': '公交车', 'train': '火车', 'truck': '卡车',
@@ -547,13 +534,50 @@
 
     let detector = null;
     let currentResults = null;
+    let useWebGPU = false;
+
+    // 检测 WebGPU 支持
+    async function checkWebGPU() {
+      if ('gpu' in navigator) {
+        try {
+          const adapter = await navigator.gpu.requestAdapter();
+          if (adapter) {
+            useWebGPU = true;
+            console.log('✅ WebGPU 已支持');
+            return true;
+          }
+        } catch (e) {
+          console.log('❌ WebGPU 检测失败:', e);
+        }
+      }
+      console.log('⚠️ WebGPU 不支持，将使用 WASM 后端（较慢）');
+      return false;
+    }
 
     // 初始化模型
     async function initModel() {
       try {
-        statusText.textContent = '正在加载模型...';
-        // 使用 TensorFlow.js COCO-SSD
-        detector = await cocoSsd.load();
+        await checkWebGPU();
+        
+        statusText.textContent = '正在加载 RF-DETR 模型 (358MB)，请耐心等待...';
+        
+        detector = await pipeline(
+          'object-detection',
+          'onnx-community/rfdetr_medium-ONNX',
+          {
+            device: useWebGPU ? 'webgpu' : 'wasm',
+            dtype: 'fp32',
+            progress_callback: (progress) => {
+              if (progress.status === 'downloading') {
+                const percent = progress.progress ? progress.progress.toFixed(1) : '0';
+                statusText.textContent = `正在下载模型... ${percent}% (${(progress.loaded / 1024 / 1024).toFixed(1)} MB)`;
+              } else if (progress.status === 'loading') {
+                statusText.textContent = '正在加载模型到内存...';
+              }
+            }
+          }
+        );
+        
         statusDot.classList.add('ready');
         statusText.textContent = '模型已就绪，可以上传图片';
       } catch (error) {
@@ -591,28 +615,31 @@
       }
 
       try {
-        // COCO-SSD 检测
-        const predictions = await detector.detect(previewImage);
+        // RF-DETR 检测
+        const results = await detector(previewImage, {
+          threshold: 0.2, // 降低阈值到 0.2，检测更多物体
+          percentage: true // 使用百分比坐标
+        });
         
-        // 转换格式
-        const results = predictions.map(p => ({
-          label: p.class,
-          score: p.score,
+        // 转换格式 - Transformers.js 返回的格式与 COCO-SSD 不同
+        const detections = results.map(r => ({
+          label: r.label,
+          score: r.score,
           box: {
-            xmin: p.bbox[0],
-            ymin: p.bbox[1],
-            xmax: p.bbox[0] + p.bbox[2],
-            ymax: p.bbox[1] + p.bbox[3]
+            xmin: r.box.xmin,
+            ymin: r.box.ymin,
+            xmax: r.box.xmax,
+            ymax: r.box.ymax
           }
         }));
         
-        currentResults = results;
+        currentResults = detections;
         
         // 绘制检测框
-        drawBoundingBoxes(results);
+        drawBoundingBoxes(detections);
         
         // 显示结果
-        displayResults(results);
+        displayResults(detections);
         
       } catch (error) {
         console.error('Detection error:', error);
@@ -629,8 +656,6 @@
       canvasOverlay.height = img.clientHeight;
       
       const ctx = canvasOverlay.getContext('2d');
-      const scaleX = img.clientWidth / img.naturalWidth;
-      const scaleY = img.clientHeight / img.naturalHeight;
       
       ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
       
@@ -641,10 +666,12 @@
       
       results.forEach((result, index) => {
         const { xmin, ymin, xmax, ymax } = result.box;
-        const x = xmin * scaleX;
-        const y = ymin * scaleY;
-        const width = (xmax - xmin) * scaleX;
-        const height = (ymax - ymin) * scaleY;
+        
+        // 百分比坐标转像素
+        const x = xmin * img.clientWidth;
+        const y = ymin * img.clientHeight;
+        const width = (xmax - xmin) * img.clientWidth;
+        const height = (ymax - ymin) * img.clientHeight;
         
         const color = colors[index % colors.length];
         
@@ -673,12 +700,14 @@
       classCount.textContent = classes.size;
       
       // 标签列表
-      tagList.innerHTML = results.map(result => `
-        <div class="tag">
-          ${COCO_CLASSES_ZH[result.label] || result.label}
-          <span class="tag-confidence">${(result.score * 100).toFixed(0)}%</span>
-        </div>
-      `).join('');
+      tagList.innerHTML = results.length > 0 
+        ? results.map(result => `
+            <div class="tag">
+              ${COCO_CLASSES_ZH[result.label] || result.label}
+              <span class="tag-confidence">${(result.score * 100).toFixed(0)}%</span>
+            </div>
+          `).join('')
+        : '<div class="tag">未检测到物体</div>';
       
       // JSON 输出
       const jsonOutputData = {
@@ -690,10 +719,10 @@
           labelZh: COCO_CLASSES_ZH[r.label] || r.label,
           confidence: parseFloat((r.score * 100).toFixed(2)),
           bbox: {
-            x: Math.round(r.box.xmin),
-            y: Math.round(r.box.ymin),
-            width: Math.round(r.box.xmax - r.box.xmin),
-            height: Math.round(r.box.ymax - r.box.ymin)
+            x: Math.round(r.box.xmin * previewImage.naturalWidth),
+            y: Math.round(r.box.ymin * previewImage.naturalHeight),
+            width: Math.round((r.box.xmax - r.box.xmin) * previewImage.naturalWidth),
+            height: Math.round((r.box.ymax - r.box.ymin) * previewImage.naturalHeight)
           }
         }))
       };
