@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 图片标签生成器 | GP's Vibe Coding</title>
+  <title>AI 武器检测 | GP's Vibe Coding</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -128,6 +128,32 @@
       font-size: 16px;
     }
 
+    .api-config {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .api-config label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .api-config input {
+      flex: 1;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
     .upload-area {
       background: var(--bg-card);
       border: 2px dashed var(--border);
@@ -241,8 +267,7 @@
     }
 
     .results-section.show {
-      display: block;
-    }
+      displa   }
 
     .results-grid {
       display: grid;
@@ -285,6 +310,11 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .tag.weapon {
+      border-color: var(--error);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .tag-confidence {
@@ -335,7 +365,7 @@
     .btn-secondary {
       background: var(--bg-card);
       color: var(--text-primary);
-      border: 1px solid var(--border);
+      borde var(--border);
     }
 
     .btn-secondary:hover {
@@ -389,6 +419,10 @@
       color: var(--accent);
     }
 
+    .stat-value.danger {
+      color: var(--error);
+    }
+
     .stat-label {
       font-size: 12px;
       color: var(--text-secondary);
@@ -408,8 +442,8 @@
     <div class="container">
       <div class="header-content">
         <a href="./" class="logo">
-          <div class="logo-icon">🏷️</div>
-          <span class="logo-text">AI 图片标签生成器</span>
+          <div class="logo-icon">🔫</div>
+          <span class="logo-text">AI 武器检测</span>
         </a>
         <a href="./" class="back-link">← 返回首页</a>
       </div>
@@ -419,19 +453,24 @@
   <main>
     <div class="container">
       <div class="tool-header">
-        <h1>AI 图片标签生成器</h1>
-        <p>上传图片，自动识别物体并生成标签 | 基于 RF-DETR 模型，完全在浏览器端运行</p>
+        <h1>AI 武器检测系统</h1>
+        <p>上传图片，自动识别武器 | 基于 RF-DETR 武器检测模型</p>
+      </div>
+
+      <div class="api-config">
+        <label>API 地址:</label>
+        <input type="text" id="apiUrl" value="http://localhost:5000" placeholder="http://localhost:5000">
       </div>
 
       <div class="status-bar">
         <div class="status-dot" id="statusDot"></div>
-        <span class="status-text" id="statusText">正在加载 RF-DETR 模型 (358MB)...</span>
+        <span class="status-text" id="statusText">正在连接后端 API...</span>
       </div>
 
       <div class="upload-area" id="uploadArea">
         <div class="upload-icon">📷</div>
         <div class="upload-text">点击或拖拽上传图片</div>
-        <div class="upload-hint">支持 JPG、PNG、WebP 格式 | 需要 WebGPU 支持</div>
+        <div class="upload-hint">支持 JPG、PNG、WebP 格式</div>
         <input type="file" id="fileInput" accept="image/*">
       </div>
 
@@ -449,12 +488,12 @@
       <div class="results-section" id="resultsSection">
         <div class="results-grid">
           <div class="result-card">
-            <h3>🏷️ 检测到的标签</h3>
+            <h3>🔫 检测结果</h3>
             <div class="tag-list" id="tagList"></div>
             <div class="stats-row">
               <div class="stat-item">
-                <div class="stat-value" id="objectCount">0</div>
-                <div class="stat-label">检测物体</div>
+                <div class="stat-value danger" id="weaponCount">0</div>
+                <div class="stat-label">检测到武器</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value" id="classCount">0</div>
@@ -479,42 +518,13 @@
 
   <footer>
     <div class="container">
-      <p>© 2026 GP's Vibe Coding | 基于 Transformers.js + RF-DETR</p>
+      <p>© 2026 GP's Vibe Coding | 基于 RF-DETR 武器检测模型</p>
     </div>
   </footer>
 
-  <script type="module">
-    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.3.1';
-
-    // 配置 Transformers.js
-    env.allowLocalModels = false;
-
-    // COCO 类别中文翻译
-    const COCO_CLASSES_ZH = {
-      'person': '人', 'bicycle': '自行车', 'car': '汽车', 'motorcycle': '摩托车',
-      'airplane': '飞机', 'bus': '公交车', 'train': '火车', 'truck': '卡车',
-      'boat': '船', 'traffic light': '交通灯', 'fire hydrant': '消防栓',
-      'stop sign': '停止标志', 'parking meter': '停车计时器', 'bench': '长椅',
-      'bird': '鸟', 'cat': '猫', 'dog': '狗', 'horse': '马', 'sheep': '羊',
-      'cow': '牛', 'elephant': '大象', 'bear': '熊', 'zebra': '斑马',
-      'giraffe': '长颈鹿', 'backpack': '背包', 'umbrella': '雨伞', 'handbag': '手提包',
-      'tie': '领带', 'suitcase': '行李箱', 'frisbee': '飞盘', 'skis': '滑雪板',
-      'snowboard': '单板滑雪', 'sports ball': '运动球', 'kite': '风筝',
-      'baseball bat': '棒球棒', 'baseball glove': '棒球手套', 'skateboard': '滑板',
-      'surfboard': '冲浪板', 'tennis racket': '网球拍', 'bottle': '瓶子',
-      'wine glass': '酒杯', 'cup': '杯子', 'fork': '叉子', 'knife': '刀',
-      'spoon': '勺子', 'bowl': '碗', 'banana': '香蕉', 'apple': '苹果',
-      'sandwich': '三明治', 'orange': '橙子', 'broccoli': '西兰花', 'carrot': '胡萝卜',
-      'hot dog': '热狗', 'pizza': '披萨', 'donut': '甜甜圈', 'cake': '蛋糕',
-      'chair': '椅子', 'couch': '沙发', 'potted plant': '盆栽', 'bed': '床',
-      'dining table': '餐桌', 'toilet': '马桶', 'tv': '电视', 'laptop': '笔记本电脑',
-      'mouse': '鼠标', 'remote': '遥控器', 'keyboard': '键盘', 'cell phone': '手机',
-      'microwave': '微波炉', 'oven': '烤箱', 'toaster': '烤面包机', 'sink': '水槽',
-      'refrigerator': '冰箱', 'book': '书', 'clock': '时钟', 'vase': '花瓶',
-      'scissors': '剪刀', 'teddy bear': '泰迪熊', 'hair drier': '吹风机', 'toothbrush': '牙刷'
-    };
-
+  <script>
     // DOM 元素
+    const apiUrlInput = document.getElementById('apiUrl');
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const previewSection = document.getElementById('previewSection');
@@ -524,7 +534,7 @@
     const resultsSection = document.getElementById('resultsSection');
     const tagList = document.getElementById('tagList');
     const jsonOutput = document.getElementById('jsonOutput');
-    const objectCount = document.getElementById('objectCount');
+    const weaponCount = document.getElementById('weaponCount');
     const classCount = document.getElementById('classCount');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
@@ -532,59 +542,24 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    let detector = null;
     let currentResults = null;
-    let useWebGPU = false;
 
-    // 检测 WebGPU 支持
-    async function checkWebGPU() {
-      if ('gpu' in navigator) {
-        try {
-          const adapter = await navigator.gpu.requestAdapter();
-          if (adapter) {
-            useWebGPU = true;
-            console.log('✅ WebGPU 已支持');
-            return true;
-          }
-        } catch (e) {
-          console.log('❌ WebGPU 检测失败:', e);
-        }
-      }
-      console.log('⚠️ WebGPU 不支持，将使用 WASM 后端（较慢）');
-      return false;
-    }
-
-    // 初始化模型
-    async function initModel() {
+    // 检查 API 健康状态
+    async function checkAPIHealth() {
       try {
-        await checkWebGPU();
-        
-        statusText.textContent = '正在加载 RF-DETR 模型 (358MB)，请耐心等待...';
-        
-        detector = await pipeline(
-          'object-detection',
-          'onnx-community/rfdetr_medium-ONNX',
-          {
-            device: useWebGPU ? 'webgpu' : 'wasm',
-            dtype: 'fp32',
-            progress_callback: (progress) => {
-              if (progress.status === 'downloading') {
-                const percent = progress.progress ? progress.progress.toFixed(1) : '0';
-                statusText.textContent = `正在下载模型... ${percent}% (${(progress.loaded / 1024 / 1024).toFixed(1)} MB)`;
-              } else if (progress.status === 'loading') {
-                statusText.textContent = '正在加载模型到内存...';
-              }
-            }
-          }
-        );
-        
-        statusDot.classList.add('ready');
-        statusText.textContent = '模型已就绪，可以上传图片';
+        const response = await fetch(`${apiUrlInput.value}/health`);
+        if (response.ok) {
+          const data = await response.json();
+          statusDot.classList.add('ready');
+          statusText.textContent = `后端已就绪 (${data.model})`;
+          return true;
+        }
       } catch (error) {
         statusDot.classList.add('error');
-        statusText.textContent = '模型加载失败: ' + error.message;
-        console.error('Model loading error:', error);
+        statusText.textContent = '无法连接到后端 API，请确保服务已启动';
+        console.error('API health check failed:', error);
       }
+      return false;
     }
 
     // 处理文件上传
@@ -601,45 +576,41 @@
         resultsSection.classList.remove('show');
         loadingOverlay.classList.remove('hidden');
         
-        await detectObjects(e.target.result);
+        await detectWeapons(e.target.result);
       };
       reader.readAsDataURL(file);
     }
 
-    // 检测物体
-    async function detectObjects(imageSrc) {
-      if (!detector) {
-        alert('模型尚未加载完成');
-        loadingOverlay.classList.add('hidden');
-        return;
-      }
-
+    // 检测武器
+    async function detectWeapons(imageSrc) {
       try {
-        // RF-DETR 检测
-        const results = await detector(previewImage, {
-          threshold: 0.2, // 降低阈值到 0.2，检测更多物体
-          percentage: true // 使用百分比坐标
+        const response = await fetch(`${apiUrlInput.value}/detect`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            image_base64: imageSrc
+          })
         });
+
+        if (!response.ok) {
+          throw new Error(`API 返回错误: ${response.status}`);
+        }
+
+        const data = await response.json();
         
-        // 转换格式 - Transformers.js 返回的格式与 COCO-SSD 不同
-        const detections = results.map(r => ({
-          label: r.label,
-          score: r.score,
-          box: {
-            xmin: r.box.xmin,
-            ymin: r.box.ymin,
-            xmax: r.box.xmax,
-            ymax: r.box.ymax
-          }
-        }));
-        
-        currentResults = detections;
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        currentResults = data.detections;
         
         // 绘制检测框
-        drawBoundingBoxes(detections);
+        drawBoundingBoxes(data.detections);
         
         // 显示结果
-        displayResults(detections);
+        displayResults(data.detections);
         
       } catch (error) {
         console.error('Detection error:', error);
@@ -656,39 +627,37 @@
       canvasOverlay.height = img.clientHeight;
       
       const ctx = canvasOverlay.getContext('2d');
-      
       ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
       
-      const colors = [
-        '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316',
-        '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6'
-      ];
+      const scaleX = img.clientWidth / img.naturalWidth;
+      const scaleY = img.clientHeight / img.naturalHeight;
+      
+      const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4'];
       
       results.forEach((result, index) => {
         const { xmin, ymin, xmax, ymax } = result.box;
         
-        // 百分比坐标转像素
-        const x = xmin * img.clientWidth;
-        const y = ymin * img.clientHeight;
-        const width = (xmax - xmin) * img.clientWidth;
-        const height = (ymax - ymin) * img.clientHeight;
+        const x = xmin * scaleX;
+        const y = ymin * scaleY;
+        const width = (xmax - xmin) * scaleX;
+        const height = (ymax - ymin) * scaleY;
         
         const color = colors[index % colors.length];
         
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.strokeRect(x, y, width, height);
         
         // 标签背景
-        const label = `${COCO_CLASSES_ZH[result.label] || result.label} ${(result.score * 100).toFixed(0)}%`;
-        ctx.font = '12px Inter, sans-serif';
+        const label = `${result.label} ${(result.score * 100).toFixed(0)}%`;
+        ctx.font = 'bold 14px Inter, sans-serif';
         const textWidth = ctx.measureText(label).width;
         ctx.fillStyle = color;
-        ctx.fillRect(x, y - 20, textWidth + 8, 20);
+        ctx.fillRect(x, y - 24, textWidth + 12, 24);
         
         // 标签文字
         ctx.fillStyle = 'white';
-        ctx.fillText(label, x + 4, y - 6);
+        ctx.fillText(label, x + 6, y - 6);
       });
     }
 
@@ -696,35 +665,25 @@
     function displayResults(results) {
       // 统计
       const classes = new Set(results.map(r => r.label));
-      objectCount.textContent = results.length;
+      weaponCount.textContent = results.length;
       classCount.textContent = classes.size;
       
       // 标签列表
       tagList.innerHTML = results.length > 0 
         ? results.map(result => `
-            <div class="tag">
-              ${COCO_CLASSES_ZH[result.label] || result.label}
+            <div class="tag weapon">
+              ${result.label}
               <span class="tag-confidence">${(result.score * 100).toFixed(0)}%</span>
             </div>
           `).join('')
-        : '<div class="tag">未检测到物体</div>';
+        : '<div class="tag">未检测到武器</div>';
       
       // JSON 输出
       const jsonOutputData = {
         timestamp: new Date().toISOString(),
-        totalObjects: results.length,
+        totalWeapons: results.length,
         uniqueClasses: classes.size,
-        detections: results.map(r => ({
-          label: r.label,
-          labelZh: COCO_CLASSES_ZH[r.label] || r.label,
-          confidence: parseFloat((r.score * 100).toFixed(2)),
-          bbox: {
-            x: Math.round(r.box.xmin * previewImage.naturalWidth),
-            y: Math.round(r.box.ymin * previewImage.naturalHeight),
-            width: Math.round((r.box.xmax - r.box.xmin) * previewImage.naturalWidth),
-            height: Math.round((r.box.ymax - r.box.ymin) * previewImage.naturalHeight)
-          }
-        }))
+        detections: results
       };
       
       jsonOutput.textContent = JSON.stringify(jsonOutputData, null, 2);
@@ -768,7 +727,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `labels-${Date.now()}.json`;
+      a.download = `weapon-detection-${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -781,7 +740,7 @@
     });
 
     // 初始化
-    initModel();
+    checkAPIHealth();
   </script>
 </body>
 </html>
