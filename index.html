@@ -179,6 +179,25 @@
       position: relative;
     }
 
+    .search-shortcut {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .search-input:focus ~ .search-shortcut {
+      opacity: 0;
+    }
+
     .search-input {
       width: 100%;
       background: var(--bg-secondary);
@@ -413,13 +432,16 @@
         <div class="search-box">
           <span class="search-icon">🔍</span>
           <input type="text" class="search-input" id="searchInput" data-zh-placeholder="搜索工具或资源..." data-en-placeholder="Search tools or resources..." placeholder="搜索工具或资源...">
+          <span class="search-shortcut">Ctrl+K</span>
         </div>
         <div class="filters">
           <button class="filter-btn active" data-filter="all" data-zh="全部" data-en="All">全部</button>
           <button class="filter-btn" data-filter="ai" data-zh="AI 工具" data-en="AI Tools">AI 工具</button>
           <button class="filter-btn" data-filter="dev" data-zh="开发工具" data-en="Dev Tools">开发工具</button>
+          <button class="filter-btn" data-filter="productivity" data-zh="效率工具" data-en="Productivity">效率工具</button>
+          <button class="filter-btn" data-filter="learning" data-zh="学习资源" data-en="Learning">学习资源</button>
           <button class="filter-btn" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
-          <button class="filter-btn" data-filter="project" data-zh="API中转" data-en="Projects">API中转</button>
+          <button class="filter-btn" data-filter="project" data-zh="API中转" data-en="API Proxy">API中转</button>
         </div>
         <div class="stats">
           <div class="stat">
@@ -452,6 +474,25 @@
 
   <script>
     const tools = [
+      // ========== AI 工具 ==========
+      {
+        id: 1,
+        name: "ChatGPT",
+        nameZh: "ChatGPT",
+        icon: "💬",
+        iconBg: "#10a37f",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "OpenAI 出品的对话式 AI，GPT-4o 多模态能力强大，日常问答首选",
+        descZh: "OpenAI 出品的对话式 AI，GPT-4o 多模态能力强大，日常问答首选",
+        descEn: "OpenAI's conversational AI, GPT-4o has powerful multimodal capabilities",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://chat.openai.com",
+        featured: true
+      },
       {
         id: 2,
         name: "Claude",
@@ -703,6 +744,298 @@
         priceEn: "Pay per use",
         link: "https://ai.9w7.cn",
         featured: false
+      },
+      // ========== 效率工具 ==========
+      {
+        id: 17,
+        name: "Raycast",
+        nameZh: "Raycast",
+        icon: "🚀",
+        iconBg: "#ff6363",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "Mac 效率启动器，比 Spotlight 强大，AI 集成是亮点",
+        descZh: "Mac 效率启动器，比 Spotlight 强大，AI 集成是亮点",
+        descEn: "Mac productivity launcher, more powerful than Spotlight, AI integration is a highlight",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://raycast.com",
+        featured: true
+      },
+      {
+        id: 18,
+        name: "Notion",
+        nameZh: "Notion",
+        icon: "📝",
+        iconBg: "#000",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "全能笔记工具，AI 写作助手加持，知识管理神器",
+        descZh: "全能笔记工具，AI 写作助手加持，知识管理神器",
+        descEn: "All-in-one notes tool with AI writing assistant, knowledge management beast",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://notion.so",
+        featured: false
+      },
+      {
+        id: 19,
+        name: "Linear",
+        nameZh: "Linear",
+        icon: "📋",
+        iconBg: "#5e6ad2",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "现代项目管理工具，体验丝滑，开发者最爱",
+        descZh: "现代项目管理工具，体验丝滑，开发者最爱",
+        descEn: "Modern project management tool, buttery smooth experience, developers love it",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://linear.app",
+        featured: false
+      },
+      {
+        id: 20,
+        name: "Arc Browser",
+        nameZh: "Arc 浏览器",
+        icon: "🌈",
+        iconBg: "#414efa",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "重新定义浏览器体验，分栏、空间、AI 功能一应俱全",
+        descZh: "重新定义浏览器体验，分栏、空间、AI 功能一应俱全",
+        descEn: "Redefining browser experience, tabs, spaces, AI features all included",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://arc.net",
+        featured: false
+      },
+      // ========== 学习资源 ==========
+      {
+        id: 21,
+        name: "freeCodeCamp",
+        nameZh: "freeCodeCamp",
+        icon: "🔥",
+        iconBg: "#0a0a23",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "完全免费的编程学习平台，项目驱动，认证受认可",
+        descZh: "完全免费的编程学习平台，项目驱动，认证受认可",
+        descEn: "Completely free coding learning platform, project-based, recognized certifications",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://freecodecamp.org",
+        featured: false
+      },
+      {
+        id: 22,
+        name: "Roadmap.sh",
+        nameZh: "Roadmap.sh",
+        icon: "🗺️",
+        iconBg: "#1e1e1e",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "开发者学习路线图，从入门到精通的清晰路径",
+        descZh: "开发者学习路线图，从入门到精通的清晰路径",
+        descEn: "Developer learning roadmaps, clear path from beginner to expert",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://roadmap.sh",
+        featured: false
+      },
+      {
+        id: 23,
+        name: "LeetCode",
+        nameZh: "力扣",
+        icon: "💻",
+        iconBg: "#ffa116",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "算法刷题平台，面试必备，中文站体验友好",
+        descZh: "算法刷题平台，面试必备，中文站体验友好",
+        descEn: "Algorithm practice platform, interview essential, Chinese site is user-friendly",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://leetcode.cn",
+        featured: false
+      },
+      {
+        id: 24,
+        name: "MDN Web Docs",
+        nameZh: "MDN",
+        icon: "📖",
+        iconBg: "#83d0f2",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "Mozilla 出品的前端文档，权威详实，开发者必备参考",
+        descZh: "Mozilla 出品的前端文档，权威详实，开发者必备参考",
+        descEn: "Mozilla's frontend documentation, authoritative and detailed, essential reference",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://developer.mozilla.org",
+        featured: false
+      },
+      // ========== 更多开发工具 ==========
+      {
+        id: 25,
+        name: "VS Code",
+        nameZh: "VS Code",
+        icon: "💠",
+        iconBg: "#007acc",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "微软出品代码编辑器，插件生态丰富，免费开源",
+        descZh: "微软出品代码编辑器，插件生态丰富，免费开源",
+        descEn: "Microsoft's code editor, rich plugin ecosystem, free and open source",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://code.visualstudio.com",
+        featured: false
+      },
+      {
+        id: 26,
+        name: "Postman",
+        nameZh: "Postman",
+        icon: "📮",
+        iconBg: "#ff6c37",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "API 测试工具，接口调试神器，团队协作方便",
+        descZh: "API 测试工具，接口调试神器，团队协作方便",
+        descEn: "API testing tool, interface debugging beast, great for team collaboration",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://postman.com",
+        featured: false
+      },
+      {
+        id: 27,
+        name: "Docker",
+        nameZh: "Docker",
+        icon: "🐳",
+        iconBg: "#2496ed",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "容器化部署标准，开发环境一致性保障",
+        descZh: "容器化部署标准，开发环境一致性保障",
+        descEn: "Container deployment standard, ensures development environment consistency",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://docker.com",
+        featured: false
+      },
+      {
+        id: 28,
+        name: "Terminal",
+        nameZh: "终端工具",
+        icon: "⬛",
+        iconBg: "#000",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "Windows Terminal / iTerm2，终端体验升级必备",
+        descZh: "Windows Terminal / iTerm2，终端体验升级必备",
+        descEn: "Windows Terminal / iTerm2, essential terminal experience upgrade",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://github.com/microsoft/terminal",
+        featured: false
+      },
+      // ========== 更多 AI 工具 ==========
+      {
+        id: 29,
+        name: "Perplexity",
+        nameZh: "Perplexity",
+        icon: "🔮",
+        iconBg: "#20808d",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "AI 搜索引擎，实时联网，答案带引用来源",
+        descZh: "AI 搜索引擎，实时联网，答案带引用来源",
+        descEn: "AI search engine, real-time web access, answers with citations",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://perplexity.ai",
+        featured: true
+      },
+      {
+        id: 30,
+        name: "Midjourney",
+        nameZh: "Midjourney",
+        icon: "🎨",
+        iconBg: "#000",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "AI 绘图天花板，艺术风格独特，作品惊艳",
+        descZh: "AI 绘图天花板，艺术风格独特，作品惊艳",
+        descEn: "Top-tier AI image generation, unique artistic style, stunning results",
+        price: "paid",
+        priceZh: "付费",
+        priceEn: "Paid",
+        link: "https://midjourney.com",
+        featured: false
+      },
+      {
+        id: 31,
+        name: "Stable Diffusion",
+        nameZh: "Stable Diffusion",
+        icon: "🖼️",
+        iconBg: "#9333ea",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "开源 AI 绘图，本地部署，隐私安全可控",
+        descZh: "开源 AI 绘图，本地部署，隐私安全可控",
+        descEn: "Open source AI image generation, local deployment, privacy controlled",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://stability.ai",
+        featured: false
+      },
+      {
+        id: 32,
+        name: "Poe",
+        nameZh: "Poe",
+        icon: "🤖",
+        iconBg: "#5426d0",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "Quora 出品，一站式体验多个 AI 模型",
+        descZh: "Quora 出品，一站式体验多个 AI 模型",
+        descEn: "Quora's platform, experience multiple AI models in one place",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://poe.com",
+        featured: false
       }
     ];
 
@@ -809,6 +1142,20 @@
 
     // Search
     document.getElementById('searchInput').addEventListener('input', renderTools);
+
+    // Keyboard shortcut: Ctrl+K or / to focus search
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      // ESC to clear search
+      if (e.key === 'Escape') {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchInput').blur();
+        renderTools();
+      }
+    });
 
     // Initial render
     renderTools();
