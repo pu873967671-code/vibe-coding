@@ -137,7 +137,7 @@
       text-align: center;
     }
 
-    /* 💫 头像分层 + 跟随鼠标 */
+    /* 💫 分层头像 + 跟随鼠标 */
     .avatar {
       width: 120px;
       height: 120px;
@@ -161,8 +161,8 @@
       z-index: 1;
     }
 
-    /* 头+手层容器 - 跟随鼠标 */
-    .avatar-move {
+    /* 头+眼白容器 - 轻微动 */
+    .avatar-head {
       position: absolute;
       top: 0;
       left: 0;
@@ -172,7 +172,7 @@
       transition: transform 0.15s ease-out;
     }
 
-    .avatar-move img {
+    .avatar-head img {
       position: absolute;
       top: 0;
       left: 0;
@@ -180,17 +180,23 @@
       height: 100%;
     }
 
-    .layer-head {
+    .layer-head-face {
       z-index: 1;
     }
 
-    .layer-hand {
+    .layer-eyewhite {
       z-index: 2;
     }
 
-    /* 眼珠层 - 单独动，幅度更大 */
-    .layer-eyes {
+    /* 手层 - 中等幅度 */
+    .layer-hand {
       z-index: 3;
+      transition: transform 0.12s ease-out;
+    }
+
+    /* 眼珠层 - 最大幅度 */
+    .layer-eyes {
+      z-index: 4;
       transition: transform 0.08s ease-out;
     }
 
@@ -652,12 +658,13 @@
     <section class="hero">
       <div class="container">
         <div class="avatar">
-          <img class="layer-bg" src="layer-bg.png" alt="">
-          <div class="avatar-move">
-            <img class="layer-head" src="layer-head.png" alt="">
-            <img class="layer-hand" src="layer-hand.png" alt="">
+          <img class="layer-bg" src="layer-5-bg.png" alt="">
+          <div class="avatar-head">
+            <img class="layer-head-face" src="layer-2-head.png" alt="">
+            <img class="layer-eyewhite" src="layer-4-eyewhite.png" alt="">
           </div>
-          <img class="layer-eyes" src="layer-eyes.png" alt="">
+          <img class="layer-hand" src="layer-1-hand.png" alt="">
+          <img class="layer-eyes" src="layer-3-eyes.png" alt="">
         </div>
         <h1 data-zh="GP's Vibe Coding" data-en="GP's Vibe Coding" id="hero-title"></h1>
         <p data-zh="分享日常发现的 AI 工具、开发资源和好玩项目。Vibe coding，让开发更有趣！" data-en="Sharing AI tools, dev resources and fun projects I discover. Vibe coding, making development more fun!">
@@ -1566,7 +1573,8 @@
 
     // ============ 👀 分层头像跟随鼠标效果 ============
     const avatar = document.querySelector('.avatar');
-    const avatarMove = document.querySelector('.avatar-move');
+    const avatarHead = document.querySelector('.avatar-head');
+    const layerHand = document.querySelector('.layer-hand');
     const layerEyes = document.querySelector('.layer-eyes');
     
     document.addEventListener('mousemove', (e) => {
@@ -1578,21 +1586,27 @@
       const deltaX = e.clientX - avatarCenterX;
       const deltaY = e.clientY - avatarCenterY;
       
-      // 头+手层：轻微3D旋转
-      const maxRotate = 10;
+      // 头+眼白层：轻微3D旋转
+      const maxRotate = 8;
       const rotateY = (deltaX / window.innerWidth) * maxRotate;
       const rotateX = -(deltaY / window.innerHeight) * maxRotate;
-      avatarMove.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      avatarHead.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
-      // 眼珠层：更大的位移，盯着鼠标
-      const eyeMoveX = rotateY * 3;
-      const eyeMoveY = -rotateX * 2;
+      // 手层：中等位移
+      const handMoveX = rotateY * 2;
+      const handMoveY = -rotateX * 1.5;
+      layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
+      
+      // 眼珠层：最大位移，盯着鼠标
+      const eyeMoveX = rotateY * 3.5;
+      const eyeMoveY = -rotateX * 2.5;
       layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
     });
 
     // 鼠标离开时重置
     document.addEventListener('mouseleave', () => {
-      avatarMove.style.transform = '';
+      avatarHead.style.transform = '';
+      layerHand.style.transform = '';
       layerEyes.style.transform = '';
     });
     document.addEventListener('mouseleave', () => {
