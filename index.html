@@ -1586,9 +1586,9 @@
       const handMoveY = -rotateX * 1.5;
       layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
       
-      // 眼珠层：最大位移，盯着鼠标
-      const eyeMoveX = rotateY * 3.5;
-      const eyeMoveY = -rotateX * 2.5;
+      // 眼珠层：小幅度位移，限制在眼眶内
+      const eyeMoveX = rotateY * 1.2;
+      const eyeMoveY = -rotateX * 0.8;
       layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
     });
 
