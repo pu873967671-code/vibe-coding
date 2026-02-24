@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GP's Vibe Coding | 个人工具站</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --bg-card-hover: #222230;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --border: #2a2a3a;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ✨ 粒子背景 Canvas */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header + 滚动效果 */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 100;
+      transition: box-shadow 0.3s ease;
+    }
+
+    header.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .lang-switch {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .lang-switch:hover {
+      background: var(--bg-card-hover);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    /* 💫 分层头像 + 跟随鼠标 */
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      position: relative;
+      animation: avatarGlow 3s ease-in-out infinite;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+
+    .avatar img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 图层顺序从底到顶：背景 → 眼白 → 眼珠 → 头 → 手 */
+    
+    /* 背景层 - 不动 */
+    .layer-bg {
+      z-index: 1;
+    }
+
+    /* 眼白层 - 在头下面，固定不动 */
+    .layer-eyewhite {
+      z-index: 2;
+    }
+
+    /* 眼珠层 - 在眼白上面，头下面，跟着鼠标动 */
+    .layer-eyes {
+      z-index: 3;
+      transition: transform 0.08s ease-out;
+    }
+
+    /* 头层 - 遮住眼白和眼珠，只露出眼睛洞 */
+    .layer-head-face {
+      z-index: 4;
+      transition: transform 0.15s ease-out;
+    }
+
+    /* 手层 - 最上层 */
+    .layer-hand {
+      z-index: 5;
+      transition: transform 0.12s ease-out;
+    }
+
+    @keyframes avatarGlow {
+      0%, 100% {
+        box-shadow: 
+          0 0 20px rgba(99, 102, 241, 0.8),
+          0 0 40px rgba(139, 92, 246, 0.6),
+          0 0 60px rgba(168, 85, 247, 0.4);
+      }
+      50% {
+        box-shadow: 
+          0 0 30px rgba(99, 102, 241, 1),
+          0 0 60px rgba(139, 92, 246, 0.8),
+          0 0 100px rgba(168, 85, 247, 0.6);
+      }
+    }
+
+    /* ⌨️ 打字机标题 */
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #f0f0f5, #a5a5c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+
+    .hero h1 .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background: var(--accent);
+      margin-left: 4px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tag::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+      transition: left 0.4s ease;
+    }
+
+    .tag:hover::before {
+      left: 100%;
+    }
+
+    .tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Search */
+    .search-section {
+      padding: 0 0 40px;
+    }
+
+    .search-box {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-shortcut {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .search-input:focus ~ .search-shortcut {
+      opacity: 0;
+    }
+
+    /* 🔮 搜索框聚焦光晕 */
+    .search-input {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 16px 24px 16px 52px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      animation: searchGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes searchGlow {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3), 0 0 10px rgba(99, 102, 241, 0.1);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5), 0 0 30px rgba(99, 102, 241, 0.2);
+      }
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filter-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    .filter-btn:hover::before {
+      width: 200%;
+      height: 200%;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .filter-btn.active::before {
+      display: none;
+    }
+
+    /* Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      padding-bottom: 80px;
+    }
+
+    /* 📦 卡片入场动画 + 🌟 悬停发光 + 💫 点击 Ripple */
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      animation: cardFadeIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.15), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .tool-card:hover::before {
+      left: 100%;
+    }
+
+    /* 点击 Ripple 效果 */
+    .tool-card .ripple-effect {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: rippleExpand 0.6s ease-out forwards;
+    }
+
+    @keyframes rippleExpand {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+      }
+    }
+
+    /* 卡片入场延迟 */
+    .tool-card:nth-child(1) { animation-delay: 0.05s; }
+    .tool-card:nth-child(2) { animation-delay: 0.1s; }
+    .tool-card:nth-child(3) { animation-delay: 0.15s; }
+    .tool-card:nth-child(4) { animation-delay: 0.2s; }
+    .tool-card:nth-child(5) { animation-delay: 0.25s; }
+    .tool-card:nth-child(6) { animation-delay: 0.3s; }
+    .tool-card:nth-child(7) { animation-delay: 0.35s; }
+    .tool-card:nth-child(8) { animation-delay: 0.4s; }
+    .tool-card:nth-child(9) { animation-delay: 0.45s; }
+    .tool-card:nth-child(10) { animation-delay: 0.5s; }
+    .tool-card:nth-child(n+11) { animation-delay: 0.55s; }
+
+    @keyframes cardFadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .tool-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(99, 102, 241, 0.3),
+        0 0 60px rgba(139, 92, 246, 0.2);
+    }
+
+    .tool-card.hidden {
+      display: none;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .tool-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .tool-info .category {
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .tool-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-price {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tool-price.free {
+      color: var(--success);
+    }
+
+    .tool-price.paid {
+      color: var(--warning);
+    }
+
+    .tool-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tool-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* No results */
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      display: none;
+    }
+
+    .no-results.show {
+      display: block;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      padding: 24px 0;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      transition: transform 0.3s ease;
+      animation: countUp 0.5s ease forwards;
+    }
+
+    .stat:hover .stat-value {
+      transform: scale(1.1);
+    }
+
+    @keyframes countUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- ✨ 粒子背景 Canvas -->
+  <canvas id="particles-canvas"></canvas>
+
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <span class="logo-text">GP's Vibe Coding</span>
+        </div>
+        <button class="lang-switch" onclick="toggleLang()">EN / 中文</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="avatar">
+          <img class="layer-bg" src="layer-5-bg.png" alt="">
+          <img class="layer-eyewhite" src="layer-4-eyewhite.png" alt="">
+          <img class="layer-eyes" src="layer-3-eyes.png" alt="">
+          <img class="layer-head-face" src="layer-2-head.png" alt="">
+          <img class="layer-hand" src="layer-1-hand.png" alt="">
+        </div>
+        <h1 data-zh="GP's Vibe Coding" data-en="GP's Vibe Coding" id="hero-title"></h1>
+        <p data-zh="分享日常发现的 AI 工具、开发资源和好玩项目。Vibe coding，让开发更有趣！" data-en="Sharing AI tools, dev resources and fun projects I discover. Vibe coding, making development more fun!">
+          分享我日常发现的 AI 工具、开发资源和好玩项目。Vibe coding，让开发更有趣！
+        </p>
+        <div class="tags">
+          <span class="tag">#VibeCoding</span>
+          <span class="tag">#AI</span>
+          <span class="tag">#DevTools</span>
+          <span class="tag">#OpenSource</span>
+          <span class="tag">#API token</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <div class="container">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" data-zh-placeholder="搜索工具或资源..." data-en-placeholder="Search tools or resources..." placeholder="搜索工具或资源...">
+          <span class="search-shortcut">Ctrl+K</span>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all" data-zh="全部" data-en="All">全部</button>
+          <button class="filter-btn" data-filter="ai" data-zh="AI 工具" data-en="AI Tools">AI 工具</button>
+          <button class="filter-btn" data-filter="dev" data-zh="开发工具" data-en="Dev Tools">开发工具</button>
+          <button class="filter-btn" data-filter="productivity" data-zh="效率工具" data-en="Productivity">效率工具</button>
+          <button class="filter-btn" data-filter="learning" data-zh="学习资源" data-en="Learning">学习资源</button>
+          <button class="filter-btn" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
+          <button class="filter-btn" data-filter="project" data-zh="API中转" data-en="API Proxy">API中转</button>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="totalCount">0</div>
+            <div class="stat-label" data-zh="工具总数" data-en="Total Tools">工具总数</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="freeCount">0</div>
+            <div class="stat-label" data-zh="免费" data-en="Free">免费</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="tools-grid" id="toolsGrid"></div>
+        <div class="no-results" id="noResults" data-zh="没有找到相关工具 😢" data-en="No tools found 😢">
+          没有找到相关工具 😢
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p data-zh="© 2026 GP's Vibe Coding. 用 ❤️ 打造" data-en="© 2026 GP's Vibe Coding. Made with ❤️">© 2026 GP's Vibe Coding. 用 ❤️ 打造</p>
+    </div>
+  </footer>
+
+  <script>
+    const tools = [
+      // ========== AI 工具 ==========
+      {
+        id: 1,
+        name: "ChatGPT",
+        nameZh: "ChatGPT",
+        icon: "💬",
+        iconBg: "#10a37f",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "OpenAI 出品的对话式 AI，GPT-4o 多模态能力强大，日常问答首选",
+        descZh: "OpenAI 出品的对话式 AI，GPT-4o 多模态能力强大，日常问答首选",
+        descEn: "OpenAI's conversational AI, GPT-4o has powerful multimodal capabilities",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://chat.openai.com",
+        featured: true
+      },
+      {
+        id: 2,
+        name: "Claude",
+        nameZh: "Claude",
+        icon: "🧠",
+        iconBg: "#d97706",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "Anthropic 出品的 AI 助手，我日常主力用的模型，代码和长文本处理一流",
+        descZh: "Anthropic 出品的 AI 助手，我日常主力用的模型，代码和长文本处理一流",
+        descEn: "Anthropic's AI assistant, my daily driver for coding and long text processing",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://claude.ai",
+        featured: true
+      },
+      {
+        id: 3,
+        name: "DeepSeek",
+        nameZh: "DeepSeek",
+        icon: "🔮",
+        iconBg: "#6366f1",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "国产开源大模型天花板，性价比极高，R1 推理能力超强",
+        descZh: "国产开源大模型天花板，性价比极高，R1 推理能力超强",
+        descEn: "Top-tier Chinese open-source LLM, incredible value, R1 reasoning is amazing",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://deepseek.com",
+        featured: true
+      },
+      {
+        id: 4,
+        name: "Kimi",
+        nameZh: "Kimi",
+        icon: "🌙",
+        iconBg: "#8b5cf6",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "月之暗面出品，支持超长上下文，处理长文档神器",
+        descZh: "月之暗面出品，支持超长上下文，处理长文档神器",
+        descEn: "Moonshot's AI, ultra-long context support, great for long documents",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://kimi.moonshot.cn",
+        featured: true
+      },
+      {
+        id: 5,
+        name: "Cursor",
+        nameZh: "Cursor",
+        icon: "⚡",
+        iconBg: "#22c55e",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "AI 驱动的代码编辑器，Vibe Coding 必备，编程效率起飞",
+        descZh: "AI 驱动的代码编辑器，Vibe Coding 必备，编程效率起飞",
+        descEn: "AI-powered code editor, essential for Vibe Coding, 10x productivity",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://cursor.sh",
+        featured: true
+      },
+      {
+        id: 6,
+        name: "Windsurf",
+        nameZh: "Windsurf",
+        icon: "🌊",
+        iconBg: "#0ea5e9",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "Codeium 出品的 AI IDE，Flow 模式让你沉浸式编程",
+        descZh: "Codeium 出品的 AI IDE，Flow 模式让你沉浸式编程",
+        descEn: "Codeium's AI IDE, Flow mode for immersive coding",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://codeium.com/windsurf",
+        featured: false
+      },
+      {
+        id: 7,
+        name: "GitHub Copilot",
+        nameZh: "GitHub Copilot",
+        icon: "🐙",
+        iconBg: "#24292e",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "GitHub 官方 AI 编程助手，代码补全自动补全你的想法",
+        descZh: "GitHub 官方 AI 编程助手，代码补全自动补全你的想法",
+        descEn: "GitHub's official AI coding assistant, auto-completes your thoughts",
+        price: "paid",
+        priceZh: "付费",
+        priceEn: "Paid",
+        link: "https://github.com/features/copilot",
+        featured: false
+      },
+      {
+        id: 8,
+        name: "Figma",
+        nameZh: "Figma",
+        icon: "🎨",
+        iconBg: "#f24e1e",
+        category: "free",
+        categoryZh: "免费资源",
+        categoryEn: "Free Resources",
+        desc: "协作式 UI 设计工具，浏览器端就能做设计，免费够用",
+        descZh: "协作式 UI 设计工具，浏览器端就能做设计，免费够用",
+        descEn: "Collaborative UI design tool, works in browser, free tier is enough",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://figma.com",
+        featured: false
+      },
+      {
+        id: 9,
+        name: "Vercel",
+        nameZh: "Vercel",
+        icon: "▲",
+        iconBg: "#000",
+        category: "free",
+        categoryZh: "免费资源",
+        categoryEn: "Free Resources",
+        desc: "前端部署神器，免费额度够个人用，自动 HTTPS + CDN",
+        descZh: "前端部署神器，免费额度够个人用，自动 HTTPS + CDN",
+        descEn: "Frontend deployment platform, free tier enough for personal use",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://vercel.com",
+        featured: false
+      },
+      {
+        id: 10,
+        name: "GitHub Pages",
+        nameZh: "GitHub Pages",
+        icon: "📄",
+        iconBg: "#24292e",
+        category: "free",
+        categoryZh: "免费资源",
+        categoryEn: "Free Resources",
+        desc: "免费静态网站托管，支持自定义域名，这个网站就是用它部署的",
+        descZh: "免费静态网站托管，支持自定义域名，这个网站就是用它部署的",
+        descEn: "Free static site hosting, custom domain support, this site is hosted here",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://pages.github.com",
+        featured: false
+      },
+      {
+        id: 11,
+        name: "智谱 GLM",
+        nameZh: "智谱 GLM",
+        icon: "🏮",
+        iconBg: "#3b82f6",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "清华系国产大模型，GLM-5 多模态能力出色",
+        descZh: "清华系国产大模型，GLM-5 多模态能力出色",
+        descEn: "Tsinghua's Chinese LLM, GLM-5 has excellent multimodal capabilities",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://open.bigmodel.cn",
+        featured: false
+      },
+      {
+        id: 13,
+        name: "ZenMux",
+        nameZh: "ZenMux",
+        icon: "🔀",
+        iconBg: "#8b5cf6",
+        category: "project",
+        categoryZh: "AI 中转",
+        categoryEn: "AI Proxy",
+        desc: "原生直连，稳定可靠的 AI API 中转服务",
+        descZh: "原生直连，稳定可靠的 AI API 中转服务",
+        descEn: "Native direct connection, stable and reliable AI API proxy service",
+        price: "paid",
+        priceZh: "按量付费",
+        priceEn: "Pay as you go",
+        link: "https://zenmux.ai",
+        featured: false
+      },
+      {
+        id: 14,
+        name: "MCXHM",
+        nameZh: "MCXHM API",
+        icon: "📡",
+        iconBg: "#10b981",
+        category: "project",
+        categoryZh: "AI 中转",
+        categoryEn: "AI Proxy",
+        desc: "稳定少掉线，线路多，站主维护勤快，包回复",
+        descZh: "稳定少掉线，线路多，站主维护勤快，包回复",
+        descEn: "Stable with minimal drops, many routes, actively maintained",
+        price: "paid",
+        priceZh: "按量付费",
+        priceEn: "Pay as you go",
+        link: "https://api.mcxhm.cn",
+        featured: false
+      },
+      {
+        id: 15,
+        name: "iFlow API",
+        nameZh: "iFlow API",
+        icon: "🎁",
+        iconBg: "#06b6d4",
+        category: "project",
+        categoryZh: "AI 中转",
+        categoryEn: "AI Proxy",
+        desc: "免费！但 API Key 需每 7 天手动续期",
+        descZh: "免费！但 API Key 需每 7 天手动续期",
+        descEn: "Free! But API key needs manual renewal every 7 days",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://platform.iflow.cn/profile?tab=apiKey",
+        featured: false
+      },
+      {
+        id: 16,
+        name: "爱垂直",
+        nameZh: "爱垂直",
+        icon: "💰",
+        iconBg: "#f59e0b",
+        category: "project",
+        categoryZh: "AI 中转",
+        categoryEn: "AI Proxy",
+        desc: "按次收费，量大管饱，性价比高，偶尔抽风",
+        descZh: "按次收费，量大管饱，性价比高，偶尔抽风",
+        descEn: "Pay per use, great volume, high value, occasional hiccups",
+        price: "paid",
+        priceZh: "按次付费",
+        priceEn: "Pay per use",
+        link: "https://ai.9w7.cn",
+        featured: false
+      },
+      // ========== 效率工具 ==========
+      {
+        id: 17,
+        name: "Raycast",
+        nameZh: "Raycast",
+        icon: "🚀",
+        iconBg: "#ff6363",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "Mac 效率启动器，比 Spotlight 强大，AI 集成是亮点",
+        descZh: "Mac 效率启动器，比 Spotlight 强大，AI 集成是亮点",
+        descEn: "Mac productivity launcher, more powerful than Spotlight, AI integration is a highlight",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://raycast.com",
+        featured: true
+      },
+      {
+        id: 18,
+        name: "Notion",
+        nameZh: "Notion",
+        icon: "📝",
+        iconBg: "#000",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "全能笔记工具，AI 写作助手加持，知识管理神器",
+        descZh: "全能笔记工具，AI 写作助手加持，知识管理神器",
+        descEn: "All-in-one notes tool with AI writing assistant, knowledge management beast",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://notion.so",
+        featured: false
+      },
+      {
+        id: 19,
+        name: "Linear",
+        nameZh: "Linear",
+        icon: "📋",
+        iconBg: "#5e6ad2",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "现代项目管理工具，体验丝滑，开发者最爱",
+        descZh: "现代项目管理工具，体验丝滑，开发者最爱",
+        descEn: "Modern project management tool, buttery smooth experience, developers love it",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://linear.app",
+        featured: false
+      },
+      {
+        id: 20,
+        name: "Arc Browser",
+        nameZh: "Arc 浏览器",
+        icon: "🌈",
+        iconBg: "#414efa",
+        category: "productivity",
+        categoryZh: "效率工具",
+        categoryEn: "Productivity",
+        desc: "重新定义浏览器体验，分栏、空间、AI 功能一应俱全",
+        descZh: "重新定义浏览器体验，分栏、空间、AI 功能一应俱全",
+        descEn: "Redefining browser experience, tabs, spaces, AI features all included",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://arc.net",
+        featured: false
+      },
+      // ========== 学习资源 ==========
+      {
+        id: 21,
+        name: "freeCodeCamp",
+        nameZh: "freeCodeCamp",
+        icon: "🔥",
+        iconBg: "#0a0a23",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "完全免费的编程学习平台，项目驱动，认证受认可",
+        descZh: "完全免费的编程学习平台，项目驱动，认证受认可",
+        descEn: "Completely free coding learning platform, project-based, recognized certifications",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://freecodecamp.org",
+        featured: false
+      },
+      {
+        id: 22,
+        name: "Roadmap.sh",
+        nameZh: "Roadmap.sh",
+        icon: "🗺️",
+        iconBg: "#1e1e1e",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "开发者学习路线图，从入门到精通的清晰路径",
+        descZh: "开发者学习路线图，从入门到精通的清晰路径",
+        descEn: "Developer learning roadmaps, clear path from beginner to expert",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://roadmap.sh",
+        featured: false
+      },
+      {
+        id: 23,
+        name: "LeetCode",
+        nameZh: "力扣",
+        icon: "💻",
+        iconBg: "#ffa116",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "算法刷题平台，面试必备，中文站体验友好",
+        descZh: "算法刷题平台，面试必备，中文站体验友好",
+        descEn: "Algorithm practice platform, interview essential, Chinese site is user-friendly",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://leetcode.cn",
+        featured: false
+      },
+      {
+        id: 24,
+        name: "MDN Web Docs",
+        nameZh: "MDN",
+        icon: "📖",
+        iconBg: "#83d0f2",
+        category: "learning",
+        categoryZh: "学习资源",
+        categoryEn: "Learning",
+        desc: "Mozilla 出品的前端文档，权威详实，开发者必备参考",
+        descZh: "Mozilla 出品的前端文档，权威详实，开发者必备参考",
+        descEn: "Mozilla's frontend documentation, authoritative and detailed, essential reference",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://developer.mozilla.org",
+        featured: false
+      },
+      // ========== 更多开发工具 ==========
+      {
+        id: 25,
+        name: "VS Code",
+        nameZh: "VS Code",
+        icon: "💠",
+        iconBg: "#007acc",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "微软出品代码编辑器，插件生态丰富，免费开源",
+        descZh: "微软出品代码编辑器，插件生态丰富，免费开源",
+        descEn: "Microsoft's code editor, rich plugin ecosystem, free and open source",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://code.visualstudio.com",
+        featured: false
+      },
+      {
+        id: 26,
+        name: "Postman",
+        nameZh: "Postman",
+        icon: "📮",
+        iconBg: "#ff6c37",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "API 测试工具，接口调试神器，团队协作方便",
+        descZh: "API 测试工具，接口调试神器，团队协作方便",
+        descEn: "API testing tool, interface debugging beast, great for team collaboration",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://postman.com",
+        featured: false
+      },
+      {
+        id: 27,
+        name: "Docker",
+        nameZh: "Docker",
+        icon: "🐳",
+        iconBg: "#2496ed",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "容器化部署标准，开发环境一致性保障",
+        descZh: "容器化部署标准，开发环境一致性保障",
+        descEn: "Container deployment standard, ensures development environment consistency",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://docker.com",
+        featured: false
+      },
+      {
+        id: 28,
+        name: "Terminal",
+        nameZh: "终端工具",
+        icon: "⬛",
+        iconBg: "#000",
+        category: "dev",
+        categoryZh: "开发工具",
+        categoryEn: "Dev Tools",
+        desc: "Windows Terminal / iTerm2，终端体验升级必备",
+        descZh: "Windows Terminal / iTerm2，终端体验升级必备",
+        descEn: "Windows Terminal / iTerm2, essential terminal experience upgrade",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://github.com/microsoft/terminal",
+        featured: false
+      },
+      // ========== 更多 AI 工具 ==========
+      {
+        id: 29,
+        name: "Perplexity",
+        nameZh: "Perplexity",
+        icon: "🔮",
+        iconBg: "#20808d",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "AI 搜索引擎，实时联网，答案带引用来源",
+        descZh: "AI 搜索引擎，实时联网，答案带引用来源",
+        descEn: "AI search engine, real-time web access, answers with citations",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://perplexity.ai",
+        featured: true
+      },
+      {
+        id: 30,
+        name: "Midjourney",
+        nameZh: "Midjourney",
+        icon: "🎨",
+        iconBg: "#000",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "AI 绘图天花板，艺术风格独特，作品惊艳",
+        descZh: "AI 绘图天花板，艺术风格独特，作品惊艳",
+        descEn: "Top-tier AI image generation, unique artistic style, stunning results",
+        price: "paid",
+        priceZh: "付费",
+        priceEn: "Paid",
+        link: "https://midjourney.com",
+        featured: false
+      },
+      {
+        id: 31,
+        name: "Stable Diffusion",
+        nameZh: "Stable Diffusion",
+        icon: "🖼️",
+        iconBg: "#9333ea",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "开源 AI 绘图，本地部署，隐私安全可控",
+        descZh: "开源 AI 绘图，本地部署，隐私安全可控",
+        descEn: "Open source AI image generation, local deployment, privacy controlled",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "https://stability.ai",
+        featured: false
+      },
+      {
+        id: 32,
+        name: "Poe",
+        nameZh: "Poe",
+        icon: "🤖",
+        iconBg: "#5426d0",
+        category: "ai",
+        categoryZh: "AI 工具",
+        categoryEn: "AI Tools",
+        desc: "Quora 出品，一站式体验多个 AI 模型",
+        descZh: "Quora 出品，一站式体验多个 AI 模型",
+        descEn: "Quora's platform, experience multiple AI models in one place",
+        price: "freemium",
+        priceZh: "免费/付费",
+        priceEn: "Free/Paid",
+        link: "https://poe.com",
+        featured: false
+      }
+    ];
+
+    let currentLang = 'zh';
+    let currentFilter = 'all';
+
+    function renderTools() {
+      const grid = document.getElementById('toolsGrid');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      let filtered = tools;
+
+      // Filter by category
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(t => t.category === currentFilter);
+      }
+
+      // Filter by search
+      if (searchTerm) {
+        filtered = filtered.filter(t => {
+          const name = currentLang === 'zh' ? t.nameZh : t.name;
+          const desc = currentLang === 'zh' ? t.descZh : t.descEn;
+          return name.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm);
+        });
+      }
+
+      // Update counts
+      document.getElementById('totalCount').textContent = tools.length;
+      document.getElementById('freeCount').textContent = tools.filter(t => t.price === 'free').length;
+
+      // Show/hide no results
+      const noResults = document.getElementById('noResults');
+      if (filtered.length === 0) {
+        noResults.classList.add('show');
+        grid.innerHTML = '';
+        return;
+      }
+      noResults.classList.remove('show');
+
+      // Render cards
+      grid.innerHTML = filtered.map(tool => {
+        const name = currentLang === 'zh' ? tool.nameZh : tool.name;
+        const desc = currentLang === 'zh' ? tool.descZh : tool.descEn;
+        const category = currentLang === 'zh' ? tool.categoryZh : tool.categoryEn;
+        const priceText = currentLang === 'zh' ? tool.priceZh : tool.priceEn;
+        
+        return `
+          <div class="tool-card" data-link="${tool.link}">
+            <div class="tool-header">
+              <div class="tool-icon" style="background: ${tool.iconBg}">${tool.icon}</div>
+              <div class="tool-info">
+                <h3>${name}</h3>
+                <span class="category">${category}</span>
+              </div>
+            </div>
+            <p class="tool-desc">${desc}</p>
+            <div class="tool-footer">
+              <span class="tool-price ${tool.price === 'free' ? 'free' : tool.price === 'paid' ? 'paid' : ''}">${priceText}</span>
+              <a href="${tool.link}" target="_blank" class="tool-link" onclick="event.stopPropagation()">${currentLang === 'zh' ? '访问' : 'Visit'} →</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // 添加卡片点击事件（含 ripple 效果）
+      document.querySelectorAll('.tool-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+          // 创建 ripple 元素
+          const ripple = document.createElement('div');
+          ripple.className = 'ripple-effect';
+          ripple.style.left = e.offsetX + 'px';
+          ripple.style.top = e.offsetY + 'px';
+          this.appendChild(ripple);
+          
+          // 动画结束后移除
+          ripple.addEventListener('animationend', () => ripple.remove());
+          
+          // 延迟打开链接
+          const link = this.dataset.link;
+          setTimeout(() => {
+            window.open(link, '_blank');
+          }, 200);
+        });
+      });
+    }
+
+    function toggleLang() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      
+      // Update placeholders
+      const searchInput = document.getElementById('searchInput');
+      searchInput.placeholder = searchInput.dataset[currentLang === 'zh' ? 'zh-placeholder' : 'en-placeholder'];
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.textContent = btn.dataset[currentLang === 'zh' ? 'zh' : 'en'];
+      });
+      
+      // Update stats labels
+      document.querySelectorAll('.stat-label').forEach(label => {
+        label.textContent = label.dataset[currentLang === 'zh' ? 'zh' : 'en'];
+      });
+      
+      // Update hero text
+      document.querySelectorAll('[data-zh][data-en]').forEach(el => {
+        el.textContent = el.dataset[currentLang];
+      });
+      
+      // Update footer
+      document.querySelectorAll('footer p').forEach(el => {
+        el.textContent = el.dataset[currentLang];
+      });
+      
+      renderTools();
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderTools();
+      });
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', renderTools);
+
+    // Keyboard shortcut: Ctrl+K or / to focus search
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      // ESC to clear search
+      if (e.key === 'Escape') {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchInput').blur();
+        renderTools();
+      }
+    });
+
+    // Initial render
+    renderTools();
+    
+    // ============ ✨ 粒子背景系统 ============
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouseX = 0;
+    let mouseY = 0;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2.5 + 0.5;
+        this.speedX = Math.random() * 0.4 - 0.2;
+        this.speedY = Math.random() * 0.4 - 0.2;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        this.hue = Math.random() > 0.5 ? 239 : 263;
+        this.pulseSpeed = Math.random() * 0.02 + 0.01;
+        this.pulsePhase = Math.random() * Math.PI * 2;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.pulsePhase += this.pulseSpeed;
+        this.currentOpacity = this.opacity * (0.7 + 0.3 * Math.sin(this.pulsePhase));
+
+        const dx = mouseX - this.x;
+        const dy = mouseY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const force = (120 - dist) / 120;
+          this.x -= dx * force * 0.015;
+          this.y -= dy * force * 0.015;
+        }
+
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
+      }
+
+      draw() {
+        ctx.fillStyle = `hsla(${this.hue}, 70%, 65%, ${this.currentOpacity || this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      const particleCount = Math.min(80, Math.floor((canvas.width * canvas.height) / 15000));
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            ctx.strokeStyle = `rgba(99, 102, 241, ${0.15 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      drawConnections();
+      requestAnimationFrame(animateParticles);
+    }
+
+    resizeCanvas();
+    initParticles();
+    animateParticles();
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initParticles();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    // ============ ⌨️ 打字机标题效果 ============
+    function typeWriter(element, text, speed = 100) {
+      let i = 0;
+      element.innerHTML = '';
+      
+      function type() {
+        if (i < text.length) {
+          element.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      
+      type();
+    }
+
+    window.addEventListener('load', () => {
+      const titleEl = document.getElementById('hero-title');
+      const titleText = "GP's Vibe Coding";
+      setTimeout(() => typeWriter(titleEl, titleText, 120), 500);
+    });
+
+    // ============ 滚动效果 ============
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // ============ 👀 分层头像跟随鼠标效果 ============
+    const avatar = document.querySelector('.avatar');
+    const layerHeadFace = document.querySelector('.layer-head-face');
+    const layerHand = document.querySelector('.layer-hand');
+    const layerEyes = document.querySelector('.layer-eyes');
+    
+    document.addEventListener('mousemove', (e) => {
+      const rect = avatar.getBoundingClientRect();
+      const avatarCenterX = rect.left + rect.width / 2;
+      const avatarCenterY = rect.top + rect.height / 2;
+      
+      // 计算鼠标相对于头像中心的角度
+      const deltaX = e.clientX - avatarCenterX;
+      const deltaY = e.clientY - avatarCenterY;
+      
+      // 旋转参数 - 头部旋转幅度增大
+      const maxRotate = 12;
+      const rotateY = (deltaX / window.innerWidth) * maxRotate;
+      const rotateX = -(deltaY / window.innerHeight) * maxRotate;
+      
+      // 头层：3D旋转 + 轻微位移
+      const headMoveX = rotateY * 1;
+      const headMoveY = -rotateX * 0.6;
+      layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      
+      // 眼白层：固定不动（不需要设置transform）
+      
+      // 手层：中等位移
+      const handMoveX = rotateY * 1.8;
+      const handMoveY = -rotateX * 1.2;
+      layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
+      
+      // 眼珠层：小幅度位移，限制在眼眶内
+      const eyeMoveX = rotateY * 1.2;
+      const eyeMoveY = -rotateX * 0.8;
+      layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
+    });
+
+    // 鼠标离开时重置
+    document.addEventListener('mouseleave', () => {
+      layerHeadFace.style.transform = '';
+      layerHand.style.transform = '';
+      layerEyes.style.transform = '';
+    });
+  </script>
+</body>
+</html>
