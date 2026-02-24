@@ -145,21 +145,26 @@
       margin: 0 auto 24px;
       overflow: hidden;
       animation: avatarGlow 3s ease-in-out infinite;
-    }
-
-    @keyframes avatarGlow {
-      0%, 100% {
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.3), 0 0 60px rgba(139, 92, 246, 0.2);
-      }
-      50% {
-        box-shadow: 0 0 50px rgba(99, 102, 241, 0.5), 0 0 100px rgba(139, 92, 246, 0.4);
-      }
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      padding: 3px;
+      box-sizing: border-box;
     }
 
     .avatar img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid var(--bg-primary);
+    }
+
+    @keyframes avatarGlow {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(102, 126, 234, 0.5), 0 0 60px rgba(240, 147, 251, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 50px rgba(102, 126, 234, 0.7), 0 0 100px rgba(240, 147, 251, 0.5);
+      }
     }
 
     /* ⌨️ 打字机标题 */
