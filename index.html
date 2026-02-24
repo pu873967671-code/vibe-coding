@@ -163,13 +163,12 @@
       z-index: 1;
     }
 
-    /* 眼白层 - 在头下面 */
+    /* 眼白层 - 在头下面，固定不动 */
     .layer-eyewhite {
       z-index: 2;
-      transition: transform 0.15s ease-out;
     }
 
-    /* 眼珠层 - 在眼白上面，头下面 */
+    /* 眼珠层 - 在眼白上面，头下面，跟着鼠标动 */
     .layer-eyes {
       z-index: 3;
       transition: transform 0.08s ease-out;
@@ -185,18 +184,6 @@
     .layer-hand {
       z-index: 5;
       transition: transform 0.12s ease-out;
-    }
-
-    /* 手层 - 中等幅度 */
-    .layer-hand {
-      z-index: 3;
-      transition: transform 0.12s ease-out;
-    }
-
-    /* 眼珠层 - 最大幅度 */
-    .layer-eyes {
-      z-index: 4;
-      transition: transform 0.08s ease-out;
     }
 
     @keyframes avatarGlow {
