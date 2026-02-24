@@ -161,31 +161,28 @@
       z-index: 1;
     }
 
-    /* 头+眼白容器 - 轻微动 */
-    .avatar-head {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    /* 头层 - 轻微动 */
+    .layer-head-face {
       z-index: 2;
       transition: transform 0.15s ease-out;
     }
 
-    .avatar-head img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .layer-head-face {
-      z-index: 1;
-    }
-
+    /* 眼白层 - 跟着头动，在头上面 */
     .layer-eyewhite {
-      z-index: 2;
+      z-index: 3;
+      transition: transform 0.15s ease-out;
+    }
+
+    /* 手层 - 中等幅度 */
+    .layer-hand {
+      z-index: 4;
+      transition: transform 0.12s ease-out;
+    }
+
+    /* 眼珠层 - 最大幅度，最上层 */
+    .layer-eyes {
+      z-index: 5;
+      transition: transform 0.08s ease-out;
     }
 
     /* 手层 - 中等幅度 */
@@ -659,10 +656,8 @@
       <div class="container">
         <div class="avatar">
           <img class="layer-bg" src="layer-5-bg.png" alt="">
-          <div class="avatar-head">
-            <img class="layer-head-face" src="layer-2-head.png" alt="">
-            <img class="layer-eyewhite" src="layer-4-eyewhite.png" alt="">
-          </div>
+          <img class="layer-head-face" src="layer-2-head.png" alt="">
+          <img class="layer-eyewhite" src="layer-4-eyewhite.png" alt="">
           <img class="layer-hand" src="layer-1-hand.png" alt="">
           <img class="layer-eyes" src="layer-3-eyes.png" alt="">
         </div>
@@ -1573,7 +1568,8 @@
 
     // ============ 👀 分层头像跟随鼠标效果 ============
     const avatar = document.querySelector('.avatar');
-    const avatarHead = document.querySelector('.avatar-head');
+    const layerHeadFace = document.querySelector('.layer-head-face');
+    const layerEyewhite = document.querySelector('.layer-eyewhite');
     const layerHand = document.querySelector('.layer-hand');
     const layerEyes = document.querySelector('.layer-eyes');
     
@@ -1586,11 +1582,16 @@
       const deltaX = e.clientX - avatarCenterX;
       const deltaY = e.clientY - avatarCenterY;
       
-      // 头+眼白层：轻微3D旋转
+      // 旋转参数
       const maxRotate = 8;
       const rotateY = (deltaX / window.innerWidth) * maxRotate;
       const rotateX = -(deltaY / window.innerHeight) * maxRotate;
-      avatarHead.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      
+      // 头层：3D旋转
+      layerHeadFace.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      
+      // 眼白层：跟头一样的旋转
+      layerEyewhite.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
       // 手层：中等位移
       const handMoveX = rotateY * 2;
@@ -1605,7 +1606,8 @@
 
     // 鼠标离开时重置
     document.addEventListener('mouseleave', () => {
-      avatarHead.style.transform = '';
+      layerHeadFace.style.transform = '';
+      layerEyewhite.style.transform = '';
       layerHand.style.transform = '';
       layerEyes.style.transform = '';
     });
