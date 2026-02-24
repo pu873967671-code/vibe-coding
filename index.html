@@ -1558,7 +1558,6 @@
     // ============ 👀 分层头像跟随鼠标效果 ============
     const avatar = document.querySelector('.avatar');
     const layerHeadFace = document.querySelector('.layer-head-face');
-    const layerEyewhite = document.querySelector('.layer-eyewhite');
     const layerHand = document.querySelector('.layer-hand');
     const layerEyes = document.querySelector('.layer-eyes');
     
@@ -1579,8 +1578,7 @@
       // 头层：3D旋转
       layerHeadFace.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
-      // 眼白层：跟头一样的旋转
-      layerEyewhite.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      // 眼白层：固定不动（不需要设置transform）
       
       // 手层：中等位移
       const handMoveX = rotateY * 2;
@@ -1596,13 +1594,8 @@
     // 鼠标离开时重置
     document.addEventListener('mouseleave', () => {
       layerHeadFace.style.transform = '';
-      layerEyewhite.style.transform = '';
       layerHand.style.transform = '';
       layerEyes.style.transform = '';
-    });
-    document.addEventListener('mouseleave', () => {
-      avatarImg.style.transform = '';
-      avatar.style.transform = '';
     });
   </script>
 </body>
