@@ -1605,6 +1605,56 @@
       layerHand.style.transform = '';
       layerEyes.style.transform = '';
     });
+
+    // ============ 📱 手机陀螺仪效果 ============
+    function handleOrientation(e) {
+      // beta: 前后倾斜 (-180 to 180)
+      // gamma: 左右倾斜 (-90 to 90)
+      const beta = e.beta || 0;
+      const gamma = e.gamma || 0;
+      
+      // 限制范围，避免太敏感
+      const maxTilt = 15;
+      const rotateX = Math.max(-maxTilt, Math.min(maxTilt, beta / 3));
+      const rotateY = Math.max(-maxTilt, Math.min(maxTilt, gamma / 3));
+      
+      // 头层 + 眼白层
+      const headMoveX = rotateY * 1;
+      const headMoveY = -rotateX * 0.6;
+      layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      layerEyewhite.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      
+      // 手层
+      const handMoveX = rotateY * 1.8;
+      const handMoveY = -rotateX * 1.2;
+      layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
+      
+      // 眼珠层
+      const eyeMoveX = rotateY * 1.2;
+      const eyeMoveY = -rotateX * 0.8;
+      layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
+    }
+
+    // 检测是否支持陀螺仪
+    if (window.DeviceOrientationEvent) {
+      // iOS 13+ 需要请求权限
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // 用户点击时请求权限
+        document.body.addEventListener('click', function requestPermission() {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+              }
+            })
+            .catch(console.error);
+          document.body.removeEventListener('click', requestPermission);
+        }, { once: true });
+      } else {
+        // 其他设备直接添加
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
   </script>
 </body>
 </html>
