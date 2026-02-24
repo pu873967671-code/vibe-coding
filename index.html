@@ -156,33 +156,35 @@
       object-fit: contain;
     }
 
+    /* 图层顺序从底到顶：背景 → 眼白 → 眼珠 → 头 → 手 */
+    
     /* 背景层 - 不动 */
     .layer-bg {
       z-index: 1;
     }
 
-    /* 头层 - 轻微动 */
-    .layer-head-face {
+    /* 眼白层 - 在头下面 */
+    .layer-eyewhite {
       z-index: 2;
       transition: transform 0.15s ease-out;
     }
 
-    /* 眼白层 - 跟着头动，在头上面 */
-    .layer-eyewhite {
+    /* 眼珠层 - 在眼白上面，头下面 */
+    .layer-eyes {
       z-index: 3;
+      transition: transform 0.08s ease-out;
+    }
+
+    /* 头层 - 遮住眼白和眼珠，只露出眼睛洞 */
+    .layer-head-face {
+      z-index: 4;
       transition: transform 0.15s ease-out;
     }
 
-    /* 手层 - 中等幅度 */
+    /* 手层 - 最上层 */
     .layer-hand {
-      z-index: 4;
-      transition: transform 0.12s ease-out;
-    }
-
-    /* 眼珠层 - 最大幅度，最上层 */
-    .layer-eyes {
       z-index: 5;
-      transition: transform 0.08s ease-out;
+      transition: transform 0.12s ease-out;
     }
 
     /* 手层 - 中等幅度 */
@@ -656,10 +658,10 @@
       <div class="container">
         <div class="avatar">
           <img class="layer-bg" src="layer-5-bg.png" alt="">
-          <img class="layer-head-face" src="layer-2-head.png" alt="">
           <img class="layer-eyewhite" src="layer-4-eyewhite.png" alt="">
-          <img class="layer-hand" src="layer-1-hand.png" alt="">
           <img class="layer-eyes" src="layer-3-eyes.png" alt="">
+          <img class="layer-head-face" src="layer-2-head.png" alt="">
+          <img class="layer-hand" src="layer-1-hand.png" alt="">
         </div>
         <h1 data-zh="GP's Vibe Coding" data-en="GP's Vibe Coding" id="hero-title"></h1>
         <p data-zh="分享日常发现的 AI 工具、开发资源和好玩项目。Vibe coding，让开发更有趣！" data-en="Sharing AI tools, dev resources and fun projects I discover. Vibe coding, making development more fun!">
