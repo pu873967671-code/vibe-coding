@@ -165,9 +165,10 @@
       z-index: 1;
     }
 
-    /* 眼白层 - 在头下面，固定不动 */
+    /* 眼白层 - 跟着头一起动 */
     .layer-eyewhite {
       z-index: 2;
+      transition: transform 0.15s ease-out;
     }
 
     /* 眼珠层 - 在眼白上面，头下面，跟着鼠标动 */
@@ -1560,6 +1561,7 @@
     // ============ 👀 分层头像跟随鼠标效果 ============
     const avatar = document.querySelector('.avatar');
     const layerHeadFace = document.querySelector('.layer-head-face');
+    const layerEyewhite = document.querySelector('.layer-eyewhite');
     const layerHand = document.querySelector('.layer-hand');
     const layerEyes = document.querySelector('.layer-eyes');
     
@@ -1582,7 +1584,8 @@
       const headMoveY = -rotateX * 0.6;
       layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
-      // 眼白层：固定不动（不需要设置transform）
+      // 眼白层：跟头一起动
+      layerEyewhite.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
       // 手层：中等位移
       const handMoveX = rotateY * 1.8;
@@ -1598,6 +1601,7 @@
     // 鼠标离开时重置
     document.addEventListener('mouseleave', () => {
       layerHeadFace.style.transform = '';
+      layerEyewhite.style.transform = '';
       layerHand.style.transform = '';
       layerEyes.style.transform = '';
     });
