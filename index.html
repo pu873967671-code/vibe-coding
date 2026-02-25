@@ -139,12 +139,14 @@
 
     /* 💫 分层头像 + 跟随鼠标 */
     .avatar {
-      width: 120px;
-      height: 120px;
+      width: 130px;
+      height: 130px;
       border-radius: 50%;
       margin: 0 auto 24px;
       position: relative;
       animation: avatarGlow 3s ease-in-out infinite;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     }
 
     .avatar img {
@@ -153,37 +155,63 @@
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
     }
 
     /* 图层顺序从底到顶：背景 → 眼白 → 眼珠 → 头 → 手 */
     
-    /* 背景层 - 不动 */
+    /* 背景层 - 不动，保持130px */
     .layer-bg {
       z-index: 1;
+      width: 130px !important;
+      height: 130px !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%);
     }
 
-    /* 眼白层 - 在头下面，固定不动 */
+    /* 眼白层 - 跟着头一起动，放大到140px */
     .layer-eyewhite {
       z-index: 2;
+      transition: transform 0.15s ease-out;
+      width: 140px !important;
+      height: 140px !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%);
     }
 
-    /* 眼珠层 - 在眼白上面，头下面，跟着鼠标动 */
+    /* 眼珠层 - 跟着鼠标动，140px */
     .layer-eyes {
       z-index: 3;
       transition: transform 0.08s ease-out;
+      width: 140px !important;
+      height: 140px !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%);
     }
 
-    /* 头层 - 遮住眼白和眼珠，只露出眼睛洞 */
+    /* 头层 - 遮住眼白和眼珠，只露出眼睛洞，140px */
     .layer-head-face {
       z-index: 4;
       transition: transform 0.15s ease-out;
+      width: 140px !important;
+      height: 140px !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%);
     }
 
-    /* 手层 - 最上层 */
+    /* 手层 - 最上层，140px */
     .layer-hand {
       z-index: 5;
       transition: transform 0.12s ease-out;
+      width: 140px !important;
+      height: 140px !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%);
     }
 
     @keyframes avatarGlow {
@@ -633,7 +661,7 @@
       <div class="header-content">
         <div class="logo">
           <div class="logo-icon">⚡</div>
-          <span class="logo-text">GP's Vibe Coding</span>
+          <span class="logo-text">GP's Vibe</span>
         </div>
         <button class="lang-switch" onclick="toggleLang()">EN / 中文</button>
       </div>
@@ -679,6 +707,7 @@
           <button class="filter-btn" data-filter="learning" data-zh="学习资源" data-en="Learning">学习资源</button>
           <button class="filter-btn" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
           <button class="filter-btn" data-filter="project" data-zh="API中转" data-en="API Proxy">API中转</button>
+          <button class="filter-btn" data-filter="article" data-zh="📝 文章" data-en="📝 Articles">📝 文章</button>
         </div>
         <div class="stats">
           <div class="stat">
@@ -1273,6 +1302,27 @@
         priceEn: "Free/Paid",
         link: "https://poe.com",
         featured: false
+      },
+      // ========== 文章 ==========
+      {
+        id: 101,
+        name: "《柳叶刀·公共卫生》把账算狠了：40岁后，你的下半生取决于这3件事",
+        nameZh: "《柳叶刀·公共卫生》把账算狠了：40岁后，你的下半生取决于这3件事",
+        icon: "📝",
+        iconBg: "#8b5cf6",
+        category: "article",
+        categoryZh: "文章",
+        categoryEn: "Articles",
+        desc: "基于《柳叶刀·公共卫生》研究，40岁后最关键的3件事：睡稳、练肌肉、管住嘴。少犯错 + 稳复利，守住三条底线。",
+        descZh: "基于《柳叶刀·公共卫生》研究，40岁后最关键的3件事：睡稳、练肌肉、管住嘴。少犯错 + 稳复利，守住三条底线。",
+        descEn: "Based on Lancet Public Health research, the 3 most critical things after 40: sleep well, build muscle, eat right. Make fewer mistakes + steady compound interest.",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "article-101.html",
+        author: "@430Yang",
+        date: "2026-02-21",
+        featured: true
       }
     ];
 
@@ -1558,6 +1608,7 @@
     // ============ 👀 分层头像跟随鼠标效果 ============
     const avatar = document.querySelector('.avatar');
     const layerHeadFace = document.querySelector('.layer-head-face');
+    const layerEyewhite = document.querySelector('.layer-eyewhite');
     const layerHand = document.querySelector('.layer-hand');
     const layerEyes = document.querySelector('.layer-eyes');
     
@@ -1570,33 +1621,87 @@
       const deltaX = e.clientX - avatarCenterX;
       const deltaY = e.clientY - avatarCenterY;
       
-      // 旋转参数
-      const maxRotate = 8;
+      // 旋转参数 - 头部旋转幅度增大
+      const maxRotate = 12;
       const rotateY = (deltaX / window.innerWidth) * maxRotate;
       const rotateX = -(deltaY / window.innerHeight) * maxRotate;
       
-      // 头层：3D旋转
-      layerHeadFace.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      // 头层：3D旋转 + 轻微位移
+      const headMoveX = rotateY * 1;
+      const headMoveY = -rotateX * 0.6;
+      layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
-      // 眼白层：固定不动（不需要设置transform）
+      // 眼白层：跟头一起动
+      layerEyewhite.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
       // 手层：中等位移
-      const handMoveX = rotateY * 2;
-      const handMoveY = -rotateX * 1.5;
+      const handMoveX = rotateY * 1.8;
+      const handMoveY = -rotateX * 1.2;
       layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
       
-      // 眼珠层：最大位移，盯着鼠标
-      const eyeMoveX = rotateY * 3.5;
-      const eyeMoveY = -rotateX * 2.5;
+      // 眼珠层：小幅度位移，限制在眼眶内
+      const eyeMoveX = rotateY * 1.2;
+      const eyeMoveY = -rotateX * 0.8;
       layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
     });
 
     // 鼠标离开时重置
     document.addEventListener('mouseleave', () => {
       layerHeadFace.style.transform = '';
+      layerEyewhite.style.transform = '';
       layerHand.style.transform = '';
       layerEyes.style.transform = '';
     });
+
+    // ============ 📱 手机陀螺仪效果（方向反转）============
+    function handleOrientation(e) {
+      // beta: 前后倾斜 (-180 to 180)
+      // gamma: 左右倾斜 (-90 to 90)
+      const beta = e.beta || 0;
+      const gamma = e.gamma || 0;
+      
+      // 限制范围，避免太敏感
+      const maxTilt = 15;
+      const rotateX = -Math.max(-maxTilt, Math.min(maxTilt, beta / 3)); // 反转前后
+      const rotateY = -Math.max(-maxTilt, Math.min(maxTilt, gamma / 3)); // 反转左右
+      
+      // 头层 + 眼白层
+      const headMoveX = rotateY * 1;
+      const headMoveY = -rotateX * 0.6;
+      layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      layerEyewhite.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      
+      // 手层
+      const handMoveX = rotateY * 1.8;
+      const handMoveY = -rotateX * 1.2;
+      layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
+      
+      // 眼珠层
+      const eyeMoveX = rotateY * 1.2;
+      const eyeMoveY = -rotateX * 0.8;
+      layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
+    }
+
+    // 检测是否支持陀螺仪
+    if (window.DeviceOrientationEvent) {
+      // iOS 13+ 需要请求权限
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // 用户点击时请求权限
+        document.body.addEventListener('click', function requestPermission() {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+              }
+            })
+            .catch(console.error);
+          document.body.removeEventListener('click', requestPermission);
+        }, { once: true });
+      } else {
+        // 其他设备直接添加
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
   </script>
 </body>
 </html>
