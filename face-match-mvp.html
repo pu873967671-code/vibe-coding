@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI人脸相似匹配 - MVP版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --border: #2a2a3a;
+      --success: #22c55e;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 24px;
+      display: inline-block;
+    }
+    
+    .back-link:hover {
+      color: var(--accent-hover);
+    }
+    
+    h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .upload-zone {
+      background: var(--bg-card);
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 60px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+    }
+    
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: var(--bg-secondary);
+    }
+    
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+    
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    .upload-text {
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .upload-hint {
+      color: var(--text-secondary);
+      font-size: 13px;
+      opacity: 0.7;
+    }
+    
+    #fileInput {
+      display: none;
+    }
+    
+    .preview-section {
+      display: none;
+      margin-bottom: 30px;
+    }
+    
+    .preview-section.show {
+      display: block;
+    }
+    
+    .preview-image {
+      max-width: 300px;
+      border-radius: 12px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+    
+    .analyze-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+      transition: all 0.3s;
+    }
+    
+    .analyze-btn:hover {
+      background: var(--accent-hover);
+    }
+    
+    .analyze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .loading.show {
+      display: block;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .results-section {
+      display: none;
+    }
+    
+    .results-section.show {
+      display: block;
+    }
+    
+    .results-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .result-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .result-info {
+      flex: 1;
+    }
+    
+    .result-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .result-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .similarity-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .similarity-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #8b5cf6);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    
+    .similarity-text {
+      font-size: 14px;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+    
+    .status-message {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+    }
+    
+    .status-message.error {
+      color: #ef4444;
+    }
+    
+    .status-message.success {
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-link">← 返回首页</a>
+    
+    <h1>🔍 AI人脸相似匹配</h1>
+    <p class="subtitle">上传照片，找到和你相似的博主/明星</p>
+    
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📸</div>
+      <p class="upload-text">点击或拖拽上传照片</p>
+      <p class="upload-hint">支持 JPG, PNG 格式</p>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+    
+    <div class="preview-section" id="previewSection">
+      <img id="previewImage" class="preview-image" alt="预览">
+      <button class="analyze-btn" id="analyzeBtn">开始分析</button>
+    </div>
+    
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>正在分析人脸特征...</p>
+    </div>
+    
+    <div class="results-section" id="resultsSection">
+      <h2 class="results-title">相似结果</h2>
+      <div id="resultsList"></div>
+    </div>
+    
+    <div class="status-message" id="statusMessage"></div>
+  </div>
+
+  <script>
+    // 模拟的明星/博主数据库（MVP版）
+    const celebrityDatabase = [
+      { id: 1, name: '杨幂', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/6366f1/fff?text=YM' },
+      { id: 2, name: '迪丽热巴', desc: '演员', photo: 'https://via.placeholder.com/80x80/8b5cf6/fff?text=DL' },
+      { id: 3, name: '肖战', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/ec4899/fff?text=XZ' },
+      { id: 4, name: '王一博', desc: '演员、舞者', photo: 'https://via.placeholder.com/80x80/22c55e/fff?text=WY' },
+      { id: 5, name: '赵丽颖', desc: '演员', photo: 'https://via.placeholder.com/80x80/f59e0b/fff?text=ZL' },
+      { id: 6, name: '李现', desc: '演员', photo: 'https://via.placeholder.com/80x80/ef4444/fff?text=LX' },
+      { id: 7, name: '杨紫', desc: '演员', photo: 'https://via.placeholder.com/80x80/06b6d4/fff?text=YZ' },
+      { id: 8, name: '成毅', desc: '演员', photo: 'https://via.placeholder.com/80x80/84cc16/fff?text=CY' },
+    ];
+
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewSection = document.getElementById('previewSection');
+    const previewImage = document.getElementById('previewImage');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loading = document.getElementById('loading');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    const statusMessage = document.getElementById('statusMessage');
+
+    let selectedFile = null;
+
+    // 点击上传
+    uploadZone.addEventListener('click', () => fileInput.click());
+    
+    // 文件选择
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // 拖拽上传
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showStatus('请上传图片文件', 'error');
+        return;
+      }
+      
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImage.src = e.target.result;
+        previewSection.classList.add('show');
+        resultsSection.classList.remove('show');
+        statusMessage.textContent = '';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 分析按钮
+    analyzeBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      
+      analyzeBtn.disabled = true;
+      loading.classList.add('show');
+      resultsSection.classList.remove('show');
+      
+      try {
+        // 模拟分析过程（真实版本会调用 face-api.js）
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // 生成随机相似度结果（MVP演示用）
+        const results = celebrityDatabase
+          .map(celeb => ({
+            ...celeb,
+            similarity: Math.floor(Math.random() * 30) + 60 // 60-90%
+          }))
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, 5);
+        
+        displayResults(results);
+        showStatus('分析完成！', 'success');
+      } catch (error) {
+        showStatus('分析失败，请重试', 'error');
+      } finally {
+        analyzeBtn.disabled = false;
+        loading.classList.remove('show');
+      }
+    });
+
+    function displayResults(results) {
+      resultsList.innerHTML = results.map((result, index) => `
+        <div class="result-card" style="animation-delay: ${index * 0.1}s">
+          <img src="${result.photo}" alt="${result.name}" class="result-photo">
+          <div class="result-info">
+            <div class="result-name">${result.name}</div>
+            <div class="result-desc">${result.desc}</div>
+            <div class="similarity-bar">
+              <div class="similarity-fill" style="width: ${result.similarity}%"></div>
+            </div>
+            <div class="similarity-text">相似度 ${result.similarity}%</div>
+          </div>
+        </div>
+      `).join('');
+      
+      resultsSection.classList.add('show');
+    }
+
+    function showStatus(message, type = '') {
+      statusMessage.textContent = message;
+      statusMessage.className = 'status-message ' + type;
+    }
+
+    // 初始化 face-api.js（真实版本）
+    async function loadFaceApiModels() {
+      // TODO: 加载 face-api.js 模型
+      // await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+      // await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+      // await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+    }
+    
+    // loadFaceApiModels(); // 真实版本取消注释
+  </script>
+</body>
+</html>
