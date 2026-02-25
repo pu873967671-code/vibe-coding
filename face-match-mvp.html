@@ -300,16 +300,13 @@
   <script>
     let celebrityDatabase = [];
     
-    // 从JSON加载真实数据
+    // 从JSON加载亚洲明星数据
     async function loadCelebrities() {
       try {
-        const response = await fetch('celebrities_100.json');
+        const response = await fetch('asian_celebrities.json');
         const data = await response.json();
-        celebrityDatabase = data.creators.map(c => ({
-          ...c,
-          photo: `https://via.placeholder.com/80x80/6366f1/fff?text=${c.id}` // 使用占位符图片
-        }));
-        console.log(`Loaded ${celebrityDatabase.length} celebrities`);
+        celebrityDatabase = data.creators;
+        console.log(`Loaded ${celebrityDatabase.length} Asian celebrities`);
       } catch (error) {
         console.error('Failed to load celebrities:', error);
         // 如果加载失败，使用备用数据
