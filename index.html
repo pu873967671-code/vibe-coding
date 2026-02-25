@@ -1456,7 +1456,7 @@
         date: "2026-02-21",
         desc: "基于50万人的长期研究：40岁后保持低风险习惯的人，预期寿命能比高风险人群多8年以上。真正拉开的差距不是拼劲，而是恢复力。睡眠、肌肉、晚餐控制——守住这三条底线。",
         descEn: "Based on a 500,000-person study: people who maintain low-risk habits after 40 can live 8+ years longer. The gap isn't effort—it's recovery. Sleep, muscle, dinner control—hold these three lines.",
-        link: "https://x.com/430Yang/status/2025335291482128821",
+        link: "articles/health-after-40.html",
         readTime: "10 分钟",
         readTimeEn: "10 min read"
       }
@@ -1536,11 +1536,11 @@
           `;
         }).join('');
 
-        // 文章卡片点击
+        // 文章卡片点击（站内链接，当前窗口打开）
         document.querySelectorAll('.article-card').forEach(card => {
           card.addEventListener('click', function() {
             const link = this.dataset.link;
-            window.open(link, '_blank');
+            window.location.href = link;
           });
         });
       } else {
