@@ -411,6 +411,98 @@
       padding-bottom: 80px;
     }
 
+    /* 瀑布流布局 - 文章区 */
+    .tools-grid.masonry {
+      display: block;
+      column-count: 3;
+      column-gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .tools-grid.masonry {
+        column-count: 2;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .tools-grid.masonry {
+        column-count: 1;
+      }
+    }
+
+    /* 文章卡片 - 瀑布流样式 */
+    .article-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      animation: cardFadeIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      break-inside: avoid;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .article-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(99, 102, 241, 0.3);
+    }
+
+    .article-card .article-cover {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: var(--bg-secondary);
+    }
+
+    .article-card .article-content {
+      padding: 20px;
+    }
+
+    .article-card .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .article-card .article-tag {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .article-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .article-card .article-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .article-card .article-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
     /* 📦 卡片入场动画 + 🌟 悬停发光 + 💫 点击 Ripple */
     .tool-card {
       background: var(--bg-card);
@@ -682,6 +774,7 @@
           <button class="filter-btn" data-filter="learning" data-zh="学习资源" data-en="Learning">学习资源</button>
           <button class="filter-btn" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
           <button class="filter-btn" data-filter="project" data-zh="API中转" data-en="API Proxy">API中转</button>
+          <button class="filter-btn" data-filter="article" data-zh="文章" data-en="Articles">文章</button>
         </div>
         <div class="stats">
           <div class="stat">
@@ -1276,6 +1369,81 @@
         priceEn: "Free/Paid",
         link: "https://poe.com",
         featured: false
+      },
+      // ========== 文章 ==========
+      {
+        id: 101,
+        title: "Vibe Coding 实战：用 AI 写代码的正确姿势",
+        titleEn: "Vibe Coding in Practice: The Right Way to Code with AI",
+        cover: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop",
+        category: "article",
+        tag: "AI",
+        tagEn: "AI",
+        date: "2026-02-25",
+        desc: "分享一下我用 Cursor + Claude 的日常开发流程，AI 不是来替代你的，而是让你成为 10x 开发者。从需求到部署，全流程实战经验。",
+        descEn: "Sharing my daily dev workflow with Cursor + Claude. AI isn't here to replace you - it's here to make you a 10x developer. Full process from requirements to deployment.",
+        link: "https://github.com/pu873967671-code/vibe-coding",
+        readTime: "8 分钟",
+        readTimeEn: "8 min read"
+      },
+      {
+        id: 102,
+        title: "ComfyUI 入门：从零开始搭建 AI 绘图工作流",
+        titleEn: "ComfyUI Beginner's Guide: Building AI Image Workflows from Scratch",
+        cover: "https://images.unsplash.com/photo-1547954575-855750c57bd3?w=600&h=300&fit=crop",
+        category: "article",
+        tag: "AI绘图",
+        tagEn: "AI Art",
+        date: "2026-02-20",
+        desc: "ComfyUI 是最强大的 Stable Diffusion 界面，但学习曲线陡峭。这篇教你从安装到第一个工作流，图文并茂。",
+        descEn: "ComfyUI is the most powerful Stable Diffusion interface, but has a steep learning curve. This guide takes you from installation to your first workflow.",
+        link: "https://github.com",
+        readTime: "15 分钟",
+        readTimeEn: "15 min read"
+      },
+      {
+        id: 103,
+        title: "API 中转站选择指南：省钱又稳定",
+        titleEn: "API Proxy Selection Guide: Save Money & Stay Stable",
+        cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=500&fit=crop",
+        category: "article",
+        tag: "省钱",
+        tagEn: "Savings",
+        date: "2026-02-18",
+        desc: "用了大半年各家 API 中转，踩坑无数。总结一下各家的优缺点：ZenMux 稳、MCXHM 快、iFlow 免费但需续期。详细对比表格在这里。",
+        descEn: "After using various API proxies for months, I've hit countless pitfalls. Here's a summary of pros and cons: ZenMux is stable, MCXHM is fast, iFlow is free but needs renewal.",
+        link: "https://github.com",
+        readTime: "6 分钟",
+        readTimeEn: "6 min read"
+      },
+      {
+        id: 104,
+        title: "为什么我放弃了 VS Code 投奔 Cursor",
+        titleEn: "Why I Switched from VS Code to Cursor",
+        category: "article",
+        tag: "工具",
+        tagEn: "Tools",
+        date: "2026-02-15",
+        desc: "用了 5 年 VS Code，最终还是被 Cursor 的 AI 能力折服。Cmd+K 改代码、Tab 补全、Chat 提问，效率直接起飞。当然也有不爽的地方，这里都说了。",
+        descEn: "After 5 years of VS Code, I was finally won over by Cursor's AI capabilities. Cmd+K, Tab completion, Chat - productivity took off. But there are annoyances too.",
+        link: "https://github.com",
+        readTime: "5 分钟",
+        readTimeEn: "5 min read"
+      },
+      {
+        id: 105,
+        title: "DeepSeek R1 本地部署完整教程",
+        titleEn: "DeepSeek R1 Local Deployment Complete Guide",
+        cover: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=350&fit=crop",
+        category: "article",
+        tag: "教程",
+        tagEn: "Tutorial",
+        date: "2026-02-10",
+        desc: "DeepSeek R1 推理能力超强，不想付费？本地部署！这篇教你在本地跑 R1，从 Ollama 到 vLLM，显存不够也有办法。",
+        descEn: "DeepSeek R1 has amazing reasoning. Don't want to pay? Deploy locally! This guide shows you how to run R1 locally, from Ollama to vLLM.",
+        link: "https://github.com",
+        readTime: "12 分钟",
+        readTimeEn: "12 min read"
       }
     ];
 
@@ -1295,6 +1463,13 @@
       // Filter by search
       if (searchTerm) {
         filtered = filtered.filter(t => {
+          // 文章类型
+          if (t.category === 'article') {
+            const title = currentLang === 'zh' ? t.title : (t.titleEn || t.title);
+            const desc = currentLang === 'zh' ? t.desc : (t.descEn || t.desc);
+            return title.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm);
+          }
+          // 工具类型
           const name = currentLang === 'zh' ? t.nameZh : t.name;
           const desc = currentLang === 'zh' ? t.descZh : t.descEn;
           return name.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm);
@@ -1314,51 +1489,89 @@
       }
       noResults.classList.remove('show');
 
+      // 判断是否是文章类型，切换瀑布流
+      const isArticleView = currentFilter === 'article';
+      grid.classList.toggle('masonry', isArticleView);
+
       // Render cards
-      grid.innerHTML = filtered.map(tool => {
-        const name = currentLang === 'zh' ? tool.nameZh : tool.name;
-        const desc = currentLang === 'zh' ? tool.descZh : tool.descEn;
-        const category = currentLang === 'zh' ? tool.categoryZh : tool.categoryEn;
-        const priceText = currentLang === 'zh' ? tool.priceZh : tool.priceEn;
-        
-        return `
-          <div class="tool-card" data-link="${tool.link}">
-            <div class="tool-header">
-              <div class="tool-icon" style="background: ${tool.iconBg}">${tool.icon}</div>
-              <div class="tool-info">
-                <h3>${name}</h3>
-                <span class="category">${category}</span>
+      if (isArticleView) {
+        // 文章卡片 - 瀑布流
+        grid.innerHTML = filtered.map(article => {
+          const title = currentLang === 'zh' ? article.title : (article.titleEn || article.title);
+          const desc = currentLang === 'zh' ? article.desc : (article.descEn || article.desc);
+          const tag = currentLang === 'zh' ? article.tag : (article.tagEn || article.tag);
+          const readTime = currentLang === 'zh' ? article.readTime : (article.readTimeEn || article.readTime);
+          
+          return `
+            <div class="article-card" data-link="${article.link}">
+              ${article.cover ? `<img class="article-cover" src="${article.cover}" alt="${title}" loading="lazy">` : ''}
+              <div class="article-content">
+                <div class="article-meta">
+                  <span class="article-tag">${tag}</span>
+                  <span>${article.date}</span>
+                </div>
+                <h3>${title}</h3>
+                <p class="article-desc">${desc}</p>
+                <div class="article-footer">
+                  <span>${readTime}</span>
+                  <span>阅读 →</span>
+                </div>
               </div>
             </div>
-            <p class="tool-desc">${desc}</p>
-            <div class="tool-footer">
-              <span class="tool-price ${tool.price === 'free' ? 'free' : tool.price === 'paid' ? 'paid' : ''}">${priceText}</span>
-              <a href="${tool.link}" target="_blank" class="tool-link" onclick="event.stopPropagation()">${currentLang === 'zh' ? '访问' : 'Visit'} →</a>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      // 添加卡片点击事件（含 ripple 效果）
-      document.querySelectorAll('.tool-card').forEach(card => {
-        card.addEventListener('click', function(e) {
-          // 创建 ripple 元素
-          const ripple = document.createElement('div');
-          ripple.className = 'ripple-effect';
-          ripple.style.left = e.offsetX + 'px';
-          ripple.style.top = e.offsetY + 'px';
-          this.appendChild(ripple);
-          
-          // 动画结束后移除
-          ripple.addEventListener('animationend', () => ripple.remove());
-          
-          // 延迟打开链接
-          const link = this.dataset.link;
-          setTimeout(() => {
+          `;
+        }).join('');
+
+        // 文章卡片点击
+        document.querySelectorAll('.article-card').forEach(card => {
+          card.addEventListener('click', function() {
+            const link = this.dataset.link;
             window.open(link, '_blank');
-          }, 200);
+          });
         });
-      });
+      } else {
+        // 工具卡片 - 原有样式
+        grid.innerHTML = filtered.filter(t => t.category !== 'article').map(tool => {
+          const name = currentLang === 'zh' ? tool.nameZh : tool.name;
+          const desc = currentLang === 'zh' ? tool.descZh : tool.descEn;
+          const category = currentLang === 'zh' ? tool.categoryZh : tool.categoryEn;
+          const priceText = currentLang === 'zh' ? tool.priceZh : tool.priceEn;
+          
+          return `
+            <div class="tool-card" data-link="${tool.link}">
+              <div class="tool-header">
+                <div class="tool-icon" style="background: ${tool.iconBg}">${tool.icon}</div>
+                <div class="tool-info">
+                  <h3>${name}</h3>
+                  <span class="category">${category}</span>
+                </div>
+              </div>
+              <p class="tool-desc">${desc}</p>
+              <div class="tool-footer">
+                <span class="tool-price ${tool.price === 'free' ? 'free' : tool.price === 'paid' ? 'paid' : ''}">${priceText}</span>
+                <a href="${tool.link}" target="_blank" class="tool-link" onclick="event.stopPropagation()">${currentLang === 'zh' ? '访问' : 'Visit'} →</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        // 工具卡片点击（含 ripple 效果）
+        document.querySelectorAll('.tool-card').forEach(card => {
+          card.addEventListener('click', function(e) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple-effect';
+            ripple.style.left = e.offsetX + 'px';
+            ripple.style.top = e.offsetY + 'px';
+            this.appendChild(ripple);
+            
+            ripple.addEventListener('animationend', () => ripple.remove());
+            
+            const link = this.dataset.link;
+            setTimeout(() => {
+              window.open(link, '_blank');
+            }, 200);
+          });
+        });
+      }
     }
 
     function toggleLang() {
