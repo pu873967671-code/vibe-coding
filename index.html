@@ -428,6 +428,78 @@
       display: none;
     }
 
+    /* 子分类 */
+    .sub-filters {
+      padding-top: 20px;
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .filter-btn.sub {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+
+    /* 布局切换 */
+    .layout-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding-top: 20px;
+    }
+
+    .layout-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+
+    .layout-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .layout-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* 列表模式 */
+    .tools-grid.list-mode {
+      grid-template-columns: 1fr;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .tools-grid.list-mode .tool-card {
+      padding: 32px;
+    }
+
+    .tools-grid.list-mode .tool-header {
+      gap: 24px;
+    }
+
+    .tools-grid.list-mode .tool-icon {
+      width: 64px;
+      height: 64px;
+      font-size: 32px;
+    }
+
+    .tools-grid.list-mode .tool-info h3 {
+      font-size: 20px;
+    }
+
+    .tools-grid.list-mode .tool-desc {
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+
     /* Grid */
     .tools-grid {
       display: grid;
@@ -700,14 +772,33 @@
           <span class="search-shortcut">Ctrl+K</span>
         </div>
         <div class="filters">
-          <button class="filter-btn active" data-filter="all" data-zh="全部" data-en="All">全部</button>
-          <button class="filter-btn" data-filter="ai" data-zh="AI 工具" data-en="AI Tools">AI 工具</button>
-          <button class="filter-btn" data-filter="dev" data-zh="开发工具" data-en="Dev Tools">开发工具</button>
-          <button class="filter-btn" data-filter="productivity" data-zh="效率工具" data-en="Productivity">效率工具</button>
-          <button class="filter-btn" data-filter="learning" data-zh="学习资源" data-en="Learning">学习资源</button>
-          <button class="filter-btn" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
-          <button class="filter-btn" data-filter="project" data-zh="API中转" data-en="API Proxy">API中转</button>
-          <button class="filter-btn" data-filter="article" data-zh="📝 文章" data-en="📝 Articles">📝 文章</button>
+        <!-- 主分类 -->
+        <button class="filter-btn active" data-filter="my-projects" data-zh="⭐ 我的项目" data-en="⭐ My Projects">⭐ 我的项目</button>
+        <button class="filter-btn" data-filter="tools" data-zh="📦 工具资源" data-en="📦 Tools">📦 工具资源</button>
+      </div>
+      
+      <!-- 子分类（我的项目） -->
+      <div class="sub-filters" id="myProjectsFilters">
+        <button class="filter-btn sub active" data-filter="vibe" data-zh="Vibe项目" data-en="Vibe Projects">Vibe项目</button>
+        <button class="filter-btn sub" data-filter="project" data-zh="API中转" data-en="API Proxy">API中转</button>
+        <button class="filter-btn sub" data-filter="article" data-zh="文章" data-en="Articles">文章</button>
+      </div>
+      
+      <!-- 子分类（工具资源） -->
+      <div class="sub-filters" id="toolsFilters" style="display: none;">
+        <button class="filter-btn sub active" data-filter="all-tools" data-zh="全部" data-en="All">全部</button>
+        <button class="filter-btn sub" data-filter="ai" data-zh="AI 工具" data-en="AI Tools">AI 工具</button>
+        <button class="filter-btn sub" data-filter="dev" data-zh="开发工具" data-en="Dev Tools">开发工具</button>
+        <button class="filter-btn sub" data-filter="productivity" data-zh="效率工具" data-en="Productivity">效率工具</button>
+        <button class="filter-btn sub" data-filter="learning" data-zh="学习资源" data-en="Learning">学习资源</button>
+        <button class="filter-btn sub" data-filter="free" data-zh="免费资源" data-en="Free Resources">免费资源</button>
+      </div>
+      
+      <!-- 布局切换 -->
+      <div class="layout-toggle" id="layoutToggle">
+        <button class="layout-btn active" data-layout="grid" title="瀑布流">⊞</button>
+        <button class="layout-btn" data-layout="list" title="列表">☰</button>
+      </div>
         </div>
         <div class="stats">
           <div class="stat">
@@ -945,9 +1036,9 @@
         nameZh: "ZenMux",
         icon: "🔀",
         iconBg: "#8b5cf6",
-        category: "project",
-        categoryZh: "AI 中转",
-        categoryEn: "AI Proxy",
+        category: "my-projects",
+        categoryZh: "我的项目",
+        categoryEn: "My Projects",
         desc: "原生直连，稳定可靠的 AI API 中转服务",
         descZh: "原生直连，稳定可靠的 AI API 中转服务",
         descEn: "Native direct connection, stable and reliable AI API proxy service",
@@ -963,9 +1054,9 @@
         nameZh: "MCXHM API",
         icon: "📡",
         iconBg: "#10b981",
-        category: "project",
-        categoryZh: "AI 中转",
-        categoryEn: "AI Proxy",
+        category: "my-projects",
+        categoryZh: "我的项目",
+        categoryEn: "My Projects",
         desc: "稳定少掉线，线路多，站主维护勤快，包回复",
         descZh: "稳定少掉线，线路多，站主维护勤快，包回复",
         descEn: "Stable with minimal drops, many routes, actively maintained",
@@ -981,9 +1072,9 @@
         nameZh: "iFlow API",
         icon: "🎁",
         iconBg: "#06b6d4",
-        category: "project",
-        categoryZh: "AI 中转",
-        categoryEn: "AI Proxy",
+        category: "my-projects",
+        categoryZh: "我的项目",
+        categoryEn: "My Projects",
         desc: "免费！但 API Key 需每 7 天手动续期",
         descZh: "免费！但 API Key 需每 7 天手动续期",
         descEn: "Free! But API key needs manual renewal every 7 days",
@@ -999,9 +1090,9 @@
         nameZh: "爱垂直",
         icon: "💰",
         iconBg: "#f59e0b",
-        category: "project",
-        categoryZh: "AI 中转",
-        categoryEn: "AI Proxy",
+        category: "my-projects",
+        categoryZh: "我的项目",
+        categoryEn: "My Projects",
         desc: "按次收费，量大管饱，性价比高，偶尔抽风",
         descZh: "按次收费，量大管饱，性价比高，偶尔抽风",
         descEn: "Pay per use, great volume, high value, occasional hiccups",
@@ -1310,9 +1401,9 @@
         nameZh: "《柳叶刀·公共卫生》把账算狠了：40岁后，你的下半生取决于这3件事",
         icon: "📝",
         iconBg: "#8b5cf6",
-        category: "article",
-        categoryZh: "文章",
-        categoryEn: "Articles",
+        category: "my-projects",
+        categoryZh: "我的项目",
+        categoryEn: "My Projects",
         desc: "基于《柳叶刀·公共卫生》研究，40岁后最关键的3件事：睡稳、练肌肉、管住嘴。少犯错 + 稳复利，守住三条底线。",
         descZh: "基于《柳叶刀·公共卫生》研究，40岁后最关键的3件事：睡稳、练肌肉、管住嘴。少犯错 + 稳复利，守住三条底线。",
         descEn: "Based on Lancet Public Health research, the 3 most critical things after 40: sleep well, build muscle, eat right. Make fewer mistakes + steady compound interest.",
@@ -1322,6 +1413,25 @@
         link: "article-101.html",
         author: "@430Yang",
         date: "2026-02-21",
+        featured: true
+      },
+      // ========== Vibe项目 ==========
+      {
+        id: 102,
+        name: "AI人脸相似匹配",
+        nameZh: "AI人脸相似匹配",
+        icon: "🔍",
+        iconBg: "#ec4899",
+        category: "my-projects",
+        categoryZh: "我的项目",
+        categoryEn: "My Projects",
+        desc: "上传照片，AI帮你找到长相相似的明星。纯前端实现，无需后端，使用face-api.js人脸识别技术。",
+        descZh: "上传照片，AI帮你找到长相相似的明星。纯前端实现，无需后端，使用face-api.js人脸识别技术。",
+        descEn: "Upload a photo, AI finds celebrities who look similar to you. Pure frontend, no backend needed, powered by face-api.js.",
+        price: "free",
+        priceZh: "免费",
+        priceEn: "Free",
+        link: "face-match.html",
         featured: true
       }
     ];
@@ -1335,7 +1445,23 @@
       let filtered = tools;
 
       // Filter by category
-      if (currentFilter !== 'all') {
+      if (currentFilter === 'my-projects') {
+        // 我的项目 - 全部
+        filtered = filtered.filter(t => t.category === 'my-projects');
+      } else if (currentFilter === 'vibe') {
+        // Vibe项目
+        filtered = filtered.filter(t => t.name && (t.name.includes('AI人脸') || t.name.includes('Vibe')));
+      } else if (currentFilter === 'project') {
+        // API中转
+        filtered = filtered.filter(t => t.category === 'my-projects' && t.name && !t.name.includes('AI人脸') && !t.name.includes('柳叶刀'));
+      } else if (currentFilter === 'article') {
+        // 文章
+        filtered = filtered.filter(t => t.name && t.name.includes('柳叶刀'));
+      } else if (currentFilter === 'all-tools') {
+        // 所有工具：显示除了 my-projects 之外的所有工具
+        filtered = filtered.filter(t => t.category !== 'my-projects');
+      } else if (currentFilter !== 'all') {
+        // 特定分类
         filtered = filtered.filter(t => t.category === currentFilter);
       }
 
@@ -1348,9 +1474,16 @@
         });
       }
 
-      // Update counts
-      document.getElementById('totalCount').textContent = tools.length;
-      document.getElementById('freeCount').textContent = tools.filter(t => t.price === 'free').length;
+      // Update counts (根据当前分类更新)
+      let displayTools = tools;
+      if (currentFilter === 'my-projects') {
+        displayTools = tools.filter(t => t.category === 'my-projects');
+      } else if (currentFilter === 'all-tools' || currentFilter.startsWith('ai') || currentFilter.startsWith('dev') || currentFilter.startsWith('pro') || currentFilter.startsWith('lea') || currentFilter.startsWith('fre')) {
+        displayTools = tools.filter(t => t.category !== 'my-projects');
+      }
+      
+      document.getElementById('totalCount').textContent = displayTools.length;
+      document.getElementById('freeCount').textContent = displayTools.filter(t => t.price === 'free').length;
 
       // Show/hide no results
       const noResults = document.getElementById('noResults');
@@ -1438,13 +1571,76 @@
       renderTools();
     }
 
-    // Filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    // Filter buttons (主分类)
+    const myProjectsFilters = document.getElementById('myProjectsFilters');
+    const toolsFilters = document.getElementById('toolsFilters');
+    const layoutToggle = document.getElementById('layoutToggle');
+    
+    document.querySelectorAll('.filters > .filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        // 更新主分类按钮状态
+        document.querySelectorAll('.filters > .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const filter = btn.dataset.filter;
+        
+        // 显示/隐藏子分类和布局切换
+        if (filter === 'my-projects') {
+          myProjectsFilters.style.display = 'block';
+          toolsFilters.style.display = 'none';
+          layoutToggle.style.display = 'flex';
+          currentFilter = 'vibe'; // 默认显示Vibe项目
+          // 激活第一个子分类按钮（Vibe项目）
+          myProjectsFilters.querySelector('.filter-btn').classList.add('active');
+        } else if (filter === 'tools') {
+          myProjectsFilters.style.display = 'none';
+          toolsFilters.style.display = 'block';
+          layoutToggle.style.display = 'flex';
+          currentFilter = 'all-tools'; // 默认显示所有工具
+          // 激活第一个子分类按钮
+          toolsFilters.querySelector('.filter-btn').classList.add('active');
+        }
+        
+        renderTools();
+      });
+    });
+    
+    // Sub-filter buttons (我的项目子分类)
+    document.querySelectorAll('#myProjectsFilters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#myProjectsFilters .filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFilter = btn.dataset.filter;
         renderTools();
+      });
+    });
+    
+    // Sub-filter buttons (工具资源子分类)
+    document.querySelectorAll('#toolsFilters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#toolsFilters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderTools();
+      });
+    });
+    
+    // Layout toggle (布局切换)
+    let currentLayout = 'grid';
+    const toolsGrid = document.getElementById('toolsGrid');
+    
+    document.querySelectorAll('.layout-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        currentLayout = btn.dataset.layout;
+        
+        if (currentLayout === 'list') {
+          toolsGrid.classList.add('list-mode');
+        } else {
+          toolsGrid.classList.remove('list-mode');
+        }
       });
     });
 
@@ -1629,28 +1825,28 @@
       // 头层：3D旋转 + 轻微位移
       const headMoveX = rotateY * 1;
       const headMoveY = -rotateX * 0.6;
-      layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      layerHeadFace.style.transform = `translate(-50%, -50%) translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
       // 眼白层：跟头一起动
-      layerEyewhite.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      layerEyewhite.style.transform = `translate(-50%, -50%) translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
       // 手层：中等位移
       const handMoveX = rotateY * 1.8;
       const handMoveY = -rotateX * 1.2;
-      layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
+      layerHand.style.transform = `translate(-50%, -50%) translate(${handMoveX}px, ${handMoveY}px)`;
       
       // 眼珠层：小幅度位移，限制在眼眶内
       const eyeMoveX = rotateY * 1.2;
       const eyeMoveY = -rotateX * 0.8;
-      layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
+      layerEyes.style.transform = `translate(-50%, -50%) translate(${eyeMoveX}px, ${eyeMoveY}px)`;
     });
 
     // 鼠标离开时重置
     document.addEventListener('mouseleave', () => {
-      layerHeadFace.style.transform = '';
-      layerEyewhite.style.transform = '';
-      layerHand.style.transform = '';
-      layerEyes.style.transform = '';
+      layerHeadFace.style.transform = 'translate(-50%, -50%)';
+      layerEyewhite.style.transform = 'translate(-50%, -50%)';
+      layerHand.style.transform = 'translate(-50%, -50%)';
+      layerEyes.style.transform = 'translate(-50%, -50%)';
     });
 
     // ============ 📱 手机陀螺仪效果（方向反转）============
@@ -1668,18 +1864,18 @@
       // 头层 + 眼白层
       const headMoveX = rotateY * 1;
       const headMoveY = -rotateX * 0.6;
-      layerHeadFace.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      layerEyewhite.style.transform = `translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      layerHeadFace.style.transform = `translate(-50%, -50%) translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      layerEyewhite.style.transform = `translate(-50%, -50%) translate(${headMoveX}px, ${headMoveY}px) perspective(300px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       
       // 手层
       const handMoveX = rotateY * 1.8;
       const handMoveY = -rotateX * 1.2;
-      layerHand.style.transform = `translate(${handMoveX}px, ${handMoveY}px)`;
+      layerHand.style.transform = `translate(-50%, -50%) translate(${handMoveX}px, ${handMoveY}px)`;
       
       // 眼珠层
       const eyeMoveX = rotateY * 1.2;
       const eyeMoveY = -rotateX * 0.8;
-      layerEyes.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
+      layerEyes.style.transform = `translate(-50%, -50%) translate(${eyeMoveX}px, ${eyeMoveY}px)`;
     }
 
     // 检测是否支持陀螺仪
