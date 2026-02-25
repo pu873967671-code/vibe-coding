@@ -300,14 +300,24 @@
   <script>
     // 模拟的明星/博主数据库（MVP版）
     const celebrityDatabase = [
-      { id: 1, name: '杨幂', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/6366f1/fff?text=YM' },
-      { id: 2, name: '迪丽热巴', desc: '演员', photo: 'https://via.placeholder.com/80x80/8b5cf6/fff?text=DL' },
-      { id: 3, name: '肖战', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/ec4899/fff?text=XZ' },
-      { id: 4, name: '王一博', desc: '演员、舞者', photo: 'https://via.placeholder.com/80x80/22c55e/fff?text=WY' },
-      { id: 5, name: '赵丽颖', desc: '演员', photo: 'https://via.placeholder.com/80x80/f59e0b/fff?text=ZL' },
-      { id: 6, name: '李现', desc: '演员', photo: 'https://via.placeholder.com/80x80/ef4444/fff?text=LX' },
-      { id: 7, name: '杨紫', desc: '演员', photo: 'https://via.placeholder.com/80x80/06b6d4/fff?text=YZ' },
-      { id: 8, name: '成毅', desc: '演员', photo: 'https://via.placeholder.com/80x80/84cc16/fff?text=CY' },
+      // 中国男明星
+      { id: 1, name: '刘德华', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/6366f1/fff?text=LDH', vector: [0.12, 0.85, 0.43, 0.67, 0.91] },
+      { id: 2, name: '周杰伦', desc: '歌手、演员', photo: 'https://via.placeholder.com/80x80/8b5cf6/fff?text=ZJL', vector: [0.23, 0.76, 0.54, 0.45, 0.82] },
+      { id: 3, name: '古天乐', desc: '演员', photo: 'https://via.placeholder.com/80x80/ec4899/fff?text=GTL', vector: [0.34, 0.67, 0.65, 0.78, 0.73] },
+      { id: 4, name: '成龙', desc: '演员、导演', photo: 'https://via.placeholder.com/80x80/22c55e/fff?text=CL', vector: [0.45, 0.58, 0.76, 0.89, 0.64] },
+      { id: 5, name: '肖战', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/f59e0b/fff?text=XZ', vector: [0.56, 0.49, 0.87, 0.32, 0.55] },
+      { id: 6, name: '王一博', desc: '演员、舞者', photo: 'https://via.placeholder.com/80x80/ef4444/fff?text=WYB', vector: [0.67, 0.38, 0.98, 0.21, 0.46] },
+      { id: 7, name: '易烊千玺', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/06b6d4/fff?text=YYQX', vector: [0.78, 0.27, 0.09, 0.54, 0.37] },
+      { id: 8, name: '李现', desc: '演员', photo: 'https://via.placeholder.com/80x80/84cc16/fff?text=LX', vector: [0.89, 0.16, 0.21, 0.65, 0.28] },
+      // 中国女明星
+      { id: 9, name: '杨幂', desc: '演员、歌手', photo: 'https://via.placeholder.com/80x80/a855f7/fff?text=YM', vector: [0.15, 0.94, 0.52, 0.71, 0.93] },
+      { id: 10, name: '迪丽热巴', desc: '演员', photo: 'https://via.placeholder.com/80x80/f43f5e/fff?text=DLRB', vector: [0.26, 0.85, 0.63, 0.82, 0.84] },
+      { id: 11, name: '赵丽颖', desc: '演员', photo: 'https://via.placeholder.com/80x80/14b8a6/fff?text=ZLY', vector: [0.37, 0.76, 0.74, 0.63, 0.75] },
+      { id: 12, name: '杨紫', desc: '演员', photo: 'https://via.placeholder.com/80x80/fbbf24/fff?text=YZ', vector: [0.48, 0.67, 0.85, 0.44, 0.66] },
+      // 网红
+      { id: 13, name: '李佳琦', desc: '美妆博主', photo: 'https://via.placeholder.com/80x80/f97316/fff?text=LJQ', vector: [0.59, 0.58, 0.96, 0.35, 0.57] },
+      { id: 14, name: '薇娅', desc: '电商主播', photo: 'https://via.placeholder.com/80x80/8b5cf6/fff?text=WY', vector: [0.61, 0.49, 0.18, 0.26, 0.48] },
+      { id: 15, name: '罗永浩', desc: '科技博主', photo: 'https://via.placeholder.com/80x80/3b82f6/fff?text=LYH', vector: [0.72, 0.31, 0.29, 0.17, 0.39] }
     ];
 
     const uploadZone = document.getElementById('uploadZone');
@@ -367,6 +377,24 @@
       reader.readAsDataURL(file);
     }
 
+    // 计算余弦相似度
+    function cosineSimilarity(vec1, vec2) {
+      let dotProduct = 0;
+      let norm1 = 0;
+      let norm2 = 0;
+      for (let i = 0; i < vec1.length; i++) {
+        dotProduct += vec1[i] * vec2[i];
+        norm1 += vec1[i] * vec1[i];
+        norm2 += vec2[i] * vec2[i];
+      }
+      return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+    }
+
+    // 生成随机人脸特征向量（模拟用户上传的照片）
+    function generateRandomVector() {
+      return Array.from({ length: 5 }, () => Math.random());
+    }
+
     // 分析按钮
     analyzeBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
@@ -379,11 +407,14 @@
         // 模拟分析过程（真实版本会调用 face-api.js）
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // 生成随机相似度结果（MVP演示用）
+        // 生成用户人脸特征向量
+        const userVector = generateRandomVector();
+        
+        // 计算与每个明星的相似度
         const results = celebrityDatabase
           .map(celeb => ({
             ...celeb,
-            similarity: Math.floor(Math.random() * 30) + 60 // 60-90%
+            similarity: Math.round(cosineSimilarity(userVector, celeb.vector) * 100)
           }))
           .sort((a, b) => b.similarity - a.similarity)
           .slice(0, 5);
