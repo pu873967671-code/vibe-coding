@@ -303,9 +303,16 @@
     // 从JSON加载亚洲明星数据
     async function loadCelebrities() {
       try {
-        const response = await fetch('asian_celebrities.json');
+        const response = await fetch('data/asian_celebrities.json');
         const data = await response.json();
-        celebrityDatabase = data.creators;
+        // 转换数据格式以匹配代码需求
+        celebrityDatabase = data.map(celeb => ({
+          id: celeb.name,
+          name: celeb.name,
+          desc: `${celeb.country} · ${celeb.profession}`,
+          photo: celeb.photo,
+          vector: celeb.features.slice(0, 5) // 使用前5个特征
+        }));
         console.log(`Loaded ${celebrityDatabase.length} Asian celebrities`);
       } catch (error) {
         console.error('Failed to load celebrities:', error);
