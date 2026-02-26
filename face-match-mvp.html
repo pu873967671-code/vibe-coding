@@ -435,9 +435,20 @@
     });
 
     function displayResults(results) {
+      const userPhoto = previewImage.src;
       resultsList.innerHTML = results.map((result, index) => `
         <div class="result-card" style="animation-delay: ${index * 0.1}s">
-          <img src="${result.photo}" alt="${result.name}" class="result-photo">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">你的照片</div>
+              <img src="${userPhoto}" alt="你的照片" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="font-size: 24px; color: var(--text-secondary);">↔</div>
+            <div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">${result.name}</div>
+              <img src="${result.photo}" alt="${result.name}" class="result-photo" style="width: 100px; height: 100px;">
+            </div>
+          </div>
           <div class="result-info">
             <div class="result-name">${result.name}</div>
             <div class="result-desc">${result.desc}</div>
