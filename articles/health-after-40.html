@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《柳叶刀》把账算明白了：40岁后，你的下半生取决于这3件事 | GP's Vibe Coding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --border: #2a2a3a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.8;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 10, 15, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--accent-hover);
+    }
+
+    article {
+      padding: 60px 0 100px;
+    }
+
+    .article-header {
+      margin-bottom: 40px;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .article-tag {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #f0f0f5, #a5a5c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .article-cover {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 32px;
+    }
+
+    .article-content {
+      font-size: 17px;
+      color: var(--text-primary);
+    }
+
+    .article-content p {
+      margin-bottom: 24px;
+    }
+
+    .article-content h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 48px 0 20px;
+      color: var(--text-primary);
+    }
+
+    .article-content h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 36px 0 16px;
+      color: var(--text-primary);
+    }
+
+    .article-content ul, .article-content ol {
+      margin: 20px 0;
+      padding-left: 24px;
+    }
+
+    .article-content li {
+      margin-bottom: 12px;
+    }
+
+    .article-content strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .article-content blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 20px;
+      margin: 24px 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 40px;
+      transition: all 0.3s;
+    }
+
+    .source-link:hover {
+      border-color: var(--accent);
+      background: var(--bg-secondary);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 40px 0;
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-top: 40px;
+    }
+
+    .author-info span {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../index.html" class="back-link">← 返回首页</a>
+    </div>
+  </header>
+
+  <main>
+    <article class="container">
+      <div class="article-header">
+        <div class="article-meta">
+          <span class="article-tag">健康</span>
+          <span>2026-02-21</span>
+          <span>10 分钟阅读</span>
+        </div>
+        <h1>《柳叶刀》把账算明白了：40岁后，你的下半生取决于这3件事</h1>
+      </div>
+
+      <img class="article-cover" src="https://pbs.twimg.com/media/HBtvGrWbQAAUrom.jpg" alt="文章封面">
+
+      <div class="article-content">
+        <p>40岁以后，很多人开始出现一种错觉：</p>
+        
+        <p>身体不如以前了，是"年龄到了"。</p>
+        
+        <p>但更冷的真相是——多数人的下半生差距，不是被年龄拉开的，而是被习惯复利拉开的。</p>
+        
+        <p>你以为差距在"努力"、在"机会"、在"人脉"。</p>
+        
+        <p>其实差距往往在更底层：你还能不能恢复得回来。</p>
+        
+        <p>咱们先把证据摆在桌面上。</p>
+
+        <h2>《柳叶刀·公共卫生》的研究</h2>
+        
+        <p>《柳叶刀·公共卫生》（The Lancet Public Health）在2022年发表过一项中国超大规模研究：基于 China Kadoorie Biobank（CKB），用接近50万人的长期随访，定义了5个低风险生活方式（不吸烟、不过量饮酒、更健康饮食、更健康体型、更活跃）。</p>
+        
+        <p>结果非常直观：从30岁起算，长期保持更多低风险习惯的人，预期寿命能比高风险人群多8年以上；研究的讨论与估算也提示：把起点放到更靠后的年龄段，差距仍然显著。</p>
+        
+        <p>这不是鸡汤，这是算账。</p>
+
+        <h2>40岁后最要命的不是"补"，而是：少犯错 + 稳复利</h2>
+        
+        <p>下面我们把"论文里的5件事"，压缩成更适合中年人执行的3件事——你只要守住它们，很多"中年危机"会被你提前拦下。</p>
+
+        <h3>1、先把睡眠稳住</h3>
+        
+        <p>很多人不是从生病开始垮的，是从睡不好开始垮的。</p>
+        
+        <p>睡不好 → 情绪变差 → 决策变烂 → 关系变紧 → 身体指标跟着滑坡。</p>
+        
+        <p>你以为自己在拼事业，身体理解的是：你在长期掠夺修复窗口。</p>
+        
+        <p>这里有个问题，请你诚实回答：</p>
+        
+        <blockquote>你上一次"自然睡到醒、醒来脑子清爽"，是什么时候？</blockquote>
+        
+        <p>40岁后，恢复能力本来就在往下走；你再把睡眠弄碎，等于在下坡路上踩油门。</p>
+        
+        <p>这时候最有效的动作并不复杂——不是买补品，不是上强度，而是把"睡眠"重新变成每天的硬任务：</p>
+        
+        <ul>
+          <li><strong>固定上床时间：</strong>先让节律站住，睡没睡着是第二步</li>
+          <li><strong>固定起床锚点：</strong>生物钟只认锚点，晚睡能补，晚起补不了</li>
+          <li><strong>睡前一小时降噪：</strong>把情绪和信息降下来，身体才会进入修复模式</li>
+        </ul>
+        
+        <p>中年最稀缺的资源不是时间，是可恢复的体力。</p>
+        
+        <p>我现在能睡得更稳，是因为我把"上床时间"当成硬纪律——不是自律，是保命。</p>
+
+        <h3>2、肌肉别再掉</h3>
+        
+        <p>真正阴险的衰老，是肌肉流失。</p>
+        
+        <p>它不疼，但它会悄悄拿走你的代谢、稳定性、抗压能力——最后表现为：一动就累，然后你更不动。</p>
+        
+        <p>咱们再问自己一个扎心的问题：</p>
+        
+        <blockquote>你现在爬三楼层，是"热身"，还是"心跳乱、腿发软"？</blockquote>
+        
+        <p>40岁后，最划算的投资不是"更努力"，而是把身体从"玻璃体质"变回"结构体质"。</p>
+        
+        <p>怎么做？别复杂，做到两条就够：</p>
+        
+        <ul>
+          <li><strong>每周2次力量：</strong>深蹲/硬拉/推/拉/核心，20—30分钟就行，长期在场最重要</li>
+          <li><strong>每周2—3次有氧：</strong>快走、慢跑、骑行任选，不卷速度，只求持续</li>
+        </ul>
+        
+        <p>一句话：中年练的不是身材，是活得稳。</p>
+        
+        <p>绝大多数人练的不够，极少数人练多了。</p>
+        
+        <p>40岁后，肌肉不是审美，是保险。你不练，它就掉；它一掉，代谢、体力、稳定性会一起掉。</p>
+        
+        <p>先做到每周两次，哪怕每次20分钟，长期复利就会出现。</p>
+
+        <h3>3、晚上管住嘴</h3>
+        
+        <p>论文里那5个低风险习惯，看起来都很"土"。</p>
+        
+        <p>但真正决定你10年后是"轻松走路的人"，还是"药不离身的人"，就是这些土办法。</p>
+        
+        <p>中年人最大的自欺是："我现在没事"。</p>
+        
+        <p>可身体的账，从来不是按感觉结算的，是按长期输入与恢复结算的。</p>
+        
+        <p>这里最关键的不是"吃得多少精致"，而是守住几条硬规则：</p>
+        
+        <ul>
+          <li><strong>烟：</strong>能戒就戒（别跟身体谈侥幸）</li>
+          <li><strong>酒：</strong>别把它当社交工具（很多人不是爱喝酒，是在慢性自虐）</li>
+          <li><strong>体型：</strong>别让腰围继续增（腰围往往比体重更早暴露风险）</li>
+          <li><strong>饮食：</strong>少加工、少甜饮、少夜宵（中年最怕"晚上一顿把白天抵消"）</li>
+        </ul>
+
+        <h2>三条底线</h2>
+        
+        <p>很多人不是不知道，而是做不到；不是做不到，而是做不久。</p>
+        
+        <p>原因只有一个：把健康当成了"项目"，而不是"系统"。</p>
+        
+        <p>更稳的做法是：给自己三条底线，先止损，再谈翻盘。</p>
+        
+        <ul>
+          <li><strong>底线一：</strong>睡眠先稳住（先把恢复拉回来）</li>
+          <li><strong>底线二：</strong>力量永不丢（每周两次，雷打不动）</li>
+          <li><strong>底线三：</strong>夜晚不放纵（晚餐与夜宵是中年分水岭）</li>
+        </ul>
+        
+        <p>你会发现，一旦这三条线站住了：</p>
+        <p>情绪会稳、心力会足、决策会清，很多"身体问题"会自己缓下来。</p>
+
+        <h2>下半生账单</h2>
+        
+        <p>40岁后，世界不会因为你忙就放过你。</p>
+        
+        <p>身体也不会因为你有理想就给你特权。</p>
+        
+        <p>你要的不是"更拼"，你要的是"更会恢复"。</p>
+        
+        <p>你要的不是"更多补"，你要的是"更少犯错"。</p>
+        
+        <p>你要的不是"短期爆发"，你要的是"长期复利"。</p>
+        
+        <p>最后送你一句可以直接引用的话：</p>
+        
+        <blockquote>40岁以后，真正拉开差距的，不是你有多拼，是你能不能把恢复、肌肉、输入这三件事守住。</blockquote>
+        
+        <p>40岁后最要命的不是忙，是恢复不上来。你现在最缺的是：睡、练、还是戒？</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="author-info">
+        <span>作者：@430Yang</span>
+        <span>·</span>
+        <span>浏览量 329万+</span>
+      </div>
+
+      <a href="https://x.com/430Yang/status/2025335291482128821" target="_blank" class="source-link">
+        🔗 查看原文 (X/Twitter)
+      </a>
+    </article>
+  </main>
+</body>
+</html>

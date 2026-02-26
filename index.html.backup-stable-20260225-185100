@@ -1431,7 +1431,7 @@
         price: "free",
         priceZh: "免费",
         priceEn: "Free",
-        link: "face-match-mvp.html",
+        link: "face-match.html",
         featured: true
       }
     ];
