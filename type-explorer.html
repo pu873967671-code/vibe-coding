@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>同志类型探索工具 - 发现你的归属</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --border: #2a2a3a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    /* Transparency Notice */
+    .transparency-box {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 40px;
+      text-align: left;
+    }
+
+    .transparency-box h3 {
+      color: #22c55e;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .transparency-box ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .transparency-box li {
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .transparency-box li::before {
+      content: "✓ ";
+      color: #22c55e;
+      margin-right: 5px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tab:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Type Cards */
+    .types-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .type-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .type-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .type-card.selected {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .type-emoji {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .type-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .type-name-en {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .type-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+    }
+
+    .type-traits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .trait-tag {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    /* Questionnaire */
+    .questionnaire {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .question {
+      margin-bottom: 30px;
+    }
+
+    .question h3 {
+      font-size: 16px;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 15px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .option:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .option.selected {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    /* Results */
+    .result-section {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .result-type {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 20px 0;
+    }
+
+    .result-confidence {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Resources */
+    .resources {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .resource-item {
+      padding: 15px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .resource-item h4 {
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .resource-item p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      padding: 30px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 30px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Privacy Notice */
+    .privacy-notice {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 30px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">🏳️‍🌈</div>
+      <h1 class="title">同志类型探索工具</h1>
+      <p class="subtitle">自我探索，而非被定义</p>
+    </div>
+
+    <!-- Transparency Notice -->
+    <div class="transparency-box">
+      <h3>🔒 隐私与透明声明</h3>
+      <ul>
+        <li>所有处理在您的浏览器本地完成，不上传任何数据</li>
+        <li>此工具仅供娱乐和自我探索，不是科学评估</li>
+        <li>我们不承诺"准确匹配"，你最了解自己</li>
+        <li>类型标签仅供文化参考，不应定义任何人</li>
+      </ul>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('learn')">📚 了解类型</div>
+      <div class="tab" onclick="switchTab('explore')">🔍 自我探索</div>
+      <div class="tab" onclick="switchTab('resources')">🤝 社区资源</div>
+    </div>
+
+    <!-- Tab Content: Learn -->
+    <div id="learn" class="tab-content active">
+      <h2 style="font-size: 24px; margin-bottom: 20px;">认识12种同志类型文化</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        这些类型来源于同志社区文化，是对不同气质和身体类型的友好称呼。
+        <strong>请记住：你不必被任何标签定义。</strong>
+      </p>
+
+      <div id="types-grid" class="types-grid">
+        <!-- Types will be loaded here -->
+      </div>
+    </div>
+
+    <!-- Tab Content: Explore -->
+    <div id="explore" class="tab-content">
+      <h2 style="font-size: 24px; margin-bottom: 20px;">探索你的类型</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 20px;">
+        回答几个简单问题，看看哪种类型更符合你的气质
+      </p>
+
+      <div id="questionnaire" class="questionnaire">
+        <!-- Questions will be loaded here -->
+      </div>
+
+      <div id="result" class="result-section" style="display: none;">
+        <!-- Results will be shown here -->
+      </div>
+
+      <div class="privacy-notice">
+        ⚠️ <strong>重要提示：</strong>
+        此问卷仅供自我探索娱乐，结果不应被视为对你身份的定义。
+        你有权利选择任何标签，或者不使用任何标签。
+      </div>
+    </div>
+
+    <!-- Tab Content: Resources -->
+    <div id="resources" class="tab-content">
+      <h2 style="font-size: 24px; margin-bottom: 20px;">社区资源</h2>
+
+      <div class="resources">
+        <div class="resource-item">
+          <h4>📞 支持热线</h4>
+          <p>如果你需要心理支持或有任何困惑，请联系专业的LGBTQ+友好机构</p>
+        </div>
+
+        <div class="resource-item">
+          <h4>📚 了解更多</h4>
+          <p>同志文化是多元的，这里展示的只是其中一部分。探索更多文化知识，找到属于你的社区</p>
+        </div>
+
+        <div class="resource-item">
+          <h4>🤝 寻找社区</h4>
+          <p>无论你是哪种类型，都可以在任何社区找到归属。不要让标签限制你的社交圈</p>
+        </div>
+
+        <div class="resource-item">
+          <h4>💬 自我认同</h4>
+          <p>记住：标签是工具，不是枷锁。你定义你自己，而不是相反</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        这是一个基于 <strong>透明度、隐私保护、自我探索</strong> 原则构建的工具
+      </p>
+      <p style="margin-top: 10px;">
+        灵感来自 <a href="https://www.anthropic.com" target="_blank">Anthropic</a> 的产品设计哲学
+      </p>
+      <p style="margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
+        © 2026 | 本地处理 | 零数据收集 | 开源项目
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Data
+    const types = [
+      {
+        id: 'bear',
+        name: '熊系',
+        nameEn: 'Bear',
+        emoji: '🐻',
+        desc: '壮硕阳刚，温暖可靠',
+        traits: ['肌肉', '体毛', '阳刚', '温暖', '成熟'],
+        keywords: ['强壮', '可靠', '保护']
+      },
+      {
+        id: 'otter',
+        name: '猴系',
+        nameEn: 'Otter',
+        emoji: '🐒',
+        desc: '精瘦灵活，年轻活力',
+        traits: ['精瘦', '灵活', '年轻', '活力', '调皮'],
+        keywords: ['活力', '机灵', '可爱']
+      },
+      {
+        id: 'wolf',
+        name: '狼系',
+        nameEn: 'Wolf',
+        emoji: '🐺',
+        desc: '成熟有型，野性魅力',
+        traits: ['健壮', '成熟', '野性', '魅力', '独立'],
+        keywords: ['成熟', '野性', '魅力']
+      },
+      {
+        id: 'deer',
+        name: '鹿系',
+        nameEn: 'Deer',
+        emoji: '🦌',
+        desc: '清秀纤细，文艺温柔',
+        traits: ['纤细', '清秀', '文艺', '温柔', '内向'],
+        keywords: ['文艺', '温柔', '气质']
+      },
+      {
+        id: 'rabbit',
+        name: '兔系',
+        nameEn: 'Rabbit',
+        emoji: '🐰',
+        desc: '可爱年轻，活泼萌系',
+        traits: ['可爱', '年轻', '活泼', '萌', '少年感'],
+        keywords: ['可爱', '活泼', '少年']
+      },
+      {
+        id: 'lion',
+        name: '狮子系',
+        nameEn: 'Lion',
+        emoji: '🦁',
+        desc: '领袖气质，自信支配',
+        traits: ['健壮', '成熟', '领袖', '自信', '支配'],
+        keywords: ['领袖', '自信', '魅力']
+      },
+      {
+        id: 'fox',
+        name: '狐系',
+        nameEn: 'Fox',
+        emoji: '🦊',
+        desc: '机智狡黠，神秘迷人',
+        traits: ['聪明', '狡黠', '神秘', '机智', '难以捉摸'],
+        keywords: ['机智', '神秘', '聪明']
+      },
+      {
+        id: 'dog',
+        name: '犬系',
+        nameEn: 'Dog',
+        emoji: '🐕',
+        desc: '忠诚阳光，友善可靠',
+        traits: ['忠诚', '阳光', '友善', '可靠', '真诚'],
+        keywords: ['忠诚', '友善', '可靠']
+      },
+      {
+        id: 'cat',
+        name: '猫系',
+        nameEn: 'Cat',
+        emoji: '🐱',
+        desc: '优雅独立，精致高冷',
+        traits: ['优雅', '独立', '精致', '高冷', '有主见'],
+        keywords: ['优雅', '独立', '精致']
+      },
+      {
+        id: 'tiger',
+        name: '虎系',
+        nameEn: 'Tiger',
+        emoji: '🐯',
+        desc: '强壮霸气，主导自信',
+        traits: ['强壮', '霸气', '主导', '自信', '力量'],
+        keywords: ['强壮', '霸气', '领袖']
+      },
+      {
+        id: 'leopard',
+        name: '豹系',
+        nameEn: 'Leopard',
+        emoji: '🐆',
+        desc: '优雅精致，时尚性感',
+        traits: ['精瘦', '敏捷', '时尚', '优雅', '精致'],
+        keywords: ['时尚', '精致', '优雅']
+      },
+      {
+        id: 'pig',
+        name: '猪系',
+        nameEn: 'Pig',
+        emoji: '🐷',
+        desc: '圆润可爱，随和亲切',
+        traits: ['圆润', '可爱', '随和', '亲切', '好相处'],
+        keywords: ['可爱', '随和', '亲切']
+      }
+    ];
+
+    // Questions
+    const questions = [
+      {
+        id: 'body',
+        question: '描述一下你的体型特征',
+        options: [
+          { text: '壮硕、肌肉发达', types: ['bear', 'tiger', 'lion'] },
+          { text: '精瘦、体脂低', types: ['otter', 'leopard', 'deer'] },
+          { text: '匀称、结实', types: ['wolf', 'dog'] },
+          { text: '纤细、修长', types: ['deer', 'cat', 'fox'] },
+          { text: '圆润、微胖', types: ['pig'] }
+        ]
+      },
+      {
+        id: 'personality',
+        question: '你的性格更偏向哪种？',
+        options: [
+          { text: '温暖可靠、保护欲强', types: ['bear', 'dog'] },
+          { text: '活泼机灵、有活力', types: ['otter', 'rabbit'] },
+          { text: '成熟自信、有魅力', types: ['wolf', 'lion', 'tiger'] },
+          { text: '温柔细腻、文艺气质', types: ['deer'] },
+          { text: '机智神秘、难以捉摸', types: ['fox', 'cat'] },
+          { text: '随和亲切、好相处', types: ['pig'] }
+        ]
+      },
+      {
+        id: 'style',
+        question: '你更喜欢哪种风格？',
+        options: [
+          { text: '阳刚、成熟', types: ['bear', 'wolf', 'lion'] },
+          { text: '年轻、活泼', types: ['otter', 'rabbit'] },
+          { text: '优雅、精致', types: ['leopard', 'cat'] },
+          { text: '可爱、萌', types: ['rabbit', 'pig'] },
+          { text: '神秘、独特', types: ['fox'] },
+          { text: '真诚、友善', types: ['dog'] }
+        ]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let answers = {};
+
+    // Initialize
+    function init() {
+      loadTypes();
+      loadQuestionnaire();
+    }
+
+    // Load Types
+    function loadTypes() {
+      const grid = document.getElementById('types-grid');
+      grid.innerHTML = types.map(type => `
+        <div class="type-card" onclick="toggleType('${type.id}')">
+          <div class="type-emoji">${type.emoji}</div>
+          <div class="type-name">${type.name}</div>
+          <div class="type-name-en">${type.nameEn}</div>
+          <div class="type-desc">${type.desc}</div>
+          <div class="type-traits">
+            ${type.traits.slice(0, 3).map(t => `<span class="trait-tag">${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Toggle Type Selection
+    function toggleType(id) {
+      const cards = document.querySelectorAll('.type-card');
+      cards.forEach(card => card.classList.remove('selected'));
+
+      const selectedCard = event.currentTarget;
+      selectedCard.classList.add('selected');
+    }
+
+    // Load Questionnaire
+    function loadQuestionnaire() {
+      const container = document.getElementById('questionnaire');
+      const resultDiv = document.getElementById('result');
+
+      if (currentQuestion < questions.length) {
+        const q = questions[currentQuestion];
+        container.innerHTML = `
+          <div class="question">
+            <h3>${q.question}</h3>
+            <div class="options">
+              ${q.options.map((opt, i) => `
+                <div class="option" onclick="selectOption('${q.id}', ${i}, ${JSON.stringify(opt.types).replace(/"/g, '&quot;')})">
+                  ${opt.text}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        resultDiv.style.display = 'none';
+      } else {
+        showResults();
+      }
+    }
+
+    // Select Option
+    function selectOption(questionId, optionIndex, types) {
+      answers[questionId] = types;
+
+      const options = event.currentTarget.parentElement.querySelectorAll('.option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      setTimeout(() => {
+        currentQuestion++;
+        loadQuestionnaire();
+      }, 300);
+    }
+
+    // Show Results
+    function showResults() {
+      const container = document.getElementById('questionnaire');
+      const resultDiv = document.getElementById('result');
+
+      // Calculate scores
+      const scores = {};
+      types.forEach(t => scores[t.id] = 0);
+
+      Object.values(answers).forEach(selectedTypes => {
+        selectedTypes.forEach(typeId => {
+          if (scores[typeId] !== undefined) {
+            scores[typeId]++;
+          }
+        });
+      });
+
+      // Find top match
+      const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      const topId = sorted[0][0];
+      const topScore = sorted[0][1];
+      const topType = types.find(t => t.id === topId);
+
+      const maxScore = questions.length;
+      const confidence = Math.round((topScore / maxScore) * 100);
+
+      container.style.display = 'none';
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <div style="font-size: 80px; margin-bottom: 20px;">${topType.emoji}</div>
+        <div class="result-type">${topType.name} ${topType.nameEn}</div>
+        <div style="font-size: 18px; color: var(--text-secondary); margin-bottom: 15px;">
+          ${topType.desc}
+        </div>
+        <div class="result-confidence">
+          基于你的选择，这种类型与你最契合 (${confidence}%)
+        </div>
+
+        <div style="text-align: left; margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+          <h4 style="margin-bottom: 15px;">💡 重要提醒</h4>
+          <ul style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">
+            <li>这只是基于简单问卷的建议，<strong>你不是被这个结果定义的</strong></li>
+            <li>你可以自由选择认同或不认同任何标签</li>
+            <li>类型是流动的，人可以同时具备多种类型的特征</li>
+            <li>最重要的是你自己觉得舒服和认同</li>
+          </ul>
+        </div>
+
+        <button class="btn" onclick="resetQuestionnaire()">重新探索</button>
+      `;
+    }
+
+    // Reset Questionnaire
+    function resetQuestionnaire() {
+      currentQuestion = 0;
+      answers = {};
+      document.getElementById('questionnaire').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+      loadQuestionnaire();
+    }
+
+    // Switch Tab
+    function switchTab(tabId) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>
