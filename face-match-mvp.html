@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI人脸匹配 - 亚洲明星版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+        }
+        
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f5f5ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.has-image {
+            border-style: solid;
+            border-color: #667eea;
+        }
+        
+        #upload-input {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        #preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .results-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        
+        .celebrity-card {
+            background: #f5f5f5;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .celebrity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .celebrity-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e0e0e0;
+        }
+        
+        .celebrity-info {
+            padding: 15px;
+        }
+        
+        .celebrity-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .celebrity-country {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .similarity-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .similarity-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .similarity-text {
+            font-size: 0.85em;
+            color: #667eea;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        .stats {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 AI人脸匹配</h1>
+        <p class="subtitle">上传照片，找出和你最像的亚洲明星</p>
+        
+        <div class="upload-section">
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📸</div>
+                <p>点击或拖拽照片到这里</p>
+                <p style="color: #999; margin-top: 10px; font-size: 0.9em;">支持 JPG, PNG 格式</p>
+                <img id="preview-image" alt="预览">
+            </div>
+            <input type="file" id="upload-input" accept="image/*">
+        </div>
+        
+        <div class="results-section">
+            <h2 class="results-title">🔍 匹配结果</h2>
+            <div id="results-container">
+                <div class="loading">👆 上传照片开始匹配</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <p>数据库：25位亚洲明星 | 最后更新：2025-02-26</p>
+        </div>
+    </div>
+
+    <script>
+        let celebrities = [];
+        
+        // 加载明星数据
+        async function loadCelebrities() {
+            try {
+                const response = await fetch('data/asian-celebrities.json');
+                celebrities = await response.json();
+                console.log(`✅ 已加载 ${celebrities.length} 位明星数据`);
+            } catch (error) {
+                console.error('❌ 加载数据失败:', error);
+                alert('加载数据库失败，请刷新页面重试');
+            }
+        }
+        
+        // 余弦相似度计算
+        function cosineSimilarity(a, b) {
+            let dotProduct = 0;
+            let normA = 0;
+            let normB = 0;
+            
+            for (let i = 0; i < a.length; i++) {
+                dotProduct += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+            
+            return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+        
+        // 模拟：从图片提取特征（实际上生成随机特征）
+        function extractFeatures(imageData) {
+            const features = [];
+            for (let i = 0; i < 128; i++) {
+                features.push(Math.random());
+            }
+            // 归一化
+            const norm = Math.sqrt(features.reduce((sum, f) => sum + f * f, 0));
+            return features.map(f => f / norm);
+        }
+        
+        // 查找最相似的明星
+        function findMatches(userFeatures, topN = 5) {
+            const similarities = celebrities.map(celeb => ({
+                ...celeb,
+                similarity: cosineSimilarity(userFeatures, celeb.features)
+            }));
+            
+            similarities.sort((a, b) => b.similarity - a.similarity);
+            return similarities.slice(0, topN);
+        }
+        
+        // 显示结果
+        function displayResults(matches) {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '<div class="results-grid">' +
+                matches.map(match => `
+                    <div class="celebrity-card">
+                        <img src="${match.photo}" alt="${match.name}" 
+                             onerror="this.src='https://via.placeholder.com/180x200?text=${encodeURIComponent(match.name)}'">
+                        <div class="celebrity-info">
+                            <div class="celebrity-name">${match.name}</div>
+                            <div class="celebrity-country">${match.country} · ${match.profession}</div>
+                            <div class="similarity-bar">
+                                <div class="similarity-fill" style="width: ${match.similarity * 100}%"></div>
+                            </div>
+                            <div class="similarity-text">相似度 ${(match.similarity * 100).toFixed(1)}%</div>
+                        </div>
+                    </div>
+                `).join('') +
+                '</div>';
+        }
+        
+        // 显示加载中
+        function showLoading() {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '<div class="loading">⏳ AI正在分析你的脸...</div>';
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('请上传图片文件');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // 显示预览
+                const preview = document.getElementById('preview-image');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                document.getElementById('upload-area').classList.add('has-image');
+                
+                // 模拟AI处理
+                showLoading();
+                
+                setTimeout(() => {
+                    const userFeatures = extractFeatures(e.target.result);
+                    const matches = findMatches(userFeatures);
+                    displayResults(matches);
+                }, 1500);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCelebrities();
+            
+            const uploadArea = document.getElementById('upload-area');
+            const uploadInput = document.getElementById('upload-input');
+            
+            uploadArea.addEventListener('click', () => uploadInput.click());
+            
+            uploadInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    handleImageUpload(e.target.files[0]);
+                }
+            });
+            
+            // 拖拽支持
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = '#f5f5ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.background = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = '';
+                if (e.dataTransfer.files[0]) {
+                    handleImageUpload(e.dataTransfer.files[0]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
