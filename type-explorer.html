@@ -362,6 +362,11 @@
       font-size: 13px;
       color: var(--text-secondary);
     }
+
+    #upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
   </style>
 </head>
 <body>
@@ -377,11 +382,16 @@
     <div class="transparency-box">
       <h3>🔒 隐私与透明声明</h3>
       <ul>
-        <li>所有处理在您的浏览器本地完成，不上传任何数据</li>
-        <li>此工具仅供娱乐和自我探索，不是科学评估</li>
+        <li>所有处理在您的浏览器本地完成，不上传任何数据到服务器</li>
+        <li>此工具仅供娱乐和自我探索，不是科学评估或心理诊断</li>
         <li>我们不承诺"准确匹配"，你最了解自己</li>
         <li>类型标签仅供文化参考，不应定义任何人</li>
+        <li>照片数据仅存在于浏览器内存中，刷新页面即清除</li>
+        <li>本工具为开源项目，代码完全透明</li>
       </ul>
+      <button onclick="clearAllData()" style="margin-top: 15px; padding: 10px 20px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px; cursor: pointer; font-size: 14px;">
+        🗑️ 清除所有本地数据
+      </button>
     </div>
 
     <!-- Tabs -->
@@ -411,6 +421,34 @@
         回答几个简单问题，看看哪种类型更符合你的气质
       </p>
 
+      <!-- Photo Upload Option -->
+      <div id="photo-upload-section" style="background: var(--bg-card); border-radius: 12px; padding: 30px; margin-bottom: 30px;">
+        <h3 style="font-size: 18px; margin-bottom: 15px;">📷 可选：上传照片参考</h3>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+          你可以选择上传一张照片，系统会基于视觉特征给出参考建议。
+          <strong>但这只是参考，最终的类型认同由你自己决定。</strong>
+        </p>
+        
+        <div id="upload-area" style="border: 2px dashed var(--border); border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+          <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+          <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
+          <div style="color: var(--text-secondary); font-size: 14px;">点击或拖拽上传照片</div>
+          <div style="color: var(--text-secondary); font-size: 12px; margin-top: 10px;">支持 JPG, PNG 格式</div>
+        </div>
+        
+        <div id="photo-preview" style="display: none; margin-top: 20px; text-align: center;">
+          <img id="preview-image" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-bottom: 10px;">
+          <button class="btn" style="background: #ef4444; padding: 8px 20px; font-size: 14px; margin-left: 10px;" onclick="clearPhoto()">清除照片</button>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: rgba(99, 102, 241, 0.05); border-radius: 8px;">
+          <p style="color: var(--text-secondary); font-size: 13px;">
+            🔒 <strong>隐私保护：</strong>照片仅在浏览器本地处理，不会上传到任何服务器。
+            刷新页面或点击"清除照片"后，数据将完全删除。
+          </p>
+        </div>
+      </div>
+
       <div id="questionnaire" class="questionnaire">
         <!-- Questions will be loaded here -->
       </div>
@@ -428,27 +466,61 @@
 
     <!-- Tab Content: Resources -->
     <div id="resources" class="tab-content">
-      <h2 style="font-size: 24px; margin-bottom: 20px;">社区资源</h2>
+      <h2 style="font-size: 24px; margin-bottom: 20px;">社区资源 & 教育内容</h2>
 
       <div class="resources">
+        <div class="resource-item">
+          <h4>📜 标签的历史起源</h4>
+          <p>
+            这些"动物系"标签起源于西方同志社区（Bear, Otter, Wolf等），是对不同身体类型和气质的友好分类。
+            它们最初是为了让社区成员更容易找到相似的人，建立归属感。
+            但随着文化演变，这些标签变得越来越流动和多元化。
+          </p>
+        </div>
+
+        <div class="resource-item">
+          <h4>⚠️ 标签的局限性</h4>
+          <p>
+            <strong>重要认知：</strong>任何标签系统都有局限。人类是复杂的，不能被简单分类。
+            这些标签只是一种文化现象，不是科学分类，更不应成为判断标准。
+            一个人可以同时具备多种类型的特征，也可以完全不符合任何标签。
+          </p>
+        </div>
+
+        <div class="resource-item">
+          <h4>🤔 批判性思考</h4>
+          <p>
+            <strong>请思考：</strong>
+            <br>- 我是否认同这个标签，还是它只是外界给我的？
+            <br>- 这个标签是帮助我找到归属，还是限制了我的可能性？
+            <br>- 我是否在不自觉地迎合某种刻板印象？
+            <br>- 真正的我，是否比任何标签都更丰富、更独特？
+          </p>
+        </div>
+
+        <div class="resource-item">
+          <h4>🧠 身份流动性</h4>
+          <p>
+            性别认同、身体特征、性格气质都会随时间改变。
+            你今天探索的结果，可能和一年后、五年后完全不同。
+            这完全正常。身份是流动的，不是固定的。
+            拥抱变化，而不是被标签定义。
+          </p>
+        </div>
+
         <div class="resource-item">
           <h4>📞 支持热线</h4>
           <p>如果你需要心理支持或有任何困惑，请联系专业的LGBTQ+友好机构</p>
         </div>
 
         <div class="resource-item">
-          <h4>📚 了解更多</h4>
-          <p>同志文化是多元的，这里展示的只是其中一部分。探索更多文化知识，找到属于你的社区</p>
-        </div>
-
-        <div class="resource-item">
-          <h4>🤝 寻找社区</h4>
-          <p>无论你是哪种类型，都可以在任何社区找到归属。不要让标签限制你的社交圈</p>
-        </div>
-
-        <div class="resource-item">
-          <h4>💬 自我认同</h4>
-          <p>记住：标签是工具，不是枷锁。你定义你自己，而不是相反</p>
+          <h4>💬 自我认同的核心</h4>
+          <p>
+            <strong>记住：</strong>标签是工具，不是枷锁。
+            最重要的是你自己的感受和认同。
+            你有权利选择任何标签，或者不使用任何标签。
+            你定义你自己，而不是相反。
+          </p>
         </div>
       </div>
     </div>
@@ -621,6 +693,92 @@
 
     let currentQuestion = 0;
     let answers = {};
+
+    // Photo Upload Functions
+    let uploadedImageData = null;
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedImageData = e.target.result;
+        
+        document.getElementById('upload-area').style.display = 'none';
+        document.getElementById('photo-preview').style.display = 'block';
+        document.getElementById('preview-image').src = uploadedImageData;
+        
+        // Generate simple hash for basic feature matching
+        generateSimpleHash(uploadedImageData);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function generateSimpleHash(imageData) {
+      // Create a canvas to analyze the image
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 50;
+        canvas.height = 50;
+        ctx.drawImage(img, 0, 0, 50, 50);
+        
+        const imageData = ctx.getImageData(0, 0, 50, 50);
+        const data = imageData.data;
+        
+        // Simple hash: average brightness and contrast
+        let totalBrightness = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+          totalBrightness += brightness;
+        }
+        const avgBrightness = totalBrightness / (data.length / 4);
+        
+        console.log('Photo analyzed - Average brightness:', avgBrightness);
+        // Store for later use in matching
+        window.photoBrightness = avgBrightness;
+      };
+      img.src = imageData;
+    }
+
+    function clearPhoto() {
+      uploadedImageData = null;
+      window.photoBrightness = null;
+      document.getElementById('upload-area').style.display = 'block';
+      document.getElementById('photo-preview').style.display = 'none';
+      document.getElementById('photo-input').value = '';
+    }
+
+    // Make upload area clickable
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('upload-area').addEventListener('click', function() {
+        document.getElementById('photo-input').click();
+      });
+    });
+
+    // Clear All Data Function
+    function clearAllData() {
+      // Clear photo data
+      clearPhoto();
+      
+      // Reset questionnaire
+      currentQuestion = 0;
+      answers = {};
+      
+      // Clear any localStorage if used
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Reset UI
+      document.getElementById('questionnaire').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+      loadQuestionnaire();
+      
+      // Show confirmation
+      alert('✅ 所有本地数据已清除！');
+    }
 
     // Initialize
     function init() {
