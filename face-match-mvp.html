@@ -317,6 +317,8 @@
           traits: type.traits,
           personality: type.personality,
           match: type.match,
+          photo: type.photo,
+          examples: type.examples,
           vector: type.features
         }));
         console.log(`✅ Loaded ${celebrityDatabase.length} gay types`);
@@ -430,14 +432,14 @@
         // 生成用户人脸特征向量
         const userVector = generateRandomVector();
         
-        // 计算与每个明星的相似度
+        // 计算与每个类型的相似度
         const results = celebrityDatabase
-          .map(celeb => ({
-            ...celeb,
-            similarity: Math.round(cosineSimilarity(userVector, celeb.vector) * 100)
+          .map(type => ({
+            ...type,
+            similarity: Math.round(cosineSimilarity(userVector, type.vector) * 100)
           }))
           .sort((a, b) => b.similarity - a.similarity)
-          .slice(0, 5);
+          .slice(0, 1); // 只取最匹配的1个
         
         displayResults(results);
         showStatus('分析完成！', 'success');
@@ -453,7 +455,7 @@
       const userPhoto = previewImage.src;
       resultsList.innerHTML = results.map((result, index) => `
         <div class="result-card" style="animation-delay: ${index * 0.1}s">
-          <div style="display: flex; gap: 20px; align-items: center;">
+          <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
             <div>
               <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">你的照片</div>
               <img src="${userPhoto}" alt="你的照片" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
@@ -465,20 +467,30 @@
             </div>
           </div>
           <div class="result-info">
-            <div class="result-name">${result.emoji} ${result.name} ${result.nameEn}</div>
-            <div class="result-desc" style="margin-bottom: 8px;">${result.desc}</div>
-            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.6;">
-              <div><strong>体型：</strong>${result.bodyType}</div>
-              <div><strong>特征：</strong>${result.traits}</div>
-              <div><strong>性格：</strong>${result.personality}</div>
+            <div class="result-name" style="font-size: 24px; margin-bottom: 10px;">${result.emoji} ${result.name} ${result.nameEn}</div>
+            <div class="result-desc" style="font-size: 16px; margin-bottom: 15px; color: var(--accent);">${result.desc}</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 15px; line-height: 1.8;">
+              <div><strong>💪 体型：</strong>${result.bodyType}</div>
+              <div><strong>✨ 特征：</strong>${result.traits}</div>
+              <div><strong>💫 性格：</strong>${result.personality}</div>
             </div>
             <div class="similarity-bar">
               <div class="similarity-fill" style="width: ${result.similarity}%"></div>
             </div>
-            <div class="similarity-text">匹配度 ${result.similarity}%</div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; font-size: 13px; line-height: 1.6;">
+            <div class="similarity-text" style="font-size: 18px; font-weight: bold;">匹配度 ${result.similarity}%</div>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; font-size: 14px; line-height: 1.8;">
               💡 ${result.match}
             </div>
+            ${result.examples ? `
+            <div style="margin-top: 25px;">
+              <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">📸 参考示例：</div>
+              <div style="display: flex; gap: 10px;">
+                ${result.examples.map(img => `
+                  <img src="${img}" alt="示例" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" onerror="this.style.display='none'">
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
           </div>
         </div>
       `).join('');

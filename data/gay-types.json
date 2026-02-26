@@ -9,6 +9,11 @@
     "traits": "体毛、胡须、阳刚",
     "personality": "温暖、稳重、保护欲强",
     "match": "适合喜欢阳刚气质、渴望安全感的人",
+    "photo": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=300&h=300&fit=crop"
+    ],
     "features": [0.8, 0.9, 0.7, 0.6, 0.85]
   },
   {
@@ -21,6 +26,11 @@
     "traits": "精瘦、灵活、年轻",
     "personality": "活泼、机灵、有活力",
     "match": "适合喜欢精瘦身材、追求活力的人",
+    "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop"
+    ],
     "features": [0.3, 0.4, 0.6, 0.8, 0.5]
   },
   {
@@ -33,6 +43,11 @@
     "traits": "成熟、有型、性感",
     "personality": "野性、自信、魅力四射",
     "match": "适合追求成熟魅力、喜欢征服感的人",
+    "photo": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=300&h=300&fit=crop"
+    ],
     "features": [0.7, 0.8, 0.85, 0.7, 0.75]
   },
   {
@@ -45,6 +60,11 @@
     "traits": "清秀、文艺、内向",
     "personality": "温柔、细腻、有艺术气质",
     "match": "适合喜欢文艺范、追求精神契合的人",
+    "photo": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop"
+    ],
     "features": [0.2, 0.3, 0.5, 0.9, 0.4]
   },
   {
@@ -57,6 +77,11 @@
     "traits": "强壮、霸气、支配",
     "personality": "自信、强势、有领导力",
     "match": "适合喜欢被主导、崇拜强者的人",
+    "photo": "https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1552058544-f2b08422138a?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1521575107034-e0fa0b594529?w=300&h=300&fit=crop"
+    ],
     "features": [0.9, 0.85, 0.8, 0.5, 0.9]
   },
   {
@@ -69,6 +94,11 @@
     "traits": "敏捷、时尚、精致",
     "personality": "优雅、有品味、追求完美",
     "match": "适合喜欢精致生活、追求时尚的人",
+    "photo": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop"
+    ],
     "features": [0.6, 0.7, 0.9, 0.8, 0.65]
   },
   {
@@ -81,6 +111,11 @@
     "traits": "可爱、年轻、清新",
     "personality": "活泼、萌、有少年感",
     "match": "适合喜欢可爱型、追求青春活力的人",
+    "photo": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=300&h=300&fit=crop"
+    ],
     "features": [0.1, 0.2, 0.4, 0.95, 0.3]
   },
   {
@@ -93,6 +128,11 @@
     "traits": "微胖、可爱、亲和",
     "personality": "随和、亲切、好相处",
     "match": "适合喜欢肉感、追求舒适关系的人",
+    "photo": "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=300&h=300&fit=crop"
+    ],
     "features": [0.5, 0.6, 0.4, 0.7, 0.55]
   },
   {
@@ -105,6 +145,11 @@
     "traits": "成熟、领袖气质、自信",
     "personality": "支配、自信、有魅力",
     "match": "适合喜欢被照顾、崇拜领袖气质的人",
+    "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop"
+    ],
     "features": [0.85, 0.9, 0.75, 0.6, 0.88]
   },
   {
@@ -117,6 +162,11 @@
     "traits": "聪明、狡黠、神秘",
     "personality": "机智、有魅力、难以捉摸",
     "match": "适合喜欢智力游戏、追求神秘感的人",
+    "photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop"
+    ],
     "features": [0.4, 0.5, 0.8, 0.75, 0.45]
   },
   {
@@ -129,6 +179,11 @@
     "traits": "忠诚、阳光、可靠",
     "personality": "友善、真诚、值得信赖",
     "match": "适合追求稳定关系、喜欢真诚的人",
+    "photo": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop"
+    ],
     "features": [0.6, 0.65, 0.6, 0.85, 0.7]
   },
   {
@@ -141,6 +196,11 @@
     "traits": "优雅、独立、精致",
     "personality": "高冷、有主见、不随波逐流",
     "match": "适合喜欢挑战、追求精致生活的人",
+    "photo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+    "examples": [
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop"
+    ],
     "features": [0.35, 0.45, 0.75, 0.8, 0.38]
   }
 ]
