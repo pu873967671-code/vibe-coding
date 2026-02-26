@@ -318,8 +318,7 @@
           personality: type.personality,
           match: type.match,
           photo: type.photo,
-          examples: type.examples,
-          vector: type.features
+          vector: type.features // 使用完整的20维特征向量
         }));
         console.log(`✅ Loaded ${celebrityDatabase.length} gay types`);
         console.log('Sample type:', celebrityDatabase[0]);
@@ -412,9 +411,23 @@
       return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
     }
 
-    // 生成随机人脸特征向量（模拟用户上传的照片）
-    function generateRandomVector() {
-      return Array.from({ length: 5 }, () => Math.random());
+    // 生成基于图片的特征向量
+    function generateImageBasedVector(imageData) {
+      // 使用图片base64的hash作为种子
+      const hash = imageData.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      
+      // 生成20维特征向量（增加维度提高区分度）
+      const vector = [];
+      let seed = Math.abs(hash);
+      for (let i = 0; i < 20; i++) {
+        seed = (seed * 9301 + 49297) % 233280;
+        vector.push(seed / 233280);
+      }
+      
+      return vector;
     }
 
     // 分析按钮
@@ -429,8 +442,8 @@
         // 模拟分析过程（真实版本会调用 face-api.js）
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // 生成用户人脸特征向量
-        const userVector = generateRandomVector();
+        // 生成用户人脸特征向量（基于上传的图片）
+        const userVector = generateImageBasedVector(previewImage.src);
         
         // 计算与每个类型的相似度
         const results = celebrityDatabase
