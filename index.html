@@ -1453,7 +1453,7 @@
         filtered = filtered.filter(t => t.name && (t.name.includes('AI人脸') || t.name.includes('Vibe') || t.name.includes('AI同志')));
       } else if (currentFilter === 'project') {
         // API中转
-        filtered = filtered.filter(t => t.category === 'my-projects' && t.name && !t.name.includes('AI人脸') && !t.name.includes('柳叶刀'));
+        filtered = filtered.filter(t => t.category === 'my-projects' && t.name && !t.name.includes('AI人脸') && !t.name.includes('柳叶刀') && !t.name.includes('AI同志'));
       } else if (currentFilter === 'article') {
         // 文章
         filtered = filtered.filter(t => t.name && t.name.includes('柳叶刀'));
