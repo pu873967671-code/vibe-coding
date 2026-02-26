@@ -1450,7 +1450,7 @@
         filtered = filtered.filter(t => t.category === 'my-projects');
       } else if (currentFilter === 'vibe') {
         // Vibe项目
-        filtered = filtered.filter(t => t.name && (t.name.includes('AI人脸') || t.name.includes('Vibe')));
+        filtered = filtered.filter(t => t.name && (t.name.includes('AI人脸') || t.name.includes('Vibe') || t.name.includes('AI同志')));
       } else if (currentFilter === 'project') {
         // API中转
         filtered = filtered.filter(t => t.category === 'my-projects' && t.name && !t.name.includes('AI人脸') && !t.name.includes('柳叶刀'));
