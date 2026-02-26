@@ -303,7 +303,8 @@
     // 从JSON加载亚洲明星数据
     async function loadCelebrities() {
       try {
-        const response = await fetch('data/asian_celebrities.json');
+        const response = await fetch('./data/asian_celebrities.json');
+        if (!response.ok) throw new Error('Failed to load data');
         const data = await response.json();
         // 转换数据格式以匹配代码需求
         celebrityDatabase = data.map(celeb => ({
@@ -313,11 +314,13 @@
           photo: celeb.photo,
           vector: celeb.features.slice(0, 5) // 使用前5个特征
         }));
-        console.log(`Loaded ${celebrityDatabase.length} Asian celebrities`);
+        console.log(`✅ Loaded ${celebrityDatabase.length} Asian celebrities`);
+        console.log('Sample celeb:', celebrityDatabase[0]);
       } catch (error) {
-        console.error('Failed to load celebrities:', error);
+        console.error('❌ Failed to load celebrities:', error);
         // 如果加载失败，使用备用数据
         celebrityDatabase = getFallbackData();
+        console.log('Using fallback data:', celebrityDatabase.length);
       }
     }
     
@@ -453,7 +456,7 @@
             <div style="font-size: 24px; color: var(--text-secondary);">↔</div>
             <div>
               <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">${result.name}</div>
-              <img src="${result.photo}" alt="${result.name}" class="result-photo" style="width: 100px; height: 100px;">
+              <img src="${result.photo}" alt="${result.name}" class="result-photo" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" onerror="this.src='https://via.placeholder.com/100x100/6366f1/fff?text=${encodeURIComponent(result.name)}'">
             </div>
           </div>
           <div class="result-info">
