@@ -1,0 +1,93 @@
+{
+  "title": "🌈 彩虹光谱 - 发现你在光谱上的位置",
+  "author": "弟弟 & 肥婆",
+  "slides": [
+    {
+      "index": 0,
+      "type": "cover",
+      "title": "你有没有想过，气质是什么？",
+      "content": "是你走路的方式？是你微笑的弧度？还是你眼里的光芒？\n\n气质不是一个标签，也不是一个类型。它是独特的、流动的、属于你的。",
+      "style": "minimalist"
+    },
+    {
+      "index": 1,
+      "type": "content",
+      "title": "1970年代，旧金山的一个夜晚",
+      "content": "在美国西海岸的卡斯特罗区（Castro），同志解放运动正如火如荼。但在主流的同志审美中，"完美身材"只有一个定义：瘦削、无体毛、年轻。\n\n一群体型壮硕、体毛较多的男性聚在一起。他们厌倦了被边缘化，厌倦了被告知"你们不够迷人"。",
+      "animation": "cinematic"
+    },
+    {
+      "index": 2,
+      "type": "quote",
+      "title": "",
+      "content": "\"我们就像熊一样，壮实、温暖、毛茸茸。\"\n\n这不是自我贬低，而是一种宣言：\n我们不需要符合主流审美。我们有自己的美。",
+      "style": "cinematic"
+    },
+    {
+      "index": 3,
+      "type": "content",
+      "title": "从熊到猴，从狼到鹿",
+      "content": "随后几十年，社区内部衍生出更多词汇，每一种都是对某种气质的描述：\n\n• Bear 熊系 - 壮硕、体毛较多、成熟稳重\n• Otter 猴系 - 精瘦、灵活、年轻活力\n• Wolf 狼系 - 成熟有型、野性魅力\n• Deer 鹿系 - 清秀纤细、文艺温柔\n\n还有更多：Lion、Fox、Dog、Cat、Rabbit...",
+      "layout": "bullet-list"
+    },
+    {
+      "index": 4,
+      "type": "content",
+      "title": "东方语境下的"动物系"",
+      "content": "当这些词汇进入中国互联网环境，它们被本土化为"熊系""猴系""狼系"等"动物系"称呼。\n\n在东方文化中，动物隐喻有特殊的含义。"熊"不仅是体型描述，还带有"温暖""可靠"的情感色彩。\n\n语言在旅行时会改变形状。但核心的渴望不变：找到相似的人，建立归属感。",
+      "animation": "slide"
+    },
+    {
+      "index": 5,
+      "type": "content",
+      "title": "这些分类科学吗？",
+      "content": "不科学。\n\n这些分类只是文化现象，是对不同身体类型和气质的友好称呼。\n\n它们不是基于：\n✗ 心理学研究\n✗ 生物学分析\n✗ 基因测序\n✗ 任何科学方法\n\n人类是复杂的，不能被简单分类。",
+      "style": "dramatic"
+    },
+    {
+      "index": 6,
+      "type": "content",
+      "title": "标签的局限性",
+      "content": "任何标签系统都有局限。当你用"熊系""猴系"这样的词汇时，你在简化一个复杂的人：\n\n• 过度简化 - 一个人可以同时具备多种类型的特征\n• 刻板印象 - 标签可能强化某种刻板印象\n• 排斥性 - 如果你不符合任何标签，你可能会感到被排斥\n• 流动性被忽视 - 身体会改变，气质会改变",
+      "layout": "timeline"
+    },
+    {
+      "index": 7,
+      "type": "content",
+      "title": "⚠️ 在使用任何标签前，请思考",
+      "content": "🤔 我是否认同这个标签，还是它只是外界给我的？\n\n🤔 这个标签是帮助我找到归属，还是限制了我的可能性？\n\n🤔 我是否在不自觉地迎合某种刻板印象？\n\n🤔 真正的我，是否比任何标签都更丰富、更独特？",
+      "style": "warning",
+      "animation": "fade"
+    },
+    {
+      "index": 8,
+      "type": "content",
+      "title": "流动的身份",
+      "content": "性别认同、身体特征、性格气质都会随时间改变。\n\n你今天的自我认知，可能和一年后、五年后完全不同。\n\n这完全正常。\n\n身份是流动的，不是固定的。拥抱变化，而不是被标签定义。\n\n你有权利选择认同任何标签，也可以不使用任何标签。",
+      "style": "cinematic",
+      "animation": "zoom"
+    },
+    {
+      "index": 9,
+      "type": "quote",
+      "title": "",
+      "content": "\"我曾经很困惑，不知道自己是什么'类型'。我觉得自己不属于任何地方。\"\n\n\"后来我意识到，我不需要找到一个'类型'。我就是我。标签是工具，不是牢笼。\"\n\n— 一位社区成员的分享",
+      "style": "minimalist"
+    },
+    {
+      "index": 10,
+      "type": "ending",
+      "title": "标签是工具，不是枷锁",
+      "content": "最重要的是你自己的感受和认同。\n\n你定义你自己，而不是相反。\n\n🌈 现在，开始自我探索",
+      "style": "gradient",
+      "animation": "cinematic"
+    }
+  ],
+  "designPreferences": {
+    "colorScheme": "purple-pink-gradient",
+    "fontStyle": "modern-sans-serif",
+    "transition": "cinematic",
+    "layout": "centered",
+    "mood": "thoughtful-inclusive"
+  }
+}

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌈 彩虹光谱 - 发现你在光谱上的位置</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ... [省略基础CSS，保持与原版一致] ... */
+    
+    /* ==================== */
+    /* 翻页引擎核心样式 */
+    /* ==================== */
+    
+    .slides-viewport {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-primary);
+    }
+    
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* 6种翻页动画 */
+    
+    /* 1. Fade */
+    .transition-fade .slide.leaving {
+      animation: fadeOut 0.6s ease forwards;
+    }
+    .transition-fade .slide.entering {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* 2. Slide */
+    .transition-slide .slide.leaving {
+      animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    .transition-slide .slide.entering {
+      animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    
+    @keyframes slideOutLeft {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-100%); opacity: 0; }
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* 3. Cinematic */
+    .transition-cinematic .slide.leaving {
+      animation: cinematicOut 0.8s ease forwards;
+    }
+    .transition-cinematic .slide.entering {
+      animation: cinematicIn 0.8s ease forwards;
+    }
+    
+    @keyframes cinematicOut {
+      0% { transform: scale(1); opacity: 1; filter: blur(0px); }
+      100% { transform: scale(1.15); opacity: 0; filter: blur(8px); }
+    }
+    @keyframes cinematicIn {
+      0% { transform: scale(0.8); opacity: 0; filter: blur(8px); }
+      100% { transform: scale(1); opacity: 1; filter: blur(0px); }
+    }
+    
+    /* 4. Cut */
+    .transition-cut .slide.leaving {
+      opacity: 0;
+      transition: none;
+    }
+    .transition-cut .slide.entering {
+      opacity: 1;
+      transition: none;
+    }
+    
+    /* 5. Flip */
+    .transition-flip .slides-viewport {
+      perspective: 1200px;
+    }
+    .transition-flip .slide.leaving {
+      animation: flipOut 0.6s ease-in forwards;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+    .transition-flip .slide.entering {
+      animation: flipIn 0.6s ease-out forwards;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+    
+    @keyframes flipOut {
+      0% { transform: rotateY(0deg); opacity: 1; }
+      100% { transform: rotateY(-90deg); opacity: 0; }
+    }
+    @keyframes flipIn {
+      0% { transform: rotateY(90deg); opacity: 0; }
+      100% { transform: rotateY(0deg); opacity: 1; }
+    }
+    
+    /* 6. Zoom */
+    .transition-zoom .slide.leaving {
+      animation: zoomOut 0.5s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+    .transition-zoom .slide.entering {
+      animation: zoomIn 0.5s cubic-bezier(0, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes zoomOut {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(0.3); opacity: 0; }
+    }
+    @keyframes zoomIn {
+      from { transform: scale(2); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    /* ==================== */
+    /* 控制面板 */
+    /* ==================== */
+    
+    .slide-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      background: rgba(26, 26, 36, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 25px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      z-index: 1000;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .control-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .control-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .page-indicator {
+      color: var(--text-secondary);
+      font-size: 14px;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    .transition-selector {
+      display: flex;
+      gap: 5px;
+      padding: 5px;
+      background: var(--bg-secondary);
+      border-radius: 20px;
+    }
+    
+    .transition-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 8px 15px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .transition-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .transition-btn:hover:not(.active) {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .slide-controls {
+        padding: 10px 15px;
+        gap: 10px;
+      }
+      
+      .control-btn {
+        padding: 8px 15px;
+        font-size: 13px;
+      }
+      
+      .transition-selector {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(10px); padding: 20px;">
+      <h1 class="title">🌈 彩虹光谱</h1>
+      <p class="subtitle">发现你在光谱上的位置</p>
+    </div>
+
+    <!-- Slides Viewport -->
+    <div class="slides-viewport transition-cinematic" id="slides-viewport">
+      <!-- Slides will be loaded here by JavaScript -->
+    </div>
+
+    <!-- Controls -->
+    <div class="slide-controls">
+      <button class="control-btn" id="prev-btn" onclick="prevSlide()">← 上一页</button>
+      
+      <div class="page-indicator">
+        <span id="current-page">1</span> / <span id="total-pages">10</span>
+      </div>
+      
+      <button class="control-btn" id="next-btn" onclick="nextSlide()">下一页 →</button>
+      
+      <div class="transition-selector">
+        <button class="transition-btn" data-transition="fade" onclick="setTransition('fade')">Fade</button>
+        <button class="transition-btn active" data-transition="cinematic" onclick="setTransition('cinematic')">Cinema</button>
+        <button class="transition-btn" data-transition="zoom" onclick="setTransition('zoom')">Zoom</button>
+        <button class="transition-btn" data-transition="slide" onclick="setTransition('slide')">Slide</button>
+        <button class="transition-btn" data-transition="flip" onclick="setTransition('flip')">Flip</button>
+        <button class="transition-btn" data-transition="cut" onclick="setTransition('cut')">Cut</button>
+      </div>
+      
+      <button class="control-btn" id="auto-btn" onclick="toggleAutoPlay()">▶ 自动播放</button>
+    </div>
+  </div>
+
+  <script>
+    // Slides Data
+    const slides = [
+      {
+        title: "你有没有想过，气质是什么？",
+        content: "是你走路的方式？是你微笑的弧度？还是你眼里的光芒？<br><br>气质不是一个标签，也不是一个类型。它是独特的、流动的、属于你的。<br><br>但在同志社区里，我们用一些词汇来描述相似的气质。这些词汇，有历史、有故事、也有局限。",
+        style: "centered"
+      },
+      {
+        title: "1970年代，旧金山的一个夜晚",
+        content: "在美国西海岸的卡斯特罗区（Castro），同志解放运动正如火如荼。但在主流的同志审美中，"完美身材"只有一个定义：瘦削、无体毛、年轻。<br><br>一群体型壮硕、体毛较多的男性聚在一起。他们厌倦了被边缘化，厌倦了被告知"你们不够迷人"。",
+        style: "narrative"
+      },
+      {
+        title: "",
+        content: "\"我们就像熊一样，壮实、温暖、毛茸茸。\"<br><br>这不是自我贬低，而是一种宣言：<br><strong>我们不需要符合主流审美。我们有自己的美。</strong>",
+        style: "quote"
+      },
+      // ... 更多slides
+    ];
+
+    // Slide Engine
+    let currentSlide = 0;
+    let currentTransition = 'cinematic';
+    let isAutoPlaying = false;
+    let autoPlayInterval = null;
+
+    function initSlides() {
+      const viewport = document.getElementById('slides-viewport');
+      
+      // Generate slides HTML
+      viewport.innerHTML = slides.map((slide, index) => `
+        <div class="slide ${index === 0 ? 'active' : ''}" data-index="${index}">
+          <div style="max-width: 800px; text-align: ${slide.style === 'quote' ? 'center' : 'left'};">
+            ${slide.title ? `<h2 style="font-size: ${slide.style === 'quote' ? '24px' : '48px'}; margin-bottom: 30px; font-weight: ${slide.style === 'quote' ? '400' : '600'}; line-height: 1.3;">${slide.title}</h2>` : ''}
+            <div style="font-size: 20px; line-height: 1.8; color: var(--text-secondary);">
+              ${slide.content}
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('total-pages').textContent = slides.length;
+      updateButtons();
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      
+      const viewport = document.getElementById('slides-viewport');
+      const allSlides = viewport.querySelectorAll('.slide');
+      const currentSlideEl = allSlides[currentSlide];
+      const nextSlideEl = allSlides[index];
+      
+      // Add transition classes
+      viewport.className = `slides-viewport transition-${currentTransition}`;
+      currentSlideEl.classList.add('leaving');
+      currentSlideEl.classList.remove('active');
+      nextSlideEl.classList.add('entering', 'active');
+      
+      // Clean up after animation
+      setTimeout(() => {
+        currentSlideEl.classList.remove('leaving');
+        nextSlideEl.classList.remove('entering');
+      }, 800);
+      
+      currentSlide = index;
+      document.getElementById('current-page').textContent = currentSlide + 1;
+      updateButtons();
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    function setTransition(type) {
+      currentTransition = type;
+      
+      // Update UI
+      document.querySelectorAll('.transition-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.transition === type) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    function toggleAutoPlay() {
+      isAutoPlaying = !isAutoPlaying;
+      const btn = document.getElementById('auto-btn');
+      
+      if (isAutoPlaying) {
+        btn.textContent = '⏸ 暂停';
+        autoPlayInterval = setInterval(() => {
+          if (currentSlide < slides.length - 1) {
+            nextSlide();
+          } else {
+            toggleAutoPlay(); // Stop at end
+          }
+        }, 5000);
+      } else {
+        btn.textContent = '▶ 自动播放';
+        clearInterval(autoPlayInterval);
+      }
+    }
+
+    function updateButtons() {
+      document.getElementById('prev-btn').disabled = currentSlide === 0;
+      document.getElementById('next-btn').disabled = currentSlide === slides.length - 1;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+
+    // Initialize
+    initSlides();
+  </script>
+</body>
+</html>
