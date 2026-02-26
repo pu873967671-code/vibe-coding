@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI人脸相似匹配 - MVP版</title>
+  <title>AI同志类型匹配 - 你是哪一种？</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
@@ -269,8 +269,8 @@
   <div class="container">
     <a href="index.html" class="back-link">← 返回首页</a>
     
-    <h1>🔍 AI人脸相似匹配</h1>
-    <p class="subtitle">上传照片，找到和你相似的博主/明星</p>
+    <h1>🌈 AI同志类型匹配</h1>
+    <p class="subtitle">上传照片，看看你属于哪种类型</p>
     
     <div class="upload-zone" id="uploadZone">
       <div class="upload-icon">📸</div>
@@ -290,7 +290,7 @@
     </div>
     
     <div class="results-section" id="resultsSection">
-      <h2 class="results-title">相似结果</h2>
+      <h2 class="results-title">匹配结果</h2>
       <div id="resultsList"></div>
     </div>
     
@@ -303,21 +303,26 @@
     // 从JSON加载亚洲明星数据
     async function loadCelebrities() {
       try {
-        const response = await fetch('./data/asian_celebrities.json');
+        const response = await fetch('./data/gay-types.json');
         if (!response.ok) throw new Error('Failed to load data');
         const data = await response.json();
         // 转换数据格式以匹配代码需求
-        celebrityDatabase = data.map(celeb => ({
-          id: celeb.name,
-          name: celeb.name,
-          desc: `${celeb.country} · ${celeb.profession}`,
-          photo: celeb.photo,
-          vector: celeb.features.slice(0, 5) // 使用前5个特征
+        celebrityDatabase = data.map(type => ({
+          id: type.id,
+          name: type.name,
+          nameEn: type.nameEn,
+          emoji: type.emoji,
+          desc: type.desc,
+          bodyType: type.bodyType,
+          traits: type.traits,
+          personality: type.personality,
+          match: type.match,
+          vector: type.features
         }));
-        console.log(`✅ Loaded ${celebrityDatabase.length} Asian celebrities`);
-        console.log('Sample celeb:', celebrityDatabase[0]);
+        console.log(`✅ Loaded ${celebrityDatabase.length} gay types`);
+        console.log('Sample type:', celebrityDatabase[0]);
       } catch (error) {
-        console.error('❌ Failed to load celebrities:', error);
+        console.error('❌ Failed to load gay types:', error);
         // 如果加载失败，使用备用数据
         celebrityDatabase = getFallbackData();
         console.log('Using fallback data:', celebrityDatabase.length);
@@ -455,17 +460,25 @@
             </div>
             <div style="font-size: 24px; color: var(--text-secondary);">↔</div>
             <div>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">${result.name}</div>
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(result.name)}" alt="${result.name}" style="width: 100px; height: 100px; border-radius: 8px; background: #f0f0f5;">
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">${result.nameEn}</div>
+              <div style="width: 100px; height: 100px; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 50px;">${result.emoji}</div>
             </div>
           </div>
           <div class="result-info">
-            <div class="result-name">${result.name}</div>
-            <div class="result-desc">${result.desc}</div>
+            <div class="result-name">${result.emoji} ${result.name} ${result.nameEn}</div>
+            <div class="result-desc" style="margin-bottom: 8px;">${result.desc}</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.6;">
+              <div><strong>体型：</strong>${result.bodyType}</div>
+              <div><strong>特征：</strong>${result.traits}</div>
+              <div><strong>性格：</strong>${result.personality}</div>
+            </div>
             <div class="similarity-bar">
               <div class="similarity-fill" style="width: ${result.similarity}%"></div>
             </div>
-            <div class="similarity-text">相似度 ${result.similarity}%</div>
+            <div class="similarity-text">匹配度 ${result.similarity}%</div>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; font-size: 13px; line-height: 1.6;">
+              💡 ${result.match}
+            </div>
           </div>
         </div>
       `).join('');
