@@ -314,6 +314,140 @@
       margin-bottom: 20px;
     }
 
+    /* Advanced Animations */
+    .text-line {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .text-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .parallax-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.1;
+      z-index: -1;
+      transition: transform 0.5s ease-out;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .floating-element {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .pulse-element {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+
+    .slide-in-left {
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .slide-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide-in-right {
+      opacity: 0;
+      transform: translateX(50px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .slide-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .quote-box {
+      position: relative;
+      padding: 40px;
+      margin: 40px 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+      border-radius: 16px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .quote-box::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 20px;
+      font-size: 120px;
+      font-family: Georgia, serif;
+      color: var(--accent);
+      opacity: 0.2;
+      line-height: 1;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 40px;
+      margin-bottom: 30px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: -30px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .type-card-minimal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .type-card-minimal:hover {
+      border-color: var(--accent);
+      transform: translateX(5px);
+    }
+
     /* Buttons */
     .btn {
       padding: 12px 30px;
@@ -382,7 +516,7 @@
 
     <!-- Progress Indicator -->
     <div class="progress-indicator" id="progress-indicator">
-      <span class="current" id="current-chapter">01</span> / <span id="total-chapters">05</span>
+      <span class="current" id="current-chapter">01</span> / <span id="total-chapters">10</span>
     </div>
 
     <!-- Tabs -->
@@ -1014,12 +1148,36 @@
       const progressIndicator = document.getElementById('progress-indicator');
       const currentChapter = document.getElementById('current-chapter');
       
-      const observer = new IntersectionObserver((entries) => {
+      // Observe chapter sections
+      const sectionObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
             const chapterNum = entry.target.getAttribute('data-chapter');
             currentChapter.textContent = chapterNum.padStart(2, '0');
+            
+            // Trigger text-line animations within this section
+            const textLines = entry.target.querySelectorAll('.text-line');
+            textLines.forEach((line, index) => {
+              setTimeout(() => {
+                line.classList.add('visible');
+              }, index * 150); // Stagger effect
+            });
+            
+            // Trigger slide-in animations
+            const slideLeftElements = entry.target.querySelectorAll('.slide-in-left');
+            slideLeftElements.forEach((el, index) => {
+              setTimeout(() => {
+                el.classList.add('visible');
+              }, index * 200);
+            });
+            
+            const slideRightElements = entry.target.querySelectorAll('.slide-in-right');
+            slideRightElements.forEach((el, index) => {
+              setTimeout(() => {
+                el.classList.add('visible');
+              }, index * 200);
+            });
           }
         });
       }, {
@@ -1028,7 +1186,7 @@
       });
 
       sections.forEach(section => {
-        observer.observe(section);
+        sectionObserver.observe(section);
       });
     }
 
