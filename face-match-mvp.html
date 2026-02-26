@@ -456,7 +456,7 @@
             <div style="font-size: 24px; color: var(--text-secondary);">↔</div>
             <div>
               <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">${result.name}</div>
-              <div style="width: 100px; height: 100px; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; font-weight: bold;">${result.name.charAt(0)}</div>
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(result.name)}" alt="${result.name}" style="width: 100px; height: 100px; border-radius: 8px; background: #f0f0f5;">
             </div>
           </div>
           <div class="result-info">
