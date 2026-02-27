@@ -17,63 +17,97 @@
       position: relative;
     }
 
-    /* 🌈 彩虹之路背景 */
-    .rainbow-road {
+    /* 🌈 彩虹烟雾流动背景 */
+    .rainbow-smoke {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
+      height: 300%;
       z-index: 0;
       pointer-events: none;
-      overflow: hidden;
+      transition: transform 0.5s ease-out;
     }
 
-    .rainbow-stripe {
+    .smoke-layer {
       position: absolute;
-      width: 200%;
-      height: 25%;
-      left: -50%;
-      opacity: 0.15;
-      filter: blur(40px);
-      transform: skewY(-15deg);
-      transition: transform 0.3s ease-out;
+      width: 100%;
+      height: 33.33%;
+      opacity: 0.4;
+      filter: blur(80px);
+      mix-blend-mode: screen;
     }
 
-    .rainbow-stripe:nth-child(1) {
-      top: -5%;
-      background: linear-gradient(90deg, #ff6b6b 0%, #ff8787 100%);
-      box-shadow: 0 0 60px rgba(255, 107, 107, 0.5);
+    .smoke-layer:nth-child(1) {
+      top: 0;
+      background: linear-gradient(180deg,
+        rgba(255, 107, 107, 0.6) 0%,
+        rgba(255, 107, 107, 0.3) 50%,
+        transparent 100%);
+      animation: smoke-flow-1 15s ease-in-out infinite;
     }
 
-    .rainbow-stripe:nth-child(2) {
-      top: 15%;
-      background: linear-gradient(90deg, #ffa94d 0%, #ffc078 100%);
-      box-shadow: 0 0 60px rgba(255, 169, 77, 0.5);
+    .smoke-layer:nth-child(2) {
+      top: 33.33%;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(116, 192, 252, 0.6) 25%,
+        rgba(116, 192, 252, 0.3) 50%,
+        transparent 100%);
+      animation: smoke-flow-2 18s ease-in-out infinite;
     }
 
-    .rainbow-stripe:nth-child(3) {
-      top: 35%;
-      background: linear-gradient(90deg, #ffd43b 0%, #ffe066 100%);
-      box-shadow: 0 0 60px rgba(255, 212, 59, 0.5);
+    .smoke-layer:nth-child(3) {
+      top: 66.66%;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(177, 151, 252, 0.6) 25%,
+        rgba(177, 151, 252, 0.3) 50%,
+        transparent 100%);
+      animation: smoke-flow-3 20s ease-in-out infinite;
     }
 
-    .rainbow-stripe:nth-child(4) {
-      top: 55%;
-      background: linear-gradient(90deg, #69db7c 0%, #8ce99a 100%);
-      box-shadow: 0 0 60px rgba(105, 219, 124, 0.5);
+    .smoke-layer:nth-child(4) {
+      top: 0;
+      background: linear-gradient(180deg,
+        rgba(105, 219, 124, 0.5) 0%,
+        rgba(255, 212, 59, 0.4) 50%,
+        transparent 100%);
+      animation: smoke-flow-4 22s ease-in-out infinite;
     }
 
-    .rainbow-stripe:nth-child(5) {
-      top: 75%;
-      background: linear-gradient(90deg, #74c0fc 0%, #a5d8ff 100%);
-      box-shadow: 0 0 60px rgba(116, 192, 252, 0.5);
+    .smoke-layer:nth-child(5) {
+      top: 50%;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(255, 169, 77, 0.5) 50%,
+        rgba(255, 107, 107, 0.3) 100%);
+      animation: smoke-flow-5 25s ease-in-out infinite;
     }
 
-    .rainbow-stripe:nth-child(6) {
-      top: 95%;
-      background: linear-gradient(90deg, #b197fc 0%, #d0bfff 100%);
-      box-shadow: 0 0 60px rgba(177, 151, 252, 0.5);
+    @keyframes smoke-flow-1 {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-50px) scale(1.1); }
+    }
+
+    @keyframes smoke-flow-2 {
+      0%, 100% { transform: translateY(0) scale(1.1); }
+      50% { transform: translateY(60px) scale(1); }
+    }
+
+    @keyframes smoke-flow-3 {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-70px) rotate(2deg); }
+    }
+
+    @keyframes smoke-flow-4 {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(40px) scale(1.15); }
+    }
+
+    @keyframes smoke-flow-5 {
+      0%, 100% { transform: translateY(0) rotate(1deg); }
+      50% { transform: translateY(-55px) rotate(-1deg); }
     }
 
     /* 鼠标光效 */
@@ -90,185 +124,117 @@
       transition: opacity 0.3s;
     }
 
-    /* 极简动物容器 */
+    /* 极简发光线条动物容器 */
     .animal-container {
       position: fixed;
       z-index: 2;
       pointer-events: none;
-      opacity: 0.4;
-      transition: opacity 0.3s;
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
 
-    /* 动物基础样式 */
+    .animal-container.visible {
+      opacity: 0.6;
+    }
+
+    /* 发光线条动物基础样式 */
     .animal {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       position: relative;
+      filter: drop-shadow(0 0 8px currentColor);
     }
 
-    /* 🐻 熊 */
-    .bear {
-      animation: walk-bear 4s ease-in-out infinite;
+    .animal svg {
+      width: 100%;
+      height: 100%;
     }
 
-    .bear::before, .bear::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      background: #f0f0f5;
+    .animal-path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.9;
     }
 
-    .bear::before {
-      width: 40px;
-      height: 40px;
-      top: 10px;
-      left: 10px;
-      border-radius: 40% 40% 50% 50%;
+    /* 12种动物动画 */
+    .animal-bear { animation: walk 4s ease-in-out infinite; }
+    .animal-otter { animation: swim 3s ease-in-out infinite; }
+    .animal-wolf { animation: run 3.5s ease-in-out infinite; }
+    .animal-deer { animation: hop 5s ease-in-out infinite; }
+    .animal-lion { animation: prowl 4.5s ease-in-out infinite; }
+    .animal-fox { animation: sneak 3s ease-in-out infinite; }
+    .animal-dog { animation: trot 3s ease-in-out infinite; }
+    .animal-cat { animation: stroll 6s ease-in-out infinite; }
+    .animal-rabbit { animation: bounce 2s ease-in-out infinite; }
+    .animal-tiger { animation: stalk 4s ease-in-out infinite; }
+    .animal-pig { animation: waddle 5s ease-in-out infinite; }
+    .animal-fish { animation: glide 3.5s ease-in-out infinite; }
+
+    @keyframes walk {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(15px) rotate(-2deg); }
+      50% { transform: translateX(30px) rotate(0deg); }
+      75% { transform: translateX(15px) rotate(2deg); }
     }
 
-    .bear::after {
-      width: 20px;
-      height: 20px;
-      top: 0;
-      left: 15px;
-      border-radius: 50% 50% 40% 40%;
-    }
-
-    @keyframes walk-bear {
+    @keyframes swim {
       0%, 100% { transform: translateX(0) translateY(0); }
-      25% { transform: translateX(20px) translateY(-5px); }
-      50% { transform: translateX(40px) translateY(0); }
-      75% { transform: translateX(20px) translateY(-5px); }
+      50% { transform: translateX(40px) translateY(-10px); }
     }
 
-    /* 🐺 狼 */
-    .wolf {
-      animation: run-wolf 3s ease-in-out infinite;
-    }
-
-    .wolf::before {
-      content: '';
-      position: absolute;
-      width: 50px;
-      height: 30px;
-      top: 15px;
-      left: 5px;
-      background: #f0f0f5;
-      border-radius: 50% 20% 20% 50%;
-    }
-
-    .wolf::after {
-      content: '';
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      top: 10px;
-      left: 35px;
-      background: #f0f0f5;
-      border-radius: 50%;
-    }
-
-    @keyframes run-wolf {
+    @keyframes run {
       0%, 100% { transform: translateX(0); }
       50% { transform: translateX(60px); }
     }
 
-    /* 🦌 鹿 */
-    .deer {
-      animation: hop-deer 5s ease-in-out infinite;
-    }
-
-    .deer::before {
-      content: '';
-      position: absolute;
-      width: 35px;
-      height: 45px;
-      top: 10px;
-      left: 12px;
-      background: #f0f0f5;
-      border-radius: 50% 50% 40% 40%;
-    }
-
-    .deer::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 0;
-      top: 0;
-      left: 15px;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-bottom: 15px solid #f0f0f5;
-    }
-
-    @keyframes hop-deer {
+    @keyframes hop {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
+      50% { transform: translateY(-25px); }
     }
 
-    /* 🐱 猫 */
-    .cat {
-      animation: stroll-cat 6s ease-in-out infinite;
+    @keyframes prowl {
+      0%, 100% { transform: translateX(0) scaleX(1); }
+      50% { transform: translateX(20px) scaleX(1.05); }
     }
 
-    .cat::before {
-      content: '';
-      position: absolute;
-      width: 40px;
-      height: 35px;
-      top: 15px;
-      left: 10px;
-      background: #f0f0f5;
-      border-radius: 50% 50% 45% 45%;
+    @keyframes sneak {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(25px) rotate(-3deg); }
+      75% { transform: translateX(25px) rotate(3deg); }
     }
 
-    .cat::after {
-      content: '';
-      position: absolute;
-      width: 15px;
-      height: 15px;
-      top: 5px;
-      left: 12px;
-      background: #f0f0f5;
-      border-radius: 50% 50% 0 0;
-    }
-
-    @keyframes stroll-cat {
+    @keyframes trot {
       0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(-50px); }
+      50% { transform: translateX(35px); }
     }
 
-    /* 🐰 兔子 */
-    .rabbit {
-      animation: bounce-rabbit 2s ease-in-out infinite;
+    @keyframes stroll {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(-30px); }
     }
 
-    .rabbit::before {
-      content: '';
-      position: absolute;
-      width: 35px;
-      height: 40px;
-      top: 15px;
-      left: 12px;
-      background: #f0f0f5;
-      border-radius: 50%;
-    }
-
-    .rabbit::after {
-      content: '';
-      position: absolute;
-      width: 10px;
-      height: 25px;
-      top: 0;
-      left: 18px;
-      background: #f0f0f5;
-      border-radius: 50%;
-      box-shadow: 12px 0 0 #f0f0f5;
-    }
-
-    @keyframes bounce-rabbit {
+    @keyframes bounce {
       0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-15px) scale(1.1); }
+      50% { transform: translateY(-20px) scale(1.1); }
+    }
+
+    @keyframes stalk {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(25px) translateY(-5px); }
+    }
+
+    @keyframes waddle {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(10px) rotate(-3deg); }
+      75% { transform: translateX(10px) rotate(3deg); }
+    }
+
+    @keyframes glide {
+      0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+      50% { transform: translateX(50px) translateY(-15px) rotate(5deg); }
     }
 
     /* 原有装饰背景 */
@@ -470,34 +436,113 @@
   </style>
 </head>
 <body>
-  <!-- 🌈 彩虹之路背景 -->
-  <div class="rainbow-road" id="rainbowRoad">
-    <div class="rainbow-stripe"></div>
-    <div class="rainbow-stripe"></div>
-    <div class="rainbow-stripe"></div>
-    <div class="rainbow-stripe"></div>
-    <div class="rainbow-stripe"></div>
-    <div class="rainbow-stripe"></div>
+  <!-- 🌈 彩虹烟雾背景 -->
+  <div class="rainbow-smoke" id="rainbowSmoke">
+    <div class="smoke-layer"></div>
+    <div class="smoke-layer"></div>
+    <div class="smoke-layer"></div>
+    <div class="smoke-layer"></div>
+    <div class="smoke-layer"></div>
   </div>
 
   <!-- 鼠标光效 -->
   <div class="mouse-glow" id="mouseGlow"></div>
 
-  <!-- 极简动物 -->
-  <div class="animal-container" id="animal1" style="bottom: 15%; left: 10%;">
-    <div class="animal bear"></div>
+  <!-- 12种发光线条动物 -->
+  <div class="animal-container" id="animal1" style="bottom: 15%; left: 10%; color: #ff6b6b;">
+    <div class="animal animal-bear">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M30 60 Q50 40 70 60 Q70 80 50 85 Q30 80 30 60 M35 45 Q30 35 35 30 M65 45 Q70 35 65 30"/>
+      </svg>
+    </div>
   </div>
-  <div class="animal-container" id="animal2" style="top: 20%; right: 15%;">
-    <div class="animal wolf"></div>
+
+  <div class="animal-container" id="animal2" style="top: 25%; right: 12%; color: #74c0fc;">
+    <div class="animal animal-otter">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M20 50 Q35 40 60 45 Q80 50 75 60 Q65 65 50 60 Q30 55 20 50 M75 60 Q85 55 90 50"/>
+      </svg>
+    </div>
   </div>
-  <div class="animal-container" id="animal3" style="bottom: 30%; right: 20%;">
-    <div class="animal deer"></div>
+
+  <div class="animal-container" id="animal3" style="bottom: 25%; right: 18%; color: #b197fc;">
+    <div class="animal animal-wolf">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M25 55 L45 50 L55 35 L50 30 M55 35 L70 45 L75 55 Q70 65 55 65 Q35 65 25 55"/>
+      </svg>
+    </div>
   </div>
-  <div class="animal-container" id="animal4" style="top: 40%; left: 8%;">
-    <div class="animal cat"></div>
+
+  <div class="animal-container" id="animal4" style="top: 40%; left: 8%; color: #69db7c;">
+    <div class="animal animal-deer">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M50 70 Q60 55 55 40 Q50 35 45 40 Q40 55 50 70 M45 35 L40 20 M45 35 L50 22"/>
+      </svg>
+    </div>
   </div>
-  <div class="animal-container" id="animal5" style="bottom: 50%; right: 10%;">
-    <div class="animal rabbit"></div>
+
+  <div class="animal-container" id="animal5" style="bottom: 50%; right: 8%; color: #ffa94d;">
+    <div class="animal animal-lion">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M50 65 m-20 0 a20 20 0 1 0 40 0 a20 20 0 1 0 -40 0 M50 65 Q55 55 60 50 M50 65 L50 80"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal6" style="top: 15%; left: 15%; color: #d0bfff;">
+    <div class="animal animal-fox">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M30 60 Q45 50 60 55 L70 45 L65 40 M60 55 Q70 60 75 70 M45 50 L40 35 M55 50 L60 35"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal7" style="bottom: 35%; left: 20%; color: #ffe066;">
+    <div class="animal animal-dog">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M35 55 Q50 50 65 55 Q75 60 70 65 Q65 75 50 75 Q35 75 30 65 Q25 60 35 55 M65 55 L75 45 M35 55 L30 48"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal8" style="top: 55%; right: 22%; color: #ff8787;">
+    <div class="animal animal-cat">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M30 60 Q45 55 60 60 Q70 65 65 70 Q60 80 45 80 Q30 80 25 70 Q20 65 30 60 M30 55 L25 42 L35 48 M60 55 L65 42 L55 48"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal9" style="bottom: 40%; right: 15%; color: #8ce99a;">
+    <div class="animal animal-rabbit">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M50 75 m-15 0 a15 15 0 1 0 30 0 a15 15 0 1 0 -30 0 M42 60 Q40 40 42 30 M58 60 Q60 40 58 30"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal10" style="top: 30%; left: 12%; color: #ffc078;">
+    <div class="animal animal-tiger">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M30 55 Q50 45 70 55 Q75 65 65 70 Q55 80 45 80 Q35 80 25 70 Q20 65 30 55 M35 45 L28 35 M65 45 L72 35 M40 60 L40 65 M60 60 L60 65"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal11" style="bottom: 20%; right: 25%; color: #a5d8ff;">
+    <div class="animal animal-pig">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M35 60 Q50 55 65 60 Q75 65 70 72 Q65 80 50 80 Q35 80 30 72 Q25 65 35 60 M35 55 L30 48 M65 55 L70 48 M45 68 L45 72 M55 68 L55 72"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="animal-container" id="animal12" style="top: 20%; right: 18%; color: #63e6be;">
+    <div class="animal animal-fish">
+      <svg viewBox="0 0 100 100">
+        <path class="animal-path" d="M25 50 Q45 40 65 50 Q75 55 65 60 Q45 70 25 60 Q20 55 25 50 M65 50 L80 40 L80 60 Z"/>
+      </svg>
+    </div>
   </div>
 
   <!-- Slide 1 -->
@@ -678,12 +723,12 @@
   </div>
 
   <script>
-    // ===== 🌈 彩虹之路 & 动画控制 =====
-    
+    // ===== 🌈 彩虹烟雾 & 动画控制 =====
+
     let current = 1;
     const total = 15;
     let isScrolling = false;
-    let rainbowOffset = 0;
+    let smokeOffset = 0;
 
     // 鼠标光效跟踪
     const mouseGlow = document.getElementById('mouseGlow');
@@ -699,50 +744,56 @@
     function animateMouseGlow() {
       const dx = mouseX - glowX;
       const dy = mouseY - glowY;
-      
+
       glowX += dx * 0.1;
       glowY += dy * 0.1;
-      
+
       mouseGlow.style.left = glowX + 'px';
       mouseGlow.style.top = glowY + 'px';
-      
+
       requestAnimationFrame(animateMouseGlow);
     }
     animateMouseGlow();
 
-    // 彩虹之路滚动控制
-    const rainbowRoad = document.getElementById('rainbowRoad');
-    const rainbowStripes = rainbowRoad.querySelectorAll('.rainbow-stripe');
+    // 彩虹烟雾滚动控制
+    const rainbowSmoke = document.getElementById('rainbowSmoke');
 
-    function updateRainbowPosition() {
-      rainbowStripes.forEach((stripe, i) => {
-        const offset = rainbowOffset * (i * 0.3 + 1);
-        stripe.style.transform = `skewY(-15deg) translateX(${offset}px)`;
-      });
+    function updateSmokePosition() {
+      // 向上流动效果
+      rainbowSmoke.style.transform = `translateY(${-smokeOffset}px)`;
     }
 
-    // 动物显示/隐藏逻辑
+    // 12种动物显示逻辑（每种动物在特定页面显示）
     const animals = document.querySelectorAll('.animal-container');
-    
+
     function updateAnimals() {
+      const animalPages = {
+        1: [1, 2, 3, 4, 5],       // bear (熊)
+        2: [2, 3, 4, 5, 6],       // otter (猴)
+        3: [3, 4, 5, 6, 7],       // wolf (狼)
+        4: [4, 5, 6, 7, 8],       // deer (鹿)
+        5: [5, 6, 7, 8, 9],       // lion (狮子)
+        6: [6, 7, 8, 9, 10],      // fox (狐)
+        7: [7, 8, 9, 10, 11],     // dog (犬)
+        8: [8, 9, 10, 11, 12],    // cat (猫)
+        9: [9, 10, 11, 12, 13],   // rabbit (兔)
+        10: [10, 11, 12, 13, 14], // tiger (虎)
+        11: [11, 12, 13, 14, 15], // pig (猪)
+        12: [12, 13, 14, 15, 1]   // fish (鱼)
+      };
+
       animals.forEach((animal, i) => {
-        const showOnSlides = [
-          [1, 2, 3, 4, 5],      // bear
-          [3, 4, 5, 6, 7],      // wolf
-          [5, 6, 7, 8, 9],      // deer
-          [7, 8, 9, 10, 11],    // cat
-          [9, 10, 11, 12, 13]   // rabbit
-        ];
-        
-        if (showOnSlides[i].includes(current)) {
-          animal.style.opacity = '0.4';
+        const pageId = i + 1;
+        if (animalPages[pageId].includes(current)) {
+          animal.classList.add('visible');
         } else {
-          animal.style.opacity = '0';
+          animal.classList.remove('visible');
         }
       });
     }
 
     // ===== 原有幻灯片控制 =====
+
 
 
     function playAnimations(slideElement) {
@@ -795,28 +846,28 @@
     // Mouse wheel navigation
     window.addEventListener('wheel', (e) => {
       if (isScrolling) return;
-      
+
       isScrolling = true;
-      
+
       if (e.deltaY > 0) {
         // Scroll down - next slide
         changeSlide(1);
-        rainbowOffset -= 50; // 彩虹之路向左移动
+        smokeOffset += 100; // 彩虹烟雾向上流动
       } else {
         // Scroll up - prev slide
         changeSlide(-1);
-        rainbowOffset += 50; // 彩虹之路向右移动
+        smokeOffset -= 100; // 彩虹烟雾向下流动
       }
-      
-      // 更新彩虹之路位置
-      updateRainbowPosition();
-      
+
+      // 更新彩虹烟雾位置
+      updateSmokePosition();
+
       // 更新动物显示
       updateAnimals();
-      
+
       // Prevent default scroll
       e.preventDefault();
-      
+
       // Debounce
       setTimeout(() => {
         isScrolling = false;
@@ -828,14 +879,14 @@
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         changeSlide(1);
-        rainbowOffset -= 50;
-        updateRainbowPosition();
+        smokeOffset += 100;
+        updateSmokePosition();
         updateAnimals();
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault();
         changeSlide(-1);
-        rainbowOffset += 50;
-        updateRainbowPosition();
+        smokeOffset -= 100;
+        updateSmokePosition();
         updateAnimals();
       }
     });
@@ -849,16 +900,16 @@
     document.addEventListener('touchend', (e) => {
       const touchEndY = e.changedTouches[0].clientY;
       const diff = touchStartY - touchEndY;
-      
+
       if (Math.abs(diff) > 50) {
         if (diff > 0) {
           changeSlide(1); // Swipe up - next
-          rainbowOffset -= 50;
+          smokeOffset += 100;
         } else {
           changeSlide(-1); // Swipe down - prev
-          rainbowOffset += 50;
+          smokeOffset -= 100;
         }
-        updateRainbowPosition();
+        updateSmokePosition();
         updateAnimals();
       }
     });
