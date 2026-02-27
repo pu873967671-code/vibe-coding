@@ -10,17 +10,47 @@
     
     body {
       font-family: 'Noto Sans SC', sans-serif;
-      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a24 100%);
+      background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%);
       color: #f0f0f5;
       height: 100vh;
       overflow: hidden;
+      position: relative;
+    }
+
+    /* 装饰背景 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+      animation: bgFloat 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+      animation: bgFloat 25s ease-in-out infinite reverse;
+      pointer-events: none;
+    }
+
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, 30px); }
     }
 
     .slide {
       display: none;
       height: 100vh;
       padding: 80px 40px 140px;
-      animation: fadeIn 0.6s ease;
     }
 
     .slide.active {
@@ -29,9 +59,80 @@
       justify-content: center;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+    /* ===== 动画库 ===== */
+    
+    /* 1. Fade In Up */
+    .slide.active .fade-in-up {
+      animation: fadeInUp 0.8s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 2. Fade In Down */
+    .slide.active .fade-in-down {
+      animation: fadeInDown 0.8s ease forwards;
+    }
+    
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 3. Scale In */
+    .slide.active .scale-in {
+      animation: scaleIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* 4. Slide In Left */
+    .slide.active .slide-in-left {
+      animation: slideInLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-60px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* 5. Slide In Right */
+    .slide.active .slide-in-right {
+      animation: slideInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(60px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* 6. Bounce In */
+    .slide.active .bounce-in {
+      animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+    
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { opacity: 1; transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+
+    /* 延迟动画 */
+    .delay-1 { animation-delay: 0.1s !important; }
+    .delay-2 { animation-delay: 0.2s !important; }
+    .delay-3 { animation-delay: 0.3s !important; }
+    .delay-4 { animation-delay: 0.4s !important; }
+    .delay-5 { animation-delay: 0.5s !important; }
+    
+    /* 初始状态（隐藏） */
+    .fade-in-up, .fade-in-down, .scale-in, .slide-in-left, .slide-in-right, .bounce-in {
+      opacity: 0;
     }
 
     .content {
@@ -41,24 +142,37 @@
     }
 
     h1 {
-      font-size: 48px;
-      margin-bottom: 40px;
-      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      font-size: 56px;
+      margin-bottom: 50px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      line-height: 1.3;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -1px;
+      text-shadow: 0 0 60px rgba(99, 102, 241, 0.3);
     }
 
     p {
-      font-size: 22px;
-      line-height: 1.8;
-      color: #8888a0;
-      margin-bottom: 20px;
+      font-size: 24px;
+      line-height: 1.9;
+      color: #a0a0b0;
+      margin-bottom: 30px;
+      font-weight: 400;
     }
 
     strong {
       color: #f0f0f5;
+      font-weight: 600;
+    }
+
+    /* 文字装饰 */
+    p strong {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .page-hint {
@@ -75,76 +189,117 @@
     .page-hint:hover {
       opacity: 1;
     }
+
+    /* 响应式 - 移动端优化 */
+    @media (max-width: 768px) {
+      .slide {
+        padding: 60px 25px 120px;
+      }
+
+      h1 {
+        font-size: 36px;
+        margin-bottom: 30px;
+        letter-spacing: 0;
+      }
+
+      p {
+        font-size: 18px;
+        line-height: 1.8;
+        margin-bottom: 20px;
+      }
+
+      .page-hint {
+        font-size: 12px;
+        padding: 10px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .slide {
+        padding: 50px 20px 110px;
+      }
+
+      h1 {
+        font-size: 28px;
+        margin-bottom: 25px;
+      }
+
+      p {
+        font-size: 16px;
+        line-height: 1.7;
+        margin-bottom: 15px;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- Slide 1 -->
   <div class="slide active" id="slide1">
     <div class="content">
-      <h1>你有没有想过，气质是什么？</h1>
-      <p>是你走路的方式？是你微笑的弧度？还是你眼里的光芒？</p>
-      <p>气质不是一个标签，也不是一个类型。<br>它是独特的、流动的、属于你的。</p>
+      <h1 class="scale-in">你有没有想过，气质是什么？</h1>
+      <p class="fade-in-up delay-1">是你走路的方式？是你微笑的弧度？还是你眼里的光芒？</p>
+      <p class="fade-in-up delay-2">气质不是一个标签，也不是一个类型。<br>它是独特的、流动的、属于你的。</p>
     </div>
   </div>
 
   <!-- Slide 2 -->
   <div class="slide" id="slide2">
     <div class="content">
-      <h1>1970年代，旧金山的一个夜晚</h1>
-      <p>一群体型壮硕、体毛较多的男性聚在一起。<br>他们厌倦了被边缘化。</p>
-      <p><strong>"我们就像熊一样，壮实、温暖、毛茸茸。"</strong></p>
-      <p>这不是自我贬低，而是一种宣言：<br><strong>我们不需要符合主流审美。我们有自己的美。</strong></p>
+      <h1 class="slide-in-left">1970年代，旧金山的一个夜晚</h1>
+      <p class="fade-in-up delay-1">一群体型壮硕、体毛较多的男性聚在一起。<br>他们厌倦了被边缘化。</p>
+      <p class="bounce-in delay-2">"我们就像熊一样，壮实、温暖、毛茸茸。"</p>
+      <p class="fade-in-up delay-3">这不是自我贬低，而是一种宣言：<br><strong>我们不需要符合主流审美。我们有自己的美。</strong></p>
     </div>
   </div>
 
   <!-- Slide 3 -->
   <div class="slide" id="slide3">
     <div class="content">
-      <h1>从熊到猴，从狼到鹿</h1>
-      <p>• <strong>Bear 熊系</strong> - 壮硕、体毛较多、成熟稳重</p>
-      <p>• <strong>Otter 猴系</strong> - 精瘦、灵活、年轻活力</p>
-      <p>• <strong>Wolf 狼系</strong> - 成熟有型、野性魅力</p>
-      <p>• <strong>Deer 鹿系</strong> - 清秀纤细、文艺温柔</p>
+      <h1 class="bounce-in">从熊到猴，从狼到鹿</h1>
+      <p class="slide-in-left delay-1">• <strong>Bear 熊系</strong> - 壮硕、体毛较多、成熟稳重</p>
+      <p class="slide-in-left delay-2">• <strong>Otter 猴系</strong> - 精瘦、灵活、年轻活力</p>
+      <p class="slide-in-left delay-3">• <strong>Wolf 狼系</strong> - 成熟有型、野性魅力</p>
+      <p class="slide-in-left delay-4">• <strong>Deer 鹿系</strong> - 清秀纤细、文艺温柔</p>
     </div>
   </div>
 
   <!-- Slide 4 -->
   <div class="slide" id="slide4">
     <div class="content">
-      <h1>这些分类科学吗？</h1>
-      <p style="font-size: 32px; color: #f59e0b;"><strong>不科学。</strong></p>
-      <p>这些分类只是文化现象，不是科学分类。</p>
-      <p>人类是复杂的，不能被简单分类。</p>
+      <h1 class="scale-in">这些分类科学吗？</h1>
+      <p class="bounce-in delay-1" style="font-size: 32px; color: #f59e0b;"><strong>不科学。</strong></p>
+      <p class="fade-in-up delay-2">这些分类只是文化现象，不是科学分类。</p>
+      <p class="fade-in-up delay-3">人类是复杂的，不能被简单分类。</p>
     </div>
   </div>
 
   <!-- Slide 5 -->
   <div class="slide" id="slide5">
     <div class="content">
-      <h1>⚠️ 在使用任何标签前，请思考</h1>
-      <p>🤔 我是否认同这个标签，还是它只是外界给我的？</p>
-      <p>🤔 这个标签是帮助我找到归属，还是限制了我的可能性？</p>
-      <p>🤔 真正的我，是否比任何标签都更丰富、更独特？</p>
+      <h1 class="scale-in">⚠️ 在使用任何标签前，请思考</h1>
+      <p class="slide-in-right delay-1">🤔 我是否认同这个标签，还是它只是外界给我的？</p>
+      <p class="slide-in-right delay-2">🤔 这个标签是帮助我找到归属，还是限制了我的可能性？</p>
+      <p class="slide-in-right delay-3">🤔 真正的我，是否比任何标签都更丰富、更独特？</p>
     </div>
   </div>
 
   <!-- Slide 6 -->
   <div class="slide" id="slide6">
     <div class="content">
-      <h1>流动的身份</h1>
-      <p>性别认同、身体特征、性格气质都会随时间改变。</p>
-      <p><strong>这完全正常。</strong></p>
-      <p>身份是流动的，不是固定的。<br>拥抱变化，而不是被标签定义。</p>
+      <h1 class="fade-in-down">流动的身份</h1>
+      <p class="fade-in-up delay-1">性别认同、身体特征、性格气质都会随时间改变。</p>
+      <p class="bounce-in delay-2"><strong>这完全正常。</strong></p>
+      <p class="fade-in-up delay-3">身份是流动的，不是固定的。<br>拥抱变化，而不是被标签定义。</p>
     </div>
   </div>
 
   <!-- Slide 7 -->
   <div class="slide" id="slide7">
     <div class="content">
-      <h1>标签是工具，不是枷锁</h1>
-      <p>最重要的是你自己的感受和认同。</p>
-      <p><strong style="font-size: 28px;">你定义你自己，而不是相反。</strong></p>
-      <p style="font-size: 32px;">🌈</p>
+      <h1 class="scale-in">标签是工具，不是枷锁</h1>
+      <p class="fade-in-up delay-1">最重要的是你自己的感受和认同。</p>
+      <p class="bounce-in delay-2"><strong style="font-size: 28px;">你定义你自己，而不是相反。</strong></p>
+      <p class="scale-in delay-3" style="font-size: 48px;">🌈</p>
     </div>
   </div>
 
