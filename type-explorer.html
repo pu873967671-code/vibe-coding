@@ -522,7 +522,7 @@
 
     /* 🌈 底部光效 - 删除 */
 
-    /* 🌈 边框流动光效（类似Apple Siri）- 增强版 */
+    /* 🌈 边框流动光效（更柔和、更大面积）*/
     .border-glow {
       position: fixed;
       top: 0;
@@ -536,64 +536,95 @@
 
     .border-line {
       position: absolute;
+      opacity: 0;
+      filter: blur(8px); /* 从1px增加到8px，更柔和 */
+    }
+
+    /* 底部默认状态：左右来回移动 */
+    .border-line.bottom {
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 6px; /* 从3px增加到6px，面积更大 */
       background: linear-gradient(90deg,
         transparent,
-        rgba(99, 102, 241, 1),
-        rgba(168, 85, 247, 1),
-        rgba(236, 72, 153, 1),
-        rgba(255, 82, 82, 1),
+        rgba(99, 102, 241, 0.7),
+        rgba(168, 85, 247, 0.7),
+        rgba(236, 72, 153, 0.7),
+        rgba(255, 82, 82, 0.7),
         transparent);
-      opacity: 0;
-      filter: blur(1px);
+      animation: bottom-flow-idle 4s ease-in-out infinite;
+      opacity: 0.8; /* 默认可见 */
+    }
+
+    @keyframes bottom-flow-idle {
+      0%, 100% { transform: translateX(-30%); }
+      50% { transform: translateX(30%); }
+    }
+
+    /* 滚动时激活的4边框流动 */
+    .border-glow.scrolling .border-line {
+      opacity: 1;
+    }
+
+    .border-glow.scrolling .border-line.bottom {
+      animation: border-flow-bottom 3s ease-in-out infinite;
     }
 
     .border-line.top {
       top: 0;
       left: 0;
       width: 100%;
-      height: 3px;
+      height: 6px; /* 面积更大 */
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(99, 102, 241, 0.7),
+        rgba(168, 85, 247, 0.7),
+        rgba(236, 72, 153, 0.7),
+        rgba(255, 82, 82, 0.7),
+        transparent);
       animation: border-flow-top 3s ease-in-out infinite;
+      animation-play-state: paused;
     }
 
     .border-line.right {
       top: 0;
       right: 0;
-      width: 3px;
+      width: 6px; /* 面积更大 */
       height: 100%;
       background: linear-gradient(180deg,
         transparent,
-        rgba(99, 102, 241, 1),
-        rgba(168, 85, 247, 1),
-        rgba(236, 72, 153, 1),
-        rgba(255, 82, 82, 1),
+        rgba(99, 102, 241, 0.7),
+        rgba(168, 85, 247, 0.7),
+        rgba(236, 72, 153, 0.7),
+        rgba(255, 82, 82, 0.7),
         transparent);
       animation: border-flow-right 3s ease-in-out infinite;
       animation-delay: 0.75s;
-    }
-
-    .border-line.bottom {
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      animation: border-flow-bottom 3s ease-in-out infinite;
-      animation-delay: 1.5s;
+      animation-play-state: paused;
     }
 
     .border-line.left {
       top: 0;
       left: 0;
-      width: 3px;
+      width: 6px; /* 面积更大 */
       height: 100%;
       background: linear-gradient(180deg,
         transparent,
-        rgba(99, 102, 241, 1),
-        rgba(168, 85, 247, 1),
-        rgba(236, 72, 153, 1),
-        rgba(255, 82, 82, 1),
+        rgba(99, 102, 241, 0.7),
+        rgba(168, 85, 247, 0.7),
+        rgba(236, 72, 153, 0.7),
+        rgba(255, 82, 82, 0.7),
         transparent);
       animation: border-flow-left 3s ease-in-out infinite;
       animation-delay: 2.25s;
+      animation-play-state: paused;
+    }
+
+    .border-glow.scrolling .border-line.top,
+    .border-glow.scrolling .border-line.right,
+    .border-glow.scrolling .border-line.left {
+      animation-play-state: running;
     }
 
     @keyframes border-flow-top {
@@ -1357,6 +1388,24 @@
       progressIndicator.classList.add('visible');
       initScrollAnimations();
     }, 100);
+
+    // ===== 🌈 边框光效滚动控制 =====
+    const borderGlow = document.querySelector('.border-glow');
+    let scrollTimer = null;
+
+    // 监听滚动
+    window.addEventListener('scroll', () => {
+      // 添加滚动状态类
+      borderGlow.classList.add('scrolling');
+
+      // 清除之前的定时器
+      clearTimeout(scrollTimer);
+
+      // 1秒后停止滚动状态
+      scrollTimer = setTimeout(() => {
+        borderGlow.classList.remove('scrolling');
+      }, 1000);
+    });
 
     // ===== 🌈 彩虹粒子系统 =====
     const rainbowColors = [
