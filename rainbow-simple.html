@@ -17,97 +17,157 @@
       position: relative;
     }
 
-    /* 🌈 彩虹烟雾流动背景 */
+    /* 🌈 彩虹烟雾流动背景（参考图片1风格）*/
     .rainbow-smoke {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
+      top: -50%;
+      left: -50%;
+      width: 200%;
       height: 300%;
       z-index: 0;
       pointer-events: none;
-      transition: transform 0.5s ease-out;
+      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .smoke-layer {
       position: absolute;
       width: 100%;
-      height: 33.33%;
-      opacity: 0.4;
-      filter: blur(80px);
+      height: 100%;
+      opacity: 0.5;
+      filter: blur(100px);
       mix-blend-mode: screen;
     }
 
+    /* 彩虹色烟雾层 - 从中心向外扩散 */
     .smoke-layer:nth-child(1) {
-      top: 0;
-      background: linear-gradient(180deg,
-        rgba(255, 107, 107, 0.6) 0%,
-        rgba(255, 107, 107, 0.3) 50%,
-        transparent 100%);
-      animation: smoke-flow-1 15s ease-in-out infinite;
+      background: radial-gradient(ellipse at 30% 40%,
+        rgba(255, 107, 107, 0.8) 0%,
+        rgba(255, 107, 107, 0.4) 30%,
+        transparent 70%);
+      animation: smoke-flow-1 20s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(2) {
-      top: 33.33%;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(116, 192, 252, 0.6) 25%,
-        rgba(116, 192, 252, 0.3) 50%,
-        transparent 100%);
-      animation: smoke-flow-2 18s ease-in-out infinite;
+      background: radial-gradient(ellipse at 70% 30%,
+        rgba(255, 169, 77, 0.7) 0%,
+        rgba(255, 169, 77, 0.35) 30%,
+        transparent 70%);
+      animation: smoke-flow-2 25s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(3) {
-      top: 66.66%;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(177, 151, 252, 0.6) 25%,
-        rgba(177, 151, 252, 0.3) 50%,
-        transparent 100%);
-      animation: smoke-flow-3 20s ease-in-out infinite;
+      background: radial-gradient(ellipse at 50% 60%,
+        rgba(255, 212, 59, 0.6) 0%,
+        rgba(255, 212, 59, 0.3) 30%,
+        transparent 70%);
+      animation: smoke-flow-3 22s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(4) {
-      top: 0;
-      background: linear-gradient(180deg,
-        rgba(105, 219, 124, 0.5) 0%,
-        rgba(255, 212, 59, 0.4) 50%,
-        transparent 100%);
-      animation: smoke-flow-4 22s ease-in-out infinite;
+      background: radial-gradient(ellipse at 40% 70%,
+        rgba(105, 219, 124, 0.7) 0%,
+        rgba(105, 219, 124, 0.35) 30%,
+        transparent 70%);
+      animation: smoke-flow-4 28s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(5) {
-      top: 50%;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(255, 169, 77, 0.5) 50%,
-        rgba(255, 107, 107, 0.3) 100%);
-      animation: smoke-flow-5 25s ease-in-out infinite;
+      background: radial-gradient(ellipse at 60% 50%,
+        rgba(116, 192, 252, 0.8) 0%,
+        rgba(116, 192, 252, 0.4) 30%,
+        transparent 70%);
+      animation: smoke-flow-5 24s ease-in-out infinite;
     }
 
+    .smoke-layer:nth-child(6) {
+      background: radial-gradient(ellipse at 50% 40%,
+        rgba(177, 151, 252, 0.75) 0%,
+        rgba(177, 151, 252, 0.38) 30%,
+        transparent 70%);
+      animation: smoke-flow-6 26s ease-in-out infinite;
+    }
+
+    /* 烟雾流动动画 - 更自然、更柔和 */
     @keyframes smoke-flow-1 {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-50px) scale(1.1); }
+      0%, 100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.5;
+      }
+      33% {
+        transform: translate(30px, -40px) scale(1.1) rotate(5deg);
+        opacity: 0.6;
+      }
+      66% {
+        transform: translate(-20px, 20px) scale(0.95) rotate(-3deg);
+        opacity: 0.45;
+      }
     }
 
     @keyframes smoke-flow-2 {
-      0%, 100% { transform: translateY(0) scale(1.1); }
-      50% { transform: translateY(60px) scale(1); }
+      0%, 100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.5;
+      }
+      33% {
+        transform: translate(-40px, 30px) scale(1.05) rotate(-4deg);
+        opacity: 0.55;
+      }
+      66% {
+        transform: translate(25px, -35px) scale(0.98) rotate(3deg);
+        opacity: 0.48;
+      }
     }
 
     @keyframes smoke-flow-3 {
-      0%, 100% { transform: translateY(0) rotate(-2deg); }
-      50% { transform: translateY(-70px) rotate(2deg); }
+      0%, 100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translate(0, 50px) scale(1.08) rotate(2deg);
+        opacity: 0.58;
+      }
     }
 
     @keyframes smoke-flow-4 {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(40px) scale(1.15); }
+      0%, 100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.5;
+      }
+      33% {
+        transform: translate(50px, 20px) scale(1.12) rotate(6deg);
+        opacity: 0.62;
+      }
+      66% {
+        transform: translate(-30px, -40px) scale(0.92) rotate(-4deg);
+        opacity: 0.42;
+      }
     }
 
     @keyframes smoke-flow-5 {
-      0%, 100% { transform: translateY(0) rotate(1deg); }
-      50% { transform: translateY(-55px) rotate(-1deg); }
+      0%, 100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translate(-35px, 35px) scale(1.03) rotate(-2deg);
+        opacity: 0.52;
+      }
+    }
+
+    @keyframes smoke-flow-6 {
+      0%, 100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.5;
+      }
+      33% {
+        transform: translate(-25px, -45px) scale(0.96) rotate(-5deg);
+        opacity: 0.46;
+      }
+      66% {
+        transform: translate(40px, 25px) scale(1.07) rotate(4deg);
+        opacity: 0.56;
+      }
     }
 
     /* 鼠标光效 */
@@ -124,17 +184,18 @@
       transition: opacity 0.3s;
     }
 
-    /* 极简发光线条动物容器 */
+    /* 极简发光线条动物容器（参考图片2风格）*/
     .animal-container {
       position: fixed;
       z-index: 2;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.5s ease;
+      color: #b197fc; /* 统一的霓虹紫色 */
     }
 
     .animal-container.visible {
-      opacity: 0.6;
+      opacity: 0.7;
     }
 
     /* 发光线条动物基础样式 */
@@ -142,7 +203,7 @@
       width: 80px;
       height: 80px;
       position: relative;
-      filter: drop-shadow(0 0 8px currentColor);
+      filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
     }
 
     .animal svg {
@@ -153,10 +214,10 @@
     .animal-path {
       fill: none;
       stroke: currentColor;
-      stroke-width: 2;
+      stroke-width: 1.5;
       stroke-linecap: round;
       stroke-linejoin: round;
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     /* 12种动物动画 */
@@ -443,104 +504,105 @@
     <div class="smoke-layer"></div>
     <div class="smoke-layer"></div>
     <div class="smoke-layer"></div>
+    <div class="smoke-layer"></div>
   </div>
 
   <!-- 鼠标光效 -->
   <div class="mouse-glow" id="mouseGlow"></div>
 
-  <!-- 12种发光线条动物 -->
-  <div class="animal-container" id="animal1" style="bottom: 15%; left: 10%; color: #ff6b6b;">
+  <!-- 12种极简发光线条动物（参考图片2风格）-->
+  <div class="animal-container" id="animal1" style="bottom: 15%; left: 10%;">
     <div class="animal animal-bear">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M30 60 Q50 40 70 60 Q70 80 50 85 Q30 80 30 60 M35 45 Q30 35 35 30 M65 45 Q70 35 65 30"/>
+        <path class="animal-path" d="M35 55 Q50 45 65 55 Q70 70 50 75 Q30 70 35 55 M35 40 Q30 30 35 25 Q40 30 35 40 M65 40 Q70 30 65 25 Q60 30 65 40"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal2" style="top: 25%; right: 12%; color: #74c0fc;">
+  <div class="animal-container" id="animal2" style="top: 25%; right: 12%;">
     <div class="animal animal-otter">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M20 50 Q35 40 60 45 Q80 50 75 60 Q65 65 50 60 Q30 55 20 50 M75 60 Q85 55 90 50"/>
+        <path class="animal-path" d="M20 55 Q40 45 60 50 Q80 55 75 65 Q70 75 50 70 Q30 65 20 55 M75 60 Q85 55 88 48"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal3" style="bottom: 25%; right: 18%; color: #b197fc;">
+  <div class="animal-container" id="animal3" style="bottom: 25%; right: 18%;">
     <div class="animal animal-wolf">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M25 55 L45 50 L55 35 L50 30 M55 35 L70 45 L75 55 Q70 65 55 65 Q35 65 25 55"/>
+        <path class="animal-path" d="M25 60 Q40 55 55 60 L65 45 L60 38 M55 60 Q70 65 75 70 Q65 80 50 80 Q30 80 25 60"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal4" style="top: 40%; left: 8%; color: #69db7c;">
+  <div class="animal-container" id="animal4" style="top: 40%; left: 8%;">
     <div class="animal animal-deer">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M50 70 Q60 55 55 40 Q50 35 45 40 Q40 55 50 70 M45 35 L40 20 M45 35 L50 22"/>
+        <path class="animal-path" d="M50 75 Q65 60 55 40 Q50 35 45 40 Q35 60 50 75 M40 35 L35 18 Q38 22 42 20 M60 35 L65 18 Q62 22 58 20"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal5" style="bottom: 50%; right: 8%; color: #ffa94d;">
+  <div class="animal-container" id="animal5" style="bottom: 50%; right: 8%;">
     <div class="animal animal-lion">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M50 65 m-20 0 a20 20 0 1 0 40 0 a20 20 0 1 0 -40 0 M50 65 Q55 55 60 50 M50 65 L50 80"/>
+        <path class="animal-path" d="M50 50 m-28 0 a28 28 0 1 0 56 0 a28 28 0 1 0 -56 0 M50 50 Q58 42 62 35 M50 50 L50 65"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal6" style="top: 15%; left: 15%; color: #d0bfff;">
+  <div class="animal-container" id="animal6" style="top: 15%; left: 15%;">
     <div class="animal animal-fox">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M30 60 Q45 50 60 55 L70 45 L65 40 M60 55 Q70 60 75 70 M45 50 L40 35 M55 50 L60 35"/>
+        <path class="animal-path" d="M30 65 Q48 55 65 62 L78 48 L72 40 M65 62 Q78 68 82 78 M48 55 L42 38 M58 55 L64 38"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal7" style="bottom: 35%; left: 20%; color: #ffe066;">
+  <div class="animal-container" id="animal7" style="bottom: 35%; left: 20%;">
     <div class="animal animal-dog">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M35 55 Q50 50 65 55 Q75 60 70 65 Q65 75 50 75 Q35 75 30 65 Q25 60 35 55 M65 55 L75 45 M35 55 L30 48"/>
+        <path class="animal-path" d="M32 58 Q52 52 68 58 Q80 65 75 72 Q68 82 50 82 Q32 82 25 72 Q18 65 32 58 M68 58 L80 45 M32 58 L25 48"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal8" style="top: 55%; right: 22%; color: #ff8787;">
+  <div class="animal-container" id="animal8" style="top: 55%; right: 22%;">
     <div class="animal animal-cat">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M30 60 Q45 55 60 60 Q70 65 65 70 Q60 80 45 80 Q30 80 25 70 Q20 65 30 60 M30 55 L25 42 L35 48 M60 55 L65 42 L55 48"/>
+        <path class="animal-path" d="M28 65 Q48 60 68 65 Q80 72 75 78 Q68 88 48 88 Q28 88 22 78 Q15 72 28 65 M28 60 L22 45 L35 55 M68 60 L75 45 L62 55"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal9" style="bottom: 40%; right: 15%; color: #8ce99a;">
+  <div class="animal-container" id="animal9" style="bottom: 40%; right: 15%;">
     <div class="animal animal-rabbit">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M50 75 m-15 0 a15 15 0 1 0 30 0 a15 15 0 1 0 -30 0 M42 60 Q40 40 42 30 M58 60 Q60 40 58 30"/>
+        <path class="animal-path" d="M50 75 m-18 0 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 M38 58 Q35 35 38 22 M62 58 Q65 35 62 22"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal10" style="top: 30%; left: 12%; color: #ffc078;">
+  <div class="animal-container" id="animal10" style="top: 30%; left: 12%;">
     <div class="animal animal-tiger">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M30 55 Q50 45 70 55 Q75 65 65 70 Q55 80 45 80 Q35 80 25 70 Q20 65 30 55 M35 45 L28 35 M65 45 L72 35 M40 60 L40 65 M60 60 L60 65"/>
+        <path class="animal-path" d="M28 58 Q52 48 72 58 Q78 68 68 75 Q58 85 50 85 Q42 85 32 75 Q22 68 28 58 M32 48 L25 35 M68 48 L75 35 M42 65 L42 70 M58 65 L58 70"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal11" style="bottom: 20%; right: 25%; color: #a5d8ff;">
+  <div class="animal-container" id="animal11" style="bottom: 20%; right: 25%;">
     <div class="animal animal-pig">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M35 60 Q50 55 65 60 Q75 65 70 72 Q65 80 50 80 Q35 80 30 72 Q25 65 35 60 M35 55 L30 48 M65 55 L70 48 M45 68 L45 72 M55 68 L55 72"/>
+        <path class="animal-path" d="M35 65 Q52 60 68 65 Q80 72 75 78 Q68 88 52 88 Q35 88 28 78 Q22 72 35 65 M35 60 L28 48 M68 60 L75 48 M45 72 L45 78 M58 72 L58 78"/>
       </svg>
     </div>
   </div>
 
-  <div class="animal-container" id="animal12" style="top: 20%; right: 18%; color: #63e6be;">
+  <div class="animal-container" id="animal12" style="top: 20%; right: 18%;">
     <div class="animal animal-fish">
       <svg viewBox="0 0 100 100">
-        <path class="animal-path" d="M25 50 Q45 40 65 50 Q75 55 65 60 Q45 70 25 60 Q20 55 25 50 M65 50 L80 40 L80 60 Z"/>
+        <path class="animal-path" d="M22 50 Q45 38 68 50 Q80 58 68 62 Q45 75 22 62 Q15 58 22 50 M68 50 L85 38 L85 62 Z"/>
       </svg>
     </div>
   </div>
