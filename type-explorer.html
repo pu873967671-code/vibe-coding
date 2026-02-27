@@ -1207,6 +1207,8 @@
           <div class="dot" data-step="2"></div>
           <div class="dot" data-step="3"></div>
           <div class="dot" data-step="4"></div>
+          <div class="dot" data-step="5"></div>
+          <div class="dot" data-step="6"></div>
         </div>
       </div>
 
@@ -1404,60 +1406,87 @@
 
     // ===== 💬 引导式对话系统 =====
     let currentStep = 1;
-    const totalSteps = 4;
+    const totalSteps = 6;
     let userChoices = [];
 
     // 对话流程
     const dialogueFlow = {
       1: {
         botMessage: `
-          <p>嘿！让我们轻松聊聊～</p>
-          <p>不要担心标签，只是想了解<span class="highlight">你自己</span>怎么看待自己。</p>
-          <p>你觉得哪种形容更贴近你的体型特征？</p>
+          <p>嘿！让我们深度聊聊～</p>
+          <p>不是问外表，而是想了解<span class="highlight">内在的你</span>。</p>
+          <p>你最在意别人怎么看你吗？</p>
         `,
         choices: [
-          { id: 'strong', text: '💪 壮硕、肌肉发达', traits: ['肌肉', '强壮', '成熟'] },
-          { id: 'slim', text: '🏃 精瘦、体脂低', traits: ['精瘦', '灵活', '年轻'] },
-          { id: 'fit', text: '🎯 匀称、结实', traits: ['健壮', '匀称', '阳光'] },
-          { id: 'slender', text: '🦌 纤细、修长', traits: ['纤细', '清秀', '文艺'] },
-          { id: 'cute', text: '🐰 可爱、少年感', traits: ['可爱', '活泼', '萌'] }
+          { id: 'approval', text: '🔒 很在意，希望被认可', dimension: '社会认同', value: '高认同需求' },
+          { id: 'some-approval', text: '🌟 有点在意，但不强求', dimension: '社会认同', value: '中等认同需求' },
+          { id: 'self-first', text: '⚡ 不太在意，做自己最重要', dimension: '社会认同', value: '自我优先' },
+          { id: 'authentic', text: '🌈 完全不在意，我就是我', dimension: '社会认同', value: '完全真实' }
         ],
         allowCustom: true,
-        customPlaceholder: '或者，用你自己的话描述...'
+        customPlaceholder: '或者，用你自己的话描述你对社会认同的看法...'
       },
 
       2: {
         botMessage: `
-          <p>有意思！那你觉得自己的性格更偏向哪种？</p>
+          <p>很好！那你觉得在社区中，<span class="highlight">归属感</span>对你重要吗？</p>
         `,
         choices: [
-          { id: 'warm', text: '🧸 温暖可靠、保护欲强', traits: ['温暖', '可靠', '保护'] },
-          { id: 'energetic', text: '⚡ 活泼机灵、有活力', traits: ['活力', '机灵', '调皮'] },
-          { id: 'mature', text: '🧠 成熟自信、有魅力', traits: ['成熟', '自信', '魅力'] },
-          { id: 'gentle', text: '🌸 温柔细腻、文艺气质', traits: ['温柔', '文艺', '细腻'] },
-          { id: 'mysterious', text: '🌙 机智神秘、难以捉摸', traits: ['机智', '神秘', '独特'] }
+          { id: 'belong-important', text: '🏠 很重要，想找到相似的人', dimension: '社区归属', value: '高归属需求' },
+          { id: 'friends-ok', text: '🤝 还可以，有朋友就好', dimension: '社区归属', value: '朋友导向' },
+          { id: 'solo', text: '🌱 不太重要，我喜欢独处', dimension: '社区归属', value: '独立倾向' },
+          { id: 'unique', text: '✨ 无所谓，我是独特的', dimension: '社区归属', value: '独特性优先' }
         ],
         allowCustom: true,
-        customPlaceholder: '或者，用你自己的话描述...'
+        customPlaceholder: '或者，用你自己的话描述你对社区归属的看法...'
       },
 
       3: {
         botMessage: `
-          <p>很好！最后一个问题～</p>
-          <p>你更看重什么？</p>
+          <p>深入一点～你更享受哪种<span class="highlight">互动角色</span>？</p>
         `,
         choices: [
-          { id: 'strength', text: '💪 力量、阳刚', values: ['强壮', '阳刚', '保护'] },
-          { id: 'youth', text: '⚡ 年轻、活力', values: ['年轻', '活力', '可爱'] },
-          { id: 'elegance', text: '🎨 优雅、精致', values: ['优雅', '精致', '品味'] },
-          { id: 'sincerity', text: '❤️ 真诚、友善', values: ['真诚', '友善', '可靠'] },
-          { id: 'uniqueness', text: '✨ 独特、个性', values: ['独特', '个性', '自我'] }
+          { id: 'protector', text: '🛡️ 保护者、可靠的支持', dimension: '权力动态', value: '保护型' },
+          { id: 'protected', text: '🌻 被保护、感到安全', dimension: '权力动态', value: '被保护型' },
+          { id: 'equal', text: '⚖️ 平等、互相支持', dimension: '权力动态', value: '平等型' },
+          { id: 'fluid', text: '💫 看情况、流动的', dimension: '权力动态', value: '流动型' }
         ],
         allowCustom: true,
-        customPlaceholder: '或者，用你自己的话描述...'
+        customPlaceholder: '或者，用你自己的话描述你的互动偏好...'
       },
 
       4: {
+        botMessage: `
+          <p>那你觉得自己的<span class="highlight">魅力</span>在哪里？</p>
+        `,
+        choices: [
+          { id: 'confidence', text: '💪 自信、成熟、稳重', dimension: '魅力来源', value: '自信魅力' },
+          { id: 'energy', text: '⚡ 活力、阳光、可爱', dimension: '魅力来源', value: '活力魅力' },
+          { id: 'elegance', text: '🎨 气质、优雅、独特', dimension: '魅力来源', value: '气质魅力' },
+          { id: 'sincerity', text: '❤️ 真诚、温暖、可靠', dimension: '魅力来源', value: '真诚魅力' },
+          { id: 'mystery', text: '✨ 神秘、难以捉摸', dimension: '魅力来源', value: '神秘魅力' }
+        ],
+        allowCustom: true,
+        customPlaceholder: '或者，用你自己的话描述你的魅力...'
+      },
+
+      5: {
+        botMessage: `
+          <p>最后一个深层问题～</p>
+          <p>你最<span class="highlight">不想</span>被误解成什么？</p>
+        `,
+        choices: [
+          { id: 'not-sincere', text: '💭 被认为不够真诚', dimension: '身份边界', value: '拒绝不真诚标签' },
+          { id: 'not-fake', text: '🎭 被认为做作、装', dimension: '身份边界', value: '拒绝虚假标签' },
+          { id: 'not-cold', text: '🌑 被认为冷漠、疏离', dimension: '身份边界', value: '拒绝冷漠标签' },
+          { id: 'not-showy', text: '🎪 被认为太张扬', dimension: '身份边界', value: '拒绝张扬标签' },
+          { id: 'not-unreliable', text: '💔 被认为不可靠', dimension: '身份边界', value: '拒绝不可靠标签' }
+        ],
+        allowCustom: true,
+        customPlaceholder: '或者，用你自己的话描述你最不想被误解的...'
+      },
+
+      6: {
         botMessage: null, // 动态生成
         isFinalStep: true
       }
@@ -1535,7 +1564,8 @@
         step: currentStep,
         choiceId: choiceId,
         text: choiceText,
-        traits: selectedChoice.traits || selectedChoice.values
+        dimension: selectedChoice.dimension,
+        value: selectedChoice.value
       });
 
       // 高亮选中的按钮
@@ -1565,7 +1595,8 @@
         step: currentStep,
         choiceId: 'custom',
         text: text,
-        traits: [text]
+        dimension: '自定义',
+        value: text
       });
 
       // 进入下一步
@@ -1615,46 +1646,46 @@
     function renderFinalSummary() {
       const chatMessages = document.getElementById('chat-messages');
 
-      // 收集所有特质
-      const allTraits = userChoices.flatMap(c => c.traits);
-      const uniqueTraits = [...new Set(allTraits)];
-
-      // 找到最匹配的类型（仅作参考）
-      let bestMatch = null;
-      let maxMatches = 0;
-
-      types.forEach(type => {
-        const matches = type.traits.filter(t => uniqueTraits.includes(t)).length;
-        if (matches > maxMatches) {
-          maxMatches = matches;
-          bestMatch = type;
-        }
-      });
+      // 按维度分组
+      const dimensions = userChoices.map(c => ({
+        dimension: c.dimension,
+        value: c.value,
+        text: c.text
+      }));
 
       const summaryDiv = document.createElement('div');
       summaryDiv.className = 'chat-message';
       summaryDiv.innerHTML = `
         <div class="bot-message">
-          <p>感谢你的分享！让我们来看看～</p>
-          <div class="reflection-box">
-            <p><strong>我们发现你的一些特质：</strong></p>
-            <ul style="list-style: none; padding-left: 0; margin-top: 15px;">
-              ${userChoices.map((choice, index) => `
-                <li style="margin-bottom: 10px; padding-left: 20px; position: relative;">
-                  <span style="position: absolute; left: 0;">•</span>
-                  ${choice.text}
-                </li>
-              `).join('')}
-            </ul>
+          <p>感谢你的深度分享！</p>
+          <p>通过这5个维度，让我们看看你的一些<span class="highlight">核心特质</span>：</p>
+
+          <div class="reflection-box" style="margin-top: 20px;">
+            ${dimensions.map(d => `
+              <div style="margin-bottom: 15px;">
+                <strong style="color: var(--accent);">${d.dimension}：</strong>
+                <span style="color: var(--text-primary);">${d.text}</span>
+              </div>
+            `).join('')}
           </div>
-          <p style="margin-top: 20px;">这些特质在社区中，有人会形容为<span class="highlight">${bestMatch ? bestMatch.name : '独特的'}</span>。</p>
-          <p>但记住：</p>
-          <div class="reflection-box">
-            <p>• <strong>你不是被这个词定义的。</strong></p>
-            <p>• 身份是流动的，你可以同时具备多种特质。</p>
-            <p>• 你有权利选择认同或不认同任何标签。</p>
-            <p>• 最重要的是<span class="highlight">你自己觉得舒服和认同</span>。</p>
+
+          <p style="margin-top: 25px;">这些特质在社区文化中，可能会被用一些词汇来形容。</p>
+
+          <p style="margin-top: 15px;">但更重要的是：</p>
+
+          <div class="reflection-box" style="margin-top: 15px;">
+            <p>• <strong>你如何看待这些特质？</strong></p>
+            <p>• <strong>这些特质让你舒服吗？</strong></p>
+            <p>• <strong>你想改变什么？保持什么？</strong></p>
           </div>
+
+          <p style="margin-top: 20px; font-style: italic; color: var(--text-secondary);">
+            记住：<br>
+            身份不是固定的标签，<br>
+            而是你与自己的<span class="highlight">持续对话</span>。<br>
+            你是流动的、成长的、独一无二的。
+          </p>
+
           <p style="margin-top: 20px;">想了解更多吗？</p>
           <div class="choice-buttons">
             <button class="choice-btn" onclick="location.href='#learn'">📚 了解文化背景</button>
