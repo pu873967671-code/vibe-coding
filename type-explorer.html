@@ -222,225 +222,170 @@
       display: block;
     }
 
-    /* ===== 🎴 穆夏风格卡牌游戏 ===== */
-    .memory-game-container {
-      max-width: 900px;
+    /* ===== 💬 引导式对话界面 ===== */
+    .chat-container {
+      max-width: 700px;
       margin: 0 auto;
       padding: 20px;
     }
 
-    .game-header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .game-stats {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      margin-top: 20px;
-    }
-
-    .stat-item {
-      background: var(--bg-secondary);
-      padding: 15px 25px;
-      border-radius: 12px;
+    .chat-messages {
+      min-height: 400px;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: var(--bg-card);
+      border-radius: 16px;
       border: 1px solid var(--border);
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 5px;
+    .chat-message {
+      margin-bottom: 20px;
+      animation: fadeInUp 0.5s ease-out;
     }
 
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-    }
-
-    .memory-card {
-      aspect-ratio: 3/4;
-      perspective: 1000px;
-      cursor: pointer;
-    }
-
-    .card-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-style: preserve-3d;
-    }
-
-    .memory-card.flipped .card-inner {
-      transform: rotateY(180deg);
-    }
-
-    .memory-card.matched .card-inner {
-      transform: rotateY(180deg);
-      opacity: 0.6;
-    }
-
-    .card-front, .card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    /* 卡牌背面（穆夏风格） */
-    .card-back {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border: 2px solid rgba(99, 102, 241, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .card-back::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
-      border: 2px solid rgba(99, 102, 241, 0.2);
-      border-radius: 12px;
-    }
-
-    /* 穆夏装饰图案 */
-    .muchapattern {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 0.15;
-      background-image:
-        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.3) 0%, transparent 50%);
-    }
-
-    .muchapattern svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .question-mark {
-      font-size: 64px;
-      color: rgba(99, 102, 241, 0.8);
-      z-index: 1;
-      text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    /* 卡牌正面 */
-    .card-front {
-      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
-      border: 2px solid var(--accent);
-      transform: rotateY(180deg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .bot-message {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
       padding: 20px;
-      position: relative;
-      overflow: hidden;
+      border-radius: 16px;
+      border-left: 4px solid var(--accent);
+      margin-bottom: 20px;
     }
 
-    /* 彩虹边框效果 */
-    .card-front::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(90deg,
-        #e40303 0%, #ff8c00 14%, #ffed00 28%,
-        #008026 42%, #004dff 57%, #750787 71%, #e40303 100%);
-      opacity: 0.1;
-      animation: rainbow-shift 3s ease-in-out infinite;
-    }
-
-    @keyframes rainbow-shift {
-      0%, 100% { opacity: 0.1; }
-      50% { opacity: 0.2; }
-    }
-
-    .card-emoji {
-      font-size: 56px;
-      margin-bottom: 10px;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    }
-
-    .card-label {
-      font-size: 18px;
-      font-weight: 600;
+    .bot-message p {
       color: var(--text-primary);
-      text-align: center;
-      z-index: 1;
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 10px;
     }
 
-    .card-sublabel {
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-align: center;
-      margin-top: 8px;
-      z-index: 1;
+    .bot-message p:last-child {
+      margin-bottom: 0;
     }
 
-    .card-type {
-      font-size: 14px;
-      color: var(--accent);
-      margin-top: 12px;
-      padding: 6px 16px;
+    .user-message {
+      background: var(--bg-secondary);
+      padding: 15px 20px;
+      border-radius: 16px;
+      margin-left: 40px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .choice-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .choice-btn {
+      padding: 18px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+
+    .choice-btn:hover {
+      border-color: var(--accent);
       background: rgba(99, 102, 241, 0.1);
-      border-radius: 20px;
-      z-index: 1;
+      transform: translateY(-2px);
     }
 
-    /* 游戏按钮 */
-    .game-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 30px;
+    .choice-btn.selected {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.2);
     }
 
-    .btn-game {
+    .custom-input-area {
+      margin-top: 15px;
+    }
+
+    .custom-input {
+      width: 100%;
+      padding: 15px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 15px;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .custom-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .send-btn {
+      margin-top: 10px;
       padding: 12px 30px;
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
       border: none;
       border-radius: 12px;
+      cursor: pointer;
       font-size: 15px;
       font-weight: 600;
-      cursor: pointer;
       transition: all 0.3s ease;
     }
 
-    .btn-game:hover {
+    .send-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
     }
 
-    .btn-game:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
+    .reflection-box {
+      background: rgba(99, 102, 241, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 15px;
+      border-left: 3px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .reflection-box p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .reflection-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    .dot.completed {
+      background: rgba(99, 102, 241, 0.5);
     }
 
     /* Questionnaire */
@@ -1247,55 +1192,28 @@
 
     <!-- Tab Content: Explore -->
     <div id="explore" class="tab-content">
-      <h2 style="font-size: 24px; margin-bottom: 20px;">🎴 记忆配对游戏</h2>
+      <h2 style="font-size: 24px; margin-bottom: 20px;">💬 探索你的特质</h2>
       <p style="color: var(--text-secondary); margin-bottom: 20px;">
-        翻开卡牌，找到匹配的特征与类型！记住卡片位置，考验你的记忆力！
+        通过轻松的对话，了解你自己。记住，这不是贴标签，而是自我探索。
       </p>
 
-      <div class="memory-game-container">
-        <!-- 游戏统计 -->
-        <div class="game-header">
-          <h3 style="font-size: 20px; color: var(--text-primary);">✨ 找到所有配对</h3>
-          <div class="game-stats">
-            <div class="stat-item">
-              <div class="stat-label">尝试次数</div>
-              <div class="stat-value" id="attempts">0</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">已匹配</div>
-              <div class="stat-value"><span id="matched">0</span> / <span id="total-pairs">8</span></div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">用时</div>
-              <div class="stat-value" id="timer">0:00</div>
-            </div>
-          </div>
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <!-- 对话内容将在这里动态生成 -->
         </div>
 
-        <!-- 卡牌网格 -->
-        <div class="card-grid" id="card-grid">
-          <!-- 卡牌将通过JavaScript生成 -->
-        </div>
-
-        <!-- 游戏按钮 -->
-        <div class="game-buttons">
-          <button class="btn-game" onclick="resetGame()">🔄 重新开始</button>
-          <button class="btn-game" id="see-results-btn" style="display: none;" onclick="showGameResults()">📊 查看结果</button>
-        </div>
-
-        <!-- 游戏结果（隐藏） -->
-        <div id="game-results" style="display: none; margin-top: 30px; background: var(--bg-card); border-radius: 12px; padding: 30px;">
-          <h3 style="font-size: 20px; margin-bottom: 20px; text-align: center;">🎉 游戏完成！</h3>
-          <div id="matched-types" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <!-- 匹配的类型将在这里显示 -->
-          </div>
+        <div class="progress-dots">
+          <div class="dot active" data-step="1"></div>
+          <div class="dot" data-step="2"></div>
+          <div class="dot" data-step="3"></div>
+          <div class="dot" data-step="4"></div>
         </div>
       </div>
 
       <div class="privacy-notice">
-        ⚠️ <strong>重要提示：</strong>
-        此游戏仅供自我探索娱乐，结果不应被视为对你身份的定义。
-        你有权利选择任何标签，或者不使用任何标签。
+        💡 <strong>温馨提示：</strong>
+        这个对话只是为了帮助你探索自己，不会给你贴标签。
+        你有权利选择认同或不认同任何描述。最重要的是你自己觉得舒服。
       </div>
     </div>
 
@@ -1484,226 +1402,274 @@
       }
     ];
 
-    // ===== 🎴 翻牌记忆游戏 =====
-    let gameCards = [];
-    let flippedCards = [];
-    let matchedPairs = 0;
-    let attempts = 0;
-    let gameTimer = null;
-    let gameSeconds = 0;
-    let matchedTypes = [];
-    let canFlip = true;
+    // ===== 💬 引导式对话系统 =====
+    let currentStep = 1;
+    const totalSteps = 4;
+    let userChoices = [];
 
-    // 初始化游戏
-    function initGame() {
-      // 选择8种类型用于游戏
-      const gameTypes = types.slice(0, 8);
+    // 对话流程
+    const dialogueFlow = {
+      1: {
+        botMessage: `
+          <p>嘿！让我们轻松聊聊～</p>
+          <p>不要担心标签，只是想了解<span class="highlight">你自己</span>怎么看待自己。</p>
+          <p>你觉得哪种形容更贴近你的体型特征？</p>
+        `,
+        choices: [
+          { id: 'strong', text: '💪 壮硕、肌肉发达', traits: ['肌肉', '强壮', '成熟'] },
+          { id: 'slim', text: '🏃 精瘦、体脂低', traits: ['精瘦', '灵活', '年轻'] },
+          { id: 'fit', text: '🎯 匀称、结实', traits: ['健壮', '匀称', '阳光'] },
+          { id: 'slender', text: '🦌 纤细、修长', traits: ['纤细', '清秀', '文艺'] },
+          { id: 'cute', text: '🐰 可爱、少年感', traits: ['可爱', '活泼', '萌'] }
+        ],
+        allowCustom: true,
+        customPlaceholder: '或者，用你自己的话描述...'
+      },
 
-      // 创建配对卡牌
-      gameCards = [];
-      gameTypes.forEach(type => {
-        // 特征卡
-        gameCards.push({
-          id: `trait-${type.id}`,
-          type: type.id,
-          pairId: type.id,
-          emoji: type.traits[0] === '肌肉' ? '💪' :
-                 type.traits[0] === '精瘦' ? '🏃' :
-                 type.traits[0] === '健壮' ? '🏋️' :
-                 type.traits[0] === '纤细' ? '🦌' :
-                 type.traits[0] === '可爱' ? '🐰' :
-                 type.traits[0] === '聪明' ? '🦊' :
-                 type.traits[0] === '忠诚' ? '🐕' :
-                 type.traits[0] === '优雅' ? '🐱' : '⭐',
-          label: type.traits[0],
-          sublabel: '特征',
-          cardType: 'trait'
-        });
+      2: {
+        botMessage: `
+          <p>有意思！那你觉得自己的性格更偏向哪种？</p>
+        `,
+        choices: [
+          { id: 'warm', text: '🧸 温暖可靠、保护欲强', traits: ['温暖', '可靠', '保护'] },
+          { id: 'energetic', text: '⚡ 活泼机灵、有活力', traits: ['活力', '机灵', '调皮'] },
+          { id: 'mature', text: '🧠 成熟自信、有魅力', traits: ['成熟', '自信', '魅力'] },
+          { id: 'gentle', text: '🌸 温柔细腻、文艺气质', traits: ['温柔', '文艺', '细腻'] },
+          { id: 'mysterious', text: '🌙 机智神秘、难以捉摸', traits: ['机智', '神秘', '独特'] }
+        ],
+        allowCustom: true,
+        customPlaceholder: '或者，用你自己的话描述...'
+      },
 
-        // 类型卡
-        gameCards.push({
-          id: `type-${type.id}`,
-          type: type.id,
-          pairId: type.id,
-          emoji: type.emoji,
-          label: type.name,
-          sublabel: type.desc,
-          cardType: 'type'
-        });
-      });
+      3: {
+        botMessage: `
+          <p>很好！最后一个问题～</p>
+          <p>你更看重什么？</p>
+        `,
+        choices: [
+          { id: 'strength', text: '💪 力量、阳刚', values: ['强壮', '阳刚', '保护'] },
+          { id: 'youth', text: '⚡ 年轻、活力', values: ['年轻', '活力', '可爱'] },
+          { id: 'elegance', text: '🎨 优雅、精致', values: ['优雅', '精致', '品味'] },
+          { id: 'sincerity', text: '❤️ 真诚、友善', values: ['真诚', '友善', '可靠'] },
+          { id: 'uniqueness', text: '✨ 独特、个性', values: ['独特', '个性', '自我'] }
+        ],
+        allowCustom: true,
+        customPlaceholder: '或者，用你自己的话描述...'
+      },
 
-      // 洗牌
-      gameCards = shuffleArray(gameCards);
-
-      // 重置游戏状态
-      matchedPairs = 0;
-      attempts = 0;
-      gameSeconds = 0;
-      matchedTypes = [];
-      canFlip = true;
-      flippedCards = [];
-
-      // 更新UI
-      document.getElementById('attempts').textContent = attempts;
-      document.getElementById('matched').textContent = matchedPairs;
-      document.getElementById('total-pairs').textContent = gameTypes.length;
-      document.getElementById('timer').textContent = '0:00';
-      document.getElementById('see-results-btn').style.display = 'none';
-      document.getElementById('game-results').style.display = 'none';
-
-      // 渲染卡牌
-      renderCards();
-
-      // 启动计时器
-      if (gameTimer) clearInterval(gameTimer);
-      gameTimer = setInterval(() => {
-        gameSeconds++;
-        const mins = Math.floor(gameSeconds / 60);
-        const secs = gameSeconds % 60;
-        document.getElementById('timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-      }, 1000);
-    }
-
-    // 洗牌算法
-    function shuffleArray(array) {
-      const newArray = [...array];
-      for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      4: {
+        botMessage: null, // 动态生成
+        isFinalStep: true
       }
-      return newArray;
+    };
+
+    // 初始化对话
+    function initDialogue() {
+      currentStep = 1;
+      userChoices = [];
+      updateProgressDots();
+      renderCurrentStep();
     }
 
-    // 渲染卡牌
-    function renderCards() {
-      const grid = document.getElementById('card-grid');
-      grid.innerHTML = '';
+    // 渲染当前步骤
+    function renderCurrentStep() {
+      const chatMessages = document.getElementById('chat-messages');
+      const stepData = dialogueFlow[currentStep];
 
-      gameCards.forEach((card, index) => {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'memory-card';
-        cardElement.dataset.index = index;
-        cardElement.onclick = () => flipCard(index);
+      // 清空之前的内容
+      chatMessages.innerHTML = '';
 
-        cardElement.innerHTML = `
-          <div class="card-inner">
-            <!-- 背面（穆夏风格） -->
-            <div class="card-back">
-              <div class="muchapattern">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                  <!-- 穆夏装饰曲线 -->
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(99, 102, 241, 0.2)" stroke-width="1"/>
-                  <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(139, 92, 246, 0.2)" stroke-width="1"/>
-                  <circle cx="50" cy="50" r="25" fill="none" stroke="rgba(99, 102, 241, 0.2)" stroke-width="1"/>
-                  <!-- 花卉装饰 -->
-                  <path d="M50,10 Q60,30 50,50 Q40,30 50,10" fill="none" stroke="rgba(99, 102, 241, 0.15)" stroke-width="0.5"/>
-                  <path d="M90,50 Q70,60 50,50 Q70,40 90,50" fill="none" stroke="rgba(139, 92, 246, 0.15)" stroke-width="0.5"/>
-                  <path d="M50,90 Q40,70 50,50 Q60,70 50,90" fill="none" stroke="rgba(99, 102, 241, 0.15)" stroke-width="0.5"/>
-                  <path d="M10,50 Q30,40 50,50 Q30,60 10,50" fill="none" stroke="rgba(139, 92, 246, 0.15)" stroke-width="0.5"/>
-                </svg>
-              </div>
-              <div class="question-mark">?</div>
-            </div>
-
-            <!-- 正面 -->
-            <div class="card-front">
-              <div class="card-emoji">${card.emoji}</div>
-              <div class="card-label">${card.label}</div>
-              ${card.sublabel ? `<div class="card-sublabel">${card.sublabel}</div>` : ''}
-              <div class="card-type">${card.cardType === 'trait' ? '特征' : '类型'}</div>
-            </div>
+      // 添加Bot消息
+      if (stepData.botMessage) {
+        const botDiv = document.createElement('div');
+        botDiv.className = 'chat-message';
+        botDiv.innerHTML = `
+          <div class="bot-message">
+            ${stepData.botMessage}
+            ${renderChoices(stepData)}
           </div>
         `;
-
-        grid.appendChild(cardElement);
-      });
+        chatMessages.appendChild(botDiv);
+      } else if (stepData.isFinalStep) {
+        // 最终步骤：展示总结
+        renderFinalSummary();
+      }
     }
 
-    // 翻牌
-    function flipCard(index) {
-      if (!canFlip) return;
+    // 渲染选择按钮
+    function renderChoices(stepData) {
+      let html = '<div class="choice-buttons">';
 
-      const card = gameCards[index];
-      const cardElement = document.querySelectorAll('.memory-card')[index];
+      stepData.choices.forEach(choice => {
+        html += `
+          <button class="choice-btn" onclick="selectChoice('${choice.id}', '${choice.text}')">
+            ${choice.text}
+          </button>
+        `;
+      });
 
-      // 已翻开或已匹配的卡牌不能再次翻开
-      if (cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) {
-        return;
+      html += '</div>';
+
+      if (stepData.allowCustom) {
+        html += `
+          <div class="custom-input-area">
+            <textarea class="custom-input" id="custom-input" placeholder="${stepData.customPlaceholder}"></textarea>
+            <button class="send-btn" onclick="submitCustomInput()">发送</button>
+          </div>
+        `;
       }
 
-      // 翻开卡牌
-      cardElement.classList.add('flipped');
-      flippedCards.push({ index, card, element: cardElement });
+      return html;
+    }
 
-      // 如果翻开了两张牌
-      if (flippedCards.length === 2) {
-        canFlip = false;
-        attempts++;
-        document.getElementById('attempts').textContent = attempts;
+    // 选择选项
+    function selectChoice(choiceId, choiceText) {
+      const stepData = dialogueFlow[currentStep];
+      const selectedChoice = stepData.choices.find(c => c.id === choiceId);
 
-        const [first, second] = flippedCards;
+      // 添加用户消息
+      adduserMessage(choiceText);
 
-        // 检查是否匹配
-        if (first.card.pairId === second.card.pairId && first.card.cardType !== second.card.cardType) {
-          // 匹配成功
-          setTimeout(() => {
-            first.element.classList.add('matched');
-            second.element.classList.add('matched');
-            matchedPairs++;
-            matchedTypes.push(first.card.pairId);
-            document.getElementById('matched').textContent = matchedPairs;
+      // 保存选择
+      userChoices.push({
+        step: currentStep,
+        choiceId: choiceId,
+        text: choiceText,
+        traits: selectedChoice.traits || selectedChoice.values
+      });
 
-            // 检查游戏是否完成
-            if (matchedPairs === 8) {
-              clearInterval(gameTimer);
-              document.getElementById('see-results-btn').style.display = 'inline-block';
-            }
+      // 高亮选中的按钮
+      document.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      event.target.classList.add('selected');
 
-            canFlip = true;
-            flippedCards = [];
-          }, 500);
-        } else {
-          // 不匹配，翻回去
-          setTimeout(() => {
-            first.element.classList.remove('flipped');
-            second.element.classList.remove('flipped');
-            canFlip = true;
-            flippedCards = [];
-          }, 1000);
+      // 延迟进入下一步
+      setTimeout(() => {
+        nextStep();
+      }, 800);
+    }
+
+    // 提交自定义输入
+    function submitCustomInput() {
+      const input = document.getElementById('custom-input');
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      // 添加用户消息
+      adduserMessage(text);
+
+      // 保存选择
+      userChoices.push({
+        step: currentStep,
+        choiceId: 'custom',
+        text: text,
+        traits: [text]
+      });
+
+      // 进入下一步
+      setTimeout(() => {
+        nextStep();
+      }, 800);
+    }
+
+    // 添加用户消息
+    function adduserMessage(text) {
+      const chatMessages = document.getElementById('chat-messages');
+      const userDiv = document.createElement('div');
+      userDiv.className = 'chat-message';
+      userDiv.innerHTML = `
+        <div class="user-message">
+          ${text}
+        </div>
+      `;
+      chatMessages.appendChild(userDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // 下一步
+    function nextStep() {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateProgressDots();
+        renderCurrentStep();
+      }
+    }
+
+    // 更新进度点
+    function updateProgressDots() {
+      document.querySelectorAll('.dot').forEach(dot => {
+        const step = parseInt(dot.dataset.step);
+        dot.classList.remove('active', 'completed');
+
+        if (step === currentStep) {
+          dot.classList.add('active');
+        } else if (step < currentStep) {
+          dot.classList.add('completed');
         }
-      }
+      });
     }
 
-    // 重置游戏
-    function resetGame() {
-      clearInterval(gameTimer);
-      initGame();
-    }
+    // 渲染最终总结
+    function renderFinalSummary() {
+      const chatMessages = document.getElementById('chat-messages');
 
-    // 显示游戏结果
-    function showGameResults() {
-      const resultsDiv = document.getElementById('game-results');
-      const matchedTypesDiv = document.getElementById('matched-types');
+      // 收集所有特质
+      const allTraits = userChoices.flatMap(c => c.traits);
+      const uniqueTraits = [...new Set(allTraits)];
 
-      // 显示匹配的类型
-      matchedTypesDiv.innerHTML = matchedTypes.map(typeId => {
-        const type = types.find(t => t.id === typeId);
-        return `
-          <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border);">
-            <div style="font-size: 48px; margin-bottom: 10px;">${type.emoji}</div>
-            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 5px;">${type.name}</div>
-            <div style="font-size: 14px; color: var(--text-secondary);">${type.desc}</div>
+      // 找到最匹配的类型（仅作参考）
+      let bestMatch = null;
+      let maxMatches = 0;
+
+      types.forEach(type => {
+        const matches = type.traits.filter(t => uniqueTraits.includes(t)).length;
+        if (matches > maxMatches) {
+          maxMatches = matches;
+          bestMatch = type;
+        }
+      });
+
+      const summaryDiv = document.createElement('div');
+      summaryDiv.className = 'chat-message';
+      summaryDiv.innerHTML = `
+        <div class="bot-message">
+          <p>感谢你的分享！让我们来看看～</p>
+          <div class="reflection-box">
+            <p><strong>我们发现你的一些特质：</strong></p>
+            <ul style="list-style: none; padding-left: 0; margin-top: 15px;">
+              ${userChoices.map((choice, index) => `
+                <li style="margin-bottom: 10px; padding-left: 20px; position: relative;">
+                  <span style="position: absolute; left: 0;">•</span>
+                  ${choice.text}
+                </li>
+              `).join('')}
+            </ul>
           </div>
-        `;
-      }).join('');
+          <p style="margin-top: 20px;">这些特质在社区中，有人会形容为<span class="highlight">${bestMatch ? bestMatch.name : '独特的'}</span>。</p>
+          <p>但记住：</p>
+          <div class="reflection-box">
+            <p>• <strong>你不是被这个词定义的。</strong></p>
+            <p>• 身份是流动的，你可以同时具备多种特质。</p>
+            <p>• 你有权利选择认同或不认同任何标签。</p>
+            <p>• 最重要的是<span class="highlight">你自己觉得舒服和认同</span>。</p>
+          </div>
+          <p style="margin-top: 20px;">想了解更多吗？</p>
+          <div class="choice-buttons">
+            <button class="choice-btn" onclick="location.href='#learn'">📚 了解文化背景</button>
+            <button class="choice-btn" onclick="initDialogue()">🔄 重新探索</button>
+          </div>
+        </div>
+      `;
 
-      resultsDiv.style.display = 'block';
-      resultsDiv.scrollIntoView({ behavior: 'smooth' });
+      chatMessages.appendChild(summaryDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // 页面加载时初始化游戏
+    // 页面加载时初始化对话
     document.addEventListener('DOMContentLoaded', () => {
-      initGame();
+      initDialogue();
     });
 
     // Questions
