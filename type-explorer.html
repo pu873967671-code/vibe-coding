@@ -60,11 +60,20 @@
     .header {
       text-align: center;
       margin-bottom: 50px;
+      position: relative;
     }
 
     .logo {
       font-size: 48px;
       margin-bottom: 20px;
+      display: inline-block;
+      animation: flag-wave 2s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    @keyframes flag-wave {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
     }
 
     .title {
@@ -73,6 +82,33 @@
       margin-bottom: 15px;
       background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
+
+    .title:hover {
+      transform: scale(1.05);
+    }
+
+    /* 贪吃蛇动画 */
+    .snake-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .snake-particle.active {
+      opacity: 1;
+    }
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
@@ -774,8 +810,8 @@
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <div class="logo">🏳️‍🌈</div>
-      <h1 class="title">🌈 彩虹光谱</h1>
+      <div class="logo" id="rainbowFlag">🏳️‍🌈</div>
+      <h1 class="title" id="mainTitle" onmouseenter="startSnakeAnimation()" onmouseleave="stopSnakeAnimation()">🌈 彩虹光谱</h1>
       <p class="subtitle">发现你在光谱上的位置</p>
     </div>
 
@@ -1927,6 +1963,121 @@
           stripe.style.transform = 'scaleY(1)';
         });
       }, 300);
+    }
+
+    // ===== 🐍 贪吃蛇动画 =====
+    let snakeAnimationId = null;
+    let snakeParticles = [];
+
+    function startSnakeAnimation() {
+      const title = document.getElementById('mainTitle');
+      const logo = document.getElementById('rainbowFlag');
+      if (!title || !logo) return;
+
+      // 创建蛇的粒子
+      const particleCount = 15;
+      snakeParticles = [];
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'snake-particle';
+        particle.style.background = `hsl(${(i / particleCount) * 360}, 80%, 60%)`;
+        document.body.appendChild(particle);
+        snakeParticles.push(particle);
+      }
+
+      // 获取标题和logo的位置
+      const titleRect = title.getBoundingClientRect();
+      const logoRect = logo.getBoundingClientRect();
+
+      // 计算X形路线的关键点
+      const points = [
+        { x: titleRect.left - 20, y: titleRect.top - 20 }, // 左上
+        { x: titleRect.right + 20, y: titleRect.top - 20 }, // 右上
+        { x: titleRect.left - 20, y: titleRect.bottom + 20 }, // 左下
+        { x: titleRect.right + 20, y: titleRect.bottom + 20 }, // 右下
+        { x: titleRect.left + titleRect.width / 2, y: titleRect.top - 30 }, // 顶部中心
+        { x: titleRect.right + 20, y: titleRect.top + titleRect.height / 2 }, // 右侧中心
+        { x: titleRect.left + titleRect.width / 2, y: titleRect.bottom + 30 }, // 底部中心
+        { x: titleRect.left - 20, y: titleRect.top + titleRect.height / 2 }, // 左侧中心
+        { x: logoRect.left + logoRect.width / 2, y: logoRect.top + logoRect.height / 2 } // 回到logo
+      ];
+
+      let currentPoint = 0;
+      let progress = 0;
+      const speed = 0.02;
+
+      function animateSnake() {
+        progress += speed;
+
+        if (progress >= 1) {
+          progress = 0;
+          currentPoint++;
+          if (currentPoint >= points.length) {
+            currentPoint = 0;
+          }
+        }
+
+        const fromPoint = points[currentPoint];
+        const toPoint = points[(currentPoint + 1) % points.length];
+
+        // 更新所有粒子的位置
+        snakeParticles.forEach((particle, index) => {
+          const delay = index * 0.05;
+          let particleProgress = progress - delay;
+          
+          if (particleProgress < 0) {
+            particleProgress = 0;
+          } else if (particleProgress > 1) {
+            particleProgress = 1;
+          }
+
+          // 添加蛇形摆动效果
+          const wave = Math.sin((progress + index * 0.3) * Math.PI * 2) * 10;
+
+          const x = fromPoint.x + (toPoint.x - fromPoint.x) * particleProgress + wave;
+          const y = fromPoint.y + (toPoint.y - fromPoint.y) * particleProgress;
+
+          particle.style.left = `${x}px`;
+          particle.style.top = `${y}px`;
+          particle.classList.add('active');
+
+          // 头部粒子更大更亮
+          if (index === 0) {
+            particle.style.width = '12px';
+            particle.style.height = '12px';
+            particle.style.boxShadow = '0 0 10px currentColor';
+          } else {
+            particle.style.width = '8px';
+            particle.style.height = '8px';
+            particle.style.boxShadow = 'none';
+            particle.style.opacity = 1 - (index / particleCount) * 0.5;
+          }
+        });
+
+        snakeAnimationId = requestAnimationFrame(animateSnake);
+      }
+
+      animateSnake();
+    }
+
+    function stopSnakeAnimation() {
+      if (snakeAnimationId) {
+        cancelAnimationFrame(snakeAnimationId);
+        snakeAnimationId = null;
+      }
+
+      // 移除所有粒子
+      snakeParticles.forEach(particle => {
+        particle.classList.remove('active');
+        setTimeout(() => {
+          if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+          }
+        }, 300);
+      });
+
+      snakeParticles = [];
     }
 
     // Switch Tab
