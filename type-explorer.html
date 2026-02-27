@@ -844,57 +844,48 @@
       <div class="logo" id="rainbowFlag">
         <div class="flag-container">
           <svg viewBox="0 0 48 36" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+            <defs>
+              <!-- 定义裁剪路径 - 用于创建波浪形旗面 -->
+              <clipPath id="wave-clip">
+                <path id="wave-path">
+                  <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
+                    values="M1.2,0 Q12,1 24,3 T36,5 T46,4 L46,36 Q36,31 24,33 T12,35 T1.2,36 Z;
+                            M1.2,0 Q12,2 24,1 T36,3 T46,2 L46,36 Q36,34 24,32 T12,34 T1.2,36 Z;
+                            M1.2,0 Q12,0 24,4 T36,2 T46,5 L46,36 Q36,33 24,34 T12,36 T1.2,36 Z;
+                            M1.2,0 Q12,1 24,3 T36,5 T46,4 L46,36 Q36,31 24,33 T12,35 T1.2,36 Z"/>
+                </path>
+              </clipPath>
+
+              <!-- 旗帜阴影和光泽 -->
+              <linearGradient id="flag-shade" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.15)"/>
+                <stop offset="50%" stop-color="rgba(0,0,0,0.05)"/>
+                <stop offset="100%" stop-color="rgba(0,0,0,0.15)"/>
+              </linearGradient>
+            </defs>
+
             <!-- 旗杆 -->
             <rect x="0" y="0" width="1.2" height="36" fill="#c0c0c0"/>
             <circle cx="0.6" cy="0" r="2" fill="#ffd700"/>
 
-            <!-- 红色条纹 -->
-            <path fill="#e40303" opacity="0.95">
-              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                values="M1.2,0 L46,0 L46,6 L1.2,6 Z;
-                        M1.2,0 Q20,2 46,1 L46,6 Q20,5 1.2,6 Z;
-                        M1.2,0 L46,0 L46,6 L1.2,6 Z"/>
-            </path>
+            <!-- 整个旗面被裁剪成波浪形 -->
+            <g clip-path="url(#wave-clip)">
+              <!-- 红色条纹 -->
+              <rect x="1.2" y="0" width="46" height="6" fill="#e40303"/>
+              <!-- 橙色条纹 -->
+              <rect x="1.2" y="6" width="46" height="6" fill="#ff8c00"/>
+              <!-- 黄色条纹 -->
+              <rect x="1.2" y="12" width="46" height="6" fill="#ffed00"/>
+              <!-- 绿色条纹 -->
+              <rect x="1.2" y="18" width="46" height="6" fill="#008026"/>
+              <!-- 蓝色条纹 -->
+              <rect x="1.2" y="24" width="46" height="6" fill="#004dff"/>
+              <!-- 紫色条纹 -->
+              <rect x="1.2" y="30" width="46" height="6" fill="#750787"/>
 
-            <!-- 橙色条纹 -->
-            <path fill="#ff8c00" opacity="0.95">
-              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                values="M1.2,6 L46,6 L46,12 L1.2,12 Z;
-                        M1.2,6 Q20,8 46,7 L46,12 Q20,11 1.2,12 Z;
-                        M1.2,6 L46,6 L46,12 L1.2,12 Z"/>
-            </path>
-
-            <!-- 黄色条纹 -->
-            <path fill="#ffed00" opacity="0.95">
-              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                values="M1.2,12 L46,12 L46,18 L1.2,18 Z;
-                        M1.2,12 Q20,14 46,13 L46,18 Q20,17 1.2,18 Z;
-                        M1.2,12 L46,12 L46,18 L1.2,18 Z"/>
-            </path>
-
-            <!-- 绿色条纹 -->
-            <path fill="#008026" opacity="0.95">
-              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                values="M1.2,18 L46,18 L46,24 L1.2,24 Z;
-                        M1.2,18 Q20,20 46,19 L46,24 Q20,23 1.2,24 Z;
-                        M1.2,18 L46,18 L46,24 L1.2,24 Z"/>
-            </path>
-
-            <!-- 蓝色条纹 -->
-            <path fill="#004dff" opacity="0.95">
-              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                values="M1.2,24 L46,24 L46,30 L1.2,30 Z;
-                        M1.2,24 Q20,26 46,25 L46,30 Q20,29 1.2,30 Z;
-                        M1.2,24 L46,24 L46,30 L1.2,30 Z"/>
-            </path>
-
-            <!-- 紫色条纹 -->
-            <path fill="#750787" opacity="0.95">
-              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                values="M1.2,30 L46,30 L46,36 L1.2,36 Z;
-                        M1.2,30 Q20,32 46,31 L46,36 Q20,35 1.2,36 Z;
-                        M1.2,30 L46,30 L46,36 L1.2,36 Z"/>
-            </path>
+              <!-- 布料阴影效果 -->
+              <rect x="1.2" y="0" width="46" height="36" fill="url(#flag-shade)" opacity="0.4"/>
+            </g>
           </svg>
         </div>
       </div>
