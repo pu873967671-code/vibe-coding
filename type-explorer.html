@@ -520,16 +520,18 @@
       }
     }
 
-    /* 🌈 底部流动彩虹光效 - 缩小面积 */
+    /* 🌈 底部流动彩虹光效 - 缩小面积 + 渐变过渡 */
     .bottom-glow {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 60px; /* 从150px减少到60px */
+      height: 80px; /* 稍微增加到80px */
       pointer-events: none;
       z-index: 0;
       overflow: hidden;
+      mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.3) 60%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.3) 60%, transparent 100%);
     }
 
     .glow-layer {
@@ -537,8 +539,8 @@
       bottom: 0;
       width: 200%;
       height: 100%;
-      opacity: 0.2; /* 从0.4降低到0.2 */
-      filter: blur(40px); /* 从60px减少到40px */
+      opacity: 0.25; /* 稍微提高到0.25 */
+      filter: blur(30px); /* 减少到30px */
       animation: flow-horizontal 8s linear infinite;
     }
 
