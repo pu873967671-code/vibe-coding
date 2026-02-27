@@ -2051,94 +2051,98 @@
       }, 300);
     }
 
-    // ===== 🐍 贪吃蛇动画 =====
+    // ===== 🐍 贪吃蛇动画（改进版）=====
     let snakeAnimationId = null;
     let snakeParticles = [];
+    let snakeTime = 0;
 
     function startSnakeAnimation() {
       const title = document.getElementById('mainTitle');
       const logo = document.getElementById('rainbowFlag');
       if (!title || !logo) return;
 
-      // 创建蛇的粒子
-      const particleCount = 15;
+      // 创建蛇的粒子（更多、更大）
+      const particleCount = 25;
       snakeParticles = [];
+
+      // 彩虹色数组
+      const rainbowColors = [
+        '#ff0000', // 红
+        '#ff8800', // 橙
+        '#ffff00', // 黄
+        '#00ff00', // 绿
+        '#00ffff', // 青
+        '#0088ff', // 蓝
+        '#8800ff', // 紫
+        '#ff00ff'  // 粉
+      ];
 
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'snake-particle';
-        particle.style.background = `hsl(${(i / particleCount) * 360}, 80%, 60%)`;
+
+        // 头部更大更亮
+        if (i === 0) {
+          particle.style.cssText = `
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ffffff 0%, ${rainbowColors[0]} 100%);
+            box-shadow: 0 0 20px ${rainbowColors[0]}, 0 0 40px ${rainbowColors[0]};
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+          `;
+        } else {
+          const colorIndex = i % rainbowColors.length;
+          particle.style.cssText = `
+            width: ${16 - i * 0.3}px;
+            height: ${16 - i * 0.3}px;
+            background: ${rainbowColors[colorIndex]};
+            box-shadow: 0 0 10px ${rainbowColors[colorIndex]};
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: ${1 - i / particleCount * 0.6};
+          `;
+        }
+
         document.body.appendChild(particle);
         snakeParticles.push(particle);
       }
 
-      // 获取标题和logo的位置
-      const titleRect = title.getBoundingClientRect();
-      const logoRect = logo.getBoundingClientRect();
-
-      // 计算X形路线的关键点
-      const points = [
-        { x: titleRect.left - 20, y: titleRect.top - 20 }, // 左上
-        { x: titleRect.right + 20, y: titleRect.top - 20 }, // 右上
-        { x: titleRect.left - 20, y: titleRect.bottom + 20 }, // 左下
-        { x: titleRect.right + 20, y: titleRect.bottom + 20 }, // 右下
-        { x: titleRect.left + titleRect.width / 2, y: titleRect.top - 30 }, // 顶部中心
-        { x: titleRect.right + 20, y: titleRect.top + titleRect.height / 2 }, // 右侧中心
-        { x: titleRect.left + titleRect.width / 2, y: titleRect.bottom + 30 }, // 底部中心
-        { x: titleRect.left - 20, y: titleRect.top + titleRect.height / 2 }, // 左侧中心
-        { x: logoRect.left + logoRect.width / 2, y: logoRect.top + logoRect.height / 2 } // 回到旗帜中心
-      ];
-
-      let currentPoint = 0;
-      let progress = 0;
-      const speed = 0.02;
+      snakeTime = 0;
 
       function animateSnake() {
-        progress += speed;
+        snakeTime += 0.03;
 
-        if (progress >= 1) {
-          progress = 0;
-          currentPoint++;
-          if (currentPoint >= points.length) {
-            currentPoint = 0;
-          }
-        }
+        const titleRect = title.getBoundingClientRect();
+        const logoRect = logo.getBoundingClientRect();
 
-        const fromPoint = points[currentPoint];
-        const toPoint = points[(currentPoint + 1) % points.length];
-
-        // 更新所有粒子的位置
+        // 更复杂的8字形路径
         snakeParticles.forEach((particle, index) => {
-          const delay = index * 0.05;
-          let particleProgress = progress - delay;
-          
-          if (particleProgress < 0) {
-            particleProgress = 0;
-          } else if (particleProgress > 1) {
-            particleProgress = 1;
-          }
+          const delay = index * 0.15;
+          const t = snakeTime - delay;
 
-          // 添加蛇形摆动效果
-          const wave = Math.sin((progress + index * 0.3) * Math.PI * 2) * 10;
+          // 8字形轨迹 + 螺旋
+          const centerX = titleRect.left + titleRect.width / 2;
+          const centerY = titleRect.top + titleRect.height / 2;
 
-          const x = fromPoint.x + (toPoint.x - fromPoint.x) * particleProgress + wave;
-          const y = fromPoint.y + (toPoint.y - fromPoint.y) * particleProgress;
+          // 水平8字
+          const radiusX = titleRect.width * 0.8;
+          const radiusY = titleRect.height * 0.6;
 
-          particle.style.left = `${x}px`;
+          // 蛇形曲线
+          const x = centerX + radiusX * Math.sin(t * 2) * Math.cos(t);
+          const y = centerY + radiusY * Math.sin(t * 3) + Math.sin(t * 5) * 10;
+
+          // 蛇身摆动
+          const wave = Math.sin(t * 4 + index * 0.5) * (5 + index * 0.5);
+
+          particle.style.left = `${x + wave}px`;
           particle.style.top = `${y}px`;
           particle.classList.add('active');
-
-          // 头部粒子更大更亮
-          if (index === 0) {
-            particle.style.width = '12px';
-            particle.style.height = '12px';
-            particle.style.boxShadow = '0 0 10px currentColor';
-          } else {
-            particle.style.width = '8px';
-            particle.style.height = '8px';
-            particle.style.boxShadow = 'none';
-            particle.style.opacity = 1 - (index / particleCount) * 0.5;
-          }
         });
 
         snakeAnimationId = requestAnimationFrame(animateSnake);
@@ -2153,14 +2157,19 @@
         snakeAnimationId = null;
       }
 
-      // 移除所有粒子
-      snakeParticles.forEach(particle => {
-        particle.classList.remove('active');
+      // 淡出效果
+      snakeParticles.forEach((particle, index) => {
         setTimeout(() => {
-          if (particle.parentNode) {
-            particle.parentNode.removeChild(particle);
-          }
-        }, 300);
+          particle.style.transition = 'opacity 0.5s, transform 0.5s';
+          particle.style.opacity = '0';
+          particle.style.transform = 'scale(0)';
+
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+          }, 500);
+        }, index * 20);
       });
 
       snakeParticles = [];
