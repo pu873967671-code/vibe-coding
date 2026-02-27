@@ -17,7 +17,12 @@
       position: relative;
     }
 
-    /* 🌈 彩虹烟雾流动背景（参考图片1风格）*/
+    /* 🌈 背景基础 - 深色，不显示彩虹 */
+    body {
+      background: #0a0a0f;
+    }
+
+    /* 🌈 彩虹烟雾背景 - 默认不可见，只有鼠标照亮才显示 */
     .rainbow-smoke {
       position: fixed;
       top: -50%;
@@ -26,176 +31,120 @@
       height: 300%;
       z-index: 0;
       pointer-events: none;
+      opacity: 0;
       transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      mix-blend-mode: screen;
     }
 
     .smoke-layer {
       position: absolute;
       width: 100%;
       height: 100%;
-      opacity: 0.5;
+      opacity: 0;
       filter: blur(100px);
-      mix-blend-mode: screen;
+      transition: opacity 0.3s ease;
     }
 
     /* 彩虹色烟雾层 - 从中心向外扩散 */
     .smoke-layer:nth-child(1) {
       background: radial-gradient(ellipse at 30% 40%,
-        rgba(255, 107, 107, 0.8) 0%,
-        rgba(255, 107, 107, 0.4) 30%,
+        rgba(255, 107, 107, 0.9) 0%,
+        rgba(255, 107, 107, 0.5) 30%,
         transparent 70%);
-      animation: smoke-flow-1 20s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(2) {
       background: radial-gradient(ellipse at 70% 30%,
-        rgba(255, 169, 77, 0.7) 0%,
-        rgba(255, 169, 77, 0.35) 30%,
+        rgba(255, 169, 77, 0.85) 0%,
+        rgba(255, 169, 77, 0.45) 30%,
         transparent 70%);
-      animation: smoke-flow-2 25s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(3) {
       background: radial-gradient(ellipse at 50% 60%,
-        rgba(255, 212, 59, 0.6) 0%,
-        rgba(255, 212, 59, 0.3) 30%,
+        rgba(255, 212, 59, 0.8) 0%,
+        rgba(255, 212, 59, 0.4) 30%,
         transparent 70%);
-      animation: smoke-flow-3 22s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(4) {
       background: radial-gradient(ellipse at 40% 70%,
-        rgba(105, 219, 124, 0.7) 0%,
-        rgba(105, 219, 124, 0.35) 30%,
+        rgba(105, 219, 124, 0.85) 0%,
+        rgba(105, 219, 124, 0.45) 30%,
         transparent 70%);
-      animation: smoke-flow-4 28s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(5) {
       background: radial-gradient(ellipse at 60% 50%,
-        rgba(116, 192, 252, 0.8) 0%,
-        rgba(116, 192, 252, 0.4) 30%,
+        rgba(116, 192, 252, 0.9) 0%,
+        rgba(116, 192, 252, 0.5) 30%,
         transparent 70%);
-      animation: smoke-flow-5 24s ease-in-out infinite;
     }
 
     .smoke-layer:nth-child(6) {
       background: radial-gradient(ellipse at 50% 40%,
-        rgba(177, 151, 252, 0.75) 0%,
-        rgba(177, 151, 252, 0.38) 30%,
+        rgba(177, 151, 252, 0.88) 0%,
+        rgba(177, 151, 252, 0.48) 30%,
         transparent 70%);
-      animation: smoke-flow-6 26s ease-in-out infinite;
     }
 
-    /* 烟雾流动动画 - 更自然、更柔和 */
-    @keyframes smoke-flow-1 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 0.5;
-      }
-      33% {
-        transform: translate(30px, -40px) scale(1.1) rotate(5deg);
-        opacity: 0.6;
-      }
-      66% {
-        transform: translate(-20px, 20px) scale(0.95) rotate(-3deg);
-        opacity: 0.45;
-      }
+    /* 鼠标激活彩虹 - 只有鼠标光效范围内的彩虹可见 */
+    .rainbow-smoke.activated {
+      opacity: 0.6;
     }
 
-    @keyframes smoke-flow-2 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 0.5;
+    .rainbow-smoke.activated .smoke-layer {
+      opacity: 0.5;
+      animation: smoke-glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes smoke-glow {
+      0% {
+        filter: blur(100px) brightness(1);
       }
-      33% {
-        transform: translate(-40px, 30px) scale(1.05) rotate(-4deg);
-        opacity: 0.55;
-      }
-      66% {
-        transform: translate(25px, -35px) scale(0.98) rotate(3deg);
-        opacity: 0.48;
+      100% {
+        filter: blur(110px) brightness(1.2);
       }
     }
 
-    @keyframes smoke-flow-3 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 0.5;
-      }
-      50% {
-        transform: translate(0, 50px) scale(1.08) rotate(2deg);
-        opacity: 0.58;
-      }
-    }
-
-    @keyframes smoke-flow-4 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 0.5;
-      }
-      33% {
-        transform: translate(50px, 20px) scale(1.12) rotate(6deg);
-        opacity: 0.62;
-      }
-      66% {
-        transform: translate(-30px, -40px) scale(0.92) rotate(-4deg);
-        opacity: 0.42;
-      }
-    }
-
-    @keyframes smoke-flow-5 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 0.5;
-      }
-      50% {
-        transform: translate(-35px, 35px) scale(1.03) rotate(-2deg);
-        opacity: 0.52;
-      }
-    }
-
-    @keyframes smoke-flow-6 {
-      0%, 100% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
-        opacity: 0.5;
-      }
-      33% {
-        transform: translate(-25px, -45px) scale(0.96) rotate(-5deg);
-        opacity: 0.46;
-      }
-      66% {
-        transform: translate(40px, 25px) scale(1.07) rotate(4deg);
-        opacity: 0.56;
-      }
-    }
-
-    /* 鼠标光效 */
+    /* 鼠标光效 - 更大的彩虹发光范围 */
     .mouse-glow {
       position: fixed;
-      width: 400px;
-      height: 400px;
+      width: 800px;
+      height: 800px;
       border-radius: 50%;
       pointer-events: none;
       z-index: 1;
-      opacity: 0.3;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+      opacity: 0;
       transform: translate(-50%, -50%);
       transition: opacity 0.3s;
+      background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(177, 151, 252, 0.12) 20%,
+        rgba(116, 192, 252, 0.1) 40%,
+        rgba(105, 219, 124, 0.08) 60%,
+        rgba(255, 212, 59, 0.06) 80%,
+        transparent 100%);
+      filter: blur(60px);
+      mix-blend-mode: screen;
     }
 
-    /* 极简发光线条动物容器（参考图片2风格）*/
+    .mouse-glow.active {
+      opacity: 1;
+    }
+
+    /* 极简发光线条动物容器（更亮的霓虹色）*/
     .animal-container {
       position: fixed;
       z-index: 2;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.5s ease;
-      color: #b197fc; /* 统一的霓虹紫色 */
+      color: #e879f9; /* 更亮的霓虹粉紫色 */
     }
 
     .animal-container.visible {
-      opacity: 0.7;
+      opacity: 0.85;
     }
 
     /* 发光线条动物基础样式 */
@@ -203,7 +152,9 @@
       width: 80px;
       height: 80px;
       position: relative;
-      filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
+      filter: drop-shadow(0 0 15px currentColor)
+              drop-shadow(0 0 30px currentColor)
+              drop-shadow(0 0 45px currentColor);
     }
 
     .animal svg {
@@ -217,7 +168,8 @@
       stroke-width: 1.5;
       stroke-linecap: round;
       stroke-linejoin: round;
-      opacity: 0.95;
+      opacity: 1;
+      filter: brightness(1.3);
     }
 
     /* 12种动物动画 */
@@ -794,12 +746,27 @@
 
     // 鼠标光效跟踪
     const mouseGlow = document.getElementById('mouseGlow');
+    const rainbowSmoke = document.getElementById('rainbowSmoke');
     let mouseX = 0, mouseY = 0;
     let glowX = 0, glowY = 0;
+    let mouseTimer = null;
 
     document.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+
+      // 激活鼠标光效和彩虹背景
+      mouseGlow.classList.add('active');
+      rainbowSmoke.classList.add('activated');
+
+      // 清除之前的定时器
+      clearTimeout(mouseTimer);
+
+      // 3秒后淡出
+      mouseTimer = setTimeout(() => {
+        mouseGlow.classList.remove('active');
+        rainbowSmoke.classList.remove('activated');
+      }, 3000);
     });
 
     // 平滑光效动画
@@ -807,8 +774,8 @@
       const dx = mouseX - glowX;
       const dy = mouseY - glowY;
 
-      glowX += dx * 0.1;
-      glowY += dy * 0.1;
+      glowX += dx * 0.08;
+      glowY += dy * 0.08;
 
       mouseGlow.style.left = glowX + 'px';
       mouseGlow.style.top = glowY + 'px';
@@ -817,12 +784,12 @@
     }
     animateMouseGlow();
 
-    // 彩虹烟雾滚动控制
-    const rainbowSmoke = document.getElementById('rainbowSmoke');
-
+    // 彩虹烟雾滚动控制（仅当激活时）
     function updateSmokePosition() {
-      // 向上流动效果
-      rainbowSmoke.style.transform = `translateY(${-smokeOffset}px)`;
+      // 彩虹随滚动轻微移动
+      const currentOffset = rainbowSmoke.style.transform || 'translateY(0px)';
+      const newOffset = -smokeOffset;
+      rainbowSmoke.style.transform = `translateY(${newOffset}px)`;
     }
 
     // 12种动物显示逻辑（每种动物在特定页面显示）
