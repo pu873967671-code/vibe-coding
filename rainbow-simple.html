@@ -22,238 +22,52 @@
       background: #050508;
     }
 
-    /* 🌈 彩虹烟雾背景 - 默认不可见，只有鼠标照亮才显示 */
+    /* 🌈 彩虹烟雾背景 - 始终不可见 */
     .rainbow-smoke {
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 300%;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      mix-blend-mode: screen;
+      display: none;
     }
 
-    .smoke-layer {
-      position: absolute;
+    /* 🌈 彩虹粒子容器 */
+    .rainbow-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0;
-      filter: blur(120px) saturate(1.5);
-      transition: opacity 0.3s ease;
-    }
-
-    /* 彩虹色烟雾层 - 高饱和度，从中心向外扩散 */
-    .smoke-layer:nth-child(1) {
-      background: radial-gradient(ellipse at 30% 40%,
-        rgba(255, 82, 82, 1) 0%,
-        rgba(255, 82, 82, 0.6) 25%,
-        transparent 60%);
-    }
-
-    .smoke-layer:nth-child(2) {
-      background: radial-gradient(ellipse at 70% 30%,
-        rgba(255, 159, 67, 1) 0%,
-        rgba(255, 159, 67, 0.6) 25%,
-        transparent 60%);
-    }
-
-    .smoke-layer:nth-child(3) {
-      background: radial-gradient(ellipse at 50% 60%,
-        rgba(255, 215, 0, 1) 0%,
-        rgba(255, 215, 0, 0.6) 25%,
-        transparent 60%);
-    }
-
-    .smoke-layer:nth-child(4) {
-      background: radial-gradient(ellipse at 40% 70%,
-        rgba(50, 205, 50, 1) 0%,
-        rgba(50, 205, 50, 0.6) 25%,
-        transparent 60%);
-    }
-
-    .smoke-layer:nth-child(5) {
-      background: radial-gradient(ellipse at 60% 50%,
-        rgba(30, 144, 255, 1) 0%,
-        rgba(30, 144, 255, 0.6) 25%,
-        transparent 60%);
-    }
-
-    .smoke-layer:nth-child(6) {
-      background: radial-gradient(ellipse at 50% 40%,
-        rgba(186, 85, 211, 1) 0%,
-        rgba(186, 85, 211, 0.6) 25%,
-        transparent 60%);
-    }
-
-    /* 鼠标激活彩虹 - 只有鼠标光效范围内的彩虹可见 */
-    .rainbow-smoke.activated {
-      opacity: 0.5;
-    }
-
-    .rainbow-smoke.activated .smoke-layer {
-      opacity: 0.6;
-      animation: smoke-glow 4s ease-in-out infinite alternate;
-    }
-
-    @keyframes smoke-glow {
-      0% {
-        filter: blur(120px) saturate(1.5) brightness(1);
-      }
-      100% {
-        filter: blur(130px) saturate(1.8) brightness(1.15);
-      }
-    }
-
-    /* 鼠标光效 - 精致小巧的发光 */
-    .mouse-glow {
-      position: fixed;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
       pointer-events: none;
       z-index: 1;
-      opacity: 0;
-      transform: translate(-50%, -50%);
-      transition: opacity 0.5s ease;
-      background: radial-gradient(circle,
-        rgba(255, 255, 255, 0.12) 0%,
-        rgba(186, 85, 211, 0.08) 30%,
-        rgba(30, 144, 255, 0.05) 50%,
-        transparent 70%);
-      filter: blur(50px);
-      mix-blend-mode: screen;
+      overflow: hidden;
     }
 
-    .mouse-glow.active {
-      opacity: 0.9;
-    }
-
-    /* 极简发光线条动物容器（可爱风格）*/
-    .animal-container {
-      position: fixed;
-      z-index: 2;
+    .particle {
+      position: absolute;
+      border-radius: 50%;
       pointer-events: none;
+      mix-blend-mode: screen;
+      filter: blur(1px);
       opacity: 0;
-      transition: opacity 0.5s ease;
-      color: #f472b6; /* 可爱的粉红色 */
+      animation: particle-life 2s ease-out forwards;
     }
 
-    .animal-container.visible {
-      opacity: 0.9;
+    @keyframes particle-life {
+      0% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+      }
     }
 
-    /* 发光线条动物基础样式 */
-    .animal {
-      width: 80px;
-      height: 80px;
-      position: relative;
-      filter: drop-shadow(0 0 12px currentColor)
-              drop-shadow(0 0 24px currentColor)
-              drop-shadow(0 0 36px currentColor);
+    /* 鼠标光效 - 删除 */
+    .mouse-glow {
+      display: none;
     }
 
-    .animal svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .animal-path {
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      opacity: 1;
-    }
-
-    /* 12种不同的可爱动画 */
-    .animal-bear { animation: waddle 3s ease-in-out infinite; }
-    .animal-otter { animation: swim-cute 2.5s ease-in-out infinite; }
-    .animal-wolf { animation: wag-tail 2s ease-in-out infinite; }
-    .animal-deer { animation: hop-cute 3s ease-in-out infinite; }
-    .animal-lion { animation: shake-mane 3.5s ease-in-out infinite; }
-    .animal-fox { animation: bounce-cute 2.5s ease-in-out infinite; }
-    .animal-dog { animation: pant 1.5s ease-in-out infinite; }
-    .animal-cat { animation: stretch 4s ease-in-out infinite; }
-    .animal-rabbit { animation: wiggle-ears 2s ease-in-out infinite; }
-    .animal-tiger { animation: prowl-cute 3s ease-in-out infinite; }
-    .animal-pig { animation: oink 2.5s ease-in-out infinite; }
-    .animal-fish { animation: bubble-swim 2s ease-in-out infinite; }
-
-    @keyframes waddle {
-      0%, 100% { transform: translateX(0) rotate(0deg) scale(1); }
-      25% { transform: translateX(15px) rotate(5deg) scale(1.05); }
-      50% { transform: translateX(0) rotate(0deg) scale(1); }
-      75% { transform: translateX(-15px) rotate(-5deg) scale(1.05); }
-    }
-
-    @keyframes swim-cute {
-      0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
-      33% { transform: translateX(25px) translateY(-10px) rotate(10deg); }
-      66% { transform: translateX(50px) translateY(0) rotate(0deg); }
-    }
-
-    @keyframes wag-tail {
-      0%, 100% { transform: rotate(0deg) scale(1); }
-      25% { transform: rotate(8deg) scale(1.02); }
-      75% { transform: rotate(-8deg) scale(1.02); }
-    }
-
-    @keyframes hop-cute {
-      0%, 100% { transform: translateY(0) scale(1, 1); }
-      40% { transform: translateY(-30px) scale(0.95, 1.1); }
-      60% { transform: translateY(-30px) scale(0.95, 1.1); }
-      80% { transform: translateY(0) scale(1.05, 0.95); }
-    }
-
-    @keyframes shake-mane {
-      0%, 100% { transform: scale(1) rotate(0deg); }
-      25% { transform: scale(1.08) rotate(-3deg); }
-      75% { transform: scale(1.08) rotate(3deg); }
-    }
-
-    @keyframes bounce-cute {
-      0%, 100% { transform: translateY(0) scaleY(1); }
-      30% { transform: translateY(-25px) scaleY(1.1); }
-      50% { transform: translateY(0) scaleY(0.95); }
-      70% { transform: translateY(-10px) scaleY(1.05); }
-    }
-
-    @keyframes pant {
-      0%, 100% { transform: scaleY(1); }
-      50% { transform: scaleY(0.92); }
-    }
-
-    @keyframes stretch {
-      0%, 100% { transform: scaleX(1) scaleY(1); }
-      30% { transform: scaleX(1.15) scaleY(0.85); }
-      60% { transform: scaleX(0.85) scaleY(1.15); }
-    }
-
-    @keyframes wiggle-ears {
-      0%, 100% { transform: rotate(0deg) translateY(0); }
-      25% { transform: rotate(5deg) translateY(-5px); }
-      75% { transform: rotate(-5deg) translateY(-5px); }
-    }
-
-    @keyframes prowl-cute {
-      0%, 100% { transform: translateX(0) scaleX(1); }
-      50% { transform: translateX(20px) scaleX(1.05); }
-    }
-
-    @keyframes oink {
-      0%, 100% { transform: scale(1) rotate(0deg); }
-      33% { transform: scale(1.1) rotate(3deg); }
-      66% { transform: scale(1.1) rotate(-3deg); }
-    }
-
-    @keyframes bubble-swim {
-      0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
-      33% { transform: translateX(30px) translateY(-15px) rotate(8deg); }
-      66% { transform: translateX(60px) translateY(0) rotate(-8deg); }
+    /* 动物 - 删除 */
+    .animal-container {
+      display: none;
     }
 
     /* 原有装饰背景 */
@@ -455,166 +269,8 @@
   </style>
 </head>
 <body>
-  <!-- 🌈 彩虹烟雾背景 -->
-  <div class="rainbow-smoke" id="rainbowSmoke">
-    <div class="smoke-layer"></div>
-    <div class="smoke-layer"></div>
-    <div class="smoke-layer"></div>
-    <div class="smoke-layer"></div>
-    <div class="smoke-layer"></div>
-    <div class="smoke-layer"></div>
-  </div>
-
-  <!-- 鼠标光效 -->
-  <div class="mouse-glow" id="mouseGlow"></div>
-
-  <!-- 12种可爱发光线条动物 -->
-  <div class="animal-container" id="animal1" style="bottom: 15%; left: 10%;">
-    <div class="animal animal-bear">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的熊：圆圆的身体 + 小圆耳 -->
-        <circle cx="50" cy="55" r="25" class="animal-path"/>
-        <circle cx="35" cy="32" r="8" class="animal-path"/>
-        <circle cx="65" cy="32" r="8" class="animal-path"/>
-        <circle cx="50" cy="60" r="4" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal2" style="top: 25%; right: 12%;">
-    <div class="animal animal-otter">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的猴：流线型身体 + 卷尾巴 -->
-        <ellipse cx="50" cy="55" rx="30" ry="20" class="animal-path"/>
-        <circle cx="50" cy="35" r="12" class="animal-path"/>
-        <path d="M75 60 Q85 70 80 80 Q75 75 70 70" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal3" style="bottom: 25%; right: 18%;">
-    <div class="animal animal-wolf">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的狼：尖耳朵 + 毛茸茸尾巴 -->
-        <ellipse cx="45" cy="60" rx="25" ry="18" class="animal-path"/>
-        <polygon points="35,35 30,15 45,35" class="animal-path"/>
-        <polygon points="55,35 60,15 55,35" class="animal-path"/>
-        <path d="M68 65 Q85 60 90 70" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal4" style="top: 40%; left: 8%;">
-    <div class="animal animal-deer">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的鹿：优雅的角 + 大眼睛 -->
-        <ellipse cx="50" cy="65" rx="18" ry="25" class="animal-path"/>
-        <circle cx="50" cy="40" r="12" class="animal-path"/>
-        <path d="M40 30 Q35 15 30 10 M35 18 L30 15" class="animal-path"/>
-        <path d="M60 30 Q65 15 70 10 M65 18 L70 15" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal5" style="bottom: 50%; right: 8%;">
-    <div class="animal animal-lion">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的狮子：圆圆的鬃毛 -->
-        <circle cx="50" cy="50" r="30" class="animal-path"/>
-        <circle cx="50" cy="55" r="18" class="animal-path"/>
-        <circle cx="50" cy="52" r="4" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal6" style="top: 15%; left: 15%;">
-    <div class="animal animal-fox">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的狐狸：尖尖的脸 + 大尾巴 -->
-        <ellipse cx="50" cy="60" rx="28" ry="18" class="animal-path"/>
-        <path d="M35 45 Q50 35 65 45 Q60 55 50 55 Q40 55 35 45" class="animal-path"/>
-        <path d="M75 65 Q90 60 95 70 Q90 75 85 70" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal7" style="bottom: 35%; left: 20%;">
-    <div class="animal animal-dog">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的狗：垂耳朵 + 开心的表情 -->
-        <ellipse cx="50" cy="60" rx="25" ry="20" class="animal-path"/>
-        <circle cx="50" cy="38" r="15" class="animal-path"/>
-        <ellipse cx="35" cy="28" rx="8" ry="15" class="animal-path"/>
-        <ellipse cx="65" cy="28" rx="8" ry="15" class="animal-path"/>
-        <path d="M42 42 Q50 50 58 42" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal8" style="top: 55%; right: 22%;">
-    <div class="animal animal-cat">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的猫：尖耳朵 + 卷尾巴 -->
-        <ellipse cx="50" cy="62" rx="22" ry="18" class="animal-path"/>
-        <circle cx="50" cy="40" r="15" class="animal-path"/>
-        <polygon points="38,30 30,10 42,28" class="animal-path"/>
-        <polygon points="62,30 70,10 58,28" class="animal-path"/>
-        <path d="M70 65 Q85 60 90 70 Q85 80 80 75" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal9" style="bottom: 40%; right: 15%;">
-    <div class="animal animal-rabbit">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的兔子：长耳朵 + 圆尾巴 -->
-        <ellipse cx="50" cy="65" rx="20" ry="25" class="animal-path"/>
-        <ellipse cx="42" cy="35" rx="6" ry="20" class="animal-path"/>
-        <ellipse cx="58" cy="35" rx="6" ry="20" class="animal-path"/>
-        <circle cx="75" cy="70" r="6" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal10" style="top: 30%; left: 12%;">
-    <div class="animal animal-tiger">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的老虎：圆圆的脸 + 虎纹 -->
-        <ellipse cx="50" cy="60" rx="28" ry="22" class="animal-path"/>
-        <circle cx="50" cy="38" r="18" class="animal-path"/>
-        <polygon points="38,28 30,8 44,26" class="animal-path"/>
-        <polygon points="62,28 70,8 56,26" class="animal-path"/>
-        <path d="M38 48 L38 52 M50 46 L50 52 M62 48 L62 52" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal11" style="bottom: 20%; right: 25%;">
-    <div class="animal animal-pig">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的猪：圆圆的鼻子 + 卷尾巴 -->
-        <ellipse cx="50" cy="60" rx="25" ry="22" class="animal-path"/>
-        <circle cx="50" cy="40" r="18" class="animal-path"/>
-        <ellipse cx="50" cy="48" rx="10" ry="8" class="animal-path"/>
-        <circle cx="46" cy="48" r="2" class="animal-path"/>
-        <circle cx="54" cy="48" r="2" class="animal-path"/>
-        <path d="M73 70 Q80 75 78 82 Q75 78 72 75" class="animal-path"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="animal-container" id="animal12" style="top: 20%; right: 18%;">
-    <div class="animal animal-fish">
-      <svg viewBox="0 0 100 100">
-        <!-- 可爱的鱼：圆润的身体 + 气泡 -->
-        <ellipse cx="45" cy="50" rx="28" ry="20" class="animal-path"/>
-        <polygon points="70,50 90,35 90,65" class="animal-path"/>
-        <circle cx="35" cy="45" r="4" class="animal-path"/>
-        <circle cx="20" cy="35" r="5" class="animal-path" style="opacity: 0.5"/>
-        <circle cx="25" cy="25" r="3" class="animal-path" style="opacity: 0.4"/>
-      </svg>
-    </div>
-  </div>
+  <!-- 🌈 彩虹粒子容器 -->
+  <div class="rainbow-particles" id="rainbowParticles"></div>
 
   <!-- Slide 1 -->
   <div class="slide active" id="slide1">
@@ -794,91 +450,84 @@
   </div>
 
   <script>
-    // ===== 🌈 彩虹烟雾 & 动画控制 =====
+    // ===== 🌈 彩虹粒子系统 =====
 
     let current = 1;
     const total = 15;
     let isScrolling = false;
-    let smokeOffset = 0;
 
-    // 鼠标光效跟踪
-    const mouseGlow = document.getElementById('mouseGlow');
-    const rainbowSmoke = document.getElementById('rainbowSmoke');
-    let mouseX = 0, mouseY = 0;
-    let glowX = 0, glowY = 0;
-    let mouseTimer = null;
+    // 彩虹颜色
+    const rainbowColors = [
+      'rgba(255, 82, 82, 0.8)',   // 红
+      'rgba(255, 159, 67, 0.8)',  // 橙
+      'rgba(255, 215, 0, 0.8)',   // 黄
+      'rgba(50, 205, 50, 0.8)',   // 绿
+      'rgba(30, 144, 255, 0.8)',  // 蓝
+      'rgba(186, 85, 211, 0.8)'   // 紫
+    ];
 
+    const particlesContainer = document.getElementById('rainbowParticles');
+    let particleInterval = null;
+
+    // 创建粒子
+    function createParticle(x, y) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+
+      // 随机颜色
+      const color = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
+
+      // 随机大小 (3-8px)
+      const size = Math.random() * 5 + 3;
+
+      // 随机速度和方向
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 80 + 40;
+      const endX = x + Math.cos(angle) * distance;
+      const endY = y + Math.sin(angle) * distance;
+
+      // 设置样式
+      particle.style.cssText = `
+        left: ${x}px;
+        top: ${y}px;
+        width: ${size}px;
+        height: ${size}px;
+        background: ${color};
+        box-shadow: 0 0 ${size * 2}px ${color};
+      `;
+
+      // 添加到容器
+      particlesContainer.appendChild(particle);
+
+      // 动画：从鼠标位置移动到终点
+      particle.animate([
+        { left: `${x}px`, top: `${y}px`, opacity: 0.8 },
+        { left: `${endX}px`, top: `${endY}px`, opacity: 0 }
+      ], {
+        duration: 2000,
+        easing: 'ease-out'
+      }).onfinish = () => {
+        particle.remove();
+      };
+    }
+
+    // 鼠标移动时创建粒子
+    let lastX = 0, lastY = 0;
     document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // 激活鼠标光效和彩虹背景
-      mouseGlow.classList.add('active');
-      rainbowSmoke.classList.add('activated');
-
-      // 清除之前的定时器
-      clearTimeout(mouseTimer);
-
-      // 3秒后淡出
-      mouseTimer = setTimeout(() => {
-        mouseGlow.classList.remove('active');
-        rainbowSmoke.classList.remove('activated');
-      }, 3000);
+      // 每移动10px创建一个粒子
+      if (distance > 10) {
+        createParticle(e.clientX, e.clientY);
+        lastX = e.clientX;
+        lastY = e.clientY;
+      }
     });
 
-    // 平滑光效动画
-    function animateMouseGlow() {
-      const dx = mouseX - glowX;
-      const dy = mouseY - glowY;
-
-      glowX += dx * 0.08;
-      glowY += dy * 0.08;
-
-      mouseGlow.style.left = glowX + 'px';
-      mouseGlow.style.top = glowY + 'px';
-
-      requestAnimationFrame(animateMouseGlow);
-    }
-    animateMouseGlow();
-
-    // 彩虹烟雾滚动控制（仅当激活时）
-    function updateSmokePosition() {
-      // 彩虹随滚动轻微移动
-      const currentOffset = rainbowSmoke.style.transform || 'translateY(0px)';
-      const newOffset = -smokeOffset;
-      rainbowSmoke.style.transform = `translateY(${newOffset}px)`;
-    }
-
-    // 12种动物显示逻辑（每种动物在特定页面显示）
-    const animals = document.querySelectorAll('.animal-container');
-
-    function updateAnimals() {
-      const animalPages = {
-        1: [1, 2, 3, 4, 5],       // bear (熊)
-        2: [2, 3, 4, 5, 6],       // otter (猴)
-        3: [3, 4, 5, 6, 7],       // wolf (狼)
-        4: [4, 5, 6, 7, 8],       // deer (鹿)
-        5: [5, 6, 7, 8, 9],       // lion (狮子)
-        6: [6, 7, 8, 9, 10],      // fox (狐)
-        7: [7, 8, 9, 10, 11],     // dog (犬)
-        8: [8, 9, 10, 11, 12],    // cat (猫)
-        9: [9, 10, 11, 12, 13],   // rabbit (兔)
-        10: [10, 11, 12, 13, 14], // tiger (虎)
-        11: [11, 12, 13, 14, 15], // pig (猪)
-        12: [12, 13, 14, 15, 1]   // fish (鱼)
-      };
-
-      animals.forEach((animal, i) => {
-        const pageId = i + 1;
-        if (animalPages[pageId].includes(current)) {
-          animal.classList.add('visible');
-        } else {
-          animal.classList.remove('visible');
-        }
-      });
-    }
-
     // ===== 原有幻灯片控制 =====
+
 
 
 
@@ -938,18 +587,10 @@
       if (e.deltaY > 0) {
         // Scroll down - next slide
         changeSlide(1);
-        smokeOffset += 100; // 彩虹烟雾向上流动
       } else {
         // Scroll up - prev slide
         changeSlide(-1);
-        smokeOffset -= 100; // 彩虹烟雾向下流动
       }
-
-      // 更新彩虹烟雾位置
-      updateSmokePosition();
-
-      // 更新动物显示
-      updateAnimals();
 
       // Prevent default scroll
       e.preventDefault();
@@ -965,15 +606,9 @@
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         changeSlide(1);
-        smokeOffset += 100;
-        updateSmokePosition();
-        updateAnimals();
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault();
         changeSlide(-1);
-        smokeOffset -= 100;
-        updateSmokePosition();
-        updateAnimals();
       }
     });
 
@@ -990,13 +625,9 @@
       if (Math.abs(diff) > 50) {
         if (diff > 0) {
           changeSlide(1); // Swipe up - next
-          smokeOffset += 100;
         } else {
           changeSlide(-1); // Swipe down - prev
-          smokeOffset -= 100;
         }
-        updateSmokePosition();
-        updateAnimals();
       }
     });
 
@@ -1004,7 +635,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       const firstSlide = document.getElementById('slide1');
       playAnimations(firstSlide);
-      updateAnimals();
     });
   </script>
 </body>
