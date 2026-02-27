@@ -2051,7 +2051,7 @@
       }, 300);
     }
 
-    // ===== 🐍 贪吃蛇动画（改进版）=====
+    // ===== 🐍 贪吃蛇动画（无限符号版）=====
     let snakeAnimationId = null;
     let snakeParticles = [];
     let snakeTime = 0;
@@ -2061,50 +2061,49 @@
       const logo = document.getElementById('rainbowFlag');
       if (!title || !logo) return;
 
-      // 创建蛇的粒子（更多、更大）
-      const particleCount = 25;
+      // 创建蛇的粒子（无限符号轨迹）
+      const particleCount = 40;
       snakeParticles = [];
 
-      // 彩虹色数组
+      // 彩虹色渐变
       const rainbowColors = [
-        '#ff0000', // 红
-        '#ff8800', // 橙
-        '#ffff00', // 黄
-        '#00ff00', // 绿
-        '#00ffff', // 青
-        '#0088ff', // 蓝
-        '#8800ff', // 紫
-        '#ff00ff'  // 粉
+        '#ff0000', '#ff4400', '#ff8800', '#ffaa00',
+        '#ffff00', '#aaff00', '#00ff00', '#00ffaa',
+        '#00ffff', '#00aaff', '#0088ff', '#0044ff',
+        '#4400ff', '#8800ff', '#aa00ff', '#ff00ff'
       ];
 
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'snake-particle';
 
-        // 头部更大更亮
+        const colorIndex = Math.floor((i / particleCount) * rainbowColors.length);
+        const color = rainbowColors[colorIndex];
+        const size = 18 - (i / particleCount) * 8; // 18px → 10px
+
+        // 头部特殊效果
         if (i === 0) {
           particle.style.cssText = `
-            width: 20px;
-            height: 20px;
-            background: radial-gradient(circle, #ffffff 0%, ${rainbowColors[0]} 100%);
-            box-shadow: 0 0 20px ${rainbowColors[0]}, 0 0 40px ${rainbowColors[0]};
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #ffffff 0%, ${color} 60%, transparent 100%);
+            box-shadow: 0 0 30px ${color}, 0 0 60px ${color}, 0 0 90px ${color};
             border-radius: 50%;
             position: fixed;
             pointer-events: none;
             z-index: 10000;
           `;
         } else {
-          const colorIndex = i % rainbowColors.length;
           particle.style.cssText = `
-            width: ${16 - i * 0.3}px;
-            height: ${16 - i * 0.3}px;
-            background: ${rainbowColors[colorIndex]};
-            box-shadow: 0 0 10px ${rainbowColors[colorIndex]};
+            width: ${size}px;
+            height: ${size}px;
+            background: radial-gradient(circle, ${color} 0%, ${color}88 50%, transparent 100%);
+            box-shadow: 0 0 ${size}px ${color};
             border-radius: 50%;
             position: fixed;
             pointer-events: none;
             z-index: 10000;
-            opacity: ${1 - i / particleCount * 0.6};
+            opacity: ${1 - (i / particleCount) * 0.7};
           `;
         }
 
@@ -2115,33 +2114,40 @@
       snakeTime = 0;
 
       function animateSnake() {
-        snakeTime += 0.03;
+        snakeTime += 0.015;
 
         const titleRect = title.getBoundingClientRect();
-        const logoRect = logo.getBoundingClientRect();
+        const centerX = titleRect.left + titleRect.width / 2;
+        const centerY = titleRect.top + titleRect.height / 2;
 
-        // 更复杂的8字形路径
+        // 无限符号（∞）轨迹
         snakeParticles.forEach((particle, index) => {
-          const delay = index * 0.15;
+          const delay = index * 0.1;
           const t = snakeTime - delay;
 
-          // 8字形轨迹 + 螺旋
-          const centerX = titleRect.left + titleRect.width / 2;
-          const centerY = titleRect.top + titleRect.height / 2;
+          // 无限符号的参数方程
+          // x = a * cos(t) / (1 + sin^2(t))
+          // y = a * sin(t) * cos(t) / (1 + sin^2(t))
+          const a = titleRect.width * 0.6; // 横向半径
+          const b = titleRect.height * 0.5; // 纵向半径
 
-          // 水平8字
-          const radiusX = titleRect.width * 0.8;
-          const radiusY = titleRect.height * 0.6;
+          const sinT = Math.sin(t);
+          const cosT = Math.cos(t);
+          const denominator = 1 + sinT * sinT;
 
-          // 蛇形曲线
-          const x = centerX + radiusX * Math.sin(t * 2) * Math.cos(t);
-          const y = centerY + radiusY * Math.sin(t * 3) + Math.sin(t * 5) * 10;
+          const x = centerX + (a * cosT) / denominator;
+          const y = centerY + (b * sinT * cosT) / denominator;
 
-          // 蛇身摆动
-          const wave = Math.sin(t * 4 + index * 0.5) * (5 + index * 0.5);
+          // 蛇身摆动（垂直于运动方向）
+          const perpX = -Math.sin(t * 2 + index * 0.2);
+          const perpY = Math.cos(t * 2 + index * 0.2);
+          const waveAmplitude = 3 + (index / particleCount) * 5;
 
-          particle.style.left = `${x + wave}px`;
-          particle.style.top = `${y}px`;
+          const finalX = x + perpX * waveAmplitude;
+          const finalY = y + perpY * waveAmplitude;
+
+          particle.style.left = `${finalX}px`;
+          particle.style.top = `${finalY}px`;
           particle.classList.add('active');
         });
 
@@ -2169,7 +2175,7 @@
               particle.parentNode.removeChild(particle);
             }
           }, 500);
-        }, index * 20);
+        }, index * 15);
       });
 
       snakeParticles = [];
