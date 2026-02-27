@@ -658,6 +658,39 @@
       70% { opacity: 0; }
       100% { transform: translateY(-100%); opacity: 0; }
     }
+
+    /* 抽象结果动画 */
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.5;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -1278,27 +1311,133 @@
 
       container.style.display = 'none';
       resultDiv.style.display = 'block';
+      
+      // 为不同类型准备形容词组合
+      const qualities = {
+        bear: '温暖 · 厚实 · 可靠',
+        otter: '灵活 · 年轻 · 活力',
+        wolf: '成熟 · 野性 · 独立',
+        deer: '清秀 · 文艺 · 温柔',
+        lion: '领袖 · 自信 · 支配',
+        fox: '机智 · 神秘 · 迷人',
+        dog: '忠诚 · 阳光 · 友善',
+        cat: '优雅 · 独立 · 高冷',
+        rabbit: '可爱 · 年轻 · 活泼',
+        tiger: '霸气 · 强壮 · 自信',
+        pig: '圆润 · 亲切 · 随和',
+        fish: '优雅 · 流畅 · 精致'
+      };
+      
       resultDiv.innerHTML = `
-        <div style="font-size: 80px; margin-bottom: 20px;">${topType.emoji}</div>
-        <div class="result-type">${topType.name} ${topType.nameEn}</div>
-        <div style="font-size: 18px; color: var(--text-secondary); margin-bottom: 15px;">
-          ${topType.desc}
+        <div class="abstract-result" style="
+          text-align: center;
+          padding: 60px 20px;
+          animation: fadeIn 1s ease-out;
+        ">
+          <!-- 抽象几何符号 -->
+          <div style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+            <svg width="200" height="200" style="
+              filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.6));
+              animation: rotate 20s linear infinite;
+            ">
+              <circle cx="100" cy="100" r="80" fill="none" 
+                      stroke="url(#gradient)" stroke-width="2"/>
+              <circle cx="100" cy="100" r="60" fill="none" 
+                      stroke="url(#gradient)" stroke-width="1" opacity="0.5"/>
+              <circle cx="100" cy="100" r="40" fill="none" 
+                      stroke="url(#gradient)" stroke-width="1" opacity="0.3"/>
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="50%" stop-color="#a855f7"/>
+                  <stop offset="100%" stop-color="#ec4899"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            
+            <!-- 内部光效 -->
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 100px;
+              height: 100px;
+              border-radius: 50%;
+              background: radial-gradient(circle,
+                rgba(168, 85, 247, 0.3),
+                rgba(236, 72, 153, 0.2),
+                transparent);
+              filter: blur(20px);
+              animation: pulse 4s ease-in-out infinite;
+            "></div>
+          </div>
+          
+          <!-- 形容词（核心气质）-->
+          <div style="
+            font-size: 22px;
+            color: var(--text-primary);
+            margin-top: 50px;
+            letter-spacing: 10px;
+            font-weight: 300;
+            animation: fadeInUp 1s ease-out 0.3s both;
+          ">
+            ${qualities[topType.id]}
+          </div>
+          
+          <!-- 柔和说明 -->
+          <div style="
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 2;
+            font-style: italic;
+            animation: fadeInUp 1s ease-out 0.6s both;
+          ">
+            如果这些特质让你感到舒适，<br>
+            那就是一种可能的归属。<br>
+            <span style="font-size: 13px; color: rgba(255, 255, 255, 0.3);">
+              （光谱上的某个位置）
+            </span>
+          </div>
+          
+          <!-- 重要提醒 -->
+          <div style="
+            text-align: left;
+            margin-top: 50px;
+            padding: 25px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid rgba(99, 102, 241, 0.3);
+            animation: fadeInUp 1s ease-out 0.9s both;
+          ">
+            <h4 style="
+              margin-bottom: 15px;
+              color: rgba(99, 102, 241, 0.8);
+              font-size: 14px;
+              letter-spacing: 2px;
+            ">💡 重要提醒</h4>
+            <ul style="
+              color: var(--text-secondary);
+              font-size: 13px;
+              line-height: 2;
+              list-style: none;
+              padding: 0;
+            ">
+              <li style="margin-bottom: 8px;">• 这只是众多可能性中的一种，<strong style="color: var(--text-primary);">你不是被这个结果定义的</strong></li>
+              <li style="margin-bottom: 8px;">• 你可以自由选择认同或不认同任何标签</li>
+              <li style="margin-bottom: 8px;">• 气质是流动的，人可以同时具备多种特质</li>
+              <li>• 最重要的是你自己觉得舒服和认同</li>
+            </ul>
+          </div>
+          
+          <button class="btn" onclick="resetQuestionnaire()" style="margin-top: 40px;">
+            重新探索
+          </button>
         </div>
-        <div class="result-confidence">
-          基于你的选择，这种类型与你最契合 (${confidence}%)
-        </div>
-
-        <div style="text-align: left; margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
-          <h4 style="margin-bottom: 15px;">💡 重要提醒</h4>
-          <ul style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">
-            <li>这只是基于简单问卷的建议，<strong>你不是被这个结果定义的</strong></li>
-            <li>你可以自由选择认同或不认同任何标签</li>
-            <li>类型是流动的，人可以同时具备多种类型的特征</li>
-            <li>最重要的是你自己觉得舒服和认同</li>
-          </ul>
-        </div>
-
-        <button class="btn" onclick="resetQuestionnaire()">重新探索</button>
       `;
     }
 
