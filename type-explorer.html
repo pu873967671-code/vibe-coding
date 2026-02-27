@@ -844,48 +844,17 @@
       <div class="logo" id="rainbowFlag">
         <div class="flag-container">
           <svg viewBox="0 0 48 36" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
-            <defs>
-              <!-- 定义裁剪路径 - 用于创建波浪形旗面 -->
-              <clipPath id="wave-clip">
-                <path id="wave-path">
-                  <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-                    values="M1.2,0 Q12,1 24,3 T36,5 T46,4 L46,36 Q36,31 24,33 T12,35 T1.2,36 Z;
-                            M1.2,0 Q12,2 24,1 T36,3 T46,2 L46,36 Q36,34 24,32 T12,34 T1.2,36 Z;
-                            M1.2,0 Q12,0 24,4 T36,2 T46,5 L46,36 Q36,33 24,34 T12,36 T1.2,36 Z;
-                            M1.2,0 Q12,1 24,3 T36,5 T46,4 L46,36 Q36,31 24,33 T12,35 T1.2,36 Z"/>
-                </path>
-              </clipPath>
-
-              <!-- 旗帜阴影和光泽 -->
-              <linearGradient id="flag-shade" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="rgba(255,255,255,0.15)"/>
-                <stop offset="50%" stop-color="rgba(0,0,0,0.05)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,0.15)"/>
-              </linearGradient>
-            </defs>
-
             <!-- 旗杆 -->
             <rect x="0" y="0" width="1.2" height="36" fill="#c0c0c0"/>
             <circle cx="0.6" cy="0" r="2" fill="#ffd700"/>
 
-            <!-- 整个旗面被裁剪成波浪形 -->
-            <g clip-path="url(#wave-clip)">
-              <!-- 红色条纹 -->
-              <rect x="1.2" y="0" width="46" height="6" fill="#e40303"/>
-              <!-- 橙色条纹 -->
-              <rect x="1.2" y="6" width="46" height="6" fill="#ff8c00"/>
-              <!-- 黄色条纹 -->
-              <rect x="1.2" y="12" width="46" height="6" fill="#ffed00"/>
-              <!-- 绿色条纹 -->
-              <rect x="1.2" y="18" width="46" height="6" fill="#008026"/>
-              <!-- 蓝色条纹 -->
-              <rect x="1.2" y="24" width="46" height="6" fill="#004dff"/>
-              <!-- 紫色条纹 -->
-              <rect x="1.2" y="30" width="46" height="6" fill="#750787"/>
-
-              <!-- 布料阴影效果 -->
-              <rect x="1.2" y="0" width="46" height="36" fill="url(#flag-shade)" opacity="0.4"/>
-            </g>
+            <!-- 彩虹旗（静态）-->
+            <rect x="1.2" y="0" width="46" height="6" fill="#e40303"/>
+            <rect x="1.2" y="6" width="46" height="6" fill="#ff8c00"/>
+            <rect x="1.2" y="12" width="46" height="6" fill="#ffed00"/>
+            <rect x="1.2" y="18" width="46" height="6" fill="#008026"/>
+            <rect x="1.2" y="24" width="46" height="6" fill="#004dff"/>
+            <rect x="1.2" y="30" width="46" height="6" fill="#750787"/>
           </svg>
         </div>
       </div>
