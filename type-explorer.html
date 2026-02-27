@@ -2114,34 +2114,33 @@
       snakeTime = 0;
 
       function animateSnake() {
-        snakeTime += 0.015;
+        snakeTime += 0.02;
 
         const titleRect = title.getBoundingClientRect();
         const centerX = titleRect.left + titleRect.width / 2;
         const centerY = titleRect.top + titleRect.height / 2;
 
-        // 无限符号（∞）轨迹
+        // 无限符号（∞）轨迹 - Lemniscate of Gerono
         snakeParticles.forEach((particle, index) => {
-          const delay = index * 0.1;
+          const delay = index * 0.12;
           const t = snakeTime - delay;
 
-          // 无限符号的参数方程
-          // x = a * cos(t) / (1 + sin^2(t))
-          // y = a * sin(t) * cos(t) / (1 + sin^2(t))
-          const a = titleRect.width * 0.6; // 横向半径
-          const b = titleRect.height * 0.5; // 纵向半径
+          // Lemniscate of Gerono公式
+          // x = a * sin(t)
+          // y = a * sin(t) * cos(t)
+          const a = titleRect.width * 0.4; // 横向半径
+          const b = titleRect.height * 0.4; // 纵向半径
 
           const sinT = Math.sin(t);
           const cosT = Math.cos(t);
-          const denominator = 1 + sinT * sinT;
 
-          const x = centerX + (a * cosT) / denominator;
-          const y = centerY + (b * sinT * cosT) / denominator;
+          const x = centerX + a * sinT;
+          const y = centerY + b * sinT * cosT;
 
           // 蛇身摆动（垂直于运动方向）
-          const perpX = -Math.sin(t * 2 + index * 0.2);
-          const perpY = Math.cos(t * 2 + index * 0.2);
-          const waveAmplitude = 3 + (index / particleCount) * 5;
+          const perpX = -cosT;
+          const perpY = -sin(2 * t);
+          const waveAmplitude = 2 + (index / particleCount) * 6;
 
           const finalX = x + perpX * waveAmplitude;
           const finalY = y + perpY * waveAmplitude;
