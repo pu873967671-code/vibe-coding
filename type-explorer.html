@@ -67,13 +67,43 @@
       font-size: 48px;
       margin-bottom: 20px;
       display: inline-block;
-      animation: flag-wave 2s ease-in-out infinite;
-      transform-origin: center bottom;
+      position: relative;
+      width: 80px;
+      height: 50px;
     }
 
-    @keyframes flag-wave {
-      0%, 100% { transform: rotate(-5deg); }
-      50% { transform: rotate(5deg); }
+    /* 真实的彩虹旗SVG */
+    .flag-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .flag-container svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .flag-wave {
+      animation: flag-wave-real 3s ease-in-out infinite;
+      transform-origin: 0% 50%;
+    }
+
+    @keyframes flag-wave-real {
+      0%, 100% {
+        d: path("M0,0 Q20,5 40,0 T80,0 L80,8 Q60,13 40,8 T0,8 Z");
+      }
+      25% {
+        d: path("M0,0 Q20,-5 40,5 T80,0 L80,8 Q60,13 40,8 T0,8 Z");
+      }
+      50% {
+        d: path("M0,0 Q20,5 40,-5 T80,0 L80,8 Q60,3 40,13 T0,8 Z");
+      }
+      75% {
+        d: path("M0,0 Q20,-3 40,8 T80,0 L80,8 Q60,3 40,3 T0,8 Z");
+      }
     }
 
     .title {
@@ -810,7 +840,63 @@
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <div class="logo" id="rainbowFlag">🏳️‍🌈</div>
+      <div class="logo" id="rainbowFlag">
+        <div class="flag-container">
+          <svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
+            <!-- 旗杆 -->
+            <rect x="0" y="0" width="2" height="50" fill="#c0c0c0"/>
+            <circle cx="1" cy="0" r="3" fill="#ffd700"/>
+            
+            <!-- 红色条纹 -->
+            <path class="flag-wave" fill="#e40303" style="animation-delay: 0s;">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M2,0 Q20,3 40,0 T78,2 L78,8 Q60,10 40,7 T2,8 Z;
+                        M2,0 Q20,-2 40,4 T78,2 L78,8 Q60,12 40,6 T2,8 Z;
+                        M2,0 Q20,3 40,0 T78,2 L78,8 Q60,10 40,7 T2,8 Z"/>
+            </path>
+            
+            <!-- 橙色条纹 -->
+            <path class="flag-wave" fill="#ff8c00" style="animation-delay: 0.1s;">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M2,8 Q20,10 40,7 T78,8 L78,16 Q60,18 40,15 T2,16 Z;
+                        M2,8 Q20,6 40,12 T78,8 L78,16 Q60,20 40,14 T2,16 Z;
+                        M2,8 Q20,10 40,7 T78,8 L78,16 Q60,18 40,15 T2,16 Z"/>
+            </path>
+            
+            <!-- 黄色条纹 -->
+            <path class="flag-wave" fill="#ffed00" style="animation-delay: 0.2s;">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M2,16 Q20,18 40,15 T78,16 L78,24 Q60,26 40,23 T2,24 Z;
+                        M2,16 Q20,14 40,20 T78,16 L78,24 Q60,28 40,22 T2,24 Z;
+                        M2,16 Q20,18 40,15 T78,16 L78,24 Q60,26 40,23 T2,24 Z"/>
+            </path>
+            
+            <!-- 绿色条纹 -->
+            <path class="flag-wave" fill="#008026" style="animation-delay: 0.3s;">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M2,24 Q20,26 40,23 T78,24 L78,32 Q60,34 40,31 T2,32 Z;
+                        M2,24 Q20,22 40,28 T78,24 L78,32 Q60,36 40,30 T2,32 Z;
+                        M2,24 Q20,26 40,23 T78,24 L78,32 Q60,34 40,31 T2,32 Z"/>
+            </path>
+            
+            <!-- 蓝色条纹 -->
+            <path class="flag-wave" fill="#004dff" style="animation-delay: 0.4s;">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M2,32 Q20,34 40,31 T78,32 L78,40 Q60,42 40,39 T2,40 Z;
+                        M2,32 Q20,30 40,36 T78,32 L78,40 Q60,44 40,38 T2,40 Z;
+                        M2,32 Q20,34 40,31 T78,32 L78,40 Q60,42 40,39 T2,40 Z"/>
+            </path>
+            
+            <!-- 紫色条纹 -->
+            <path class="flag-wave" fill="#750787" style="animation-delay: 0.5s;">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M2,40 Q20,42 40,39 T78,40 L78,48 Q60,50 40,47 T2,48 Z;
+                        M2,40 Q20,38 40,44 T78,40 L78,48 Q60,52 40,46 T2,48 Z;
+                        M2,40 Q20,42 40,39 T78,40 L78,48 Q60,50 40,47 T2,48 Z"/>
+            </path>
+          </svg>
+        </div>
+      </div>
       <h1 class="title" id="mainTitle" onmouseenter="startSnakeAnimation()" onmouseleave="stopSnakeAnimation()">🌈 彩虹光谱</h1>
       <p class="subtitle">发现你在光谱上的位置</p>
     </div>
@@ -2000,7 +2086,7 @@
         { x: titleRect.right + 20, y: titleRect.top + titleRect.height / 2 }, // 右侧中心
         { x: titleRect.left + titleRect.width / 2, y: titleRect.bottom + 30 }, // 底部中心
         { x: titleRect.left - 20, y: titleRect.top + titleRect.height / 2 }, // 左侧中心
-        { x: logoRect.left + logoRect.width / 2, y: logoRect.top + logoRect.height / 2 } // 回到logo
+        { x: logoRect.left + logoRect.width / 2, y: logoRect.top + logoRect.height / 2 } // 回到旗帜中心
       ];
 
       let currentPoint = 0;
