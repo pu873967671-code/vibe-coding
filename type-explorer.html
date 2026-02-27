@@ -520,13 +520,13 @@
       }
     }
 
-    /* 🌈 底部流动彩虹光效 */
+    /* 🌈 底部流动彩虹光效 - 缩小面积 */
     .bottom-glow {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 150px;
+      height: 60px; /* 从150px减少到60px */
       pointer-events: none;
       z-index: 0;
       overflow: hidden;
@@ -537,28 +537,28 @@
       bottom: 0;
       width: 200%;
       height: 100%;
-      opacity: 0.4;
-      filter: blur(60px);
+      opacity: 0.2; /* 从0.4降低到0.2 */
+      filter: blur(40px); /* 从60px减少到40px */
       animation: flow-horizontal 8s linear infinite;
     }
 
     .glow-layer:nth-child(1) {
       background: linear-gradient(90deg,
         transparent 0%,
-        rgba(255, 82, 82, 0.6) 20%,
+        rgba(255, 82, 82, 0.5) 20%,
         transparent 40%,
-        rgba(255, 159, 67, 0.6) 60%,
+        rgba(255, 159, 67, 0.5) 60%,
         transparent 80%,
-        rgba(255, 215, 0, 0.6) 100%);
+        rgba(255, 215, 0, 0.5) 100%);
       animation-duration: 10s;
     }
 
     .glow-layer:nth-child(2) {
       background: linear-gradient(90deg,
         transparent 0%,
-        rgba(50, 205, 50, 0.6) 25%,
+        rgba(50, 205, 50, 0.5) 25%,
         transparent 50%,
-        rgba(30, 144, 255, 0.6) 75%,
+        rgba(30, 144, 255, 0.5) 75%,
         transparent 100%);
       animation-duration: 12s;
       animation-direction: reverse;
@@ -566,9 +566,9 @@
 
     .glow-layer:nth-child(3) {
       background: linear-gradient(90deg,
-        rgba(186, 85, 211, 0.6) 0%,
+        rgba(186, 85, 211, 0.5) 0%,
         transparent 33%,
-        rgba(255, 82, 82, 0.6) 66%,
+        rgba(255, 82, 82, 0.5) 66%,
         transparent 100%);
       animation-duration: 14s;
     }
