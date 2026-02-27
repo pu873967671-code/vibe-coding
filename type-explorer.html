@@ -2051,109 +2051,127 @@
       }, 300);
     }
 
-    // ===== 🐍 贪吃蛇动画（无限符号版）=====
+    // ===== 🌈 彩虹色带动画（无限符号）=====
     let snakeAnimationId = null;
     let snakeParticles = [];
-    let snakeTime = 0;
+    let snakeSVG = null;
 
     function startSnakeAnimation() {
       const title = document.getElementById('mainTitle');
-      const logo = document.getElementById('rainbowFlag');
-      if (!title || !logo) return;
+      if (!title) return;
 
-      // 创建蛇的粒子（无限符号轨迹）
-      const particleCount = 40;
-      snakeParticles = [];
+      const titleRect = title.getBoundingClientRect();
+      const centerX = titleRect.left + titleRect.width / 2;
+      const centerY = titleRect.top + titleRect.height / 2;
+      const a = titleRect.width * 0.45;
+      const b = titleRect.height * 0.4;
 
-      // 彩虹色渐变
+      // 创建SVG容器
+      snakeSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      snakeSVG.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10000;
+      `;
+
+      // 创建渐变
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.id = 'rainbow-gradient';
+      gradient.setAttribute('x1', '0%');
+      gradient.setAttribute('y1', '0%');
+      gradient.setAttribute('x2', '100%');
+      gradient.setAttribute('y2', '0%');
+
       const rainbowColors = [
-        '#ff0000', '#ff4400', '#ff8800', '#ffaa00',
-        '#ffff00', '#aaff00', '#00ff00', '#00ffaa',
-        '#00ffff', '#00aaff', '#0088ff', '#0044ff',
-        '#4400ff', '#8800ff', '#aa00ff', '#ff00ff'
+        '#ff0000', '#ff8800', '#ffff00', '#00ff00',
+        '#00ffff', '#0088ff', '#8800ff', '#ff00ff'
       ];
 
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'snake-particle';
+      rainbowColors.forEach((color, i) => {
+        const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop.setAttribute('offset', `${(i / (rainbowColors.length - 1)) * 100}%`);
+        stop.setAttribute('stop-color', color);
+        gradient.appendChild(stop);
+      });
 
-        const colorIndex = Math.floor((i / particleCount) * rainbowColors.length);
-        const color = rainbowColors[colorIndex];
-        const size = 18 - (i / particleCount) * 8; // 18px → 10px
+      defs.appendChild(gradient);
+      snakeSVG.appendChild(defs);
 
-        // 头部特殊效果
-        if (i === 0) {
-          particle.style.cssText = `
-            width: 24px;
-            height: 24px;
-            background: radial-gradient(circle, #ffffff 0%, ${color} 60%, transparent 100%);
-            box-shadow: 0 0 30px ${color}, 0 0 60px ${color}, 0 0 90px ${color};
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-          `;
-        } else {
-          particle.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            background: radial-gradient(circle, ${color} 0%, ${color}88 50%, transparent 100%);
-            box-shadow: 0 0 ${size}px ${color};
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            opacity: ${1 - (i / particleCount) * 0.7};
-          `;
-        }
-
-        document.body.appendChild(particle);
-        snakeParticles.push(particle);
+      // 创建多个色带层（形成拖尾效果）
+      const ribbonCount = 15;
+      for (let i = 0; i < ribbonCount; i++) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', `url(#rainbow-gradient)`);
+        path.setAttribute('stroke-width', `${12 - i * 0.5}`);
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('opacity', `${1 - i / ribbonCount * 0.8}`);
+        path.setAttribute('filter', 'url(#glow)');
+        path.className = 'rainbow-ribbon';
+        path.dataset.delay = i * 0.15;
+        snakeSVG.appendChild(path);
+        snakeParticles.push(path);
       }
 
-      snakeTime = 0;
+      // 添加发光滤镜
+      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+      filter.id = 'glow';
+      filter.innerHTML = `
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      `;
+      defs.appendChild(filter);
 
-      function animateSnake() {
-        snakeTime += 0.02;
+      document.body.appendChild(snakeSVG);
 
-        const titleRect = title.getBoundingClientRect();
-        const centerX = titleRect.left + titleRect.width / 2;
-        const centerY = titleRect.top + titleRect.height / 2;
+      let time = 0;
 
-        // 无限符号（∞）轨迹 - Lemniscate of Gerono
-        snakeParticles.forEach((particle, index) => {
-          const delay = index * 0.12;
-          const t = snakeTime - delay;
+      function animateRibbon() {
+        time += 0.02;
 
-          // Lemniscate of Gerono公式
-          // x = a * sin(t)
-          // y = a * sin(t) * cos(t)
-          const a = titleRect.width * 0.4; // 横向半径
-          const b = titleRect.height * 0.4; // 纵向半径
+        snakeParticles.forEach((path, index) => {
+          const t = time - parseFloat(path.dataset.delay);
 
-          const sinT = Math.sin(t);
-          const cosT = Math.cos(t);
+          // 生成无限符号路径点
+          const points = [];
+          const segments = 100;
 
-          const x = centerX + a * sinT;
-          const y = centerY + b * sinT * cosT;
+          for (let i = 0; i <= segments; i++) {
+            const angle = t + (i / segments) * Math.PI * 2;
+            const sinT = Math.sin(angle);
+            const cosT = Math.cos(angle);
 
-          // 蛇身摆动（垂直于运动方向）
-          const perpX = -cosT;
-          const perpY = -sin(2 * t);
-          const waveAmplitude = 2 + (index / particleCount) * 6;
+            const x = centerX + a * sinT;
+            const y = centerY + b * sinT * cosT;
 
-          const finalX = x + perpX * waveAmplitude;
-          const finalY = y + perpY * waveAmplitude;
+            points.push({ x, y });
+          }
 
-          particle.style.left = `${finalX}px`;
-          particle.style.top = `${finalY}px`;
-          particle.classList.add('active');
+          // 构建SVG path
+          let d = `M ${points[0].x} ${points[0].y}`;
+          for (let i = 1; i < points.length; i++) {
+            const p0 = points[i - 1];
+            const p1 = points[i];
+            const midX = (p0.x + p1.x) / 2;
+            const midY = (p0.y + p1.y) / 2;
+            d += ` Q ${p0.x} ${p0.y} ${midX} ${midY}`;
+          }
+
+          path.setAttribute('d', d);
         });
 
-        snakeAnimationId = requestAnimationFrame(animateSnake);
+        snakeAnimationId = requestAnimationFrame(animateRibbon);
       }
 
-      animateSnake();
+      animateRibbon();
     }
 
     function stopSnakeAnimation() {
@@ -2162,22 +2180,19 @@
         snakeAnimationId = null;
       }
 
-      // 淡出效果
-      snakeParticles.forEach((particle, index) => {
-        setTimeout(() => {
-          particle.style.transition = 'opacity 0.5s, transform 0.5s';
-          particle.style.opacity = '0';
-          particle.style.transform = 'scale(0)';
+      if (snakeSVG) {
+        snakeSVG.style.transition = 'opacity 0.5s';
+        snakeSVG.style.opacity = '0';
 
-          setTimeout(() => {
-            if (particle.parentNode) {
-              particle.parentNode.removeChild(particle);
-            }
-          }, 500);
-        }, index * 15);
-      });
+        setTimeout(() => {
+          if (snakeSVG && snakeSVG.parentNode) {
+            snakeSVG.parentNode.removeChild(snakeSVG);
+          }
+        }, 500);
+      }
 
       snakeParticles = [];
+      snakeSVG = null;
     }
 
     // Switch Tab
