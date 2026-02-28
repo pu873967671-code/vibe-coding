@@ -991,6 +991,8 @@
       transform: scale(1.05);
     }
   </style>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
 <body>
   <!-- 🌈 彩虹粒子容器 -->
@@ -1698,10 +1700,105 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // 页面加载时初始化对话
+    // ===== 🎬 GSAP 入场动画 =====
     document.addEventListener('DOMContentLoaded', () => {
-      initDialogue();
+      // 创建入场时间轴
+      const entranceTL = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      // 1. 彩虹旗 Logo - 缩放弹入
+      entranceTL.from(".logo", {
+        scale: 0,
+        rotation: -180,
+        duration: 1,
+        ease: "elastic.out(1, 0.5)"
+      });
+
+      // 2. 标题 - 从下方淡入
+      entranceTL.from(".title", {
+        y: 60,
+        opacity: 0,
+        duration: 0.8
+      }, "-=0.5");
+
+      // 3. 副标题 - 延迟淡入
+      entranceTL.from(".subtitle", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6
+      }, "-=0.4");
+
+      // 4. 透明度声明框 - 从左侧滑入
+      entranceTL.from(".transparency-box", {
+        x: -100,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      }, "-=0.3");
+
+      // 5. 标签页 - 交错弹入
+      entranceTL.from(".tab", {
+        y: 40,
+        opacity: 0,
+        scale: 0.8,
+        stagger: {
+          each: 0.15,
+          from: "center"
+        },
+        duration: 0.5,
+        ease: "back.out(1.5)"
+      }, "-=0.4");
+
+      // 6. 章节内容 - 淡入
+      entranceTL.from(".chapter-section", {
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2
+      }, "-=0.3");
+
+      // 7. 页脚 - 最后淡入
+      entranceTL.from(".footer", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6
+      }, "-=0.2");
+
+      // 彩虹粒子初始爆发效果
+      entranceTL.add(() => {
+        // 在标题位置创建彩虹粒子爆发
+        const title = document.querySelector('.title');
+        const rect = title.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        for (let i = 0; i < 30; i++) {
+          setTimeout(() => {
+            createParticle(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 50);
+          }, i * 30);
+        }
+      }, "-=0.5");
+
+      // 标题持续呼吸动画
+      entranceTL.to(".title", {
+        textShadow: "0 0 30px rgba(99, 102, 241, 0.5)",
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      }, "-=0.5");
+
+      // Logo 持续悬浮动画
+      entranceTL.to(".logo", {
+        y: -10,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      }, "-=2");
     });
+
+    // 初始化对话
+    initDialogue();
 
     // Questions
     const questions = [
