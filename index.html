@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GP - 自我探索中</title>
+  <title>GP - 分享与记录</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-  
+
   <style>
     * {
       margin: 0;
@@ -15,949 +15,526 @@
       box-sizing: border-box;
     }
 
-    html {
-      scroll-behavior: auto;
-    }
-
     body {
-      font-family: 'Noto Sans SC', sans-serif;
-      background: #0a0a0a;
-      color: #fff;
-      overflow-x: hidden;
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.7;
     }
 
     h1, h2, h3 {
-      font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
     }
 
-    .container {
-      position: relative;
-    }
-
-    .section {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 40px;
-      overflow: hidden;
-    }
-
-    /* 背景动态网格 */
-    .grid-bg {
-      position: absolute;
+    /* Header */
+    header {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 30px 40px;
+      position: sticky;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: 
-        linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      z-index: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
     }
 
-    /* 动态光晕 */
-    .glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .glow-1 {
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
-      top: -10%;
-      left: -10%;
-    }
-
-    .glow-2 {
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, transparent 70%);
-      bottom: -10%;
-      right: -10%;
-    }
-
-    .glow-3 {
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(110, 231, 183, 0.1) 0%, transparent 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    /* 几何装饰 */
-    .geo-shape {
-      position: absolute;
-      opacity: 0.08;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .circle {
-      width: 300px;
-      height: 300px;
-      border: 3px solid #10B981;
-      border-radius: 50%;
-    }
-
-    .square {
-      width: 200px;
-      height: 200px;
-      border: 3px solid #34D399;
-      transform: rotate(45deg);
-    }
-
-    .triangle {
-      width: 0;
-      height: 0;
-      border-left: 100px solid transparent;
-      border-right: 100px solid transparent;
-      border-bottom: 173px solid #6EE7B7;
-    }
-
-    /* 内容区域 */
-    .content {
-      position: relative;
-      z-index: 1;
+    .header-content {
       max-width: 1200px;
-      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+
+    nav a {
+      color: #999;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+      font-size: 16px;
+    }
+
+    nav a:hover {
+      color: #10B981;
+    }
+
+    /* Main */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 40px;
     }
 
     /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+      padding: 60px 0;
+    }
+
     .hero-title {
-      font-size: 120px;
-      font-weight: 900;
-      letter-spacing: -5px;
-      line-height: 1;
-      margin-bottom: 30px;
-      background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -2px;
     }
 
     .hero-subtitle {
-      font-size: 32px;
-      font-weight: 400;
-      opacity: 0.9;
-      margin-bottom: 40px;
-      line-height: 1.6;
+      font-size: 20px;
+      color: #666;
+      margin-bottom: 30px;
     }
 
-    .tag-container {
+    .hero-tags {
       display: flex;
-      gap: 15px;
+      gap: 12px;
+      justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 50px;
+      margin-top: 30px;
     }
 
     .tag {
-      padding: 12px 24px;
+      padding: 8px 16px;
       background: rgba(16, 185, 129, 0.1);
-      border: 2px solid rgba(16, 185, 129, 0.3);
-      border-radius: 50px;
-      font-size: 18px;
+      color: #10B981;
+      border-radius: 20px;
+      font-size: 14px;
       font-weight: 500;
-      transition: all 0.3s ease;
-      cursor: default;
+      transition: all 0.3s;
     }
 
     .tag:hover {
       background: rgba(16, 185, 129, 0.2);
-      border-color: #10B981;
-      transform: translateY(-3px);
+      transform: translateY(-2px);
     }
 
-    /* 按钮 */
-    .btn {
-      display: inline-block;
-      padding: 20px 40px;
-      font-size: 20px;
-      font-weight: 600;
-      color: #0a0a0a;
-      background: #10B981;
-      border: none;
-      border-radius: 60px;
-      cursor: pointer;
+    /* Links */
+    .links {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: #fff;
+      border: 2px solid #e5e5e5;
+      border-radius: 30px;
       text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+      color: #1a1a1a;
+      font-weight: 500;
+      transition: all 0.3s;
     }
 
-    .btn:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
-      background: #34D399;
+    .link:hover {
+      border-color: #10B981;
+      color: #10B981;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1);
     }
 
-    /* Section 标题 */
+    .link-icon {
+      font-size: 20px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 80px;
+    }
+
     .section-title {
-      font-size: 72px;
-      font-weight: 900;
-      margin-bottom: 60px;
-      position: relative;
+      font-size: 36px;
+      margin-bottom: 40px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #10B981;
       display: inline-block;
     }
 
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: -15px;
-      left: 0;
-      width: 100px;
-      height: 6px;
-      background: linear-gradient(90deg, #10B981, #34D399);
-      border-radius: 3px;
-    }
-
-    /* 卡片 */
-    .card-grid {
+    /* Blog Card */
+    .blog-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 30px;
-      margin: 40px 0;
+      gap: 25px;
     }
 
-    .card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 2px solid rgba(16, 185, 129, 0.2);
-      border-radius: 24px;
-      padding: 40px;
-      transition: all 0.4s ease;
-      position: relative;
-      overflow: hidden;
+    .blog-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      border: 1px solid #e5e5e5;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, #10B981, #34D399);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.4s ease;
+    .blog-card:hover {
+      border-color: #10B981;
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.1);
     }
 
-    .card:hover::before {
-      transform: scaleX(1);
-    }
-
-    .card:hover {
-      background: rgba(16, 185, 129, 0.05);
-      border-color: rgba(16, 185, 129, 0.4);
-      transform: translateY(-10px);
-    }
-
-    .card-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-    }
-
-    .card-title {
-      font-size: 28px;
-      font-weight: 700;
+    .blog-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 15px;
     }
 
-    .card-desc {
-      font-size: 18px;
-      line-height: 1.7;
-      opacity: 0.9;
+    .blog-card-title {
+      font-size: 22px;
+      margin: 0;
     }
 
-    /* Philosophy */
-    .philosophy-item {
+    .blog-card-date {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .blog-card-desc {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .blog-card-tags {
       display: flex;
-      align-items: center;
-      gap: 30px;
-      margin: 40px 0;
-      padding: 30px;
-      background: rgba(16, 185, 129, 0.05);
-      border-radius: 20px;
-      border-left: 5px solid #10B981;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .philosophy-number {
-      font-size: 48px;
-      font-weight: 900;
+    .blog-tag {
+      font-size: 13px;
       color: #10B981;
-      min-width: 80px;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 12px;
+      border-radius: 12px;
     }
 
-    .philosophy-content h3 {
-      font-size: 28px;
+    /* Project Card */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 25px;
+      border: 1px solid #e5e5e5;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .project-card:hover {
+      border-color: #10B981;
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.1);
+    }
+
+    .project-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .project-title {
+      font-size: 20px;
       margin-bottom: 10px;
     }
 
-    .philosophy-content p {
-      font-size: 18px;
-      opacity: 0.9;
+    .project-desc {
+      font-size: 15px;
+      color: #666;
       line-height: 1.6;
     }
 
-    /* Skills */
-    .skill-bar-container {
-      margin: 30px 0;
-    }
-
-    .skill-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    .skill-bar {
-      width: 100%;
-      height: 12px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    .skill-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10B981, #34D399);
-      border-radius: 6px;
-      width: 0%;
-      transition: width 1.5s ease;
-    }
-
-    /* Contact */
-    .contact-links {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
-      margin: 40px 0;
-    }
-
-    .contact-link {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 25px 35px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 2px solid rgba(16, 185, 129, 0.3);
-      border-radius: 16px;
-      text-decoration: none;
-      color: #fff;
-      font-size: 20px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .contact-link:hover {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: #10B981;
-      transform: translateY(-5px);
-    }
-
-    .contact-icon {
-      font-size: 32px;
-    }
-
-    /* 滚动指示器 */
-    .scroll-indicator {
-      position: absolute;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
+    /* Footer */
+    footer {
+      background: #0a0a0a;
+      color: #999;
       text-align: center;
-      z-index: 10;
+      padding: 40px;
+      margin-top: 80px;
     }
 
-    .scroll-arrow {
-      width: 50px;
-      height: 50px;
-      border: 3px solid rgba(16, 185, 129, 0.5);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
-      animation: bounce 2s infinite;
+    footer p {
+      margin: 10px 0;
     }
 
-    .scroll-arrow::after {
-      content: "↓";
-      font-size: 28px;
+    footer a {
       color: #10B981;
+      text-decoration: none;
     }
 
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(15px);
-      }
-      60% {
-        transform: translateY(8px);
-      }
-    }
-
-    /* 响应式 */
+    /* Responsive */
     @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      nav {
+        gap: 20px;
+      }
+
       .hero-title {
-        font-size: 72px;
-        letter-spacing: -3px;
+        font-size: 42px;
       }
 
-      .hero-subtitle {
-        font-size: 24px;
+      .links {
+        flex-direction: column;
+        align-items: center;
       }
 
-      .section-title {
-        font-size: 48px;
-      }
-
-      .card-grid {
+      .project-grid {
         grid-template-columns: 1fr;
       }
 
-      .philosophy-item {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .contact-links {
-        flex-direction: column;
+      main {
+        padding: 40px 20px;
       }
     }
 
-    /* 粒子容器 */
-    .particles {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #10B981;
-      border-radius: 50%;
-      opacity: 0.6;
+    /* 动画 */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Hero Section -->
-    <section class="section" id="hero">
-      <div class="grid-bg"></div>
-      <div class="glow glow-1"></div>
-      <div class="glow glow-2"></div>
-      <div class="particles" id="hero-particles"></div>
-      
-      <div class="geo-shape circle" style="top: 15%; right: 10%;"></div>
-      <div class="geo-shape square" style="bottom: 20%; left: 5%;"></div>
-      
-      <div class="content">
-        <h1 class="hero-title" id="hero-title">GP</h1>
-        <p class="hero-subtitle" id="hero-subtitle">
-          自我探索中 · 用代码创造价值<br>
-          Keep exploring, keep building.
+  <header>
+    <div class="header-content">
+      <div class="logo">GP</div>
+      <nav>
+        <a href="#about">关于</a>
+        <a href="#projects">项目</a>
+        <a href="#articles">文章</a>
+        <a href="https://x.com/FanPiny" target="_blank">X</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero fade-in">
+      <h1 class="hero-title">分享与记录</h1>
+      <p class="hero-subtitle">
+        自我探索中 · 用代码创造价值<br>
+        Keep exploring, keep building.
+      </p>
+
+      <div class="hero-tags">
+        <span class="tag">🚀 全栈开发</span>
+        <span class="tag">🎨 设计爱好者</span>
+        <span class="tag">💪 运动健身</span>
+        <span class="tag">🧘 自我成长</span>
+        <span class="tag">🌈 开放思维</span>
+      </div>
+
+      <div class="links">
+        <a href="https://x.com/FanPiny" class="link" target="_blank">
+          <span class="link-icon">𝕏</span>
+          <span>Follow on X</span>
+        </a>
+        <a href="https://github.com/pu873967671-code" class="link" target="_blank">
+          <span class="link-icon">💻</span>
+          <span>GitHub</span>
+        </a>
+        <a href="https://t.me/Gp9527" class="link">
+          <span class="link-icon">📱</span>
+          <span>Telegram</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="section fade-in">
+      <h2 class="section-title">关于我</h2>
+      <div style="font-size: 18px; color: #666; line-height: 1.8;">
+        <p style="margin-bottom: 20px;">
+          我系一个热爱学习嘅开发者，相信终身学习嘅力量。每日瞓觉前要比朝早聪明少少。
         </p>
-        
-        <div class="tag-container" id="hero-tags">
-          <span class="tag">🚀 全栈开发</span>
-          <span class="tag">🎨 设计爱好者</span>
-          <span class="tag">💪 运动健身</span>
-          <span class="tag">🧘 自我成长</span>
-          <span class="tag">🌈 开放思维</span>
-        </div>
-        
-        <a href="#about" class="btn" id="hero-btn">开始探索 ↓</a>
-      </div>
-      
-      <div class="scroll-indicator">
-        <div class="scroll-arrow"></div>
+        <p style="margin-bottom: 20px;">
+          <strong style="color: #1a1a1a;">核心理念：</strong>
+        </p>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li style="margin-bottom: 10px;">🎯 避免愚蠢 > 追求聪明</li>
+          <li style="margin-bottom: 10px;">📊 概率思维 + 独立思考</li>
+          <li style="margin-bottom: 10px;">🌱 持续成长 + 价值创造</li>
+        </ul>
+        <p>
+          技术栈：React / Vue / Node.js / TypeScript / Python / Go
+        </p>
       </div>
     </section>
 
-    <!-- About Section -->
-    <section class="section" id="about">
-      <div class="grid-bg"></div>
-      <div class="glow glow-3"></div>
-      
-      <div class="content">
-        <h2 class="section-title">关于我</h2>
-        
-        <div class="card-grid">
-          <div class="card">
-            <div class="card-icon">💻</div>
-            <div class="card-title">技术栈</div>
-            <div class="card-desc">
-              React / Vue / Node.js / TypeScript<br>
-              Python / Go / PostgreSQL<br>
-              AWS / Docker / Kubernetes
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-icon">🎯</div>
-            <div class="card-title">当前状态</div>
-            <div class="card-desc">
-              全职开发中 · 2026<br>
-              专注产品与用户体验<br>
-              持续学习新技术
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-icon">🌱</div>
-            <div class="card-title">成长方向</div>
-            <div class="card-desc">
-              深入系统设计<br>
-              探索 AI 应用<br>
-              提升产品思维
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Projects -->
+    <section id="projects" class="section fade-in">
+      <h2 class="section-title">项目展示</h2>
 
-    <!-- Skills Section -->
-    <section class="section" id="skills">
-      <div class="grid-bg"></div>
-      <div class="glow glow-1"></div>
-      
-      <div class="content">
-        <h2 class="section-title">技能树</h2>
-        
-        <div class="skill-bar-container">
-          <div class="skill-label">
-            <span>前端开发</span>
-            <span>90%</span>
-          </div>
-          <div class="skill-bar">
-            <div class="skill-fill" data-width="90"></div>
-          </div>
-        </div>
-        
-        <div class="skill-bar-container">
-          <div class="skill-label">
-            <span>后端开发</span>
-            <span>85%</span>
-          </div>
-          <div class="skill-bar">
-            <div class="skill-fill" data-width="85"></div>
-          </div>
-        </div>
-        
-        <div class="skill-bar-container">
-          <div class="skill-label">
-            <span>系统设计</span>
-            <span>75%</span>
-          </div>
-          <div class="skill-bar">
-            <div class="skill-fill" data-width="75"></div>
-          </div>
-        </div>
-        
-        <div class="skill-bar-container">
-          <div class="skill-label">
-            <span>产品思维</span>
-            <span>70%</span>
-          </div>
-          <div class="skill-bar">
-            <div class="skill-fill" data-width="70"></div>
-          </div>
-        </div>
-        
-        <div class="skill-bar-container">
-          <div class="skill-label">
-            <span>设计感知</span>
-            <span>65%</span>
-          </div>
-          <div class="skill-bar">
-            <div class="skill-fill" data-width="65"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Philosophy Section -->
-    <section class="section" id="philosophy">
-      <div class="grid-bg"></div>
-      <div class="glow glow-2"></div>
-      
-      <div class="geo-shape triangle" style="top: 20%; right: 15%;"></div>
-      
-      <div class="content">
-        <h2 class="section-title">自我探索</h2>
-        
-        <div class="philosophy-item">
-          <div class="philosophy-number">01</div>
-          <div class="philosophy-content">
-            <h3>终身学习</h3>
-            <p>每日瞓觉前要比朝早聪明少少。阅读系最好嘅投资，跨学科阅读系最好嘅阅读。</p>
-          </div>
-        </div>
-        
-        <div class="philosophy-item">
-          <div class="philosophy-number">02</div>
-          <div class="philosophy-content">
-            <h3>避免愚蠢 > 追求聪明</h3>
-            <p>唔需要超常智慧，只需要避免常见错误。可靠 > 聪明。</p>
-          </div>
-        </div>
-        
-        <div class="philosophy-item">
-          <div class="philosophy-number">03</div>
-          <div class="philosophy-content">
-            <h3>概率思维</h3>
-            <p>唔讲"一定"，只讲"我估计X%概率"。用新信息持续更新，唔全盘推翻。</p>
-          </div>
-        </div>
-        
-        <div class="philosophy-item">
-          <div class="philosophy-number">04</div>
-          <div class="philosophy-content">
-            <h3>独立思考</h3>
-            <p>唔理其他人点谂。社会认同系最危险嘅偏见之一。"别人买我也买"系亏钱嘅最快方法。</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section class="section" id="projects">
-      <div class="grid-bg"></div>
-      <div class="glow glow-1"></div>
-      
-      <div class="content">
-        <h2 class="section-title">项目展示</h2>
-        
-        <div class="card-grid">
-          <a href="rainbow-enhanced.html" class="card" style="text-decoration: none; color: inherit;">
-            <div class="card-icon">🌈</div>
-            <div class="card-title">彩虹光谱</div>
-            <div class="card-desc">
-              同志文化科普网站<br>
-              GSAP 全屏滚动 + 精美动画<br>
-              14页完整体验
-            </div>
-          </a>
-          
-          <a href="type-explorer-v2.html" class="card" style="text-decoration: none; color: inherit;">
-            <div class="card-icon">🎭</div>
-            <div class="card-title">类型探索器</div>
-            <div class="card-desc">
-              交互式身份探索工具<br>
-              动画效果 + 结果展示<br>
-              自我认知助手
-            </div>
-          </a>
-          
-          <a href="face-match-mvp.html" class="card" style="text-decoration: none; color: inherit;">
-            <div class="card-icon">🤖</div>
-            <div class="card-title">人脸匹配 MVP</div>
-            <div class="card-desc">
-              AI 人脸识别演示<br>
-              相似度分析<br>
-              技术实验项目
-            </div>
-          </a>
-          
-          <a href="rf-detr.html" class="card" style="text-decoration: none; color: inherit;">
-            <div class="card-icon">🎯</div>
-            <div class="card-title">RF-DETR</div>
-            <div class="card-desc">
-              目标检测研究<br>
-              深度学习应用<br>
-              技术文档
-            </div>
-          </a>
-        </div>
-        
-        <div style="text-align: center; margin-top: 50px;">
-          <p style="font-size: 20px; opacity: 0.7; line-height: 1.6;">
-            更多项目持续开发中...<br>
-            Stay tuned! 🚀
+      <div class="project-grid">
+        <a href="rainbow-enhanced.html" class="project-card">
+          <div class="project-icon">🌈</div>
+          <h3 class="project-title">彩虹光谱</h3>
+          <p class="project-desc">
+            同志文化科普网站<br>
+            GSAP 全屏滚动体验
           </p>
-        </div>
+        </a>
+
+        <a href="type-explorer-v2.html" class="project-card">
+          <div class="project-icon">🎭</div>
+          <h3 class="project-title">类型探索器</h3>
+          <p class="project-desc">
+            交互式身份探索工具<br>
+            自我认知助手
+          </p>
+        </a>
+
+        <a href="face-match-mvp.html" class="project-card">
+          <div class="project-icon">🤖</div>
+          <h3 class="project-title">人脸匹配 MVP</h3>
+          <p class="project-desc">
+            AI 人脸识别演示<br>
+            相似度分析
+          </p>
+        </a>
+
+        <a href="rf-detr.html" class="project-card">
+          <div class="project-icon">🎯</div>
+          <h3 class="project-title">RF-DETR</h3>
+          <p class="project-desc">
+            目标检测研究<br>
+            深度学习应用
+          </p>
+        </a>
       </div>
     </section>
 
-    <!-- Contact Section -->
-    <section class="section" id="contact">
-      <div class="grid-bg"></div>
-      <div class="glow glow-3"></div>
-      <div class="particles" id="contact-particles"></div>
-      
-      <div class="content" style="text-align: center;">
-        <h2 class="section-title" style="display: inline-block;">联系我</h2>
-        
-        <p style="font-size: 24px; margin: 40px 0; line-height: 1.8; opacity: 0.9;">
-          有项目想法？想交流技术？<br>
-          或者只是想打个招呼？
-        </p>
-        
-        <div class="contact-links" style="justify-content: center;">
-          <a href="https://t.me/Gp9527" class="contact-link">
-            <span class="contact-icon">📱</span>
-            <span>Telegram</span>
-          </a>
-          
-          <a href="https://github.com/pu873967671-code" class="contact-link">
-            <span class="contact-icon">💻</span>
-            <span>GitHub</span>
-          </a>
-          
-          <a href="mailto:your-email@example.com" class="contact-link">
-            <span class="contact-icon">📧</span>
-            <span>Email</span>
-          </a>
+    <!-- Articles -->
+    <section id="articles" class="section fade-in">
+      <h2 class="section-title">最新文章</h2>
+
+      <div class="blog-grid">
+        <a href="articles/health-after-40.html" class="blog-card">
+          <div class="blog-card-header">
+            <h3 class="blog-card-title">40岁后的健康指南</h3>
+            <span class="blog-card-date">2025-02</span>
+          </div>
+          <p class="blog-card-desc">
+            健康是最大的财富。这篇文章整理了40岁后需要特别注意的健康事项。
+          </p>
+          <div class="blog-card-tags">
+            <span class="blog-tag">健康</span>
+            <span class="blog-tag">生活</span>
+          </div>
+        </a>
+
+        <div class="blog-card" style="opacity: 0.5; cursor: default;">
+          <div class="blog-card-header">
+            <h3 class="blog-card-title">GSAP 完整学习笔记</h3>
+            <span class="blog-card-date">Coming Soon</span>
+          </div>
+          <p class="blog-card-desc">
+            从基础到高级，完整记录 GSAP v3 的学习过程...
+          </p>
+          <div class="blog-card-tags">
+            <span class="blog-tag">技术</span>
+            <span class="blog-tag">动画</span>
+          </div>
         </div>
-        
-        <p style="font-size: 20px; margin-top: 60px; opacity: 0.7;">
-          © 2026 GP · 自我探索中 · Keep Growing
-        </p>
+
+        <div class="blog-card" style="opacity: 0.5; cursor: default;">
+          <div class="blog-card-header">
+            <h3 class="blog-card-title">自我探索的方法论</h3>
+            <span class="blog-card-date">Coming Soon</span>
+          </div>
+          <p class="blog-card-desc">
+            如何通过日记、阅读、对话来持续认识自己...
+          </p>
+          <div class="blog-card-tags">
+            <span class="blog-tag">成长</span>
+            <span class="blog-tag">思考</span>
+          </div>
+        </div>
       </div>
     </section>
-  </div>
+  </main>
 
-  <!-- GSAP CDN -->
+  <footer>
+    <p>© 2026 GP · 自我探索中</p>
+    <p>
+      <a href="https://x.com/FanPiny" target="_blank">X @FanPiny</a> ·
+      <a href="https://github.com/pu873967671-code" target="_blank">GitHub</a> ·
+      <a href="https://t.me/Gp9527">Telegram</a>
+    </p>
+  </footer>
+
+  <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
 
   <script>
-    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+    gsap.registerPlugin(ScrollTrigger);
 
-    // 创建粒子
-    function createParticles(containerId, count = 30) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      
-      for (let i = 0; i < count; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        container.appendChild(particle);
-        
-        gsap.to(particle, {
-          y: 'random(-100, 100)',
-          x: 'random(-50, 50)',
-          duration: 'random(4, 8)',
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut'
-        });
-      }
-    }
-
-    createParticles('hero-particles', 20);
-    createParticles('contact-particles', 15);
-
-    // Hero 入场动画
-    const heroTL = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-    heroTL
-      .from("#hero-title", {
-        y: -100,
-        opacity: 0,
-        scale: 0.8,
-        rotation: -10,
-        duration: 1.2
-      })
-      .from("#hero-subtitle", {
-        y: 50,
-        opacity: 0,
-        duration: 0.9
-      }, "-=0.6")
-      .from("#hero-tags .tag", {
-        scale: 0,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.5,
-        ease: "back.out(1.7)"
-      }, "-=0.4")
-      .from("#hero-btn", {
-        scale: 0,
-        opacity: 0,
-        duration: 0.6,
-        ease: "back.out(2)"
-      }, "-=0.3")
-      .from(".geo-shape", {
-        scale: 0,
-        rotation: 180,
-        opacity: 0,
-        stagger: 0.2,
-        duration: 1
-      }, "-=0.5");
-
-    // 光晕动画
-    gsap.to(".glow", {
-      scale: 1.2,
-      duration: 4,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      stagger: 1
-    });
-
-    // 几何形状旋转
-    gsap.to(".circle", {
-      rotation: 360,
-      duration: 30,
-      repeat: -1,
-      ease: "none"
-    });
-
-    gsap.to(".square", {
-      rotation: "+=360",
-      duration: 20,
-      repeat: -1,
-      ease: "none"
-    });
-
-    // Section 动画
-    const sections = ["#about", "#skills", "#philosophy", "#projects", "#contact"];
-
-    sections.forEach(section => {
-      gsap.from(`${section} .section-title`, {
+    // Fade in 动画
+    gsap.utils.toArray('.fade-in').forEach(elem => {
+      gsap.from(elem, {
         scrollTrigger: {
-          trigger: section,
-          start: "top 80%"
+          trigger: elem,
+          start: "top 85%",
+          toggleActions: "play none none none"
         },
-        x: -100,
-        opacity: 0,
-        duration: 0.8
-      });
-    });
-
-    // 卡片动画
-    gsap.from("#about .card", {
-      scrollTrigger: {
-        trigger: "#about",
-        start: "top 60%"
-      },
-      y: 80,
-      opacity: 0,
-      stagger: 0.2,
-      duration: 0.7
-    });
-
-    // 项目卡片动画
-    gsap.from("#projects .card", {
-      scrollTrigger: {
-        trigger: "#projects",
-        start: "top 60%"
-      },
-      scale: 0.8,
-      opacity: 0,
-      rotation: "random(-5, 5)",
-      stagger: 0.15,
-      duration: 0.7,
-      ease: "back.out(1.7)"
-    });
-
-    // 技能条动画
-    gsap.from("#skills .skill-bar-container", {
-      scrollTrigger: {
-        trigger: "#skills",
-        start: "top 60%"
-      },
-      x: -50,
-      opacity: 0,
-      stagger: 0.15,
-      duration: 0.6
-    });
-
-    // 技能条填充
-    ScrollTrigger.create({
-      trigger: "#skills",
-      start: "top 60%",
-      onEnter: () => {
-        document.querySelectorAll('.skill-fill').forEach(bar => {
-          const width = bar.dataset.width;
-          bar.style.width = width + '%';
-        });
-      }
-    });
-
-    // Philosophy 动画
-    gsap.from(".philosophy-item", {
-      scrollTrigger: {
-        trigger: "#philosophy",
-        start: "top 60%"
-      },
-      x: -100,
-      opacity: 0,
-      stagger: 0.2,
-      duration: 0.8
-    });
-
-    // Contact 动画
-    const contactTL = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#contact",
-        start: "top 60%"
-      }
-    });
-
-    contactTL
-      .from("#contact p", {
         y: 30,
         opacity: 0,
-        stagger: 0.15,
-        duration: 0.6
-      })
-      .from(".contact-link", {
-        scale: 0.8,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.5,
-        ease: "back.out(1.7)"
-      }, "-=0.3");
-
-    // 平滑滚动
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        
-        gsap.to(window, {
-          scrollTo: { y: target, autoKill: false },
-          duration: 1,
-          ease: "power3.inOut"
-        });
+        duration: 0.8,
+        ease: "power2.out"
       });
     });
 
-    // 标签悬停动画
-    document.querySelectorAll('.tag').forEach(tag => {
-      tag.addEventListener('mouseenter', () => {
-        gsap.to(tag, {
-          scale: 1.1,
+    // Hero 标签动画
+    gsap.from('.tag', {
+      scale: 0,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+      delay: 0.3
+    });
+
+    // 卡片悬停效果
+    document.querySelectorAll('.blog-card, .project-card, .link').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        gsap.to(card, {
+          scale: 1.02,
           duration: 0.3,
           ease: "power2.out"
         });
       });
 
-      tag.addEventListener('mouseleave', () => {
-        gsap.to(tag, {
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
           scale: 1,
           duration: 0.3,
           ease: "power2.out"
@@ -965,7 +542,21 @@
       });
     });
 
-    console.log("🚀 GP 个人网站已加载！");
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    console.log("📝 GP 博客已加载");
   </script>
 </body>
 </html>
