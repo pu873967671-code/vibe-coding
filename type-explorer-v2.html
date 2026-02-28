@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>彩虹光谱 - 发现你的位置</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <style>
+    :root {
+      --green-primary: #10B981;
+      --green-bright: #34D399;
+      --green-mint: #6EE7B7;
+      --green-dark: #059669;
+      --green-glow: #00ff88;
+      --bg-dark: #0a0f0a;
+      --bg-card: #0f1a0f;
+      --text-primary: #f0fff0;
+      --text-secondary: #86efac;
+      --rainbow-red: #EF4444;
+      --rainbow-orange: #F59E0B;
+      --rainbow-yellow: #FBBF24;
+      --rainbow-blue: #3B82F6;
+      --rainbow-purple: #8B5CF6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* ===== 全屏页面 ===== */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 60px 20px;
+    }
+
+    /* ===== 动态背景 ===== */
+    .bg-gradient {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(52, 211, 153, 0.1) 0%, transparent 50%),
+        var(--bg-dark);
+      z-index: 0;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: 0;
+    }
+
+    /* ===== 彩虹条 ===== */
+    .rainbow-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg,
+        var(--rainbow-red),
+        var(--rainbow-orange),
+        var(--rainbow-yellow),
+        var(--green-primary),
+        var(--rainbow-blue),
+        var(--rainbow-purple)
+      );
+      z-index: 1000;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .rainbow-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      filter: blur(20px);
+      opacity: 0.6;
+    }
+
+    /* ===== 导航点 ===== */
+    .nav-dots {
+      position: fixed;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.2);
+      border: 2px solid var(--green-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-dot.active {
+      background: var(--green-primary);
+      box-shadow: 0 0 20px var(--green-glow);
+      transform: scale(1.3);
+    }
+
+    .nav-dot:hover {
+      background: var(--green-bright);
+    }
+
+    /* ===== 内容区域 ===== */
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ===== 标题样式 ===== */
+    .hero-title {
+      font-size: clamp(48px, 12vw, 120px);
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--green-bright), var(--green-mint), var(--green-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .hero-title .char {
+      display: inline-block;
+      opacity: 0;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(18px, 3vw, 28px);
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      opacity: 0;
+    }
+
+    /* ===== 彩虹拱门 ===== */
+    .rainbow-arch {
+      position: absolute;
+      width: 600px;
+      height: 300px;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      z-index: 0;
+    }
+
+    .rainbow-arch svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ===== 动物图标 ===== */
+    .animal-icons {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin: 40px 0;
+    }
+
+    .animal-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--bg-card);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      opacity: 0;
+      transform: scale(0.5) translateY(30px);
+    }
+
+    .animal-icon:hover {
+      transform: scale(1.1) translateY(-5px);
+      border-color: var(--green-primary);
+      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+    }
+
+    .animal-icon.active {
+      border-color: var(--green-bright);
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 24px;
+      padding: 40px;
+      margin: 20px 0;
+      opacity: 0;
+      transform: translateY(50px);
+    }
+
+    .card:hover {
+      border-color: var(--green-primary);
+    }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 40px;
+      background: linear-gradient(135deg, var(--green-primary), var(--green-dark));
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* ===== 滚动指示器 ===== */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      opacity: 0;
+    }
+
+    .scroll-indicator .arrow {
+      width: 24px;
+      height: 24px;
+      border-right: 2px solid var(--green-primary);
+      border-bottom: 2px solid var(--green-primary);
+      transform: rotate(45deg);
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(10px); }
+    }
+
+    /* ===== 文字段落 ===== */
+    .text-block {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .text-block p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .text-block .highlight {
+      color: var(--green-bright);
+      font-weight: 600;
+    }
+
+    /* ===== 章节标题 ===== */
+    .section-title {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .section-number {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      background: var(--green-primary);
+      color: var(--bg-dark);
+      border-radius: 50%;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: scale(0);
+    }
+
+    /* ===== 类型卡片网格 ===== */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin: 30px 0;
+    }
+
+    .type-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .type-card:hover {
+      border-color: var(--green-primary);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+    }
+
+    .type-card .emoji {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .type-card .name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .type-card .name-en {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ===== 警告框 ===== */
+    .warning-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-left: 4px solid #F59E0B;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: left;
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+
+    .warning-box h3 {
+      color: #F59E0B;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .warning-box ul {
+      list-style: none;
+      color: var(--text-secondary);
+      line-height: 2;
+    }
+
+    .warning-box li::before {
+      content: "• ";
+      color: #F59E0B;
+    }
+
+    /* ===== 引用框 ===== */
+    .quote-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(52, 211, 153, 0.05));
+      border-left: 4px solid var(--green-primary);
+      border-radius: 0 16px 16px 0;
+      padding: 40px;
+      position: relative;
+      opacity: 0;
+    }
+
+    .quote-box::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 20px;
+      font-size: 120px;
+      color: var(--green-primary);
+      opacity: 0.15;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .quote-box p {
+      font-size: 20px;
+      line-height: 1.8;
+      color: var(--text-primary);
+      font-style: italic;
+    }
+
+    /* ===== 粒子容器 ===== */
+    .particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--green-primary);
+      border-radius: 50%;
+      opacity: 0;
+    }
+
+    /* ===== 进度条 ===== */
+    .progress-line {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-primary), var(--green-bright));
+      z-index: 1000;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .nav-dots {
+        right: 15px;
+      }
+      
+      .nav-dot {
+        width: 10px;
+        height: 10px;
+      }
+      
+      .rainbow-arch {
+        width: 100%;
+        height: 200px;
+      }
+      
+      .card {
+        padding: 25px;
+        border-radius: 16px;
+      }
+      
+      .btn {
+        padding: 15px 30px;
+        font-size: 16px;
+      }
+    }
+
+    /* ===== 动画类 ===== */
+    .fade-in {
+      opacity: 1 !important;
+      transform: translateY(0) scale(1) translateX(0) !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- 进度条 -->
+  <div class="progress-line"></div>
+  
+  <!-- 彩虹条 -->
+  <div class="rainbow-bar"></div>
+  
+  <!-- 导航点 -->
+  <div class="nav-dots">
+    <div class="nav-dot active" data-page="0"></div>
+    <div class="nav-dot" data-page="1"></div>
+    <div class="nav-dot" data-page="2"></div>
+    <div class="nav-dot" data-page="3"></div>
+    <div class="nav-dot" data-page="4"></div>
+    <div class="nav-dot" data-page="5"></div>
+    <div class="nav-dot" data-page="6"></div>
+    <div class="nav-dot" data-page="7"></div>
+  </div>
+
+  <!-- ===== 第1页：开场 ===== -->
+  <section class="page" id="page-1">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="particles" id="particles-1"></div>
+    
+    <!-- 彩虹拱门 -->
+    <div class="rainbow-arch">
+      <svg viewBox="0 0 600 300" fill="none">
+        <defs>
+          <linearGradient id="rainbow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#EF4444"/>
+            <stop offset="20%" stop-color="#F59E0B"/>
+            <stop offset="40%" stop-color="#FBBF24"/>
+            <stop offset="60%" stop-color="#10B981"/>
+            <stop offset="80%" stop-color="#3B82F6"/>
+            <stop offset="100%" stop-color="#8B5CF6"/>
+          </linearGradient>
+        </defs>
+        <path d="M50 300 Q300 -50 550 300" stroke="url(#rainbow-grad)" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M80 300 Q300 0 520 300" stroke="url(#rainbow-grad)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+        <path d="M110 300 Q300 50 490 300" stroke="url(#rainbow-grad)" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.3"/>
+      </svg>
+    </div>
+    
+    <div class="content">
+      <h1 class="hero-title">彩虹光谱</h1>
+      <p class="hero-subtitle">发现你在光谱上的位置</p>
+      
+      <div class="animal-icons">
+        <div class="animal-icon">🐻</div>
+        <div class="animal-icon">🐺</div>
+        <div class="animal-icon">🦌</div>
+        <div class="animal-icon">🦊</div>
+        <div class="animal-icon">🐱</div>
+        <div class="animal-icon">🐰</div>
+      </div>
+      
+      <button class="btn" onclick="scrollToPage(1)">
+        开始探索
+        <span>→</span>
+      </button>
+    </div>
+    
+    <div class="scroll-indicator">
+      <span>向下滚动</span>
+      <div class="arrow"></div>
+    </div>
+  </section>
+
+  <!-- ===== 第2页：气质是什么 ===== -->
+  <section class="page" id="page-2">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <div class="content">
+      <div class="section-number">01</div>
+      <h2 class="section-title">气质是什么？</h2>
+      
+      <div class="text-block">
+        <p>是你走路的方式？是你微笑的弧度？还是你眼里的光芒？</p>
+        <p>气质不是一个标签，也不是一个类型。<br>它是<span class="highlight">独特的、流动的、属于你的</span>。</p>
+        <p>但在同志社区里，我们用一些词汇来描述相似的气质。<br>这些词汇，有历史、有故事、也有局限。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第3页：历史起源 ===== -->
+  <section class="page" id="page-3">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <div class="content">
+      <div class="section-number">02</div>
+      <h2 class="section-title">1970年代，旧金山</h2>
+      
+      <div class="card">
+        <div class="text-block">
+          <p>在美国西海岸的同志社区里，一群体型壮硕、体毛较多的男性开始自称<span class="highlight">"熊"(Bear)</span>。</p>
+          <p>这不是一种自我贬低，而是一种宣言：</p>
+          <p style="font-size: 24px; color: var(--green-bright); text-align: center; font-weight: 600;">
+            "我们不需要符合主流审美。<br>我们有自己的美。"
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第4页：动物系类型 ===== -->
+  <section class="page" id="page-4">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <div class="content">
+      <div class="section-number">03</div>
+      <h2 class="section-title">光谱上的位置</h2>
+      
+      <div class="type-grid">
+        <div class="type-card"><div class="emoji">🐻</div><div class="name">熊系</div><div class="name-en">Bear</div></div>
+        <div class="type-card"><div class="emoji">🐺</div><div class="name">狼系</div><div class="name-en">Wolf</div></div>
+        <div class="type-card"><div class="emoji">🦌</div><div class="name">鹿系</div><div class="name-en">Deer</div></div>
+        <div class="type-card"><div class="emoji">🦊</div><div class="name">狐系</div><div class="name-en">Fox</div></div>
+        <div class="type-card"><div class="emoji">🐱</div><div class="name">猫系</div><div class="name-en">Cat</div></div>
+        <div class="type-card"><div class="emoji">🐰</div><div class="name">兔系</div><div class="name-en">Rabbit</div></div>
+        <div class="type-card"><div class="emoji">🐕</div><div class="name">犬系</div><div class="name-en">Dog</div></div>
+        <div class="type-card"><div class="emoji">🦁</div><div class="name">狮系</div><div class="name-en">Lion</div></div>
+        <div class="type-card"><div class="emoji">🐯</div><div class="name">虎系</div><div class="name-en">Tiger</div></div>
+        <div class="type-card"><div class="emoji">🐆</div><div class="name">豹系</div><div class="name-en">Leopard</div></div>
+        <div class="type-card"><div class="emoji">🐷</div><div class="name">猪系</div><div class="name-en">Pig</div></div>
+        <div class="type-card"><div class="emoji">🐒</div><div class="name">猴系</div><div class="name-en">Otter</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第5页：科学吗？ ===== -->
+  <section class="page" id="page-5">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <div class="content">
+      <div class="section-number">04</div>
+      <h2 class="section-title">这些分类科学吗？</h2>
+      
+      <div class="card" style="text-align: center;">
+        <p style="font-size: 48px; color: #F59E0B; font-weight: 700; margin-bottom: 20px;">不科学。</p>
+        <div class="text-block">
+          <p>这些分类只是<span class="highlight">文化现象</span>，是对不同身体类型和气质的友好称呼，而不是基于心理学、生物学或任何科学研究的分类系统。</p>
+          <p>人类是复杂的，不能被简单分类。<br>一个人可以同时具备多种类型的特征，也可以完全不符合任何标签。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第6页：批判性思考 ===== -->
+  <section class="page" id="page-6">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <div class="content">
+      <div class="section-number">05</div>
+      <h2 class="section-title">⚠️ 批判性思考</h2>
+      
+      <div class="warning-box">
+        <h3>在使用任何标签系统时，请思考：</h3>
+        <ul>
+          <li>我是否认同这个标签，还是它只是外界给我的？</li>
+          <li>这个标签是帮助我找到归属，还是限制了我的可能性？</li>
+          <li>我是否在不自觉地迎合某种刻板印象？</li>
+          <li>真正的我，是否比任何标签都更丰富、更独特？</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第7页：流动的身份 ===== -->
+  <section class="page" id="page-7">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <div class="content">
+      <div class="section-number">06</div>
+      <h2 class="section-title">流动的身份</h2>
+      
+      <div class="quote-box">
+        <p>性别认同、身体特征、性格气质都会随时间改变。<br><br>
+        你今天的自我认知，可能和一年后、五年后完全不同。<br><br>
+        <strong style="color: var(--green-bright);">这完全正常。</strong></p>
+      </div>
+      
+      <div class="card" style="margin-top: 30px; text-align: center;">
+        <p style="font-size: 20px; color: var(--text-primary); font-weight: 500;">
+          标签是工具，不是枷锁。
+        </p>
+        <p style="color: var(--text-secondary); margin-top: 15px;">
+          你有权利选择认同任何标签，也可以不使用任何标签。<br>
+          你定义你自己，而不是相反。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第8页：结尾 + CTA ===== -->
+  <section class="page" id="page-8">
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="particles" id="particles-8"></div>
+    
+    <div class="content">
+      <h2 class="hero-title" style="font-size: clamp(36px, 8vw, 72px);">
+        准备好了吗？
+      </h2>
+      
+      <p class="hero-subtitle">
+        探索你在光谱上的位置<br>
+        找到属于你的归属感
+      </p>
+      
+      <div class="animal-icons" style="margin-bottom: 40px;">
+        <div class="animal-icon">🌈</div>
+        <div class="animal-icon">💚</div>
+        <div class="animal-icon">✨</div>
+      </div>
+      
+      <button class="btn" onclick="location.href='type-explorer.html'">
+        开始探索
+        <span>→</span>
+      </button>
+      
+      <p style="margin-top: 40px; color: var(--text-secondary); font-size: 14px;">
+        © 2026 彩虹光谱 · 本地处理 · 零数据收集 · 开源项目
+      </p>
+    </div>
+  </section>
+
+  <script>
+    // ===== GSAP 注册插件 =====
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    // ===== 页面数据 =====
+    const pages = document.querySelectorAll('.page');
+    const navDots = document.querySelectorAll('.nav-dot');
+    const totalSections = pages.length;
+
+    // ===== 滚动到指定页面 =====
+    function scrollToPage(index) {
+      gsap.to(window, {
+        scrollTo: { y: pages[index], autoKill: false },
+        duration: 1,
+        ease: "power3.inOut"
+      });
+    }
+
+    // ===== 导航点点击 =====
+    navDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => scrollToPage(index));
+    });
+
+    // ===== 进度条动画 =====
+    gsap.to('.progress-line', {
+      scaleX: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: 'body',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.3
+      }
+    });
+
+    // ===== 彩虹条动画 =====
+    gsap.to('.rainbow-bar', {
+      scaleX: 1,
+      duration: 1.5,
+      ease: "power2.out",
+      delay: 0.5
+    });
+
+    // ===== 第1页动画 =====
+    const tl1 = gsap.timeline();
+    
+    // 标题字符动画
+    tl1.to('.hero-title', { opacity: 1, duration: 0.01 })
+       .from('.hero-title', {
+         y: 100,
+         opacity: 0,
+         duration: 1,
+         ease: "power3.out"
+       });
+    
+    // 副标题
+    tl1.to('.hero-subtitle', { opacity: 1, y: 0, duration: 0.8 }, "-=0.5");
+    
+    // 彩虹拱门
+    tl1.to('.rainbow-arch', { opacity: 1, duration: 1, ease: "power2.out" }, "-=1");
+    
+    // 动物图标交错出现
+    tl1.to('.animal-icon', {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      duration: 0.5,
+      stagger: {
+        each: 0.1,
+        from: "center"
+      },
+      ease: "back.out(1.5)"
+    }, "-=0.5");
+    
+    // 按钮
+    tl1.to('.btn', { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.3");
+    
+    // 滚动指示器
+    tl1.to('.scroll-indicator', { opacity: 1, duration: 0.6 }, "-=0.2");
+
+    // ===== 各页面滚动触发动画 =====
+    pages.forEach((page, index) => {
+      if (index === 0) return; // 第1页已处理
+      
+      const sectionNumber = page.querySelector('.section-number');
+      const sectionTitle = page.querySelector('.section-title');
+      const textBlocks = page.querySelectorAll('.text-block p');
+      const cards = page.querySelectorAll('.card');
+      const typeCards = page.querySelectorAll('.type-card');
+      const warningBox = page.querySelector('.warning-box');
+      const quoteBox = page.querySelector('.quote-box');
+      
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: page,
+          start: "top 60%",
+          end: "top 30%",
+          toggleActions: "play none none reverse"
+        }
+      });
+      
+      // 章节编号
+      if (sectionNumber) {
+        tl.to(sectionNumber, {
+          scale: 1,
+          opacity: 1,
+          duration: 0.5,
+          ease: "back.out(2)"
+        });
+      }
+      
+      // 章节标题
+      if (sectionTitle) {
+        tl.to(sectionTitle, {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: "power3.out"
+        }, "-=0.3");
+      }
+      
+      // 文字段落
+      if (textBlocks.length) {
+        tl.to(textBlocks, {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          stagger: 0.15,
+          ease: "power2.out"
+        }, "-=0.3");
+      }
+      
+      // 卡片
+      if (cards.length) {
+        tl.to(cards, {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.2,
+          ease: "power3.out"
+        }, "-=0.3");
+      }
+      
+      // 类型卡片
+      if (typeCards.length) {
+        tl.to(typeCards, {
+          y: 0,
+          opacity: 1,
+          duration: 0.4,
+          stagger: {
+            each: 0.08,
+            from: "random"
+          },
+          ease: "back.out(1.2)"
+        }, "-=0.3");
+      }
+      
+      // 警告框
+      if (warningBox) {
+        tl.to(warningBox, {
+          x: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: "power3.out"
+        }, "-=0.3");
+      }
+      
+      // 引用框
+      if (quoteBox) {
+        tl.to(quoteBox, {
+          opacity: 1,
+          duration: 0.8,
+          ease: "power2.out"
+        }, "-=0.3");
+      }
+    });
+
+    // ===== 导航点更新 =====
+    pages.forEach((page, index) => {
+      ScrollTrigger.create({
+        trigger: page,
+        start: "top center",
+        end: "bottom center",
+        onEnter: () => updateNavDot(index),
+        onEnterBack: () => updateNavDot(index)
+      });
+    });
+
+    function updateNavDot(activeIndex) {
+      navDots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === activeIndex);
+      });
+    }
+
+    // ===== 背景粒子 =====
+    function createParticles(containerId, count = 30) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      const colors = ['#10B981', '#34D399', '#6EE7B7', '#059669'];
+      
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.cssText = `
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          background: ${colors[Math.floor(Math.random() * colors.length)]};
+          width: ${Math.random() * 6 + 2}px;
+          height: ${Math.random() * 6 + 2}px;
+        `;
+        container.appendChild(particle);
+        
+        // 漂浮动画
+        gsap.to(particle, {
+          y: -100 - Math.random() * 200,
+          x: (Math.random() - 0.5) * 100,
+          opacity: 0.6,
+          duration: 3 + Math.random() * 4,
+          repeat: -1,
+          delay: Math.random() * 3,
+          ease: "sine.inOut"
+        });
+      }
+    }
+
+    createParticles('particles-1');
+    createParticles('particles-8');
+
+    // ===== 动物图标悬停效果 =====
+    document.querySelectorAll('.animal-icon').forEach(icon => {
+      icon.addEventListener('mouseenter', () => {
+        gsap.to(icon, {
+          scale: 1.2,
+          rotation: 10,
+          duration: 0.3,
+          ease: "back.out(2)"
+        });
+      });
+      
+      icon.addEventListener('mouseleave', () => {
+        gsap.to(icon, {
+          scale: 1,
+          rotation: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+    });
+
+    // ===== 类型卡片悬停 =====
+    document.querySelectorAll('.type-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        gsap.to(card, {
+          y: -8,
+          boxShadow: "0 15px 40px rgba(16, 185, 129, 0.3)",
+          borderColor: "#10B981",
+          duration: 0.3,
+          ease: "power2.out"
+        });
+        
+        gsap.to(card.querySelector('.emoji'), {
+          scale: 1.3,
+          rotation: 15,
+          duration: 0.3
+        });
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+          y: 0,
+          boxShadow: "none",
+          borderColor: "rgba(16, 185, 129, 0.15)",
+          duration: 0.3
+        });
+        
+        gsap.to(card.querySelector('.emoji'), {
+          scale: 1,
+          rotation: 0,
+          duration: 0.3
+        });
+      });
+    });
+
+    // ===== 按钮悬停脉冲 =====
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('mouseenter', () => {
+        gsap.to(btn, {
+          boxShadow: "0 15px 40px rgba(16, 185, 129, 0.5)",
+          duration: 0.3
+        });
+      });
+      
+      btn.addEventListener('mouseleave', () => {
+        gsap.to(btn, {
+          boxShadow: "none",
+          duration: 0.3
+        });
+      });
+    });
+
+    // ===== 鼠标跟随光效 =====
+    const cursor = document.createElement('div');
+    cursor.style.cssText = `
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s;
+    `;
+    document.body.appendChild(cursor);
+
+    document.addEventListener('mousemove', (e) => {
+      gsap.to(cursor, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+    });
+
+    // ===== 键盘导航 =====
+    document.addEventListener('keydown', (e) => {
+      const currentSection = ScrollTrigger.getAll().find(st => st.isActive);
+      if (!currentSection) return;
+      
+      const currentIndex = Array.from(pages).findIndex(p => p === currentSection.trigger);
+      
+      if (e.key === 'ArrowDown' && currentIndex < totalSections - 1) {
+        scrollToPage(currentIndex + 1);
+      } else if (e.key === 'ArrowUp' && currentIndex > 0) {
+        scrollToPage(currentIndex - 1);
+      }
+    });
+
+    console.log('🌈 彩虹光谱 v2.0 已加载');
+  </script>
+</body>
+</html>
