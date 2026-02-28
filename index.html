@@ -639,6 +639,65 @@
       </div>
     </section>
 
+    <!-- Projects Section -->
+    <section class="section" id="projects">
+      <div class="grid-bg"></div>
+      <div class="glow glow-1"></div>
+      
+      <div class="content">
+        <h2 class="section-title">项目展示</h2>
+        
+        <div class="card-grid">
+          <a href="rainbow-enhanced.html" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-icon">🌈</div>
+            <div class="card-title">彩虹光谱</div>
+            <div class="card-desc">
+              同志文化科普网站<br>
+              GSAP 全屏滚动 + 精美动画<br>
+              14页完整体验
+            </div>
+          </a>
+          
+          <a href="type-explorer-v2.html" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-icon">🎭</div>
+            <div class="card-title">类型探索器</div>
+            <div class="card-desc">
+              交互式身份探索工具<br>
+              动画效果 + 结果展示<br>
+              自我认知助手
+            </div>
+          </a>
+          
+          <a href="face-match-mvp.html" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-icon">🤖</div>
+            <div class="card-title">人脸匹配 MVP</div>
+            <div class="card-desc">
+              AI 人脸识别演示<br>
+              相似度分析<br>
+              技术实验项目
+            </div>
+          </a>
+          
+          <a href="rf-detr.html" class="card" style="text-decoration: none; color: inherit;">
+            <div class="card-icon">🎯</div>
+            <div class="card-title">RF-DETR</div>
+            <div class="card-desc">
+              目标检测研究<br>
+              深度学习应用<br>
+              技术文档
+            </div>
+          </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 50px;">
+          <p style="font-size: 20px; opacity: 0.7; line-height: 1.6;">
+            更多项目持续开发中...<br>
+            Stay tuned! 🚀
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- Contact Section -->
     <section class="section" id="contact">
       <div class="grid-bg"></div>
@@ -774,7 +833,7 @@
     });
 
     // Section 动画
-    const sections = ["#about", "#skills", "#philosophy", "#contact"];
+    const sections = ["#about", "#skills", "#philosophy", "#projects", "#contact"];
 
     sections.forEach(section => {
       gsap.from(`${section} .section-title`, {
@@ -798,6 +857,20 @@
       opacity: 0,
       stagger: 0.2,
       duration: 0.7
+    });
+
+    // 项目卡片动画
+    gsap.from("#projects .card", {
+      scrollTrigger: {
+        trigger: "#projects",
+        start: "top 60%"
+      },
+      scale: 0.8,
+      opacity: 0,
+      rotation: "random(-5, 5)",
+      stagger: 0.15,
+      duration: 0.7,
+      ease: "back.out(1.7)"
     });
 
     // 技能条动画
