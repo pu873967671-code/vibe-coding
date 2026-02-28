@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GP - 分享与记录</title>
+  <title>GP - 瀑布流</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -16,41 +16,37 @@
     }
 
     body {
-      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #fafafa;
-      color: #1a1a1a;
-      line-height: 1.7;
-    }
-
-    h1, h2, h3 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
+      font-family: 'Noto Sans SC', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow-x: hidden;
     }
 
     /* Header */
     header {
-      background: #0a0a0a;
-      color: #fff;
-      padding: 30px 40px;
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 10, 10, 0.95);
       backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
     }
 
-    .header-content {
-      max-width: 1200px;
+    .header-inner {
+      max-width: 1400px;
       margin: 0 auto;
+      padding: 20px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .logo {
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 900;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+      background: linear-gradient(135deg, #10B981, #34D399);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -65,431 +61,405 @@
       text-decoration: none;
       font-weight: 500;
       transition: color 0.3s;
-      font-size: 16px;
     }
 
     nav a:hover {
       color: #10B981;
     }
 
-    /* Main */
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 60px 40px;
-    }
-
     /* Hero */
     .hero {
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 40px 60px;
       text-align: center;
-      margin-bottom: 80px;
-      padding: 60px 0;
+    }
+
+    .hero-content {
+      max-width: 800px;
     }
 
     .hero-title {
-      font-size: 56px;
+      font-size: 80px;
+      font-weight: 900;
       margin-bottom: 20px;
-      letter-spacing: -2px;
+      letter-spacing: -3px;
     }
 
     .hero-subtitle {
-      font-size: 20px;
-      color: #666;
-      margin-bottom: 30px;
+      font-size: 24px;
+      color: #999;
+      margin-bottom: 40px;
     }
 
-    .hero-tags {
+    .hero-links {
       display: flex;
-      gap: 12px;
+      gap: 15px;
       justify-content: center;
       flex-wrap: wrap;
-      margin-top: 30px;
     }
 
-    .tag {
-      padding: 8px 16px;
+    .hero-link {
+      padding: 12px 28px;
       background: rgba(16, 185, 129, 0.1);
-      color: #10B981;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-
-    .tag:hover {
-      background: rgba(16, 185, 129, 0.2);
-      transform: translateY(-2px);
-    }
-
-    /* Links */
-    .links {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 40px;
-    }
-
-    .link {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      background: #fff;
-      border: 2px solid #e5e5e5;
+      border: 2px solid rgba(16, 185, 129, 0.3);
       border-radius: 30px;
+      color: #fff;
       text-decoration: none;
-      color: #1a1a1a;
       font-weight: 500;
       transition: all 0.3s;
     }
 
-    .link:hover {
+    .hero-link:hover {
+      background: rgba(16, 185, 129, 0.2);
       border-color: #10B981;
-      color: #10B981;
       transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1);
     }
 
-    .link-icon {
-      font-size: 20px;
+    /* Masonry Grid */
+    .masonry-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
     }
 
-    /* Section */
-    .section {
-      margin-bottom: 80px;
+    .masonry-grid {
+      column-count: 3;
+      column-gap: 30px;
     }
 
-    .section-title {
-      font-size: 36px;
-      margin-bottom: 40px;
-      padding-bottom: 15px;
-      border-bottom: 3px solid #10B981;
-      display: inline-block;
-    }
-
-    /* Blog Card */
-    .blog-grid {
-      display: grid;
-      gap: 25px;
-    }
-
-    .blog-card {
-      background: #fff;
-      border-radius: 16px;
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(16, 185, 129, 0.1);
+      border-radius: 20px;
       padding: 30px;
-      border: 1px solid #e5e5e5;
-      transition: all 0.3s;
-      text-decoration: none;
-      color: inherit;
-      display: block;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .blog-card:hover {
-      border-color: #10B981;
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.1);
+    .masonry-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #10B981, #34D399);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
     }
 
-    .blog-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .masonry-item:hover::before {
+      transform: scaleX(1);
+    }
+
+    .masonry-item:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-10px);
+    }
+
+    .item-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+    }
+
+    .item-title {
+      font-size: 26px;
+      font-weight: 700;
       margin-bottom: 15px;
     }
 
-    .blog-card-title {
-      font-size: 22px;
-      margin: 0;
-    }
-
-    .blog-card-date {
-      font-size: 14px;
-      color: #999;
-    }
-
-    .blog-card-desc {
+    .item-desc {
       font-size: 16px;
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 15px;
+      color: #999;
+      line-height: 1.7;
+      margin-bottom: 20px;
     }
 
-    .blog-card-tags {
+    .item-tags {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
 
-    .blog-tag {
-      font-size: 13px;
-      color: #10B981;
+    .item-tag {
+      padding: 6px 14px;
       background: rgba(16, 185, 129, 0.1);
-      padding: 4px 12px;
-      border-radius: 12px;
+      color: #10B981;
+      border-radius: 15px;
+      font-size: 13px;
+      font-weight: 500;
     }
 
-    /* Project Card */
-    .project-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .project-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 25px;
-      border: 1px solid #e5e5e5;
-      transition: all 0.3s;
+    .item-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 24px;
+      background: #10B981;
+      color: #0a0a0a;
       text-decoration: none;
-      color: inherit;
-      display: block;
+      border-radius: 20px;
+      font-weight: 600;
+      transition: all 0.3s;
     }
 
-    .project-card:hover {
-      border-color: #10B981;
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.1);
+    .item-link:hover {
+      background: #34D399;
+      transform: scale(1.05);
     }
 
-    .project-icon {
-      font-size: 48px;
+    /* Quote Item */
+    .quote-item {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.05));
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .quote-text {
+      font-size: 22px;
+      font-style: italic;
+      line-height: 1.7;
       margin-bottom: 15px;
     }
 
-    .project-title {
-      font-size: 20px;
-      margin-bottom: 10px;
-    }
-
-    .project-desc {
-      font-size: 15px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    /* Footer */
-    footer {
-      background: #0a0a0a;
-      color: #999;
-      text-align: center;
-      padding: 40px;
-      margin-top: 80px;
-    }
-
-    footer p {
-      margin: 10px 0;
-    }
-
-    footer a {
+    .quote-author {
+      font-size: 16px;
       color: #10B981;
-      text-decoration: none;
+      text-align: right;
+    }
+
+    /* Stats Item */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 15px;
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 900;
+      color: #10B981;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #999;
     }
 
     /* Responsive */
+    @media (max-width: 1200px) {
+      .masonry-grid {
+        column-count: 2;
+      }
+    }
+
     @media (max-width: 768px) {
-      .header-content {
+      .masonry-grid {
+        column-count: 1;
+      }
+
+      .hero-title {
+        font-size: 56px;
+      }
+
+      .header-inner {
         flex-direction: column;
-        gap: 20px;
+        gap: 15px;
       }
 
       nav {
         gap: 20px;
       }
-
-      .hero-title {
-        font-size: 42px;
-      }
-
-      .links {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .project-grid {
-        grid-template-columns: 1fr;
-      }
-
-      main {
-        padding: 40px 20px;
-      }
     }
 
-    /* 动画 */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
+    /* 装饰元素 */
+    .deco-circle {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border: 2px solid rgba(16, 185, 129, 0.05);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
     }
   </style>
 </head>
 <body>
+  <!-- 装饰 -->
+  <div class="deco-circle" style="top: -100px; left: -100px;"></div>
+  <div class="deco-circle" style="bottom: -100px; right: -100px;"></div>
+
+  <!-- Header -->
   <header>
-    <div class="header-content">
+    <div class="header-inner">
       <div class="logo">GP</div>
       <nav>
-        <a href="#about">关于</a>
-        <a href="#projects">项目</a>
-        <a href="#articles">文章</a>
-        <a href="https://x.com/FanPiny" target="_blank">X</a>
+        <a href="https://x.com/FanPiny" target="_blank">X @FanPiny</a>
+        <a href="https://github.com/pu873967671-code" target="_blank">GitHub</a>
+        <a href="https://t.me/Gp9527">Telegram</a>
       </nav>
     </div>
   </header>
 
-  <main>
-    <!-- Hero -->
-    <section class="hero fade-in">
-      <h1 class="hero-title">分享与记录</h1>
-      <p class="hero-subtitle">
-        自我探索中 · 用代码创造价值<br>
-        Keep exploring, keep building.
-      </p>
-
-      <div class="hero-tags">
-        <span class="tag">🚀 全栈开发</span>
-        <span class="tag">🎨 设计爱好者</span>
-        <span class="tag">💪 运动健身</span>
-        <span class="tag">🧘 自我成长</span>
-        <span class="tag">🌈 开放思维</span>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">分享与探索</h1>
+      <p class="hero-subtitle">自我探索中 · 用代码创造价值</p>
+      <div class="hero-links">
+        <a href="https://x.com/FanPiny" class="hero-link" target="_blank">𝕏 Follow on X</a>
+        <a href="https://github.com/pu873967671-code" class="hero-link" target="_blank">💻 GitHub</a>
+        <a href="https://t.me/Gp9527" class="hero-link">📱 Telegram</a>
       </div>
+    </div>
+  </section>
 
-      <div class="links">
-        <a href="https://x.com/FanPiny" class="link" target="_blank">
-          <span class="link-icon">𝕏</span>
-          <span>Follow on X</span>
-        </a>
-        <a href="https://github.com/pu873967671-code" class="link" target="_blank">
-          <span class="link-icon">💻</span>
-          <span>GitHub</span>
-        </a>
-        <a href="https://t.me/Gp9527" class="link">
-          <span class="link-icon">📱</span>
-          <span>Telegram</span>
-        </a>
-      </div>
-    </section>
-
-    <!-- About -->
-    <section id="about" class="section fade-in">
-      <h2 class="section-title">关于我</h2>
-      <div style="font-size: 18px; color: #666; line-height: 1.8;">
-        <p style="margin-bottom: 20px;">
-          我系一个热爱学习嘅开发者，相信终身学习嘅力量。每日瞓觉前要比朝早聪明少少。
-        </p>
-        <p style="margin-bottom: 20px;">
-          <strong style="color: #1a1a1a;">核心理念：</strong>
-        </p>
-        <ul style="margin-left: 20px; margin-bottom: 20px;">
-          <li style="margin-bottom: 10px;">🎯 避免愚蠢 > 追求聪明</li>
-          <li style="margin-bottom: 10px;">📊 概率思维 + 独立思考</li>
-          <li style="margin-bottom: 10px;">🌱 持续成长 + 价值创造</li>
-        </ul>
-        <p>
-          技术栈：React / Vue / Node.js / TypeScript / Python / Go
-        </p>
-      </div>
-    </section>
-
-    <!-- Projects -->
-    <section id="projects" class="section fade-in">
-      <h2 class="section-title">项目展示</h2>
-
-      <div class="project-grid">
-        <a href="rainbow-enhanced.html" class="project-card">
-          <div class="project-icon">🌈</div>
-          <h3 class="project-title">彩虹光谱</h3>
-          <p class="project-desc">
-            同志文化科普网站<br>
-            GSAP 全屏滚动体验
-          </p>
-        </a>
-
-        <a href="type-explorer-v2.html" class="project-card">
-          <div class="project-icon">🎭</div>
-          <h3 class="project-title">类型探索器</h3>
-          <p class="project-desc">
-            交互式身份探索工具<br>
-            自我认知助手
-          </p>
-        </a>
-
-        <a href="face-match-mvp.html" class="project-card">
-          <div class="project-icon">🤖</div>
-          <h3 class="project-title">人脸匹配 MVP</h3>
-          <p class="project-desc">
-            AI 人脸识别演示<br>
-            相似度分析
-          </p>
-        </a>
-
-        <a href="rf-detr.html" class="project-card">
-          <div class="project-icon">🎯</div>
-          <h3 class="project-title">RF-DETR</h3>
-          <p class="project-desc">
-            目标检测研究<br>
-            深度学习应用
-          </p>
-        </a>
-      </div>
-    </section>
-
-    <!-- Articles -->
-    <section id="articles" class="section fade-in">
-      <h2 class="section-title">最新文章</h2>
-
-      <div class="blog-grid">
-        <a href="articles/health-after-40.html" class="blog-card">
-          <div class="blog-card-header">
-            <h3 class="blog-card-title">40岁后的健康指南</h3>
-            <span class="blog-card-date">2025-02</span>
-          </div>
-          <p class="blog-card-desc">
-            健康是最大的财富。这篇文章整理了40岁后需要特别注意的健康事项。
-          </p>
-          <div class="blog-card-tags">
-            <span class="blog-tag">健康</span>
-            <span class="blog-tag">生活</span>
-          </div>
-        </a>
-
-        <div class="blog-card" style="opacity: 0.5; cursor: default;">
-          <div class="blog-card-header">
-            <h3 class="blog-card-title">GSAP 完整学习笔记</h3>
-            <span class="blog-card-date">Coming Soon</span>
-          </div>
-          <p class="blog-card-desc">
-            从基础到高级，完整记录 GSAP v3 的学习过程...
-          </p>
-          <div class="blog-card-tags">
-            <span class="blog-tag">技术</span>
-            <span class="blog-tag">动画</span>
-          </div>
+  <!-- Masonry Grid -->
+  <div class="masonry-container">
+    <div class="masonry-grid">
+      <!-- 项目：彩虹光谱 -->
+      <div class="masonry-item">
+        <div class="item-icon">🌈</div>
+        <h3 class="item-title">彩虹光谱</h3>
+        <p class="item-desc">同志文化科普网站，14页完整体验，GSAP全屏滚动动画，精美视觉设计。</p>
+        <div class="item-tags">
+          <span class="item-tag">GSAP</span>
+          <span class="item-tag">科普</span>
+          <span class="item-tag">动画</span>
         </div>
+        <a href="rainbow-enhanced.html" class="item-link">查看项目 →</a>
+      </div>
 
-        <div class="blog-card" style="opacity: 0.5; cursor: default;">
-          <div class="blog-card-header">
-            <h3 class="blog-card-title">自我探索的方法论</h3>
-            <span class="blog-card-date">Coming Soon</span>
+      <!-- Quote -->
+      <div class="masonry-item quote-item">
+        <div class="quote-text">"每日瞓觉前要比朝早聪明少少。阅读系最好嘅投资。"</div>
+        <div class="quote-author">— 终身学习</div>
+      </div>
+
+      <!-- 项目：类型探索器 -->
+      <div class="masonry-item">
+        <div class="item-icon">🎭</div>
+        <h3 class="item-title">类型探索器</h3>
+        <p class="item-desc">交互式身份探索工具，帮助自我认知，动画效果精美。</p>
+        <div class="item-tags">
+          <span class="item-tag">交互</span>
+          <span class="item-tag">探索</span>
+        </div>
+        <a href="type-explorer-v2.html" class="item-link">查看项目 →</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="masonry-item">
+        <h3 class="item-title">📊 数据统计</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-number">4+</div>
+            <div class="stat-label">在线项目</div>
           </div>
-          <p class="blog-card-desc">
-            如何通过日记、阅读、对话来持续认识自己...
-          </p>
-          <div class="blog-card-tags">
-            <span class="blog-tag">成长</span>
-            <span class="blog-tag">思考</span>
+          <div class="stat-box">
+            <div class="stat-number">2026</div>
+            <div class="stat-label">持续更新</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">学习热情</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">0</div>
+            <div class="stat-label">放弃次数</div>
           </div>
         </div>
       </div>
-    </section>
-  </main>
 
-  <footer>
-    <p>© 2026 GP · 自我探索中</p>
-    <p>
-      <a href="https://x.com/FanPiny" target="_blank">X @FanPiny</a> ·
-      <a href="https://github.com/pu873967671-code" target="_blank">GitHub</a> ·
-      <a href="https://t.me/Gp9527">Telegram</a>
-    </p>
-  </footer>
+      <!-- 项目：人脸匹配 -->
+      <div class="masonry-item">
+        <div class="item-icon">🤖</div>
+        <h3 class="item-title">人脸匹配 MVP</h3>
+        <p class="item-desc">AI人脸识别演示，相似度分析，技术实验项目。</p>
+        <div class="item-tags">
+          <span class="item-tag">AI</span>
+          <span class="item-tag">识别</span>
+        </div>
+        <a href="face-match-mvp.html" class="item-link">查看项目 →</a>
+      </div>
+
+      <!-- Quote 2 -->
+      <div class="masonry-item quote-item">
+        <div class="quote-text">"避免愚蠢 > 追求聪明。唔需要超常智慧，只需要避免常见错误。"</div>
+        <div class="quote-author">— Munger</div>
+      </div>
+
+      <!-- 项目：RF-DETR -->
+      <div class="masonry-item">
+        <div class="item-icon">🎯</div>
+        <h3 class="item-title">RF-DETR</h3>
+        <p class="item-desc">目标检测研究，深度学习应用，技术文档。</p>
+        <div class="item-tags">
+          <span class="item-tag">深度学习</span>
+          <span class="item-tag">CV</span>
+        </div>
+        <a href="rf-detr.html" class="item-link">查看项目 →</a>
+      </div>
+
+      <!-- 核心理念 -->
+      <div class="masonry-item">
+        <h3 class="item-title">💡 核心理念</h3>
+        <div class="item-desc">
+          <p style="margin-bottom: 15px;">🎯 避免愚蠢 > 追求聪明</p>
+          <p style="margin-bottom: 15px;">📊 概率思维 + 独立思考</p>
+          <p style="margin-bottom: 15px;">🌱 持续成长 + 价值创造</p>
+          <p>🧘 知行合一</p>
+        </div>
+      </div>
+
+      <!-- 技术栈 -->
+      <div class="masonry-item">
+        <h3 class="item-title">💻 技术栈</h3>
+        <div class="item-desc">
+          <p style="margin-bottom: 10px;"><strong>前端：</strong>React / Vue / TypeScript</p>
+          <p style="margin-bottom: 10px;"><strong>后端：</strong>Node.js / Python / Go</p>
+          <p style="margin-bottom: 10px;"><strong>工具：</strong>Docker / AWS / Kubernetes</p>
+          <p><strong>设计：</strong>GSAP / Figma / CSS</p>
+        </div>
+        <div class="item-tags">
+          <span class="item-tag">全栈</span>
+          <span class="item-tag">云原生</span>
+        </div>
+      </div>
+
+      <!-- 文章：健康 -->
+      <div class="masonry-item">
+        <div class="item-icon">💪</div>
+        <h3 class="item-title">40岁后的健康指南</h3>
+        <p class="item-desc">健康是最大的财富。这篇文章整理了40岁后需要特别注意的健康事项。</p>
+        <div class="item-tags">
+          <span class="item-tag">健康</span>
+          <span class="item-tag">生活</span>
+        </div>
+        <a href="articles/health-after-40.html" class="item-link">阅读文章 →</a>
+      </div>
+
+      <!-- Quote 3 -->
+      <div class="masonry-item quote-item">
+        <div class="quote-text">"概率思维：唔讲'一定'，只讲'我估计X%概率'。用新信息持续更新。"</div>
+        <div class="quote-author">— 贝叶斯思维</div>
+      </div>
+    </div>
+  </div>
 
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -498,65 +468,76 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // Fade in 动画
-    gsap.utils.toArray('.fade-in').forEach(elem => {
-      gsap.from(elem, {
-        scrollTrigger: {
-          trigger: elem,
-          start: "top 85%",
-          toggleActions: "play none none none"
-        },
+    // Hero 动画
+    const heroTL = gsap.timeline();
+    heroTL
+      .from('.hero-title', {
+        y: -50,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out'
+      })
+      .from('.hero-subtitle', {
         y: 30,
         opacity: 0,
+        duration: 0.8
+      }, '-=0.5')
+      .from('.hero-link', {
+        scale: 0,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.5,
+        ease: 'back.out(1.7)'
+      }, '-=0.3');
+
+    // Masonry items 动画
+    gsap.utils.toArray('.masonry-item').forEach((item, i) => {
+      gsap.from(item, {
+        scrollTrigger: {
+          trigger: item,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        },
+        y: 60,
+        opacity: 0,
         duration: 0.8,
-        ease: "power2.out"
+        delay: (i % 3) * 0.1,
+        ease: 'power2.out'
       });
     });
 
-    // Hero 标签动画
-    gsap.from('.tag', {
-      scale: 0,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-      delay: 0.3
+    // 装饰圆圈动画
+    gsap.to('.deco-circle', {
+      rotation: 360,
+      duration: 60,
+      repeat: -1,
+      ease: 'none',
+      stagger: 30
     });
 
-    // 卡片悬停效果
-    document.querySelectorAll('.blog-card, .project-card, .link').forEach(card => {
-      card.addEventListener('mouseenter', () => {
-        gsap.to(card, {
-          scale: 1.02,
-          duration: 0.3,
-          ease: "power2.out"
+    // 统计数字动画
+    ScrollTrigger.create({
+      trigger: '.stats-grid',
+      start: 'top 80%',
+      onEnter: () => {
+        document.querySelectorAll('.stat-number').forEach(num => {
+          const target = num.textContent;
+          if (target !== '∞') {
+            const value = parseInt(target);
+            if (!isNaN(value)) {
+              gsap.from(num, {
+                textContent: 0,
+                duration: 2,
+                snap: { textContent: 1 },
+                ease: 'power2.out'
+              });
+            }
+          }
         });
-      });
-
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          scale: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      });
+      }
     });
 
-    // 平滑滚动
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
-
-    console.log("📝 GP 博客已加载");
+    console.log('🎨 瀑布流网站已加载');
   </script>
 </body>
 </html>
