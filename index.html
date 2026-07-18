@@ -3,541 +3,542 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GP - 瀑布流</title>
+  <meta name="description" content="GP 的独立创作作品集，记录 AI、游戏、设计与实验项目。">
+  <meta name="theme-color" content="#07080d">
+  <title>GP · Vibe Coding</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg: #07080d;
+      --surface: rgba(255,255,255,.055);
+      --surface-2: rgba(255,255,255,.035);
+      --line: rgba(255,255,255,.1);
+      --text: #f7f8fb;
+      --muted: #9da2b3;
+      --purple: #8b5cf6;
+      --cyan: #4fd1ff;
+      --pink: #ff66c4;
+      --green: #7ee787;
+      --radius-lg: 30px;
+      --radius-md: 20px;
+      --max: 1180px;
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Noto Sans SC', sans-serif;
-      background: #0a0a0a;
-      color: #fff;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(139,92,246,.18), transparent 30%),
+        radial-gradient(circle at 88% 22%, rgba(79,209,255,.12), transparent 30%),
+        radial-gradient(circle at 50% 105%, rgba(255,102,196,.1), transparent 26%),
+        var(--bg);
+      font-family: "Noto Sans SC", sans-serif;
       overflow-x: hidden;
     }
 
-    /* Header */
-    header {
+    body::before {
+      content: "";
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
+      z-index: -1;
     }
 
-    .header-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 40px;
+    a { color: inherit; }
+    .shell { width: min(calc(100% - 40px), var(--max)); margin-inline: auto; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 18px 0;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom, rgba(7,8,13,.9), rgba(7,8,13,.55));
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #090a10;
+      background: linear-gradient(135deg, var(--cyan), var(--purple) 55%, var(--pink));
+      box-shadow: 0 0 30px rgba(139,92,246,.35);
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 10px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 14px;
+      transition: .25s ease;
+    }
+    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,.07); }
+
+    .hero {
+      min-height: 720px;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      align-items: center;
+      gap: 80px;
+      padding: 90px 0 80px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #c9cddd;
+      background: rgba(255,255,255,.04);
+      font: 500 13px "Space Grotesk", sans-serif;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    h1 {
+      font: 700 clamp(58px, 7.2vw, 102px)/.94 "Space Grotesk", sans-serif;
+      letter-spacing: -.065em;
+      max-width: 780px;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(90deg, #fff, #a8dfff 35%, #a78bfa 68%, #ff8ed1);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-copy {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 620px;
+      margin-top: 28px;
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 18px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      transition: transform .25s ease, border-color .25s ease, background .25s ease;
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .btn-primary {
+      color: #08090e;
+      border-color: transparent;
+      background: linear-gradient(135deg, #fff, #b9ddff 42%, #bda7ff);
+      box-shadow: 0 12px 40px rgba(121,102,255,.24);
+    }
+    .btn-ghost { color: #d7d9e3; background: rgba(255,255,255,.04); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.07); }
+
+    .hero-art {
+      position: relative;
+      min-height: 470px;
+      display: grid;
+      place-items: center;
+    }
+
+    .orb {
+      width: min(38vw, 390px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      position: relative;
+      background:
+        radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), transparent 8%),
+        radial-gradient(circle at 38% 30%, #65e1ff, transparent 23%),
+        radial-gradient(circle at 68% 66%, #ff70c8, transparent 26%),
+        radial-gradient(circle at 55% 55%, #7557ff, #16172b 72%);
+      filter: saturate(1.12);
+      box-shadow:
+        0 0 60px rgba(116,87,255,.36),
+        0 0 120px rgba(79,209,255,.16),
+        inset -35px -35px 80px rgba(4,5,10,.55);
+      animation: float 7s ease-in-out infinite;
+    }
+
+    .orb::before,
+    .orb::after {
+      content: "";
+      position: absolute;
+      inset: -34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.13);
+      transform: rotate(-14deg) scaleY(.4);
+    }
+    .orb::after { inset: -74px; opacity: .45; transform: rotate(24deg) scaleY(.68); }
+
+    .float-card {
+      position: absolute;
+      min-width: 160px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(13,14,24,.68);
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      color: #d8dbe7;
+      box-shadow: 0 18px 55px rgba(0,0,0,.24);
+      font-size: 13px;
+    }
+    .float-card strong { display: block; color: #fff; margin-bottom: 3px; }
+    .float-a { top: 12%; right: -4%; }
+    .float-b { left: -4%; bottom: 15%; }
+
+    @keyframes float { 50% { transform: translateY(-16px) rotate(2deg); } }
+
+    section { padding: 92px 0; }
+    .section-head {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: end;
+      gap: 24px;
+      margin-bottom: 34px;
+    }
+    .kicker { color: #8f95aa; font: 600 12px "Space Grotesk"; letter-spacing: .16em; text-transform: uppercase; }
+    h2 { margin-top: 10px; font: 650 clamp(34px, 5vw, 58px)/1.06 "Space Grotesk"; letter-spacing: -.045em; }
+    .section-note { color: var(--muted); max-width: 430px; line-height: 1.7; }
+
+    .featured {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+      box-shadow: 0 30px 80px rgba(0,0,0,.2);
     }
 
-    .logo {
-      font-size: 36px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #10B981, #34D399);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    nav {
-      display: flex;
-      gap: 30px;
-    }
-
-    nav a {
-      color: #999;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-
-    nav a:hover {
-      color: #10B981;
-    }
-
-    /* Hero */
-    .hero {
-      min-height: 60vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 40px 60px;
-      text-align: center;
-    }
-
-    .hero-content {
-      max-width: 800px;
-    }
-
-    .hero-title {
-      font-size: 80px;
-      font-weight: 900;
-      margin-bottom: 20px;
-      letter-spacing: -3px;
-    }
-
-    .hero-subtitle {
-      font-size: 24px;
-      color: #999;
-      margin-bottom: 40px;
-    }
-
-    .hero-links {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .hero-link {
-      padding: 12px 28px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 2px solid rgba(16, 185, 129, 0.3);
-      border-radius: 30px;
-      color: #fff;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-
-    .hero-link:hover {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: #10B981;
-      transform: translateY(-3px);
-    }
-
-    /* Masonry Grid */
-    .masonry-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 60px 40px 100px;
-    }
-
-    .masonry-grid {
-      column-count: 3;
-      column-gap: 30px;
-    }
-
-    .masonry-item {
-      break-inside: avoid;
-      margin-bottom: 30px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(16, 185, 129, 0.1);
-      border-radius: 20px;
-      padding: 30px;
-      transition: all 0.4s ease;
+    .featured-visual {
+      min-height: 410px;
       position: relative;
       overflow: hidden;
+      border-radius: 23px;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.8), transparent 4%),
+        radial-gradient(circle at 34% 35%, #ff77cb, transparent 18%),
+        radial-gradient(circle at 68% 64%, #5fe2ff, transparent 24%),
+        conic-gradient(from 210deg, #4e38c6, #eb52a8, #ffbc5c, #4fd1ff, #4e38c6);
     }
-
-    .masonry-item::before {
-      content: '';
+    .featured-visual::after {
+      content: "RAINBOW SPECTRUM";
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, #10B981, #34D399);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.4s ease;
+      left: 24px;
+      bottom: 20px;
+      font: 700 12px "Space Grotesk";
+      letter-spacing: .22em;
+      color: rgba(255,255,255,.82);
     }
 
-    .masonry-item:hover::before {
-      transform: scaleX(1);
-    }
+    .featured-copy { padding: 20px 12px; display: flex; flex-direction: column; justify-content: center; }
+    .project-index { color: #7f8597; font: 600 12px "Space Grotesk"; letter-spacing: .14em; }
+    .featured h3 { margin-top: 18px; font: 650 clamp(34px, 4vw, 56px)/1.05 "Space Grotesk"; letter-spacing: -.045em; }
+    .featured p { margin-top: 20px; color: var(--muted); line-height: 1.8; }
 
-    .masonry-item:hover {
-      border-color: rgba(16, 185, 129, 0.3);
-      background: rgba(16, 185, 129, 0.05);
-      transform: translateY(-10px);
-    }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .tag { padding: 7px 10px; border-radius: 999px; border: 1px solid var(--line); color: #bbc0d0; font-size: 12px; background: rgba(255,255,255,.035); }
 
-    .item-icon {
-      font-size: 56px;
-      margin-bottom: 20px;
-    }
+    .project-link { margin-top: 28px; display: inline-flex; gap: 8px; text-decoration: none; font-weight: 600; align-items: center; }
+    .project-link span { transition: transform .2s ease; }
+    .project-link:hover span { transform: translateX(4px); }
 
-    .item-title {
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 15px;
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .filter {
+      appearance: none;
+      border: 1px solid var(--line);
+      color: #aeb3c3;
+      background: rgba(255,255,255,.03);
+      border-radius: 999px;
+      padding: 9px 13px;
+      cursor: pointer;
+      transition: .2s ease;
     }
+    .filter:hover, .filter.active { color: #fff; background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.2); }
 
-    .item-desc {
-      font-size: 16px;
-      color: #999;
-      line-height: 1.7;
-      margin-bottom: 20px;
-    }
-
-    .item-tags {
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card {
+      min-height: 360px;
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      overflow: hidden;
+      transition: .28s ease;
+    }
+    .card:hover { transform: translateY(-7px); border-color: rgba(255,255,255,.22); background: var(--surface); }
+    .card-icon {
+      width: 54px; height: 54px; display: grid; place-items: center;
+      border-radius: 16px; font-size: 25px;
+      background: linear-gradient(135deg, rgba(79,209,255,.18), rgba(139,92,246,.18));
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .card h3 { margin-top: 58px; font: 600 25px "Space Grotesk"; letter-spacing: -.025em; }
+    .card p { color: var(--muted); line-height: 1.75; margin-top: 12px; flex: 1; }
+    .card .project-link { margin-top: 20px; font-size: 14px; }
+    .card.is-hidden { display: none; }
+
+    .about-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 20px; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: rgba(255,255,255,.035); padding: 32px; }
+    .panel p { color: var(--muted); line-height: 1.9; margin-top: 18px; }
+    .capabilities { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+    .cap { padding: 10px 13px; border-radius: 12px; background: rgba(255,255,255,.055); color: #d7d9e2; font-size: 13px; }
+    .now-list { display: grid; gap: 13px; margin-top: 20px; }
+    .now-item { display: flex; justify-content: space-between; gap: 18px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.07); color: #c9cdd9; }
+    .now-item span:last-child { color: var(--muted); text-align: right; }
+
+    footer { padding: 50px 0 70px; color: #7f8496; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); padding-top: 26px; }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-links a { text-decoration: none; }
+    .footer-links a:hover { color: #fff; }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 70px; }
+      .hero-art { min-height: 390px; }
+      .orb { width: min(72vw, 360px); }
+      .featured, .about-grid { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .featured-visual { min-height: 330px; }
     }
 
-    .item-tag {
-      padding: 6px 14px;
-      background: rgba(16, 185, 129, 0.1);
-      color: #10B981;
-      border-radius: 15px;
-      font-size: 13px;
-      font-weight: 500;
+    @media (max-width: 680px) {
+      .shell { width: min(calc(100% - 28px), var(--max)); }
+      header { padding: 12px 0; }
+      .nav-links a:not(:last-child) { display: none; }
+      .hero { min-height: auto; padding: 64px 0 42px; }
+      h1 { font-size: clamp(52px, 16vw, 74px); }
+      .hero-copy { font-size: 16px; }
+      .hero-art { min-height: 310px; }
+      .float-card { transform: scale(.85); }
+      .float-a { right: -8%; }
+      .float-b { left: -8%; }
+      section { padding: 68px 0; }
+      .section-head { align-items: start; flex-direction: column; }
+      .featured { padding: 14px; }
+      .featured-copy { padding: 16px 8px 10px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 320px; }
+      .card h3 { margin-top: 42px; }
+      .footer-inner { flex-direction: column; }
     }
 
-    .item-link {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 10px 24px;
-      background: #10B981;
-      color: #0a0a0a;
-      text-decoration: none;
-      border-radius: 20px;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .item-link:hover {
-      background: #34D399;
-      transform: scale(1.05);
-    }
-
-    /* Quote Item */
-    .quote-item {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.05));
-      border-color: rgba(16, 185, 129, 0.2);
-    }
-
-    .quote-text {
-      font-size: 22px;
-      font-style: italic;
-      line-height: 1.7;
-      margin-bottom: 15px;
-    }
-
-    .quote-author {
-      font-size: 16px;
-      color: #10B981;
-      text-align: right;
-    }
-
-    /* Stats Item */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
-    .stat-box {
-      text-align: center;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 15px;
-    }
-
-    .stat-number {
-      font-size: 36px;
-      font-weight: 900;
-      color: #10B981;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: #999;
-    }
-
-    /* Responsive */
-    @media (max-width: 1200px) {
-      .masonry-grid {
-        column-count: 2;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .masonry-grid {
-        column-count: 1;
-      }
-
-      .hero-title {
-        font-size: 56px;
-      }
-
-      .header-inner {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      nav {
-        gap: 20px;
-      }
-    }
-
-    /* 装饰元素 */
-    .deco-circle {
-      position: fixed;
-      width: 400px;
-      height: 400px;
-      border: 2px solid rgba(16, 185, 129, 0.05);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: -1;
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
-  <!-- 装饰 -->
-  <div class="deco-circle" style="top: -100px; left: -100px;"></div>
-  <div class="deco-circle" style="bottom: -100px; right: -100px;"></div>
-
-  <!-- Header -->
   <header>
-    <div class="header-inner">
-      <div class="logo">GP</div>
-      <nav>
-        <a href="https://x.com/FanPiny" target="_blank">X @FanPiny</a>
-        <a href="https://github.com/pu873967671-code" target="_blank">GitHub</a>
-        <a href="https://t.me/Gp9527">Telegram</a>
+    <div class="shell nav">
+      <a class="brand" href="#top" aria-label="返回首页">
+        <span class="brand-mark">GP</span>
+        <span>Vibe Coding</span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#work">作品</a>
+        <a href="#about">关于</a>
+        <a href="https://github.com/pu873967671-code" target="_blank" rel="noreferrer">GitHub ↗</a>
       </nav>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1 class="hero-title">分享与探索</h1>
-      <p class="hero-subtitle">自我探索中 · 用代码创造价值</p>
-      <div class="hero-links">
-        <a href="https://x.com/FanPiny" class="hero-link" target="_blank">𝕏 Follow on X</a>
-        <a href="https://github.com/pu873967671-code" class="hero-link" target="_blank">💻 GitHub</a>
-        <a href="https://t.me/Gp9527" class="hero-link">📱 Telegram</a>
+  <main id="top">
+    <section class="shell hero">
+      <div>
+        <div class="eyebrow">Independent maker · 2026</div>
+        <h1>把想法做成<br><span class="gradient-text">会呼吸的作品</span></h1>
+        <p class="hero-copy">在设计、游戏与代码之间来回穿梭。这里收集我的实验、工具与视觉项目，也记录每一次从零到可玩的过程。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#work">浏览作品 <span>↘</span></a>
+          <a class="btn btn-ghost" href="https://x.com/FanPiny" target="_blank" rel="noreferrer">Follow on X</a>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="orb"></div>
+        <div class="float-card float-a"><strong>Design × Code</strong>把视觉变成交互</div>
+        <div class="float-card float-b"><strong>Currently building</strong>Games · AI tools · Web experiments</div>
+      </div>
+    </section>
+
+    <section id="work">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Selected work</div>
+            <h2>精选项目</h2>
+          </div>
+          <p class="section-note">每个项目都尽量保留一点“正在生长”的痕迹。不是陈列柜，更像一座持续扩建的实验室。</p>
+        </div>
+
+        <article class="featured">
+          <div class="featured-visual"></div>
+          <div class="featured-copy">
+            <div class="project-index">PROJECT 01 · WEB EXPERIENCE</div>
+            <h3>彩虹光谱</h3>
+            <p>一个围绕同志文化的沉浸式科普网站。通过全屏滚动、动态图形与章节化叙事，让信息不只被阅读，也能被感受。</p>
+            <div class="tags">
+              <span class="tag">GSAP</span>
+              <span class="tag">互动叙事</span>
+              <span class="tag">视觉设计</span>
+              <span class="tag">14 Pages</span>
+            </div>
+            <a class="project-link" href="rainbow-enhanced.html">打开项目 <span>→</span></a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="kicker">More experiments</div>
+            <h2>更多实验</h2>
+          </div>
+        </div>
+
+        <div class="filters" aria-label="项目筛选">
+          <button class="filter active" data-filter="all">全部</button>
+          <button class="filter" data-filter="design">Design</button>
+          <button class="filter" data-filter="tools">Tools</button>
+          <button class="filter" data-filter="games">Games</button>
+        </div>
+
+        <div class="grid">
+          <article class="card" data-category="design tools">
+            <div class="card-icon">◈</div>
+            <h3>类型探索器</h3>
+            <p>一个轻量的交互式身份探索工具，通过连续选择与动态反馈，帮助用户梳理自己的偏好与表达。</p>
+            <div class="tags"><span class="tag">Interactive</span><span class="tag">Self discovery</span></div>
+            <a class="project-link" href="type-explorer-v2.html">查看项目 <span>→</span></a>
+          </article>
+
+          <article class="card" data-category="games">
+            <div class="card-icon">✦</div>
+            <h3>独立游戏实验</h3>
+            <p>围绕核心循环、反馈节奏与小体量内容持续打磨的游戏原型集合。先做到“忍不住再玩一次”。</p>
+            <div class="tags"><span class="tag">Game Loop</span><span class="tag">Prototype</span></div>
+            <a class="project-link" href="https://github.com/pu873967671-code" target="_blank" rel="noreferrer">浏览仓库 <span>→</span></a>
+          </article>
+
+          <article class="card" data-category="tools design">
+            <div class="card-icon">⌁</div>
+            <h3>AI 创作工作流</h3>
+            <p>把图像生成、角色设计、网页原型和自动化串成一条更短的生产链，让创意少堵车，输出更稳定。</p>
+            <div class="tags"><span class="tag">AI</span><span class="tag">Workflow</span><span class="tag">Visual</span></div>
+            <a class="project-link" href="https://github.com/pu873967671-code" target="_blank" rel="noreferrer">查看进展 <span>→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="shell about-grid">
+        <div class="panel">
+          <div class="kicker">About</div>
+          <h2>设计师的大脑，<br>制作者的手。</h2>
+          <p>我关注视觉设计、独立游戏、AI 工具与轻量开发。比起只做一张漂亮的图，我更喜欢把视觉、规则与交互揉在一起，最终做成真正能被使用或玩起来的东西。</p>
+          <div class="capabilities">
+            <span class="cap">Visual Design</span>
+            <span class="cap">Game Concepts</span>
+            <span class="cap">Web Prototypes</span>
+            <span class="cap">AI Workflow</span>
+            <span class="cap">Creative Direction</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="kicker">Now</div>
+          <h2>正在做</h2>
+          <div class="now-list">
+            <div class="now-item"><span>独立游戏</span><span>核心循环与原型</span></div>
+            <div class="now-item"><span>视觉设计</span><span>角色、场景与 UI</span></div>
+            <div class="now-item"><span>AI 工具</span><span>自动化创作流程</span></div>
+            <div class="now-item"><span>持续学习</span><span>每天聪明一点点</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <span>© 2026 GP · Built with curiosity.</span>
+      <div class="footer-links">
+        <a href="https://x.com/FanPiny" target="_blank" rel="noreferrer">X</a>
+        <a href="https://github.com/pu873967671-code" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://t.me/Gp9527" target="_blank" rel="noreferrer">Telegram</a>
       </div>
     </div>
-  </section>
-
-  <!-- Masonry Grid -->
-  <div class="masonry-container">
-    <div class="masonry-grid">
-      <!-- 项目：彩虹光谱 -->
-      <div class="masonry-item">
-        <div class="item-icon">🌈</div>
-        <h3 class="item-title">彩虹光谱</h3>
-        <p class="item-desc">同志文化科普网站，14页完整体验，GSAP全屏滚动动画，精美视觉设计。</p>
-        <div class="item-tags">
-          <span class="item-tag">GSAP</span>
-          <span class="item-tag">科普</span>
-          <span class="item-tag">动画</span>
-        </div>
-        <a href="rainbow-enhanced.html" class="item-link">查看项目 →</a>
-      </div>
-
-      <!-- Quote -->
-      <div class="masonry-item quote-item">
-        <div class="quote-text">"每日瞓觉前要比朝早聪明少少。阅读系最好嘅投资。"</div>
-        <div class="quote-author">— 终身学习</div>
-      </div>
-
-      <!-- 项目：类型探索器 -->
-      <div class="masonry-item">
-        <div class="item-icon">🎭</div>
-        <h3 class="item-title">类型探索器</h3>
-        <p class="item-desc">交互式身份探索工具，帮助自我认知，动画效果精美。</p>
-        <div class="item-tags">
-          <span class="item-tag">交互</span>
-          <span class="item-tag">探索</span>
-        </div>
-        <a href="type-explorer-v2.html" class="item-link">查看项目 →</a>
-      </div>
-
-      <!-- Stats -->
-      <div class="masonry-item">
-        <h3 class="item-title">📊 数据统计</h3>
-        <div class="stats-grid">
-          <div class="stat-box">
-            <div class="stat-number">4+</div>
-            <div class="stat-label">在线项目</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">2026</div>
-            <div class="stat-label">持续更新</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">∞</div>
-            <div class="stat-label">学习热情</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">0</div>
-            <div class="stat-label">放弃次数</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 项目：人脸匹配 -->
-      <div class="masonry-item">
-        <div class="item-icon">🤖</div>
-        <h3 class="item-title">人脸匹配 MVP</h3>
-        <p class="item-desc">AI人脸识别演示，相似度分析，技术实验项目。</p>
-        <div class="item-tags">
-          <span class="item-tag">AI</span>
-          <span class="item-tag">识别</span>
-        </div>
-        <a href="face-match-mvp.html" class="item-link">查看项目 →</a>
-      </div>
-
-      <!-- Quote 2 -->
-      <div class="masonry-item quote-item">
-        <div class="quote-text">"避免愚蠢 > 追求聪明。唔需要超常智慧，只需要避免常见错误。"</div>
-        <div class="quote-author">— Munger</div>
-      </div>
-
-      <!-- 项目：RF-DETR -->
-      <div class="masonry-item">
-        <div class="item-icon">🎯</div>
-        <h3 class="item-title">RF-DETR</h3>
-        <p class="item-desc">目标检测研究，深度学习应用，技术文档。</p>
-        <div class="item-tags">
-          <span class="item-tag">深度学习</span>
-          <span class="item-tag">CV</span>
-        </div>
-        <a href="rf-detr.html" class="item-link">查看项目 →</a>
-      </div>
-
-      <!-- 核心理念 -->
-      <div class="masonry-item">
-        <h3 class="item-title">💡 核心理念</h3>
-        <div class="item-desc">
-          <p style="margin-bottom: 15px;">🎯 避免愚蠢 > 追求聪明</p>
-          <p style="margin-bottom: 15px;">📊 概率思维 + 独立思考</p>
-          <p style="margin-bottom: 15px;">🌱 持续成长 + 价值创造</p>
-          <p>🧘 知行合一</p>
-        </div>
-      </div>
-
-      <!-- 技术栈 -->
-      <div class="masonry-item">
-        <h3 class="item-title">💻 技术栈</h3>
-        <div class="item-desc">
-          <p style="margin-bottom: 10px;"><strong>前端：</strong>React / Vue / TypeScript</p>
-          <p style="margin-bottom: 10px;"><strong>后端：</strong>Node.js / Python / Go</p>
-          <p style="margin-bottom: 10px;"><strong>工具：</strong>Docker / AWS / Kubernetes</p>
-          <p><strong>设计：</strong>GSAP / Figma / CSS</p>
-        </div>
-        <div class="item-tags">
-          <span class="item-tag">全栈</span>
-          <span class="item-tag">云原生</span>
-        </div>
-      </div>
-
-      <!-- 文章：健康 -->
-      <div class="masonry-item">
-        <div class="item-icon">💪</div>
-        <h3 class="item-title">40岁后的健康指南</h3>
-        <p class="item-desc">健康是最大的财富。这篇文章整理了40岁后需要特别注意的健康事项。</p>
-        <div class="item-tags">
-          <span class="item-tag">健康</span>
-          <span class="item-tag">生活</span>
-        </div>
-        <a href="articles/health-after-40.html" class="item-link">阅读文章 →</a>
-      </div>
-
-      <!-- Quote 3 -->
-      <div class="masonry-item quote-item">
-        <div class="quote-text">"概率思维：唔讲'一定'，只讲'我估计X%概率'。用新信息持续更新。"</div>
-        <div class="quote-author">— 贝叶斯思维</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GSAP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  </footer>
 
   <script>
-    gsap.registerPlugin(ScrollTrigger);
+    const buttons = document.querySelectorAll('.filter');
+    const cards = document.querySelectorAll('.card');
 
-    // Hero 动画
-    const heroTL = gsap.timeline();
-    heroTL
-      .from('.hero-title', {
-        y: -50,
-        opacity: 0,
-        duration: 1,
-        ease: 'power3.out'
-      })
-      .from('.hero-subtitle', {
-        y: 30,
-        opacity: 0,
-        duration: 0.8
-      }, '-=0.5')
-      .from('.hero-link', {
-        scale: 0,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.5,
-        ease: 'back.out(1.7)'
-      }, '-=0.3');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        buttons.forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        const filter = button.dataset.filter;
 
-    // Masonry items 动画
-    gsap.utils.toArray('.masonry-item').forEach((item, i) => {
-      gsap.from(item, {
-        scrollTrigger: {
-          trigger: item,
-          start: 'top 85%',
-          toggleActions: 'play none none none'
-        },
-        y: 60,
-        opacity: 0,
-        duration: 0.8,
-        delay: (i % 3) * 0.1,
-        ease: 'power2.out'
+        cards.forEach(card => {
+          const categories = card.dataset.category.split(' ');
+          card.classList.toggle('is-hidden', filter !== 'all' && !categories.includes(filter));
+        });
       });
     });
-
-    // 装饰圆圈动画
-    gsap.to('.deco-circle', {
-      rotation: 360,
-      duration: 60,
-      repeat: -1,
-      ease: 'none',
-      stagger: 30
-    });
-
-    // 统计数字动画
-    ScrollTrigger.create({
-      trigger: '.stats-grid',
-      start: 'top 80%',
-      onEnter: () => {
-        document.querySelectorAll('.stat-number').forEach(num => {
-          const target = num.textContent;
-          if (target !== '∞') {
-            const value = parseInt(target);
-            if (!isNaN(value)) {
-              gsap.from(num, {
-                textContent: 0,
-                duration: 2,
-                snap: { textContent: 1 },
-                ease: 'power2.out'
-              });
-            }
-          }
-        });
-      }
-    });
-
-    console.log('🎨 瀑布流网站已加载');
   </script>
 </body>
 </html>
