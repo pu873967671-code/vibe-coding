@@ -16,7 +16,7 @@
  const framing={
   salon:{size:[1536,1024],position:[.5,.65],feet:[.55,.87],height:770},
   mirror_lounge:{size:[1672,941],position:[.30,.20],portrait:[.24,.5],feet:[.59,.58],height:470},
-  car:{size:[1536,1024],position:[.5,.72],portrait:[.30,.72],feet:[.32,.77],height:350},
+  car:{size:[1536,1024],position:[.5,.72],portrait:[.30,.72],feet:[.32,.8725],height:455},
   vanity:{size:[1536,1024],position:[.5,.77],feet:[.57,.88],height:650},
   balcony:{size:[1672,940],position:[.5,.76],feet:[.53,.87],height:690}
  };
@@ -29,14 +29,23 @@
   // Shallow landscape stages pan down with the room instead of cutting off toes.
   const floor=c.feet[1]*ih*scale+(h-ih*scale)*p[1];
   if(floor>h-clearance&&h<ih*scale)p[1]=Math.max(0,Math.min(1,(h-clearance-c.feet[1]*ih*scale)/(h-ih*scale)));
-  const ox=(w-iw*scale)*p[0],oy=(h-ih*scale)*p[1];
+  const ox=(w-iw*scale)*p[0];let oy=(h-ih*scale)*p[1];
   stage.style.backgroundPosition=`${p[0]*100}% ${p[1]*100}%`;
   const zoom=stage.classList.contains('zoomed')?1.14:1;
-  const footY=Math.min(h-clearance,c.feet[1]*ih*scale+oy);
+  let footY=Math.min(h-clearance,c.feet[1]*ih*scale+oy);
   // Phone cover-crops can move the authored floor anchor outside the screen.
   // Reserve enough width for the entire painted pair (or both side-detail feet).
   const detail=stage.dataset.runwayAngle==='side'&&stage.dataset.showcaseScene!=='car';
-  const fitHeight=Math.max(1,Math.min(c.height*scale*zoom*(stage.dataset.showcaseScene==='car'&&w<h?.9:1),(footY-76)/(detail?1.12:1),(w-32)/(detail?1.35:.72)));
+  const car=stage.dataset.showcaseScene==='car';
+  const fitHeight=Math.max(1,Math.min(c.height*scale*zoom,(car?h-clearance-76:footY-76)/(detail?1.12:1),(w-32)/(detail?1.35:.72)));
+  if(car){
+   // Scale around the seat-edge hem, then pan the room and pair together.
+   // Any background continuation falls behind the bottom dock, never the shoes.
+   const seatY=(c.feet[1]*ih-c.height)*scale+oy;
+   const hemY=Math.max(76,Math.min(h-clearance-fitHeight,seatY));
+   oy+=hemY-seatY;footY=hemY+fitHeight;
+   stage.style.backgroundPosition=`${ox}px ${oy}px`;
+  }
   const halfWidth=fitHeight*(detail?.66:.36),roomX=c.feet[0]*iw*scale+ox;
   const fitLeft=Math.max(16+halfWidth,Math.min(w-16-halfWidth,roomX));
   for(const [key,value] of Object.entries({
