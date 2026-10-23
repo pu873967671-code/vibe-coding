@@ -531,3 +531,69 @@ body:not(.dialogue-active) .atelier-mentor{visibility:visible}.dialogue-active .
 .vn-box{background:linear-gradient(115deg,#fffaf5,#fff9ea)}
 /* Also crop the 12–24px gutter below the box, including the character shadow. */
 .vn-mentor,.vn-story .opening-character{clip-path:inset(0 0 48px)}
+
+/* 13:56: seated knees and skirt remain opaque; feet meet the passenger mat. */
+.runway-scene[data-showcase-scene=car] .runway-angle-art{mask-image:none;filter:drop-shadow(0 3px 2px #4f2a2233);rotate:0;translate:-50% 0;animation:none}
+.runway-scene[data-showcase-scene=car] .runway-angle-art:after{left:38%;right:8%;bottom:4%;height:4%;rotate:0;opacity:.75}
+.runway-scene[data-showcase-scene=car]:after{content:none}
+/* Dialogue text and the 44px Skip action have independent grid lanes. */
+.vn-box{display:grid;grid-template-columns:minmax(0,1fr) 72px;column-gap:12px}
+.vn-box h2,.vn-story .vn-box h2{grid-column:1;margin-right:0}
+.vn-box .vn-text{grid-column:1 / -1;margin-top:0}
+.vn-box .section-kicker{grid-column:1}
+.vn-box .vn-skip{grid-column:2;grid-row:1 / 3;position:static;align-self:start;justify-self:end}
+.vn-box .vn-next{min-height:44px}
+@media(orientation:portrait){.vn-box{column-gap:8px}.vn-box h2,.vn-story .vn-box h2{margin-right:0}}
+
+/* The opening story uses the same grid as the one-action dialogue. */
+.vn-story .opening-copy.vn-box{display:grid!important}
+.vn-box .vn-skip{grid-row:1 / 2}
+
+.runway-scene[data-showcase-scene=car][data-runway-angle] .runway-angle-art{opacity:1;visibility:visible}
+.runway-scene[data-showcase-scene=car][data-runway-angle] .runway-pair{opacity:0;visibility:hidden}
+
+/* The fitting room is a destination: full-bleed scenery with two quiet overlays. */
+.runway-backdrop{padding:0;background:#e6d0bf;align-items:stretch}
+.modal.runway-modal{position:relative;width:100%;max-width:none;height:100dvh;max-height:none;padding:0;border:0;border-radius:0;overflow:hidden;background:#e6d0bf;box-shadow:none}
+.runway-modal .runway{display:block;width:100%;height:100%;position:relative}
+.runway-modal .runway-scene,.runway-modal:has([data-journey]) .runway-scene{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;--stage-height:100dvh}
+.modal.runway-modal .runway-heading{position:absolute;inset:0 0 auto;z-index:10;height:60px;padding:8px 76px;display:flex;align-items:center;justify-content:center;gap:20px;background:linear-gradient(#fffaf4f5,#fffaf4d9);border-bottom:1px solid #ffffff8c;box-shadow:0 2px 18px #62412d10;backdrop-filter:blur(16px)}
+.runway-modal .runway-heading .section-kicker{display:none}
+.runway-modal .runway-heading h2{font-size:22px;margin:0;white-space:nowrap;color:#714b52;font-weight:500}
+.runway-modal .runway-heading>p{font:11px/1.4 sans-serif;color:#82626a;margin:0}
+.runway-modal .runway-return{position:absolute;left:max(12px,env(safe-area-inset-left));top:8px;width:44px;height:44px;min-height:44px;padding:0;border:0;background:#fffaf2b8;font:32px/1 sans-serif;color:#795564;box-shadow:none;border-radius:50%}
+.runway-modal>.modal-dismiss{top:8px;right:max(12px,env(safe-area-inset-right));border:0;background:#fffaf2b8;box-shadow:none}
+.runway-dock{position:absolute;z-index:10;left:50%;bottom:max(14px,env(safe-area-inset-bottom));translate:-50% 0;width:min(1040px,calc(100% - 32px));display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding:10px 12px;background:linear-gradient(135deg,#fffaf2e8,#f5e8e0dc);border:1px solid #fffaf2c9;border-radius:22px;box-shadow:0 8px 32px #5b38252a;backdrop-filter:blur(18px)}
+.runway-dock .showcase-strip{grid-column:1/-1;grid-row:1;height:64px}
+.runway-dock .showcase-picker{height:64px;gap:8px;padding:2px;scrollbar-width:thin}
+.runway-dock .showcase-chip{flex:1 0 130px;min-width:0;min-height:58px;grid-template-columns:64px minmax(0,1fr);background:#fffaf29c;border:1px solid transparent;box-shadow:none}
+.runway-dock .showcase-chip.selected{background:#fffaf2;border-color:#b65d7d;box-shadow:0 0 0 1px #b65d7d33}
+.runway-dock .showcase-chip>img{width:64px;height:50px;border-radius:7px}
+.runway-dock .showcase-chip>span{display:block;font-size:10px;white-space:nowrap}
+.runway-dock .showcase-chip small{font-size:10px;margin-top:3px}
+.runway-dock .runway-segments{grid-column:1;grid-row:2;margin:0;gap:8px;min-width:0;justify-content:flex-start;overflow-x:auto;scrollbar-width:thin}
+.runway-dock .runway-angles,.runway-dock .runway-controls{flex:none;margin:0;padding:2px;border-radius:13px;gap:0;background:#e6d5ce77}
+.runway-dock .runway-segments button{min-width:56px;min-height:44px;padding:5px 12px;font-size:11px}
+.runway-dock .runway-actions{grid-column:2;grid-row:2;margin:0;align-items:center;gap:0}
+.runway-dock .runway-actions button{min-height:44px;padding:6px 16px;font:11px sans-serif;white-space:nowrap}
+.runway-modal .runway-monogram{bottom:calc(var(--dock-clearance,150px) + 16px)}
+.runway-scene[data-showcase-scene=car][data-runway-pose=tiptoe] .runway-angle-art{rotate:1deg;transform-origin:35% 5%}
+.runway-scene[data-showcase-scene=car][data-runway-pose=step] .runway-angle-art{rotate:-1deg;transform-origin:35% 5%}
+@media(max-height:560px) and (orientation:landscape){
+ .modal.runway-modal .runway-heading{height:50px;padding:4px 64px}.runway-modal .runway-heading h2{font-size:18px}.runway-modal .runway-return,.runway-modal>.modal-dismiss{top:3px}
+ .runway-dock{bottom:6px;width:calc(100% - 24px);padding:6px 8px;gap:8px;border-radius:16px;grid-template-columns:minmax(180px,.9fr) minmax(0,1.5fr) auto;align-items:center}
+ .runway-dock .showcase-strip{grid-column:1;grid-row:1}.runway-dock .runway-segments{grid-column:2;grid-row:1}.runway-dock .runway-actions{grid-column:3;grid-row:1}
+ .runway-dock .showcase-strip,.runway-dock .showcase-picker{height:46px}.runway-dock .showcase-picker{gap:4px;padding:0}
+ .runway-dock .showcase-chip{flex-basis:102px;min-height:44px;grid-template-columns:38px minmax(0,1fr);gap:0 5px;border-radius:9px}.runway-dock .showcase-chip>img{height:36px;width:38px}.runway-dock .showcase-chip>span,.runway-dock .showcase-chip small{font-size:9px}.runway-dock .showcase-chip small{margin-top:1px}
+ .runway-dock .runway-segments{gap:4px}.runway-dock .runway-segments button{min-width:44px;padding:4px 6px;font-size:9px}.runway-dock .runway-angles button{min-width:44px}.runway-dock .runway-actions button{padding:4px 10px;font-size:10px}
+}
+@media(orientation:portrait){
+ .modal.runway-modal .runway-heading{height:72px;display:flex;flex-direction:column;gap:3px;padding:6px 56px}.runway-modal .runway-heading h2{font-size:21px}.runway-modal .runway-heading>p{font-size:9px}.runway-modal .runway-return,.runway-modal>.modal-dismiss{top:14px}
+ .runway-dock{width:calc(100% - 20px);bottom:max(10px,env(safe-area-inset-bottom));padding:8px;gap:8px;border-radius:18px;grid-template-columns:1fr}
+ .runway-dock .showcase-chip{flex-basis:118px;grid-template-columns:44px minmax(0,1fr);gap:0 5px}.runway-dock .showcase-chip>img{width:44px}.runway-dock .showcase-picker{gap:4px}
+ .runway-dock .runway-segments{display:flex;flex-wrap:nowrap;justify-content:center;overflow-x:auto;gap:4px}.runway-dock .runway-segments button{min-width:40px;padding:4px 5px;font-size:9px}.runway-dock .runway-angles,.runway-dock .runway-controls{padding:2px}.runway-dock .runway-actions{grid-column:1;grid-row:3;justify-content:center}.runway-dock .runway-actions button{width:100%;background:#ad5271;color:#fff}
+}
+
+.runway-scene[data-showcase-scene=car][data-runway-angle] .runway-angle-art{mask-image:linear-gradient(transparent,#000 16px);animation:none}
+.runway-modal .runway-scene[data-runway-angle=side] .front-foot{left:calc(var(--fit-left) - var(--fit-height)*.03);bottom:calc(var(--fit-bottom) + 3px)}
+.runway-modal .runway-scene[data-runway-angle=side] .back-foot{left:calc(var(--fit-left) - var(--fit-height)*.48);bottom:calc(var(--fit-bottom) + var(--fit-height)*.08)}
