@@ -27,18 +27,18 @@
   }
   const clock = ms => {const sec=Math.max(0,Math.ceil(ms/1000));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');};
   A.createMergeScreen = function (root, api) {
-    let selected = -1, pointer = null, ghost = null, over = null, lastTick = 0, visible = false, lastInput = performance.now();
+    let selected = -1, pointer = null, ghost = null, over = null, lastTick = 0, visible = false, lastInput = performance.now(), mentorHint = false;
     const board = () => api.state().atelier;
     function activity() {
-      lastInput=performance.now();
+      lastInput=performance.now();mentorHint=false;
       root.querySelectorAll('.idle-match').forEach(el=>el.classList.remove('idle-match'));
     }
     function controls() {
       const b = board(), now = Date.now();
       root.querySelectorAll('[data-bubble-clock]').forEach(el=>el.textContent=clock((b.bubbles[0]?.expiresAt||now)-now));
-      const meter = root.querySelector('#energyCount');
+      const meter = document.getElementById('energyCount');
       if (meter) meter.textContent = b.energy + ' / 100';
-      const regen = root.querySelector('#energyRegen');
+      const regen = document.getElementById('energyRegen');
       if (regen) regen.textContent = b.energy === 100 ? tr('full') : tr('next')+' '+clock(M.REGEN_MS-(now-b.energyAt));
       root.querySelectorAll('[data-charge]').forEach(el => {
         const cell=b.cells[+el.dataset.charge];
@@ -101,7 +101,7 @@
           button.disabled=true;card.classList.add('receiving');card.append(reaction);
           setTimeout(()=>{reaction.remove();card.classList.remove('receiving');button.disabled=disabled;},reduced?1400:1900);
         }
-        api.sound('delivery');
+        mentorPose('cheer',lines[chapter]);api.sound('delivery');
         pieces.forEach((piece,i)=>fly(piece.markup,piece.from,destination,piece.size,i*75,'material-flight'));
         const delay=reduced?0:560+(pieces.length-1)*75;
         setTimeout(()=>{
@@ -133,7 +133,7 @@
     function render() {
       A.Boutique.sync(api.state());
       const b=board();
-      root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button></div></div><div class="atelier-orders">${orderCards()}</div><div class="energy-card">${resource('energy')}<div><span class="section-kicker">${tr('energy')}</span><strong id="energyCount"></strong><small id="energyRegen"></small></div><div class="energy-track"><i style="width:${b.energy}%"></i></div></div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${tr('merges')}</span><i>·</i><span>${b.cells.filter(c=>c?.kind==='crate').length} ${tr('room')}</span></p></div><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside>`;
+      root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button></div></div><div class="atelier-orders">${orderCards()}</div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" data-chain="${cell?.chain||''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${tr('merges')}</span><i>·</i><span>${b.cells.filter(c=>c?.kind==='crate').length} ${tr('room')}</span></p></div><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside><div class="atelier-mentor" aria-hidden="true"><img src="assets/mentor/mentor_${G.active(api.state())?(api.state().mergeGuide===0?'wave':'point'):'think'}.webp" alt=""></div><button class="mentor-bubble secondary" data-mentor-talk hidden>${G.active(api.state())?tr('guide'+Math.min(5,api.state().mergeGuide)):tr('idle')}</button>`;
       controls();detail();api.journey();
       const guide=api.state().mergeGuide;
       if(guide<4){const cells=G.plans[guide].cells,i=cells[selected===cells[0]&&cells.length>1?1:0];root.querySelector(`[data-cell="${i}"]`)?.classList.add('guide-target');}
@@ -142,7 +142,8 @@
       const bubble=b.bubbles[0];
       if(bubble&&guide>=6)root.querySelector('.chest-tool').outerHTML=`<button class="bubble-offer chest-tool secondary" data-bubble="${bubble.id}" aria-label="${tr('bubbleOpen')}">${art({kind:'item',chain:bubble.chain,tier:bubble.tier})}<span>${tr('bubbleOpen')}<small data-bubble-clock>${clock(bubble.expiresAt-Date.now())}</small></span></button>`;
     }
-    function discovery(item) {
+    function mentorPose(pose,message){const bubble=root.querySelector('[data-mentor-talk]');if(bubble&&message){bubble.textContent=message;bubble.hidden=false;setTimeout(()=>{if(bubble.isConnected)bubble.hidden=true;},5000);}const host=root.querySelector('.atelier-mentor'),im=host?.querySelector('img');if(!im)return;const next=new Image();next.src='assets/mentor/mentor_'+pose+'.webp';next.alt='';next.onload=()=>{im.classList.add('leaving');host.append(next);setTimeout(()=>im.remove(),360);};}
+    function discovery(item) {mentorPose('surprise',tr('new')+' · '+name(item));
       root.querySelector('.discovery-banner')?.remove();
       const banner=document.createElement('div'),c=A.Introduction.copy();
       banner.className='discovery-banner';banner.setAttribute('role','status');
@@ -165,6 +166,7 @@
         if(result.opened?.length)setTimeout(()=>{if(visible&&api.active())api.sound('crate');},120);
         for(const index of result.opened||[])root.querySelector(`[data-cell="${index}"]`)?.classList.add('just-opened');
       } else {api.sound(result.discovery?'discovery':'pop');if(result.discovery)discovery(result.item);}
+      if(result.type==='chest')mentorPose('present',tr('chestCollected'));
       if(result.type==='chest')api.toast(tr('chestCollected'));
       return true;
     }
@@ -226,6 +228,7 @@
     root.addEventListener('click',e=>{
       if(suppressClick||!api.active())return;
       activity();
+      if(e.target.closest('[data-mentor-talk]')){e.target.closest('[data-mentor-talk]').hidden=true;return;}
       if(e.target.closest('[data-guide-skip]')){api.state().mergeGuide=6;A.Introduction.skip(api.state());api.save();api.header();render();return;}
       if(e.target.closest('[data-guide-finish]')){api.state().mergeGuide=6;A.Introduction.begin(api.state());api.save();api.header();render();return;}
       const bubbleButton=e.target.closest('[data-bubble]');if(bubbleButton){openBubble(+bubbleButton.dataset.bubble);return;}
@@ -270,6 +273,7 @@
         document.querySelectorAll('[data-offer-expiry]').forEach(el=>{const remaining=+el.dataset.offerExpiry-Date.now();el.textContent=remaining>0?clock(remaining):tr('bubbleExpired');const buy=el.closest('.modal').querySelector('[data-bubble-buy]');if(buy)buy.disabled=remaining<=0;});
         const changed=M.tick(board())|B.ensure(board());if(changed){api.save();if(visible&&api.active()&&!pointer)render();}else if(visible&&api.active())controls();
         if(!visible||!api.active()||document.hidden||pointer){lastInput=now;return;}
+        if(now-lastInput>=5000&&!mentorHint){mentorHint=true;mentorPose('think',tr('idle'));}
         if(now-lastInput>=5000)for(const i of R.hint(board()))root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
       }
     };
