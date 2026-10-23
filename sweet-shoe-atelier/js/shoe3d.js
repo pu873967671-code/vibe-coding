@@ -74,7 +74,11 @@ function last(z){
  const toe=Math.max(0,(t-.7)/.3);
  const lift={flat:.025,block:.64,kitten:.54,wedge:.60}[current?.heel||'flat'];
  const rear=Math.max(0,Math.min(1,(.72-t)/.48)),bend=rear*rear*(3-2*rear);
- return {width:Math.max(.003,value(1)),height:Math.max(.008,value(2)),base:.075+.075*toe*toe+lift*bend};
+ // The terminal cap must converge as a dome. Clamping its height while its
+ // width vanished formed a tiny keel, visible as a bright centre dart.
+ const capT=Math.max(0,Math.min(1,(t-.83)/.17)),cap=Math.sqrt(Math.max(0,1-capT*capT));
+ const blendT=Math.max(0,Math.min(1,(t-.83)/.08)),blend=blendT*blendT*(3-2*blendT);
+ return {width:Math.max(.0001,value(1)*(1-blend)+.53*cap*blend),height:Math.max(.0001,value(2)*(1-blend)+.38*cap*blend),base:.075+.075*toe*toe+lift*bend};
 }
 function section(z){
  // An instep-sized oval: a closed heel cup and a vamp covering 44% of length.
@@ -83,28 +87,41 @@ function section(z){
  return {...p,arc:Math.acos(Math.min(.999,hole/p.width)),hole};
 }
 function upperGeometry(){
- const positions=[],uvs=[],indices=[],long=192,cross=40;
+ const positions=[],uvs=[],indices=[],surfaceNormals=[],surfaceTangents=[],long=192,cross=40;
  for(let side=0;side<2;side++)for(let i=0;i<=long;i++){
   const z=-1.5+3*i/long,p=section(z);
   for(let j=0;j<=cross;j++){
    const theta=p.arc*j/cross;
    positions.push((side? -1:1)*p.width*Math.cos(theta),p.base+p.height*Math.sin(theta),z);
+   // Different triangle fans on the two UV halves used to leave a narrow
+   // specular crease. Derive the normal from the continuous last instead.
+   const lo=last(Math.max(-1.5,z-.0005)),hi=last(Math.min(1.5,z+.0005)),dz=Math.min(1.5,z+.0005)-Math.max(-1.5,z-.0005);
+   const dw=(hi.width-lo.width)/dz,dh=(hi.height-lo.height)/dz,db=(hi.base-lo.base)/dz;
+   const sn=new THREE.Vector3((side?-1:1)*p.height*Math.cos(theta),p.width*Math.sin(theta),-p.width*Math.sin(theta)*(db+dh*Math.sin(theta))-p.height*dw*Math.cos(theta)**2).normalize();
+   surfaceNormals.push(sn.x,sn.y,sn.z);
+   const st=new THREE.Vector3(-p.width*Math.sin(theta),(side?-1:1)*p.height*Math.cos(theta),0).normalize();
+   surfaceTangents.push(st.x,st.y,st.z,1);
    uvs.push(side?1-theta/Math.PI:theta/Math.PI,i/long);
    if(i<long&&j<cross){const a=side*(long+1)*(cross+1)+i*(cross+1)+j,b=a+cross+1;
     if(side)indices.push(a,b,a+1,b,b+1,a+1);else indices.push(a,a+1,b,b,a+1,b+1);
    }
   }
  }
- const g=own(new THREE.BufferGeometry());g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setIndex(indices);g.computeVertexNormals();
+ const g=own(new THREE.BufferGeometry());g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setIndex(indices);g.setAttribute('normal',new THREE.Float32BufferAttribute(surfaceNormals,3));
  // Weld the normals at the closed vamp/heel crown without collapsing the UV seam.
  const normals=g.attributes.normal;
  for(let i=0;i<=long;i++)if(!section(-1.5+3*i/long).hole){
   const a=i*(cross+1)+cross,b=(long+1)*(cross+1)+a;
   const n=new THREE.Vector3().fromBufferAttribute(normals,a).add(new THREE.Vector3().fromBufferAttribute(normals,b)).normalize();normals.setXYZ(a,n.x,n.y,n.z);normals.setXYZ(b,n.x,n.y,n.z);
  }
- // Explicit tangents share the welded crown normals; derivative tangents
- // otherwise create a false centre seam in the satin anisotropic highlight.
- g.computeTangents();
+ // Analytical circumferential tangents share the continuous crown normals;
+ // triangle-derived tangents must not introduce a seam in the satin.
+ g.setAttribute('tangent',new THREE.Float32BufferAttribute(surfaceTangents,4));
+ const tangents=g.attributes.tangent;
+ for(let i=0;i<=long;i++)if(!section(-1.5+3*i/long).hole){
+  const a=i*(cross+1)+cross,b=(long+1)*(cross+1)+a;
+  tangents.setXYZW(a,-1,0,0,1);tangents.setXYZW(b,-1,0,0,1);
+ }
  return g;
 }
 function soleGeometry(insole=false,edge=false){
@@ -151,7 +168,7 @@ function surfaceTexture(kind){
 }
 function upperMaterial(d){
  const type=d.material,color=A.option('color',d.color)[3];
- const values={satin:{roughness:.29,metalness:0,clearcoat:.18,clearcoatRoughness:.28,sheen:.24,sheenRoughness:.4,anisotropy:.62,anisotropyRotation:Math.PI/2},velvet:{roughness:.92,sheen:1,sheenRoughness:.8},lace:{roughness:.78,sheen:.3},mesh:{roughness:.48,sheen:.45,transmission:.12,thickness:.015,ior:1.35},glitter:{roughness:.3,metalness:.22,clearcoat:.4},leather:{roughness:.43,clearcoat:.22},cotton:{roughness:.95}};
+ const values={satin:{roughness:.34,metalness:0,clearcoat:.12,clearcoatRoughness:.34,sheen:.35,sheenRoughness:.5,anisotropy:.22,anisotropyRotation:Math.PI/2},velvet:{roughness:.92,sheen:1,sheenRoughness:.8},lace:{roughness:.78,sheen:.3},mesh:{roughness:.48,sheen:.45,transmission:.12,thickness:.015,ior:1.35},glitter:{roughness:.3,metalness:.22,clearcoat:.4},leather:{roughness:.43,clearcoat:.22},cotton:{roughness:.95}};
  const m=own(new THREE.MeshPhysicalMaterial({color,side:THREE.DoubleSide,...(values[type]||values.satin)}));
  m.sheenColor=new THREE.Color(color).lerp(new THREE.Color('#fff7f5'),.38);
  if(['mesh','lace','glitter','velvet','cotton'].includes(type)){
@@ -186,16 +203,16 @@ function heelGeometry(type){
  for(const row of [0,rings]){const base=positions.length/3;positions.push(0,row?(type==='wedge'?last(-.45).base-.04:top):.018,type==='wedge'?-.45:-1.03);for(let j=0;j<segments;j++){const k=row*(segments+1)+j;if(row)indices.push(base,k+1,k);else indices.push(base,k,k+1);}}
  const g=own(new THREE.BufferGeometry());g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();return g;
 }
-function ribbon(points,width,material,parent,vertical=false,closed=false){
- const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)),closed),positions=[],uv=[],indices=[],steps=72,cross=6;
+function ribbon(points,width,material,parent,vertical=false,closed=false,silk=false){
+ const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)),closed),positions=[],uv=[],indices=[],steps=72,cross=silk?14:6;
  // A cambered silk strip with actual edge thickness and a softly twisting fold.
  for(let layer=0;layer<2;layer++)for(let i=0;i<=steps;i++){
   const t=i/steps,p=curve.getPoint(t),tangent=curve.getTangent(t).normalize();
   let side=vertical==='width'?new THREE.Vector3(1,0,0):vertical==='depth'?new THREE.Vector3(0,0,1):vertical?new THREE.Vector3(0,1,0):new THREE.Vector3(-tangent.y,tangent.x,0);
-  side.addScaledVector(tangent,-side.dot(tangent));if(side.lengthSq()<.001)side.set(1,0,0);side.normalize();side.applyAxisAngle(tangent,Math.sin(t*Math.PI*2)*.28);
+  side.addScaledVector(tangent,-side.dot(tangent));if(side.lengthSq()<.001)side.set(1,0,0);side.normalize();side.applyAxisAngle(tangent,Math.sin(t*Math.PI*2)*(silk?.5:.28));
   const normal=new THREE.Vector3().crossVectors(tangent,side).normalize();
-  const breadth=width*(closed?1:.65+.35*Math.sin(Math.PI*t)**.7);
-  for(let j=0;j<=cross;j++){const u=j/cross,camber=Math.sin(u*Math.PI)*breadth*.075+(layer?.002:-.002),q=p.clone().addScaledVector(side,(u-.5)*breadth).addScaledVector(normal,camber);positions.push(q.x,q.y,q.z);uv.push(u,t);
+  const breadth=width*(closed?1:silk?.2+.8*Math.sin(Math.PI*t)**.65:.65+.35*Math.sin(Math.PI*t)**.7);
+  for(let j=0;j<=cross;j++){const u=j/cross,gather=silk?Math.sin(u*Math.PI*6+t*3)*Math.sin(u*Math.PI)*(.002+.009*Math.exp(-Math.min(t,1-t)*9)):0,camber=Math.sin(u*Math.PI)*breadth*(silk?.11:.075)+gather+(layer?(silk?.0008:.002):-(silk?.0008:.002)),q=p.clone().addScaledVector(side,(u-.5)*breadth).addScaledVector(normal,camber);positions.push(q.x,q.y,q.z);uv.push(u,t);
    if(i<steps&&j<cross){const k=layer*(steps+1)*(cross+1)+i*(cross+1)+j,n=k+cross+1;if(layer)indices.push(k,n,k+1,n,n+1,k+1);else indices.push(k,k+1,n,n,k+1,n+1);}
   }
  }
@@ -205,11 +222,12 @@ function ribbon(points,width,material,parent,vertical=false,closed=false){
 function bow(parent,material,scale=1){
  const group=new THREE.Group();group.name='satin-loop-bow';group.scale.setScalar(scale);parent.add(group);
  for(const side of [-1,1]){
-  ribbon([[side*.025,0,.008],[side*.15,.115,.035],[side*.31,.105,.085],[side*.29,-.05,.13],[side*.045,-.02,-.015]],.115,material,group).name='folded-bow-loop';
-  ribbon([[side*.025,-.025,-.012],[side*.09,-.14,.045],[side*.16,-.25,-.015],[side*.12,-.28,.01]],.10,material,group).name='silk-bow-tail';
+  const droop=side===1?.025:0;
+  ribbon([[side*.022,.004,.018],[side*.16,.055-droop,-.012],[side*.32,.025-droop,-.065],[side*.34,-.045-droop,-.10],[side*.25,-.080-droop,-.13],[side*.10,-.045,-.065],[side*.018,-.018,.006]],.235,material,group,false,false,true).name='folded-bow-loop';
+  ribbon([[side*.025,-.025,-.012],[side*.065,-.13,-.07],[side*.10,-.25,-.10],[side*.14,-.34+(side===1?.045:0),-.055],[side*.17,-.35+(side===1?.045:0),-.025]],.12,material,group,'width',false,true).name='silk-bow-tail';
  }
  const wrap=[];for(let i=0;i<24;i++){const a=i/24*TAU;wrap.push([0,Math.cos(a)*.057,Math.sin(a)*.045+.02]);}
- ribbon(wrap,.075,material,group,'width',true).name='gathered-silk-knot';return group;
+ ribbon(wrap,.075,material,group,'width',true,true).name='gathered-silk-knot';return group;
 }
 function stitchGeometry(curve){
  const positions=[],indices=[],count=116,radial=5,along=3;
@@ -317,7 +335,7 @@ function build(d,options={}){
  const padGeo=own(new THREE.SphereGeometry(1,40,20)),padMat=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#fffaf5'),.94),roughness:.88}));
  padGeo.scale(.22,.012,.48);padGeo.translate(0,0,-.72);
  const padPos=padGeo.attributes.position;for(let i=0;i<padPos.count;i++)padPos.setY(i,padPos.getY(i)+last(padPos.getZ(i)).base+.019);padGeo.computeVertexNormals();
- const accessoryMat=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#fff9f4'),.22),roughness:.26,sheen:.6,anisotropy:.7,side:THREE.DoubleSide}));
+ const accessoryMat=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#fff9f4'),.16),roughness:.38,sheen:.8,sheenRoughness:.55,anisotropy:.35,side:THREE.DoubleSide}));
  const pearlMat=own(new THREE.MeshPhysicalMaterial({color:'#fff7ee',roughness:.16,metalness:.04,clearcoat:1,clearcoatRoughness:.12,iridescence:.28,iridescenceIOR:1.34,sheen:.35,sheenColor:'#ffe4f5'}));
  const metalMat=own(new THREE.MeshPhysicalMaterial({color:'#e8d4a3',roughness:.15,metalness:.65}));
  const crystalMat=own(new THREE.MeshPhysicalMaterial({color:'#d8ebff',roughness:.055,metalness:0,clearcoat:1,transmission:.78,thickness:.16,ior:1.65,iridescence:.35}));
@@ -333,7 +351,8 @@ function build(d,options={}){
  model=new THREE.Group();scene.add(model);
  for(let i=0;i<2;i++){
   const shoe=new THREE.Group();shoe.position.set(i?.63:-.63,0,i?.36:-.42);shoe.rotation.y=i?-.16:.17;model.add(shoe);
-  mesh(g,material,shoe).name='upper';mesh(g,innerMat,shoe).castShadow=false;if(laceMat)mesh(g,laceMat,shoe);if(motifMat)mesh(g,motifMat,shoe);
+  mesh(g,material,shoe).name='upper';
+  mesh(g,innerMat,shoe).castShadow=false;if(laceMat)mesh(g,laceMat,shoe);if(motifMat)mesh(g,motifMat,shoe);
   const bottom=mesh(sole,soleMat,shoe);bottom.position.y=.012;bottom.name='outsole';
   const welt=mesh(edge,edgeMat,shoe);welt.position.y=.044;
   const footbed=mesh(insole,liningMat,shoe);footbed.position.y=.06;
@@ -364,7 +383,7 @@ function build(d,options={}){
  scene.add(new THREE.HemisphereLight('#ffffff','#dceee8',.45));
  const floor=new THREE.Mesh(own(new THREE.PlaneGeometry(50,50)),own(new THREE.ShadowMaterial({opacity:.045})));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=-.003;scene.add(floor);
 }
-function fitCamera(width,height){
+function fitCamera(width,height,live=true){
  if(!model||!camera)return;
  model.updateMatrixWorld(true);camera.updateMatrixWorld(true);
  const min=new THREE.Vector3(Infinity,Infinity,Infinity),max=new THREE.Vector3(-Infinity,-Infinity,-Infinity),v=new THREE.Vector3();
@@ -378,12 +397,14 @@ function fitCamera(width,height){
  if(model.userData.bounds){min.set(Infinity,Infinity,Infinity);max.set(-Infinity,-Infinity,-Infinity);const b=model.userData.bounds;for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z]){v.set(x,y,z).applyMatrix4(model.matrixWorld).applyMatrix4(camera.matrixWorldInverse);min.min(v);max.max(v);}}
  const aspect=width/height,cx=(min.x+max.x)/2;let cy=(min.y+max.y)/2;
  // Eight percent of the frame is reserved at EACH edge, including the bow.
- const stage=fitting?host?.closest('.runway-scene'):null;
+ const stage=live&&fitting?host?.closest('.runway-scene'):null;
+ const studio=live&&!fitting&&host?.id==='preview'?host.closest('.stage'):null;
  const margin=stage?.classList.contains('zoomed')?.96:.90;
- const top=stage?Math.min(76,height*.13):0,bottom=stage?parseFloat(stage.style.getPropertyValue('--dock-clearance'))||190:0;
- const available=Math.max(100,height-top-bottom);
- const h=stage?Math.max((max.y-min.y)*height/available/margin,(max.x-min.x)/aspect/margin):Math.max((max.y-min.y)/.84,(max.x-min.x)/aspect/.84);
- if(stage)cy+=(top-bottom)/height*h/2;
+ const controls=studio?.querySelector('.studio-angles');
+ const top=stage?Math.min(76,height*.13):studio?8:0,bottom=stage?parseFloat(stage.style.getPropertyValue('--dock-clearance'))||190:controls?Math.max(0,host.getBoundingClientRect().bottom-controls.getBoundingClientRect().top+12):0;
+ const available=Math.max(16,height-top-bottom);
+ const h=stage||studio?Math.max((max.y-min.y)*height/available/margin,(max.x-min.x)/aspect/margin):Math.max((max.y-min.y)/.84,(max.x-min.x)/aspect/.84);
+ if(stage||studio)cy+=(top-bottom)/height*h/2;
  camera.left=cx-h*aspect/2;camera.right=cx+h*aspect/2;camera.top=cy+h/2;camera.bottom=cy-h/2;camera.updateProjectionMatrix();
 }
 // Single-shoe inspection uses the full-resolution live scene and refits geometry;
@@ -427,7 +448,7 @@ const snapshots=new Map(),snapshotJobs=new Map();let snapshotPixels=0,snapshotQu
 async function snapshot(design,options={}){
  if(failed||!supported(design)||location.protocol==='file:')return null;
  const width=Math.min(1024,Math.max(96,Math.round(options.width||640))),height=Math.min(1024,Math.max(96,Math.round(options.height||480)));
- const view=options.angle||'front34',key='0022-sculpt:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
+ const view=options.angle||'front34',key='shoe-loop2-silk:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
  if(snapshots.has(key)){const c=snapshots.get(key);snapshots.delete(key);snapshots.set(key,c);return c;}
  if(snapshotJobs.has(key))return snapshotJobs.get(key);
  const job=snapshotQueue.then(async()=>{
@@ -437,7 +458,7 @@ async function snapshot(design,options={}){
   try{
    scene=new THREE.Scene();scene.environment=environment.texture;scene.environmentIntensity=.5;
    camera=new THREE.OrthographicCamera(-3,3,2,-2,.1,40);model=null;current={...design};resources=new Set();fitting=false;
-   build(current);if(options.worn){A.Fitting3D.build({THREE,model,own,design:current,last,scene,gltf:rigAsset});fitting=true;}setView(view);fitCamera(width,height);
+   build(current);if(options.worn){A.Fitting3D.build({THREE,model,own,design:current,last,scene,gltf:rigAsset});fitting=true;}setView(view);fitCamera(width,height,false);
    rt=new THREE.WebGLRenderTarget(width,height,{depthBuffer:true,type:THREE.HalfFloatType,samples:2});
    renderer.setRenderTarget(rt);renderer.clear();renderer.render(scene,camera);
    // Render targets contain linear HDR light. The same Neutral/sRGB output
