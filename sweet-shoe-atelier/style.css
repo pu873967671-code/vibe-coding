@@ -216,3 +216,39 @@ body.merge-active{background-image:url('assets/bg_merge.webp')}
 @media(max-height:560px) and (orientation:landscape){.runway-modal{max-height:98dvh}.runway-controls{margin-top:3px}.runway-scene{--stage-height:235px}.runway-actions{padding-bottom:4px}.runway-heading>p{margin-bottom:4px}.showcase-chip{min-height:60px}.showcase-heading{margin-bottom:4px}}
 @media(orientation:portrait){.runway-scene .front-foot{left:calc(50% - var(--stage-height)*.17)}.runway-scene[data-showcase-scene=car] .front-foot{left:calc(50% - var(--stage-height)*.13)}.runway-scene[data-showcase-scene=car] .back-foot{left:calc(50% - var(--stage-height)*.55)}}
 .showcase-chip small{display:flex;align-items:center;justify-content:center;gap:2px;min-height:11px}.showcase-chip small .scene-lock{width:10px;height:10px;object-fit:contain}
+/* Readable luminous fabric, matching skin, and a real resolution change on zoom. */
+.runway-scene .runway-pair,.runway-scene[data-showcase-scene] .runway-pair{filter:none}
+.runway-scene.zoomed .runway-pair,.runway-scene[data-showcase-scene=car].zoomed .runway-pair{scale:1}
+.runway-scene.zoomed .runway-foot{height:118%}
+.runway-angle-art{position:absolute;height:96%;width:auto;max-width:94%;aspect-ratio:var(--foot-aspect,.9);left:50%;bottom:2%;translate:-50% 0;opacity:0;visibility:hidden;transition:opacity .32s;filter:drop-shadow(0 6px 3px #60473533);pointer-events:none}
+.runway-angle-art canvas{width:100%;height:100%;object-fit:contain}
+.runway-scene .runway-pair{transition:opacity .32s}
+.runway-scene:not([data-runway-angle=side]) .runway-pair{opacity:0;visibility:hidden}
+.runway-scene:not([data-runway-angle=side]) .runway-angle-art{opacity:1;visibility:visible}
+.runway-scene:not([data-runway-angle=side]) .runway-contact{opacity:0}
+.runway-scene[data-runway-pose=tiptoe] .runway-angle-art{bottom:5%}
+.runway-scene[data-runway-pose=step] .runway-angle-art{rotate:-3deg}
+.runway-scene.zoomed .runway-angle-art{height:106%}
+.runway-angles{display:flex;justify-content:center;gap:6px;margin:6px 0}
+.runway-angles button{min-height:40px;padding:6px 14px;font:12px sans-serif;box-shadow:none;min-width:64px}
+.modal-dismiss,.book-dismiss{position:absolute;top:6px;right:6px;width:44px;height:44px;min-height:44px!important;padding:0!important;margin:0!important;border-radius:50%;font:25px sans-serif;z-index:30;touch-action:manipulation;background:#fff9f0f5}
+.material-book .book-dismiss{right:-10px;top:-14px;z-index:30}
+.modal:has(.modal-dismiss)>.runway .runway-heading{padding-inline:26px}
+.opening-story{display:grid;grid-template-columns:1fr 1fr;gap:24px;text-align:left;align-items:center}
+.opening-art{position:relative;height:330px;border-radius:18px;overflow:hidden;background:#ead3c7;box-shadow:inset 0 0 0 1px #dcb9a4}
+.opening-room{width:100%;height:100%;object-fit:cover;filter:saturate(.7)}
+.opening-art-0 .opening-room,.opening-art-1 .opening-room{filter:saturate(.35) sepia(.16)}
+.opening-character{position:absolute;height:90%;width:100%;object-fit:contain;object-position:bottom;bottom:-5px;filter:drop-shadow(0 6px 6px #67423844)}
+.opening-copy h2{font-size:27px}.opening-copy p{font:15px/1.7 Georgia,'Atelier CJK',serif;margin:15px 0}.opening-copy button{display:flex;width:100%;margin:9px 0 0}.opening-copy .secondary{background:transparent;border:0;box-shadow:none;color:#896371;font:12px sans-serif}
+.opening-dots{display:flex;gap:7px;justify-content:center;margin:18px 0}.opening-dots i{width:7px;height:7px;border-radius:50%;background:#e0c6bc}.opening-dots .active{background:#b35376;width:20px;border-radius:8px}
+.merge-board:has(.guide-target) .merge-cell:not(.guide-target){filter:brightness(.72) saturate(.75)}
+.guide-target,.journey-target{position:relative;z-index:4}
+.guide-target:after,.journey-target:after{content:'☞';position:absolute;right:0;top:0;font:25px Georgia;color:#fffcdf;filter:drop-shadow(0 1px 2px #794a3a);pointer-events:none;animation:guide-point 1s ease-in-out infinite;z-index:8}
+@keyframes guide-point{50%{translate:-4px 4px}}
+@media(orientation:portrait){.opening-story{grid-template-columns:1fr;gap:14px}.opening-art{height:260px}.opening-character{height:100%}.opening-copy h2{font-size:24px}.opening-copy p{font-size:14px}.opening-dots{margin:12px 0}.runway-scene{--stage-height:245px}.runway-angles button{flex:1}}
+@media(max-height:560px) and (orientation:landscape){.runway-angles{grid-column:2;gap:3px;margin:4px 0}.runway-angles button{font-size:10px;min-width:0;padding:4px 7px;flex:1}.runway-reaction{display:none}.runway-scene{grid-row:2/7}.opening-art{height:250px}.opening-copy h2{font-size:22px}.opening-copy p{font-size:13px;margin:9px 0}.opening-dots{margin:10px 0}.runway-modal:has([data-journey]) .runway-angles button{padding:4px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.runway-angle-art,.runway-scene .runway-pair{transition:none}.guide-target:after,.journey-target:after{animation:none}}
+@media(max-height:420px) and (orientation:landscape){.showcase-chip{min-height:44px;padding-bottom:3px}.showcase-chip>img{height:20px;margin-bottom:2px}.showcase-chip>span{display:none}.showcase-chip small{margin-top:1px}.runway-angles{margin:3px 0}.runway-actions{margin-top:4px}}
+/* Keep both layers present so side/front transitions crossfade. */
+.runway-angle-art,.runway-scene:not([data-runway-angle=side]) .runway-pair{visibility:visible}
+.opening-character{left:0}
