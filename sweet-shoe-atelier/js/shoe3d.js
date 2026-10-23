@@ -9,7 +9,7 @@ let request=0,frame=0,observer,drag,failed=false,angle='front34',yaw=0;
 let resources=new Set();
 const own=value=>(resources.add(value),value);
 const TAU=Math.PI*2;
-const OPENING_START=-1.32,OPENING_END=.18;
+const OPENING_START=-1.12,OPENING_END=.15;
 function supported(d){return ['heel','strap','decoration','charm'].every(k=>A.opts[k].some(o=>o[0]===(d[k]||'none')));}
 function release(){
  cancelAnimationFrame(frame);frame=0;clearTimeout(idleTimer);idleTimer=0;fitting=false;observer?.disconnect();observer=null;
@@ -64,7 +64,7 @@ function last(z){
  // A 3-unit last with a 1.15-unit ball: a real 2.6:1 ballet proportion.
  // The heel cup rises into a rounded counter; the almond cap retains volume
  // ahead of the shorter vamp instead of collapsing into a flat canoe.
- const profile=[[0,.003,.22],[.018,.195,.32],[.055,.32,.37],[.13,.365,.38],[.25,.385,.39],[.38,.40,.40],[.49,.48,.42],[.63,.57,.43],[.74,.575,.41],[.83,.53,.38],[.91,.435,.32],[.965,.285,.23],[.991,.14,.12],[1,.003,.008]];
+ const profile=[[0,.003,.22],[.018,.195,.32],[.055,.32,.37],[.13,.365,.38],[.25,.385,.39],[.38,.40,.40],[.49,.48,.42],[.63,.57,.43],[.74,.575,.41],[.83,.48,.34],[.91,.34,.25],[.965,.19,.17],[.991,.075,.09],[1,.003,.008]];
  let i=0;while(i<profile.length-2&&t>profile[i+1][0])i++;
  const a=profile[i],b=profile[i+1],p=profile[Math.max(0,i-1)],n=profile[Math.min(profile.length-1,i+2)],u=(t-a[0])/(b[0]-a[0]);
  const value=k=>{
@@ -78,12 +78,12 @@ function last(z){
  // width vanished formed a tiny keel, visible as a bright centre dart.
  const capT=Math.max(0,Math.min(1,(t-.83)/.17)),cap=Math.sqrt(Math.max(0,1-capT*capT));
  const blendT=Math.max(0,Math.min(1,(t-.83)/.08)),blend=blendT*blendT*(3-2*blendT);
- return {width:Math.max(.0001,value(1)*(1-blend)+.53*cap*blend),height:Math.max(.0001,value(2)*(1-blend)+.38*cap*blend),base:.075+.075*toe*toe+lift*bend};
+ return {width:Math.max(.0001,value(1)*(1-blend)+.48*cap*(1-.42*capT)*blend),height:Math.max(.0001,value(2)*(1-blend)+.34*cap*(1-.20*capT)*blend),base:.075+.075*toe*toe+lift*bend};
 }
 function section(z){
- // An instep-sized oval: a closed heel cup and a vamp covering 44% of length.
+ // The vamp covers the front 45%; a deeper counter shortens the instep oval.
  // Elliptic shoulders avoid the old long, abruptly squared collar opening.
- const p=last(z),u=(z-OPENING_START)/(OPENING_END-OPENING_START),hole=u>0&&u<1?p.width*.89*Math.sin(Math.PI*u)**.42:0;
+ const p=last(z),u=(z-OPENING_START)/(OPENING_END-OPENING_START),hole=u>0&&u<1?p.width*.84*Math.sin(Math.PI*u)**.72:0;
  return {...p,arc:Math.acos(Math.min(.999,hole/p.width)),hole};
 }
 function upperGeometry(){
@@ -226,8 +226,14 @@ function bow(parent,material,scale=1){
   ribbon([[side*.022,.004,.018],[side*.16,.055-droop,-.012],[side*.32,.025-droop,-.065],[side*.34,-.045-droop,-.10],[side*.25,-.080-droop,-.13],[side*.10,-.045,-.065],[side*.018,-.018,.006]],.235,material,group,false,false,true).name='folded-bow-loop';
   ribbon([[side*.025,-.025,-.012],[side*.065,-.13,-.07],[side*.10,-.25,-.10],[side*.14,-.34+(side===1?.045:0),-.055],[side*.17,-.35+(side===1?.045:0),-.025]],.12,material,group,'width',false,true).name='silk-bow-tail';
  }
- const wrap=[];for(let i=0;i<24;i++){const a=i/24*TAU;wrap.push([0,Math.cos(a)*.057,Math.sin(a)*.045+.02]);}
- ribbon(wrap,.075,material,group,'width',true,true).name='gathered-silk-knot';return group;
+ // One closed fabric wrap covers the gathered roots. An overlapping periodic
+ // double-sided ribbon produced dark subpixel depth/shadow conflicts here.
+ const wrap=own(new THREE.SphereGeometry(1,48,32)),wp=wrap.attributes.position;
+ for(let i=0;i<wp.count;i++){const x=wp.getX(i),fold=.95+.045*Math.cos(x*Math.PI*3),soft=v=>Math.sign(v)*Math.abs(v)**.72;wp.setXYZ(i,soft(x)*.058,soft(wp.getY(i))*.065*fold,soft(wp.getZ(i))*.052*fold-.022);}
+ wrap.computeVertexNormals();mesh(wrap,material,group).name='gathered-silk-knot';
+ // Thin silk is below the directional shadow map's texel size; continuous
+ // physical/environment shading retains folds without speckled self-shadows.
+ group.traverse(o=>{if(o.isMesh)o.receiveShadow=false;});return group;
 }
 function stitchGeometry(curve){
  const positions=[],indices=[],count=116,radial=5,along=3;
@@ -448,7 +454,7 @@ const snapshots=new Map(),snapshotJobs=new Map();let snapshotPixels=0,snapshotQu
 async function snapshot(design,options={}){
  if(failed||!supported(design)||location.protocol==='file:')return null;
  const width=Math.min(1024,Math.max(96,Math.round(options.width||640))),height=Math.min(1024,Math.max(96,Math.round(options.height||480)));
- const view=options.angle||'front34',key='shoe-loop2-silk:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
+ const view=options.angle||'front34',key='shoe-loop3-almond:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
  if(snapshots.has(key)){const c=snapshots.get(key);snapshots.delete(key);snapshots.set(key,c);return c;}
  if(snapshotJobs.has(key))return snapshotJobs.get(key);
  const job=snapshotQueue.then(async()=>{
@@ -497,7 +503,7 @@ function info(){
   const mid=section((OPENING_START+OPENING_END)/2),details={binding:0,stitches:0,bow:0};
   model.traverse(o=>{if(o.name==='padded-collar-binding')details.binding++;if(o.name==='hand-stitched-topline')details.stitches++;if(o.name==='satin-loop-bow'||o.name==='outer-ankle-bow')details.bow++;});
   let ball=0;for(let z=-1.5;z<=1.5;z+=.005)ball=Math.max(ball,last(z).width);
-  quality={lengthWidthRatio:3/(2*ball),toeBoxHeight:last(.78).height,details,waistRatio:last(-.36).width/last(.72).width,toeSpring:last(1.5).base-last(.72).base,openingToeFraction:(1.5-OPENING_END)/3,openingWidthRatio:mid.hole/mid.width,quarterHeightRatio:Math.sin(mid.arc),heelCounterHeight:last(-1.44).height,outsoleThickness:.046,cameraElevation:Math.atan2(camera.position.y-.23,Math.hypot(camera.position.x,camera.position.z))*180/Math.PI,heightFraction:(bounds.top-bounds.bottom)/2,bounds,toneMapping:'Neutral',sockets:model.children.filter(o=>o.userData.sockets).map(o=>o.userData.sockets)};
+  quality={lengthWidthRatio:3/(2*ball),toeBoxHeight:last(.78).height,details,waistRatio:last(-.36).width/last(.72).width,toeSpring:last(1.5).base-last(.72).base,openingToeFraction:(1.5-OPENING_END)/3,openingWidthRatio:mid.hole/mid.width,openingLengthFraction:(OPENING_END-OPENING_START)/3,toeTipWidthRatio:last(1.23).width/ball,quarterHeightRatio:Math.sin(mid.arc),heelCounterHeight:last(-1.44).height,outsoleThickness:.046,cameraElevation:Math.atan2(camera.position.y-.23,Math.hypot(camera.position.x,camera.position.z))*180/Math.PI,heightFraction:(bounds.top-bounds.bottom)/2,bounds,toneMapping:'Neutral',sockets:model.children.filter(o=>o.userData.sockets).map(o=>o.userData.sockets)};
  }
  const anatomy=fitting?{pitch:model.userData.pitch,legs:model.userData.legs.map(l=>({thigh:l.thigh.quaternion.toArray(),calf:l.calf.quaternion.toArray(),ankle:l.foot.quaternion.toArray(),toe:l.toe.quaternion.toArray(),shoePosition:l.shoe.getWorldPosition(new THREE.Vector3()).toArray(),shoeQuaternion:l.shoe.getWorldQuaternion(new THREE.Quaternion()).toArray(),heelMeshes:l.shoe.children.filter(o=>o.name.startsWith('heel:')).map(o=>o.name)}))}:null;
  const products=model?.children.filter(o=>o.userData.sockets).map(o=>({position:o.position.toArray(),rotation:o.rotation.toArray(),heelMeshes:o.children.filter(c=>c.name.startsWith('heel:')).map(c=>c.name)}))||[];
