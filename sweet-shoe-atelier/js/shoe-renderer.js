@@ -3,19 +3,29 @@
 const {cleanDesign,defaults,option,themes,categories,t}=A;
 // Artwork metadata stays inline so the renderer also works from file://.
 const SHOE_ANCHORS={"shoe_block_cross":{"w":900,"h":491,"toe":[0.13,0.789],"back":[0.9,0.07]},"shoe_block_none":{"w":900,"h":492,"toe":[0.13,0.794],"back":[0.9,0.066]},"shoe_block_pearl":{"w":900,"h":535,"toe":[0.13,0.82],"back":[0.9,0.077]},"shoe_block_ribbon":{"w":900,"h":568,"toe":[0.13,0.838],"back":[0.9,0.076]},"shoe_block_thin":{"w":900,"h":521,"toe":[0.13,0.817],"back":[0.9,0.066]},"shoe_flat_cross":{"w":900,"h":291,"toe":[0.13,0.687],"back":[0.9,0.101]},"shoe_flat_none":{"w":900,"h":262,"toe":[0.13,0.636],"back":[0.9,0.098]},"shoe_flat_pearl":{"w":900,"h":353,"toe":[0.13,0.702],"back":[0.9,0.077]},"shoe_flat_ribbon":{"w":900,"h":465,"toe":[0.13,0.821],"back":[0.9,0.137]},"shoe_flat_thin":{"w":900,"h":344,"toe":[0.13,0.744],"back":[0.9,0.086]},"shoe_kitten_cross":{"w":900,"h":434,"toe":[0.13,0.786],"back":[0.9,0.078]},"shoe_kitten_none":{"w":900,"h":409,"toe":[0.13,0.776],"back":[0.9,0.092]},"shoe_kitten_pearl":{"w":900,"h":482,"toe":[0.13,0.792],"back":[0.9,0.079]},"shoe_kitten_ribbon":{"w":900,"h":523,"toe":[0.13,0.834],"back":[0.9,0.066]},"shoe_kitten_thin":{"w":900,"h":485,"toe":[0.13,0.816],"back":[0.9,0.087]},"shoe_wedge_cross":{"w":900,"h":432,"toe":[0.13,0.762],"back":[0.9,0.076]},"shoe_wedge_none":{"w":900,"h":452,"toe":[0.13,0.76],"back":[0.9,0.1]},"shoe_wedge_pearl":{"w":900,"h":534,"toe":[0.13,0.785],"back":[0.9,0.062]},"shoe_wedge_ribbon":{"w":900,"h":540,"toe":[0.13,0.796],"back":[0.9,0.099]},"shoe_wedge_thin":{"w":900,"h":502,"toe":[0.13,0.791],"back":[0.9,0.064]}};
-const ASSET_NAMES=[...Object.keys(SHOE_ANCHORS),'bow','pearl_drop','flower','charm_pearl','charm_crystal','charm_minibow',...['satin','velvet','glitter','mesh','lace'].map(x=>'tex_'+x),...['flower','heart','star'].map(x=>'motif_'+x),...themes.flatMap(x=>['neutral','happy','sad'].map(e=>x.asset+'_'+e)),...Object.keys(categories).map(x=>'icon_'+x),'icon_coin','icon_star','icon_heart','icon_clock','icon_gift','bg_shop','pedestal','box_closed','box_open','confetti','sparkle','logo',...['flat','block','kitten','wedge'].flatMap(h=>['legs/leg_'+h,'legs/mask_'+h])];
+const ASSET_NAMES=[...Object.keys(SHOE_ANCHORS),'bow','pearl_drop','flower','charm_pearl','charm_crystal','charm_minibow',...['satin','velvet','glitter','mesh','lace'].map(x=>'tex_'+x),...['flower','heart','star'].map(x=>'motif_'+x),...themes.flatMap(x=>['neutral','happy','sad'].map(e=>x.asset+'_'+e)),...Object.keys(categories).map(x=>'icon_'+x),'icon_coin','icon_star','icon_heart','icon_clock','icon_gift','bg_shop','pedestal','box_closed','box_open','confetti','sparkle','logo',...['flat','block','kitten','wedge'].flatMap(h=>['legs/leg_'+h,'legs/mask_'+h,'legs/calf_'+h])];
 function designKey(d){d=cleanDesign(d);return Object.keys(defaults).map(k=>d[k]).join('|');}
 function shoeLayout(d){d=cleanDesign(d);const asset='shoe_'+d.heel+'_'+d.strap,a=SHOE_ANCHORS[asset],width=820,height=a.h/a.w*width,x=70,y=550-height;return {asset,x,y,width,height,toe:[x+a.toe[0]*width,y+a.toe[1]*height],back:[x+a.back[0]*width,y+a.back[1]*height]};}
 // Markup is pure; canvases are populated only in the browser after preload.
 function shoeCanvas(d){return `<canvas class="shoe-canvas" data-design="${designKey(d)}" role="img" aria-label="${Object.keys(defaults).map(k=>option(k,cleanDesign(d)[k])[1]).join(', ')}"></canvas>`;}
 
 function createShoeRenderer(images){
-const composites=new Map();
+// Share a bounded LRU across studio and worn artwork. A worn source is ~6 MiB;
+// retaining dozens of these on a phone costs far more than rebuilding a cold design.
+const composites=new Map(),painted=new WeakMap(),cacheBudget=24*1024*1024;let cacheBytes=0;
+function cached(key){const value=composites.get(key);if(value){composites.delete(key);composites.set(key,value);}return value;}
+function remember(key,canvas){
+ const bytes=canvas.width*canvas.height*4;
+ while(composites.size&&cacheBytes+bytes>cacheBudget){const oldest=composites.keys().next().value,old=composites.get(oldest);cacheBytes-=old.width*old.height*4;composites.delete(oldest);}
+ if(bytes<=cacheBudget){composites.set(key,canvas);cacheBytes+=bytes;}return canvas;
+}
+let imageCount=images.size;
+function syncAssets(){if(imageCount!==images.size){imageCount=images.size;composites.clear();cacheBytes=0;}}
 function imageOK(name){const im=images.get(name);return im?.naturalWidth?im:null;}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function tile(name,size=150){const im=imageOK(name);if(!im)return null;const c=makeCanvas(size,size),ctx=c.getContext('2d');ctx.drawImage(im,0,0,size,size);return c;}
 function composite(d){
- const key=designKey(d);if(composites.has(key)){const cached=composites.get(key);composites.delete(key);composites.set(key,cached);return cached;}
+ d=cleanDesign(d);const key='shoe:'+designKey(d),hit=cached(key);if(hit)return hit;
  const out=makeCanvas(1000,660),ctx=out.getContext('2d'),layout=shoeLayout(d),{x,y,width:w,height:h}=layout,base=imageOK(layout.asset)||imageOK('shoe_flat_none');
  if(!base)return out;
  const body=makeCanvas(1000,660),b=body.getContext('2d'),color=option('color',d.color)[3];
@@ -36,14 +46,26 @@ function composite(d){
  function sprite(name,anchor,width){const im=imageOK(name);if(!im)return;const height=width*im.naturalHeight/im.naturalWidth;ctx.save();ctx.shadowColor='#50313b44';ctx.shadowBlur=7;ctx.shadowOffsetY=5;ctx.drawImage(im,anchor[0]-width/2,anchor[1]-height*.38,width,height);ctx.restore();}
  const decor={small:['bow',.14],big:['bow',.25],drop:['pearl_drop',.055],flower:['flower',.16]}[d.decoration];if(decor)sprite(decor[0],layout.back,w*decor[1]);
  const charm={pearl:'charm_pearl',crystal:'charm_crystal',mini:'charm_minibow'}[d.charm];if(charm)sprite(charm,layout.toe,w*(d.charm==='mini'?.11:.075));
- composites.set(key,out);if(composites.size>32)composites.delete(composites.keys().next().value);return out;
+ return remember(key,out);
+}
+// Self-contained fashion silhouette: missing/network-blocked legs must never become floating shoes.
+function fallbackWorn(d){
+ const out=makeCanvas(1200,1811),ctx=out.getContext('2d');ctx.translate(0,461);const skin=ctx.createLinearGradient(710,0,1050,0);
+ skin.addColorStop(0,'#d39b7f');skin.addColorStop(.48,'#f5d0b7');skin.addColorStop(1,'#d8a086');
+ ctx.fillStyle=skin;ctx.beginPath();ctx.moveTo(720,-461);ctx.lineTo(1020,-461);ctx.bezierCurveTo(1040,350,940,750,1005,1000);ctx.bezierCurveTo(1100,1090,1080,1180,960,1200);ctx.lineTo(180,1215);ctx.quadraticCurveTo(100,1160,220,1125);ctx.bezierCurveTo(540,1090,790,985,790,830);ctx.bezierCurveTo(790,600,700,310,720,0);ctx.fill();
+ // Draw the designed shoe on the complete fallback foot, with its opening at the ankle.
+ const source=composite({...d,strap:'none'}),layout=shoeLayout({...d,strap:'none'});
+ ctx.drawImage(source,layout.x,layout.y,layout.width,layout.height,90,1040,1030,260);
+ return out;
 }
 // The offline mask contains only neutral satin: skin and natural soles are untouched.
 function wornComposite(d){
+ syncAssets();d=cleanDesign(d);const key='worn:'+designKey(d),hit=cached(key);if(hit)return hit;
  const leg=imageOK('legs/leg_'+d.heel),mask=imageOK('legs/mask_'+d.heel);
- if(!leg||!mask)return composite(d);
- const stem=600,out=makeCanvas(leg.naturalWidth,leg.naturalHeight+stem),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
- ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,stem);ctx.drawImage(leg,0,stem);b.drawImage(leg,0,stem);
+ if(!leg)return fallbackWorn(d);
+ if(!mask){const out=makeCanvas(leg.naturalWidth,leg.naturalHeight+1200),ctx=out.getContext('2d');const calf=imageOK('legs/calf_'+d.heel);if(calf)ctx.drawImage(calf,0,0);else ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,1200);ctx.drawImage(leg,0,1200);return remember(key,out);}
+ const stem=1200,out=makeCanvas(leg.naturalWidth,leg.naturalHeight+stem),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
+ const calf=imageOK('legs/calf_'+d.heel);if(calf)ctx.drawImage(calf,0,0);else ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,stem);ctx.drawImage(leg,0,stem);b.drawImage(leg,0,stem);
  b.globalCompositeOperation='multiply';b.fillStyle=option('color',d.color)[3];b.fillRect(0,0,out.width,out.height);
  b.globalCompositeOperation='screen';b.globalAlpha=d.color==='black'?.08:.13;b.drawImage(leg,0,stem);b.globalAlpha=1;
  const texture=tile('tex_'+d.material,180);
@@ -68,9 +90,19 @@ function wornComposite(d){
  if(d.strap==='ribbon')sprite('bow',[ax+70,ay],165);
  const decor={small:['bow',140],big:['bow',240],drop:['pearl_drop',65],flower:['flower',170]}[d.decoration];if(decor)sprite(decor[0],anchors.back,decor[1]);
  const charm={pearl:'charm_pearl',crystal:'charm_crystal',mini:'charm_minibow'}[d.charm];if(charm)sprite(charm,anchors.toe,d.charm==='mini'?120:85);
- return out;
+ return remember(key,out);
 }
-function hydrateCanvases(root=document){root.querySelectorAll('canvas[data-design]').forEach(c=>{const parts=c.dataset.design.split('|'),d=Object.fromEntries(Object.keys(defaults).map((k,i)=>[k,parts[i]])),rect=c.getBoundingClientRect(),ratio=Math.min(2,window.devicePixelRatio||1);if(!rect.width)return;const source=c.hasAttribute('data-worn')?wornComposite(d):composite(d),w=Math.max(1,Math.round(rect.width*ratio)),h=Math.round(w*source.height/source.width);c.width=w;c.height=h;c.getContext('2d').drawImage(source,0,0,w,h);});}
+function hydrateCanvases(root=document){root.querySelectorAll('canvas[data-design]').forEach(c=>{
+ // Layout width excludes pose/zoom transforms. Resizing a rotated shoe must not
+ // inflate its backing store or repeatedly soften the same artwork.
+ let width=c.clientWidth;const ratio=Math.min(2,window.devicePixelRatio||1);if(!width||!c.getClientRects().length)return;
+ let w=Math.max(1,Math.round(width*ratio));const key=(c.hasAttribute('data-worn')?'worn:':'shoe:')+c.dataset.design,previous=painted.get(c);
+ if(previous?.assetCount===images.size&&previous?.key===key&&previous.width===w&&c.width===w&&c.height===previous.height)return;
+ const parts=c.dataset.design.split('|'),d=Object.fromEntries(Object.keys(defaults).map((k,i)=>[k,parts[i]])),source=c.hasAttribute('data-worn')?wornComposite(d):composite(d);
+ let h=Math.round(w*source.height/source.width);
+ if(c.hasAttribute('data-worn')){c.parentElement.style.setProperty('--foot-aspect',source.width/source.height);width=c.clientWidth;w=Math.max(1,Math.round(width*ratio));h=Math.round(w*source.height/source.width);}
+ c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(source,0,0,w,h);painted.set(c,{key,width:w,height:h,assetCount:images.size});
+});}
 
 return {hydrateCanvases,wornComposite,composite};
 }
