@@ -597,3 +597,13 @@ body:not(.dialogue-active) .atelier-mentor{visibility:visible}.dialogue-active .
 .runway-scene[data-showcase-scene=car][data-runway-angle] .runway-angle-art{mask-image:linear-gradient(transparent,#000 16px);animation:none}
 .runway-modal .runway-scene[data-runway-angle=side] .front-foot{left:calc(var(--fit-left) - var(--fit-height)*.03);bottom:calc(var(--fit-bottom) + 3px)}
 .runway-modal .runway-scene[data-runway-angle=side] .back-foot{left:calc(var(--fit-left) - var(--fit-height)*.48);bottom:calc(var(--fit-bottom) + var(--fit-height)*.08)}
+.runway-scene[data-showcase-scene=car]:before{inset:auto 0 0;height:calc(var(--dock-clearance,150px) + 20px);background:linear-gradient(transparent,#c8a18b 65%,#c8a18b);pointer-events:none}
+.audio-credits{font:10px/1.5 sans-serif;color:#795c60;margin-top:16px;max-width:440px}
+/* Soft chain wells retain the cotton silhouette without bleaching the leather. */
+.merge-cell.item[data-chain=fab]{background-color:#edc4d3a6;border-color:#d6a0b580}
+.merge-cell.item[data-chain=lea]{background-color:#eedcc1c7;border-color:#bf936e80}
+.merge-cell.item[data-chain=spk]{border-color:#b8a0d180}
+.merge-cell.item[data-chain=rib]{border-color:#d69d8980}
+.merge-art.item.lea img{filter:brightness(1.07) saturate(1.08) contrast(1.13) drop-shadow(0 1px 1px #78451e70)}
+.merge-art.item.fab img{filter:brightness(1.02) saturate(1.06) contrast(1.06) drop-shadow(0 1px 1px #9c647a70)}
+.merge-cell.item .item-tier{color:#66464f;background:#fffaf4;border-color:#bc929d;font-size:10px}
