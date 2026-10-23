@@ -722,7 +722,7 @@ body:not(.dialogue-active) .atelier-mentor{visibility:visible}.dialogue-active .
 
 /* Supervisor 19:35 — Mimi's mint-and-candy atelier. Shared colour tokens keep
    every older responsive layout on the same surface and action palette. */
-:root{--ink:#284d46;--muted:#546d65;--rose:#c62d66;--rose-dark:#a12f59;--line:#c5e4d7;--paper:#fffaf2;--green:#24664f;--mint:#bfeedd;--mint-deep:#8fd9c0;--candy:#ff9fc0;--lemon:#fff0a8;--shadow:0 8px 30px #32765e18;--action:linear-gradient(135deg,#df2768,#d83c42)}
+:root{--ink:#284d46;--muted:#546d65;--rose:#c62d66;--rose-dark:#a12f59;--line:#c5e4d7;--paper:#fffaf2;--green:#24664f;--mint:#bfeedd;--mint-deep:#8fd9c0;--candy:#ff9fc0;--lemon:#fff0a8;--shadow:0 8px 30px #32765e18;--action:linear-gradient(135deg,#ff7eb3,#ff9e8a)}
 body:before{background:linear-gradient(#f5fffac9,#fffaf26b 60%,#dff8e8c9)}
 button:focus-visible{outline-color:#236d57}button:hover{box-shadow:0 4px 14px #33785e26}
 header{background:linear-gradient(115deg,#bfeeddF5,#e5fbf1f5);border:1px solid #ffffffc9;box-shadow:0 4px 20px #32765e1a;border-radius:20px}
@@ -748,7 +748,7 @@ header #nav button.active,.primary,.collection-detail .primary,.vn-name{backgrou
 .merge-intro{background:#fffffff0;box-shadow:0 4px 24px #32765e12;border-radius:22px}
 .atelier-order{background:#eaf8f0;border-radius:20px;box-shadow:inset 0 1px 0 #fff}
 .atelier-order.ready{background:linear-gradient(135deg,#f9fff8,#d9f4e6);box-shadow:inset 0 0 0 1px #a3d9c0}
-.atelier-order.ready .order-deliver{background:linear-gradient(135deg,#328365,#23684e);border-color:#23684e;box-shadow:inset 0 1px 0 #83cbb0,0 3px 0 #1e523e;border-radius:24px;color:#fff}
+.atelier-order.ready .order-deliver{background:var(--action);border-color:#c62d66;box-shadow:inset 0 1px 0 #ffbed6,0 3px 0 #ac2850,0 6px 14px #ce49752b;border-radius:24px;color:#fff}
 .order-deliver:disabled{background:#e1efe8;color:#586e63;border-color:#c8ded2;border-radius:24px}
 .request-check,.atelier-order.ready .request-check{background:#24664f;color:#fff;border-color:#fff}
 .order-customer>img{object-fit:cover;object-position:50% 18%;background:#fffaf2;border:1px solid #b7dfcd;border-radius:50%;flex-shrink:0;filter:none}
@@ -795,5 +795,71 @@ header #nav button.active,.primary,.collection-detail .primary,.vn-name{backgrou
 @media(min-height:561px) and (orientation:landscape){.order-customer>img{width:32px;height:32px}.atelier-order{grid-template-rows:32px 1fr}}
 @media(max-height:560px) and (orientation:landscape){.atelier-order{border-radius:16px}.boutique-keepsake{height:44px}.boutique-decor-strip .boutique-object{max-height:40px}.boutique-decor-strip{padding:5px;gap:4px;margin-top:5px}}
 @media(orientation:portrait){.order-customer>img{width:24px;height:24px}.atelier-order{border-radius:16px}.boutique-keepsake{height:40px}.boutique-decor-strip{padding:5px;gap:4px;margin-top:6px}.boutique-decor-strip .boutique-object{max-height:36px}}
-/* Portrait reserves the lower-left guide lane; keep every board row visible. */
-@media(orientation:portrait){.mentor-area .atelier-mentor{left:4px;bottom:0;width:116px;height:124px}.mentor-area .atelier-mentor img{max-width:116px;object-fit:contain;animation:none}}
+/* Portrait uses a readable portrait in the reserved guide lane. The full-body
+   source is cropped at the waist, leaving all nine material rows unobstructed. */
+@media(orientation:portrait){
+ .mentor-area .atelier-mentor{left:0;bottom:0;width:128px;height:112px;overflow:hidden;border-radius:48% 48% 18px 18px;background:radial-gradient(ellipse at 50% 70%,#bfeeddb3,transparent 72%);filter:none}
+ .mentor-area .atelier-mentor img{width:auto;max-width:none;height:310px;top:0;bottom:auto;left:50%;translate:-50% 0;object-fit:contain;animation:none}
+}
+
+/* Supervisor 19:47 — finish the shared fresh palette, including modal chrome. */
+:root{--product-surface:radial-gradient(ellipse at 42% 24%,#ffffff,#f4fff9 55%,#e9f7f3 80%,#f5efff);--floor-wash:linear-gradient(125deg,#e9fff695,#fff8fc55 58%,#eeeaff65)}
+.chain-piece.locked,.book-piece.locked{background:#eaf9f2;border-color:#bfe5d5}
+.chain-piece.locked .merge-art,.book-piece.locked .merge-art{filter:url('#mint-silhouette');opacity:1}
+.chain-piece small,.book-piece>small,.book-piece>p{color:var(--muted)}
+.chain-piece.current{background:#ffedf4;border-color:#ee9dbb}
+.book-tabs,.book-close{background:#f5fff9}.book-close{box-shadow:0 0 15px 8px #f5fff9}
+.book-progress{background:#dcefe5}.book-progress i{background:linear-gradient(90deg,#8fd9c0,#ff9fc0)}
+.book-check{color:#32775f}.book-dismiss,.modal-dismiss{background:#f3fff9;border-color:#b6decd;color:var(--ink)}
+.modal.runway-modal,.runway-backdrop{background:#e5f8ef}
+.modal.runway-modal .runway-heading{background:linear-gradient(#edfff8f5,#e0f7edeb);border-color:#fff;box-shadow:0 2px 18px #32765e14}
+.runway-modal .runway-heading h2{color:var(--ink)}.runway-modal .runway-heading>p{color:var(--muted)}
+.runway-dock{background:linear-gradient(135deg,#ffffffed,#e8fbf1e8);border-color:#fff;box-shadow:0 8px 32px #32765e25}
+.runway-dock .showcase-chip{background:#f7fffaab;color:var(--ink);border-radius:14px}
+.runway-dock .showcase-chip.selected{background:#fff0f6;border-color:#e85b90;box-shadow:0 0 0 1px #ffb6d14d}
+.showcase-chip small,.showcase-chip.selected small{color:#426c5b}
+.runway-dock .runway-angles,.runway-dock .runway-controls,.studio-angles{background:#e2f5eddd;border:1px solid #c5e4d7}
+.runway-segments .primary,.studio-angles button[aria-pressed=true]{background:var(--action);border-color:#c62d66;color:#fff;box-shadow:inset 0 1px #ffbfd4,0 2px 6px #ce49752b}
+.runway-modal .runway-return,.runway-modal>.modal-dismiss{background:#f6ffface;color:var(--ink)}
+.runway-scene{background-image:var(--floor-wash),var(--scene-image)}
+.runway-scene .runway-pair,.runway-scene[data-showcase-scene] .runway-pair,.runway-scene[data-showcase-scene] .runway-angle-art{filter:none}
+.stage.product-stage{background-image:var(--floor-wash),url('assets/scenes/close_salon.webp')}
+.collection-stage{background-image:var(--floor-wash),url('assets/scenes/close_salon.webp')}
+#studioScreen .stage.shoe3d-stage,.collection-stage.has-shoe3d-snapshot,.runway-product-detail{background:var(--product-surface)}
+.shoe3d-host:after{color:var(--muted)}
+#loading{background:radial-gradient(ellipse at 50% 35%,#fff,#edfff6a8 60%,#ccefe1bf),url('assets/ui/loading_bg.webp') center/cover}
+#loading:before{background:linear-gradient(135deg,#edfff622,#f8eaff22)}
+.load-track{border-color:#a6d9c4;background:#effbf5;box-shadow:0 3px 12px #32765e18}
+.load-track i{background:linear-gradient(90deg,#8fd9c0,#ff9fc0);box-shadow:inset 0 1px #fff}
+#loading>img,.title-logo,.modal-hero[src*="logo_v4"]{filter:drop-shadow(0 3px 0 #fff) drop-shadow(0 8px 18px #ec91b52b)}
+.title-card{background:linear-gradient(145deg,#ffffffed,#effcf5ee);border-color:#bfe5d6}
+.stats strong,.commission-reward{color:var(--ink)}.stats>div{border-color:#c5e4d7}
+.settings-row,.sound-settings,.credit-line{border-color:#c5e4d7;color:var(--muted)}
+
+/* Toasts and dimmers belong to the same mint surface family. */
+.backdrop{background:#214c456b}
+.backdrop.title-backdrop{background:linear-gradient(#f0fff520,#35876730),url('assets/bg_shop.webp') center/cover no-repeat}
+.backdrop.runway-backdrop,.backdrop:has(>.boutique-modal),.backdrop:has(>.collection-modal){background:#e5f8ef}
+#toast{background:#effff8;color:#284d46;border:1px solid #9bd8c0;box-shadow:0 6px 24px #32765e30}
+#studioScreen .work-area{background:#f7fffacc}
+#studioScreen .customer,#studioScreen .custom{border-color:#c5e4d7}
+.order-customer{border-color:#c5e4d7}.request-name{color:var(--muted)}
+
+/* Rigged mint fitting: painted anatomy remains mounted until WebGL succeeds. */
+.runway-scene>.runway-fitting3d{position:absolute;z-index:3;inset:0;width:100%;height:100%;pointer-events:auto;border-radius:0;background:transparent;overflow:hidden;opacity:1;filter:none;backdrop-filter:none}
+.runway-fitting3d:empty{visibility:hidden}
+.runway-fitting3d canvas{width:100%;height:100%;display:block;touch-action:none;outline-offset:-5px}
+.has-fitting3d .runway-angle-art,.has-fitting3d .runway-pair,.has-fitting3d>.product-floor-shadow,.has-fitting3d>.runway-contact{visibility:hidden}
+.show-product-detail .runway-fitting3d{visibility:hidden}
+.runway-fitting3d.shoe3d-host::after{bottom:8px;color:#477a69;background:#f7fffae0;border-radius:20px;padding:5px 14px}
+.runway-fitting3d.shoe3d-host::after{top:auto;bottom:8px}
+.runway-scene.has-fitting3d .runway-angle-art,.runway-scene.has-fitting3d .runway-pair,.runway-scene.has-fitting3d>.product-floor-shadow,.runway-scene.has-fitting3d>.runway-contact{display:none!important}
+.runway-fitting3d canvas.shoe3d-canvas{position:static;max-width:none;max-height:none;opacity:1;mask-image:none;transform:none;object-fit:fill}
+.runway-scene.has-fitting3d .natural-reflection,.runway-scene.has-fitting3d .runway-light,.runway-scene.has-fitting3d .pose-snapshot{display:none!important}
+.runway-scene.has-fitting3d:before{display:none}
+.runway-scene.has-fitting3d{background-image:var(--scene-image);background-blend-mode:normal}
+.runway-fitting3d.shoe3d-host::after{bottom:calc(var(--dock-clearance,190px) + 10px);background:#f5fff9bd}
+
+/* Candy actions: a soft peach finish shared by navigation and every primary. */
+header #nav button.active,.primary,.collection-detail .primary,.atelier-order.ready .order-deliver,.runway-segments .primary,.studio-angles button[aria-pressed=true]{border-color:#f79bb6;box-shadow:inset 0 1px 0 #ffe4ef,0 3px 0 #e77da0,0 7px 16px #f58ab836;text-shadow:0 1px 2px #aa3e6899;font-weight:700}
+.primary:hover:not(:disabled),.atelier-order.ready .order-deliver:hover{filter:brightness(1.035);box-shadow:inset 0 1px 0 #fff0f5,0 3px 0 #e77da0,0 9px 20px #f58ab84a}
