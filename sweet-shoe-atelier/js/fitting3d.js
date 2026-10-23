@@ -4,14 +4,16 @@
 (function(A){
 A.Fitting3D={async load(){return null;},build({THREE:T,model,own}){
  const shoes=model.children.filter(o=>o.userData.sockets);
- const mint=own(new T.MeshPhysicalMaterial({color:'#d6f3e7',roughness:.42,clearcoat:.22}));
- const porcelain=own(new T.MeshPhysicalMaterial({color:'#fff8f5',roughness:.48,clearcoat:.15}));
- const rim=own(new T.MeshStandardMaterial({color:'#b4dfcc',roughness:.55,metalness:.12}));
+ const mint=own(new T.MeshPhysicalMaterial({color:'#c9eee0',roughness:.46,clearcoat:.22}));
+ const porcelain=own(new T.MeshPhysicalMaterial({color:'#f9fffc',roughness:.48,clearcoat:.15}));
+ const rim=own(new T.MeshStandardMaterial({color:'#f5b7d0',roughness:.5,metalness:.06}));
  const pedestal=new T.Group();pedestal.name='porcelain-product-pedestal';model.add(pedestal);
  for(const [radius,height,y,material] of [[2.28,.18,-.12,mint],[2.20,.055,-.003,porcelain],[2.24,.025,-.065,rim]]){
   const disc=new T.Mesh(own(new T.CylinderGeometry(radius,radius+.018,height,128)),material);
   disc.position.y=y;disc.receiveShadow=true;pedestal.add(disc);
  }
+ const piping=new T.Mesh(own(new T.TorusGeometry(2.235,.009,8,128)),rim);
+ piping.rotation.x=Math.PI/2;piping.position.y=-.016;pedestal.add(piping);
  // The studio's sole contact textures remain attached above the porcelain.
  model.userData.fitting=true;model.userData.presentation='product';
  model.userData.legs=[];model.userData.pitch=0;
