@@ -85,3 +85,6 @@ Existing filenames now carry the refreshed mint atelier/shop/fitting backgrounds
 Supervisor 22:52: visible calves are now continuous code-authored Hermite profiles following the supplied CC0 rig, avoiding overlapping source ankle rings and unused subdivision/bake work. Ribbons have closed thin strip geometry; crystal jewellery uses authored table/crown/girdle/pavilion facets. Close-up uses the same local live renderer; no new image, model, CDN or font asset is added.
 
 Supervisor 00:14: live 3D and Collection now use a code-authored cream/mint pedestal with the existing Shoe3D pair. No body model is loaded at runtime; the licensed Quaternius files remain available in source/runtime packaging for now. No external asset, CDN or font dependency was added. The new VRoid candidate under dev/ is source-only and excluded from the ZIP.
+
+
+SHOE LOOP 2: upper normals/tangents and terminal dome are generated analytically; gathered silk loops/knot/tails remain thin procedural geometry with no extra bitmap/model. Studio clearance follows actual controls; snapshot camera fitting excludes live UI offsets. All assets remain local.
