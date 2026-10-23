@@ -11,5 +11,29 @@
  function sanitize(value){const owned=['salon',...new Set((Array.isArray(value?.owned)?value.owned:[]).filter(id=>id!=='salon'&&find(id)))];return {version:1,owned,selected:owned.includes(value?.selected)?value.selected:'salon'};}
  function choose(state,id,artwork){const scene=find(id);if(!scene)return {ok:false,reason:'scene'};const room=state.showcase||(state.showcase=sanitize());const unlocked=!room.owned.includes(id);if(unlocked){if(!Number.isFinite(state.coins)||state.coins<scene.price)return {ok:false,reason:'coins'};state.coins-=scene.price;room.owned.push(id);}room.selected=id;if(artwork)artwork.scene=id;return {ok:true,unlocked,scene};}
  function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.image}${s.id==='salon'?'':'_thumb'}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+s.price}</small></button>`;}).join('')}</div>`;}
- A.Showcase={scenes,find,sanitize,choose,picker};
+ // Coordinates are authored against the local background, so cover-cropping
+ // changes the room and the fitted pair together at every aspect ratio.
+ const framing={
+  salon:{size:[1536,1024],position:[.5,.65],feet:[.55,.87],height:770},
+  mirror_lounge:{size:[1672,941],position:[.30,.20],portrait:[.24,.5],feet:[.59,.58],height:470},
+  car:{size:[1536,1024],position:[.5,.72],feet:[.60,.87],height:620},
+  vanity:{size:[1536,1024],position:[.5,.77],feet:[.57,.88],height:650},
+  balcony:{size:[1672,940],position:[.5,.76],feet:[.53,.87],height:690}
+ };
+ function frame(stage){
+  if(!stage)return;const c=framing[stage.dataset.showcaseScene]||framing.salon;
+  const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
+  const [iw,ih]=c.size,p=[...(w<h&&c.portrait?c.portrait:c.position)],scale=Math.max(w/iw,h/ih);
+  // Shallow landscape stages pan down with the room instead of cutting off toes.
+  const floor=c.feet[1]*ih*scale+(h-ih*scale)*p[1];
+  if(floor>h*.88&&h<ih*scale)p[1]=Math.max(0,Math.min(1,(h*.84-c.feet[1]*ih*scale)/(h-ih*scale)));
+  const ox=(w-iw*scale)*p[0],oy=(h-ih*scale)*p[1];
+  stage.style.backgroundPosition=`${p[0]*100}% ${p[1]*100}%`;
+  const zoom=stage.classList.contains('zoomed')?1.14:1;
+  for(const [key,value] of Object.entries({
+   'fit-height':stage.dataset.showcaseScene==='car'?Math.min(c.height*scale*zoom,h*1.18):c.height*scale*zoom,'fit-left':c.feet[0]*iw*scale+ox,'fit-bottom':h-(c.feet[1]*ih*scale+oy),
+   'mirror-left':168*scale+ox,'mirror-top':oy,'mirror-width':330*scale,'mirror-height':470*scale
+  }))stage.style.setProperty('--'+key,value+'px');
+ }
+ A.Showcase={scenes,find,sanitize,choose,picker,frame,framing};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
