@@ -6,6 +6,8 @@ const SHOE_ANCHORS={"shoe_block_cross":{"w":900,"h":491,"toe":[0.13,0.789],"back
 const ASSET_NAMES=[...Object.keys(SHOE_ANCHORS),'bow','pearl_drop','flower','charm_pearl','charm_crystal','charm_minibow',...['satin','velvet','glitter','mesh','lace'].map(x=>'tex_'+x),...['flower','heart','star'].map(x=>'motif_'+x),...themes.flatMap(x=>['neutral','happy','sad'].map(e=>x.asset+'_'+e)),...Object.keys(categories).map(x=>'icon_'+x),'icon_coin','icon_star','icon_heart','icon_clock','icon_gift','bg_shop','pedestal','box_closed','box_open','confetti','sparkle','logo',...['flat','block','kitten','wedge'].flatMap(h=>['legs/leg_'+h,'legs/mask_'+h,'legs/calf_'+h])];
 const TONE_NAMES=[...Object.keys(SHOE_ANCHORS),...['flat','block','kitten','wedge'].flatMap(h=>['leg_'+h,h+'_front34_shade',h+'_top_shade'])];
 ASSET_NAMES.push(...TONE_NAMES.flatMap(n=>['tones/'+n+'_tone','tones/'+n+'_gleam']),...['flat','block','kitten','wedge'].flatMap(h=>['front34','top'].flatMap(v=>['angles/'+h+'_'+v+'_legs','angles/'+h+'_'+v+'_shade'])));
+ASSET_NAMES.push(...['flat','block','kitten','wedge'].flatMap(h=>['relaxed','crossed','step'].flatMap(p=>['poses/'+h+'_'+p+'_legs','poses/'+h+'_'+p+'_shade','tones/'+h+'_'+p+'_shade_tone','tones/'+h+'_'+p+'_shade_gleam'])));
+A.POSE_ANCHORS={"block_crossed":[[0.375,0.7917771883289124],[0.66875,0.7718832891246684]],"block_relaxed":[[0.78125,0.7562326869806094],[0.40208333333333335,0.8213296398891967]],"block_step":[[0.7916666666666666,0.8512747875354107],[0.24375,0.7039660056657224]],"flat_crossed":[[0.7208333333333333,0.8356545961002786],[0.41041666666666665,0.8245125348189415]],"flat_relaxed":[[0.7708333333333334,0.7569444444444444],[0.425,0.8555555555555555]],"flat_step":[[0.7875,0.8456284153005464],[0.27291666666666664,0.6721311475409836]],"kitten_crossed":[[0.4708333333333333,0.7746835443037975],[0.76875,0.779746835443038]],"kitten_relaxed":[[0.7604166666666666,0.7702349869451697],[0.32083333333333336,0.839425587467363]],"kitten_step":[[0.8041666666666667,0.8218232044198895],[0.23125,0.6850828729281768]],"wedge_crossed":[[0.46458333333333335,0.8027777777777778],[0.7395833333333334,0.7708333333333334]],"wedge_relaxed":[[0.6375,0.7395287958115183],[0.475,0.8232984293193717]],"wedge_step":[[0.8166666666666667,0.8457142857142858],[0.20208333333333334,0.7257142857142858]]};
 function designKey(d){d=cleanDesign(d);return Object.keys(defaults).map(k=>d[k]).join('|');}
 function shoeLayout(d){d=cleanDesign(d);const asset='shoe_'+d.heel+'_'+d.strap,a=SHOE_ANCHORS[asset],width=820,height=a.h/a.w*width,x=70,y=550-height;return {asset,x,y,width,height,toe:[x+a.toe[0]*width,y+a.toe[1]*height],back:[x+a.back[0]*width,y+a.back[1]*height]};}
 // Markup is pure; canvases are populated only in the browser after preload.
@@ -37,8 +39,22 @@ function luminous(ctx,name,color,x,y,w,h){
  ctx.globalCompositeOperation='source-over';return true;
 }
 function finishFabric(b,d,w,h){
- const texture=tile('tex_'+d.material,d.material==='glitter'?120:100);
+ // Texture scale is tied to source width so fabrics remain legible on a fitted pair.
+ const unit=Math.max(12,w/38), texture=tile('tex_'+d.material,Math.round(unit*3));
  if(texture){b.globalCompositeOperation=d.material==='glitter'?'screen':'soft-light';b.globalAlpha={satin:.09,velvet:.23,glitter:.24,mesh:.17,lace:.25}[d.material];b.fillStyle=b.createPattern(texture,'repeat');b.fillRect(0,0,w,h);b.globalAlpha=1;}
+ b.save();b.globalCompositeOperation='source-atop';
+ if(d.material==='satin'){
+  const sheen=b.createLinearGradient(0,h*.45,w,h*.9);sheen.addColorStop(0,'#ffffff00');sheen.addColorStop(.38,'#ffffff00');sheen.addColorStop(.47,'#ffffffa0');sheen.addColorStop(.53,'#ffffff12');sheen.addColorStop(.64,'#ffffff00');b.fillStyle=sheen;b.fillRect(0,0,w,h);
+ }else if(d.material==='velvet'){
+  b.fillStyle='#492239';b.globalAlpha=.19;b.fillRect(0,0,w,h);b.globalAlpha=.23;b.fillStyle='#fff1dd';b.fillRect(0,h*.61,w,h*.018);
+ }else{
+  const pattern=makeCanvas(Math.round(unit*2),Math.round(unit*2)),p=pattern.getContext('2d'),u=pattern.width;
+  if(d.material==='mesh'){p.fillStyle='#482e4766';for(const [x,y] of [[.25,.25],[.75,.75]]){p.beginPath();p.ellipse(u*x,u*y,u*.075,u*.11,-.3,0,Math.PI*2);p.fill();}p.strokeStyle='#fff7ed88';p.lineWidth=1;p.strokeRect(0,0,u,u);}
+  if(d.material==='lace'){p.strokeStyle='#fffced';p.lineWidth=Math.max(1,u*.035);for(const [x,y] of [[.25,.25],[.75,.75]]){for(let n=0;n<5;n++){const a=n*Math.PI*2/5;p.beginPath();p.ellipse(u*x+Math.cos(a)*u*.14,u*y+Math.sin(a)*u*.14,u*.13,u*.085,a,0,Math.PI*2);p.stroke();}p.beginPath();p.arc(u*x,u*y,u*.035,0,Math.PI*2);p.stroke();}p.strokeStyle='#967d9c77';p.strokeRect(0,0,u,u);}
+  if(d.material==='glitter'){for(let i=0;i<16;i++){const x=((i*37)%97)/97*u,y=((i*61)%89)/89*u;p.fillStyle=i%3?'#fffbeee0':'#dca362b0';p.beginPath();p.arc(x,y,u*(i%4===0?.045:.022),0,Math.PI*2);p.fill();}p.strokeStyle='#fff';p.lineWidth=1.8;p.beginPath();p.moveTo(u*.67,u*.1);p.lineTo(u*.67,u*.35);p.moveTo(u*.55,u*.225);p.lineTo(u*.79,u*.225);p.stroke();}
+  b.globalAlpha=1;b.fillStyle=b.createPattern(pattern,'repeat');b.fillRect(0,0,w,h);
+ }
+ b.restore();
  if(d.pattern!=='none'){
   const motif=makeCanvas(100,100),m=motif.getContext('2d'),im=imageOK('motif_'+{flowers:'flower',hearts:'heart',stars:'star'}[d.pattern]);
   if(d.pattern==='dots'){m.fillStyle='#fff9e9';m.beginPath();m.arc(25,25,5,0,Math.PI*2);m.arc(75,75,5,0,Math.PI*2);m.fill();}else if(im)m.drawImage(im,22,22,36,36);
@@ -90,14 +106,14 @@ function wornComposite(d){
  for(const point of Object.values(anchors))point[1]+=stem;
  const [ax,ay]=anchors.ankle;
  if(d.strap!=='none'){
-  ctx.save();ctx.strokeStyle=option('color',d.color)[3];ctx.lineWidth=22;ctx.lineCap='round';ctx.shadowColor='#68413455';ctx.shadowBlur=5;
-  const strap=(y,tilt=0)=>{ctx.beginPath();ctx.moveTo(ax-120,y-tilt);ctx.quadraticCurveTo(ax,y+35,ax+95,y+tilt);ctx.stroke();};
+  const layer=makeCanvas(out.width,out.height),strapCtx=layer.getContext('2d');strapCtx.save();strapCtx.strokeStyle=option('color',d.color)[3];strapCtx.lineWidth=18;strapCtx.lineCap='round';strapCtx.shadowColor='#68413455';strapCtx.shadowBlur=5;
+  const strap=(y,tilt=0)=>{strapCtx.beginPath();strapCtx.moveTo(ax-92,y-tilt);strapCtx.quadraticCurveTo(ax,y+35,ax+72,y+tilt);strapCtx.stroke();};
   if(d.strap==='cross'){strap(ay-8,35);strap(ay+12,-35);}else strap(ay);
-  if(d.strap==='pearl'){ctx.shadowBlur=2;for(let i=0;i<11;i++){ctx.fillStyle=i%2?'#e6dac5':'#fff9eb';ctx.beginPath();ctx.arc(ax-112+i*20,ay+12+Math.sin(i/10*Math.PI)*13,11,0,Math.PI*2);ctx.fill();}}
-  ctx.restore();
+  if(d.strap==='pearl'){strapCtx.shadowBlur=2;for(let i=0;i<11;i++){strapCtx.fillStyle=i%2?'#e6dac5':'#fff9eb';strapCtx.beginPath();strapCtx.arc(ax-112+i*20,ay+12+Math.sin(i/10*Math.PI)*13,11,0,Math.PI*2);strapCtx.fill();}}
+  strapCtx.restore();strapCtx.globalCompositeOperation='destination-in';strapCtx.drawImage(leg,0,stem);ctx.drawImage(layer,0,0);
  }
  function sprite(id,point,width){const im=imageOK(id);if(!im)return;ctx.save();ctx.shadowColor='#63403744';ctx.shadowBlur=6;ctx.shadowOffsetY=4;ctx.drawImage(im,point[0]-width/2,point[1]-width*.3,width,width*im.naturalHeight/im.naturalWidth);ctx.restore();}
- if(d.strap==='ribbon')sprite('bow',[ax+70,ay],165);
+ if(d.strap==='ribbon')sprite('bow',[ax+56,ay],130);
  const decor={small:['bow',140],big:['bow',240],drop:['pearl_drop',65],flower:['flower',170]}[d.decoration];if(decor)sprite(decor[0],anchors.back,decor[1]);
  const charm={pearl:'charm_pearl',crystal:'charm_crystal',mini:'charm_minibow'}[d.charm];if(charm)sprite(charm,anchors.toe,d.charm==='mini'?120:85);
  return remember(key,out);
@@ -105,21 +121,21 @@ function wornComposite(d){
 // Extra-angle sources already contain the pair, with matching painted skin.
 function angleComposite(d,angle){
  syncAssets();d=cleanDesign(d);const key='angle:'+angle+':'+designKey(d),hit=cached(key);if(hit)return hit;
- const name=d.heel+'_'+angle,legs=imageOK('angles/'+name+'_legs'),shade=imageOK('angles/'+name+'_shade');
+ const natural=['relaxed','crossed','step'].includes(angle),folder=natural?'poses/':'angles/',name=d.heel+'_'+angle,legs=imageOK(folder+name+'_legs'),shade=imageOK(folder+name+'_shade');
  if(!legs||!shade)return wornComposite(d);
  const out=makeCanvas(legs.naturalWidth,legs.naturalHeight),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
- ctx.drawImage(legs,0,0);luminous(b,name+'_shade',option('color',d.color)[3],0,0,out.width,out.height);finishFabric(b,d,out.width,out.height);
+ ctx.drawImage(legs,0,0);if(!luminous(b,name+'_shade',option('color',d.color)[3],0,0,out.width,out.height)){b.drawImage(shade,0,0);b.globalCompositeOperation='source-in';b.fillStyle=option('color',d.color)[3];b.fillRect(0,0,out.width,out.height);b.globalCompositeOperation='source-over';}finishFabric(b,d,out.width,out.height);
  b.globalCompositeOperation='destination-in';b.drawImage(shade,0,0);ctx.drawImage(body,0,0);
- const anchors={flat:{front34:[[.23,.78],[.70,.82]],top:[[.38,.78],[.68,.78]]},block:{front34:[[.23,.75],[.70,.80]],top:[[.35,.78],[.66,.78]]},kitten:{front34:[[.23,.76],[.70,.80]],top:[[.40,.78],[.69,.78]]},wedge:{front34:[[.26,.75],[.70,.80]],top:[[.41,.79],[.72,.79]]}}[d.heel][angle];
+ const anchors=natural?(A.POSE_ANCHORS[name]||[[.28,.82],[.7,.82]]):{flat:{front34:[[.23,.78],[.70,.82]],top:[[.38,.78],[.68,.78]]},block:{front34:[[.23,.75],[.70,.80]],top:[[.35,.78],[.66,.78]]},kitten:{front34:[[.23,.76],[.70,.80]],top:[[.40,.78],[.69,.78]]},wedge:{front34:[[.26,.75],[.70,.80]],top:[[.41,.79],[.72,.79]]}}[d.heel][angle];
  function sprite(id,x,y,size){const im=imageOK(id);if(!im)return;const w=out.width*size;ctx.save();ctx.shadowColor='#593d422d';ctx.shadowBlur=4;ctx.drawImage(im,x-w/2,y-w*.3,w,w*im.naturalHeight/im.naturalWidth);ctx.restore();}
  for(const [px,py] of anchors){const x=px*out.width,y=py*out.height;
-  if(d.strap!=='none'){ctx.save();ctx.strokeStyle=option('color',d.color)[3];ctx.lineWidth=out.width*.012;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-out.width*.07,y-out.height*.09);ctx.quadraticCurveTo(x,y-out.height*.07,x+out.width*.065,y-out.height*.09);ctx.stroke();
-   if(d.strap==='cross'){ctx.beginPath();ctx.moveTo(x-out.width*.06,y-out.height*.12);ctx.lineTo(x+out.width*.06,y-out.height*.06);ctx.stroke();}
-   if(d.strap==='pearl')for(let i=0;i<7;i++){ctx.fillStyle='#fff8e5';ctx.beginPath();ctx.arc(x+out.width*(-.06+i*.02),y-out.height*.085,out.width*.009,0,Math.PI*2);ctx.fill();}ctx.restore();
-   if(d.strap==='ribbon')sprite('bow',x,y-out.height*.09,.11);
+  if(d.strap!=='none'){const strapCanvas=makeCanvas(out.width,out.height),strapCtx=strapCanvas.getContext('2d');strapCtx.save();strapCtx.strokeStyle=option('color',d.color)[3];strapCtx.lineWidth=out.width*.012;strapCtx.lineCap='round';strapCtx.beginPath();strapCtx.moveTo(x-out.width*.07,y-out.height*.025);strapCtx.quadraticCurveTo(x,y-out.height*.015,x+out.width*.065,y-out.height*.025);strapCtx.stroke();
+   if(d.strap==='cross'){strapCtx.beginPath();strapCtx.moveTo(x-out.width*.06,y-out.height*.04);strapCtx.lineTo(x+out.width*.06,y+out.height*.005);strapCtx.stroke();}
+   if(d.strap==='pearl')for(let i=0;i<7;i++){strapCtx.fillStyle='#fff8e5';strapCtx.beginPath();strapCtx.arc(x+out.width*(-.06+i*.02),y-out.height*.02,out.width*.009,0,Math.PI*2);strapCtx.fill();}strapCtx.restore();strapCtx.globalCompositeOperation='destination-in';strapCtx.drawImage(shade,0,0);ctx.drawImage(strapCanvas,0,0);
+   if(d.strap==='ribbon')sprite('bow',x,y-out.height*.015,.09);
   }
-  const decor={small:['bow',.10],big:['bow',.16],drop:['pearl_drop',.05],flower:['flower',.12]}[d.decoration];if(decor)sprite(decor[0],x,y-out.height*.035,decor[1]);
-  const charm={pearl:'charm_pearl',crystal:'charm_crystal',mini:'charm_minibow'}[d.charm];if(charm)sprite(charm,x,y+out.height*.055,.065);
+  const decor={small:['bow',.10],big:['bow',.16],drop:['pearl_drop',.05],flower:['flower',.12]}[d.decoration];if(decor)sprite(decor[0],x,y-out.height*.01,decor[1]);
+  const charm={pearl:'charm_pearl',crystal:'charm_crystal',mini:'charm_minibow'}[d.charm];if(charm)sprite(charm,x,y+out.height*.025,.05);
  }
  return remember(key,out);
 }
