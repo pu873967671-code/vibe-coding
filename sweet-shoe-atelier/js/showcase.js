@@ -7,6 +7,7 @@
   {id:'vanity',en:'Golden vanity',zh:'梳妆台卧室',price:360,image:'scenes/scene_vanity'},
   {id:'balcony',en:'Rose balcony',zh:'花园阳台',price:500,image:'scenes/scene_balcony'}
  ];
+ scenes.forEach(s=>s.closeImage='scenes/close_'+s.id);
  const find=id=>scenes.find(x=>x.id===id);
  function sanitize(value){const owned=['salon',...new Set((Array.isArray(value?.owned)?value.owned:[]).filter(id=>id!=='salon'&&find(id)))];return {version:1,owned,selected:owned.includes(value?.selected)?value.selected:'salon'};}
  function choose(state,id,artwork){const scene=find(id);if(!scene)return {ok:false,reason:'scene'};const room=state.showcase||(state.showcase=sanitize());const unlocked=!room.owned.includes(id);if(unlocked){if(!Number.isFinite(state.coins)||state.coins<scene.price)return {ok:false,reason:'coins'};state.coins-=scene.price;room.owned.push(id);}room.selected=id;if(artwork)artwork.scene=id;return {ok:true,unlocked,scene};}
@@ -21,37 +22,14 @@
   balcony:{size:[1672,940],position:[.5,.76],feet:[.53,.87],height:690}
  };
  function frame(stage){
-  if(!stage)return;const c=framing[stage.dataset.showcaseScene]||framing.salon;
-  const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
-  const dock=stage.closest('.runway')?.querySelector('.runway-dock'),clearance=(dock?.offsetHeight||0)+28;
-  stage.style.setProperty('--dock-clearance',clearance+'px');
-  const [iw,ih]=c.size,p=[...(w<h&&c.portrait?c.portrait:c.position)],scale=Math.max(w/iw,h/ih);
-  // Shallow landscape stages pan down with the room instead of cutting off toes.
-  const floor=c.feet[1]*ih*scale+(h-ih*scale)*p[1];
-  if(floor>h-clearance&&h<ih*scale)p[1]=Math.max(0,Math.min(1,(h-clearance-c.feet[1]*ih*scale)/(h-ih*scale)));
-  const ox=(w-iw*scale)*p[0];let oy=(h-ih*scale)*p[1];
-  stage.style.backgroundPosition=`${p[0]*100}% ${p[1]*100}%`;
-  const zoom=stage.classList.contains('zoomed')?1.14:1;
-  let footY=Math.min(h-clearance,c.feet[1]*ih*scale+oy);
-  // Phone cover-crops can move the authored floor anchor outside the screen.
-  // Reserve enough width for the entire painted pair (or both side-detail feet).
+  if(!stage)return;const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
+  const dock=stage.closest('.runway')?.querySelector('.runway-dock'),clearance=Math.max((dock?.offsetHeight||0)+36,dock?h-(dock.getBoundingClientRect().top-stage.getBoundingClientRect().top)+16:0);
   const detail=stage.dataset.runwayAngle==='side'&&stage.dataset.showcaseScene!=='car';
-  const car=stage.dataset.showcaseScene==='car';
-  const fitHeight=Math.max(1,Math.min(c.height*scale*zoom,(car?h-clearance-76:footY-76)/(detail?1.12:1),(w-32)/(detail?1.35:.72)));
-  if(car){
-   // Scale around the seat-edge hem, then pan the room and pair together.
-   // Any background continuation falls behind the bottom dock, never the shoes.
-   const seatY=(c.feet[1]*ih-c.height)*scale+oy;
-   const hemY=Math.max(76,Math.min(h-clearance-fitHeight,seatY));
-   oy+=hemY-seatY;footY=hemY+fitHeight;
-   stage.style.backgroundPosition=`${ox}px ${oy}px`;
-  }
-  const halfWidth=fitHeight*(detail?.66:.36),roomX=c.feet[0]*iw*scale+ox;
-  const fitLeft=Math.max(16+halfWidth,Math.min(w-16-halfWidth,roomX));
-  for(const [key,value] of Object.entries({
-   'fit-height':fitHeight,'fit-left':fitLeft,'fit-bottom':h-footY,
-   'mirror-left':168*scale+ox,'mirror-top':oy,'mirror-width':330*scale,'mirror-height':470*scale
-  }))stage.style.setProperty('--'+key,value+'px');
+  const art=stage.querySelector('.runway-angle-art'),ratio=parseFloat(art?.style.getPropertyValue('--foot-aspect'))||1.2;
+  const available=Math.max(80,h-clearance-80),zoom=stage.classList.contains('zoomed')?1.08:1;
+  const fitHeight=Math.min(Math.min(available*(detail?.84:.94)*zoom,available*(detail?.87:1)),(w-40)/(detail?1.35:ratio));
+  for(const [key,value] of Object.entries({'dock-clearance':clearance,'fit-height':fitHeight,'fit-left':w*.5,'fit-bottom':clearance+Math.max(0,(available-fitHeight)*.12)}))stage.style.setProperty('--'+key,value+'px');
+  stage.style.backgroundPosition='50% 72%';
  }
  A.Showcase={scenes,find,sanitize,choose,picker,frame,framing};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
