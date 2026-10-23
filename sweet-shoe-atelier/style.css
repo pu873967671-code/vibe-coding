@@ -526,3 +526,8 @@ body:not(.dialogue-active) .atelier-mentor{visibility:visible}.dialogue-active .
 @media(orientation:portrait){.collection-back{right:56px;max-width:104px}.collection-heading{padding-right:132px}}
 /* Preserve the authored character height instead of shrinking it to sidebar width. */
 .mentor-area .atelier-mentor img{width:auto;max-width:none;height:100%;left:50%;translate:-50% 0;object-fit:contain}
+
+/* Supervisor 13:40: opaque speech surface hides the foreground character below it. */
+.vn-box{background:linear-gradient(115deg,#fffaf5,#fff9ea)}
+/* Also crop the 12–24px gutter below the box, including the character shadow. */
+.vn-mentor,.vn-story .opening-character{clip-path:inset(0 0 48px)}
