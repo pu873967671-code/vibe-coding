@@ -152,7 +152,7 @@ function openRunway(index=0,refresh=false){
 function refreshFitting(scene){
  A.Showcase.frame(scene);
  const angle=scene.dataset.runwayAngle,pose={stand:'relaxed',tiptoe:'crossed',step:'step'}[scene.dataset.runwayPose]||'relaxed';
- const source=angle==='front34'?(scene.dataset.showcaseScene==='car'?'seated_'+pose:pose):angle;
+ const source=scene.dataset.showcaseScene==='car'?'seated_'+pose:angle==='front34'?pose:angle;
  for(const canvas of scene.querySelectorAll('.angle-canvas,.reflection-canvas')){
   if(canvas.dataset.angle===source)continue;
   if(!reducedMotion&&canvas.width&&canvas.classList.contains('angle-canvas')){const old=document.createElement('canvas');old.width=canvas.width;old.height=canvas.height;old.getContext('2d').drawImage(canvas,0,0);old.className='pose-snapshot';canvas.parentElement.append(old);old.animate([{opacity:1},{opacity:0}],{duration:360}).finished.then(()=>old.remove(),()=>old.remove());}
