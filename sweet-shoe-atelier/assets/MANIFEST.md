@@ -88,3 +88,9 @@ Supervisor 00:14: live 3D and Collection now use a code-authored cream/mint pede
 
 
 SHOE LOOP 2: upper normals/tangents and terminal dome are generated analytically; gathered silk loops/knot/tails remain thin procedural geometry with no extra bitmap/model. Studio clearance follows actual controls; snapshot camera fitting excludes live UI offsets. All assets remain local.
+
+
+## Supervisor 01:30 — boutique miniature collection
+`decor/mint_{rug,counter,shelf,sofa,mirror,flowers,chandelier,window}{1,2}.svg`: sixteen local code-authored UI illustrations with mint/pink/cream dimensional gradients, alpha backgrounds and deluxe star details. Rebuild with `python3 dev/build-boutique-icons.py`. They replace old decor stickers in runtime previews, earned keepsakes, slot lists and chapter reveals; original WebPs remain source assets. No external image/model/font download. Built-in image generation returned no artifact; these are explicitly native SVG UI art.
+
+Supervisor 01:55: boutique/showcase backgrounds retain their existing local paintings with a CSS mint/pink wash. The shared product pedestal uses cool porcelain, mint and a code-authored thin pink torus trim. No new bitmap, model, font or runtime network dependency.
