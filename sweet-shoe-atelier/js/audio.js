@@ -1,8 +1,45 @@
 'use strict';
 (function(A){
   // Local, gesture-unlocked sound. Sleeping music owns no background clock.
-  A.createAudioEngine=function(getState,blocked){
+  A.createAudioEngine=function(getState,blocked,getScene=()=> 'merge'){
     const engine={ctx:null,master:null,effects:null,music:null,tick:null,step:0,voices:new Set(),lastCue:new Map(),limit:32,
+      tracks:new Map(),failedTracks:new Set(),currentTrack:null,
+      media(silent){
+        if(silent||!getState().music){
+          for(const track of this.tracks.values()){
+            clearTimeout(track.stopTimer);track.gain.gain.cancelScheduledValues(this.ctx.currentTime);
+            track.gain.gain.setValueAtTime(0,this.ctx.currentTime);track.audio.pause();
+          }
+          this.currentTrack=null;return false;
+        }
+        const name=getScene()==='merge'?'cozy':'tea';
+        if(this.failedTracks.has(name)||!window.Audio||!this.ctx.createMediaElementSource)return false;
+        if(this.currentTrack===name)return true;
+        try{
+          let track=this.tracks.get(name);
+          if(!track){
+            const audio=new window.Audio();audio.preload='none';audio.loop=true;audio.src='assets/audio/bgm_'+name+'.mp3';
+            const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
+            gain.gain.value=0;source.connect(gain);gain.connect(this.music);
+            track={audio,source,gain,stopTimer:null};this.tracks.set(name,track);
+            audio.addEventListener('error',()=>this.mediaFailed(name));
+          }
+          this.currentTrack=name;
+          for(const [id,other] of this.tracks){
+            clearTimeout(other.stopTimer);other.gain.gain.cancelScheduledValues(this.ctx.currentTime);
+            other.gain.gain.setTargetAtTime(id===name?.35:0,this.ctx.currentTime,.35);
+            if(id!==name)other.stopTimer=setTimeout(()=>{if(this.currentTrack!==id)other.audio.pause();},1500);
+          }
+          const play=track.audio.play();
+          if(play?.catch)play.catch(error=>{if(error?.name!=='AbortError')this.mediaFailed(name);});
+          return true;
+        }catch{this.mediaFailed(name);return false;}
+      },
+      mediaFailed(name){
+        this.failedTracks.add(name);const track=this.tracks.get(name);
+        if(track){clearTimeout(track.stopTimer);track.audio.pause();track.gain.gain.setValueAtTime(0,this.ctx.currentTime);}
+        if(this.currentTrack===name){this.currentTrack=null;this.update();}
+      },
       ensure(){
         if((!getState().sound&&!getState().music)||blocked())return;
         try{
@@ -24,7 +61,12 @@
         this.music.gain.setTargetAtTime(s.music?1:0,now,.08);
         // Cancel scheduled notes as well as the clock; old fanfares must not resume.
         for(const voice of this.voices)if(silent||(!s.sound&&voice.bus===this.effects)||(!s.music&&voice.bus===this.music))voice.stop();
-        if(silent||!s.music){if(this.tick!==null){clearInterval(this.tick);this.tick=null;}return;}
+        const streaming=this.media(silent);
+        if(silent||!s.music||streaming){
+          if(this.tick!==null){clearInterval(this.tick);this.tick=null;}
+          if(streaming)for(const voice of this.voices)if(voice.bus===this.music)voice.stop();
+          return;
+        }
         if(this.tick===null)this.tick=setInterval(()=>{
           if(blocked()||!getState().music)return;
           const phrase=[261.63,329.63,392,0,440,392,329.63,0,261.63,349.23,440,0,493.88,392,293.66,0];
