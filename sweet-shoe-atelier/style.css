@@ -156,3 +156,63 @@ body.merge-active{background-image:url('assets/bg_merge.webp')}
 /* Freeze scenery behind dialogs. Full-screen backdrop blur was repainting the fitting room. */
 #app[inert] *,#app[inert] *:before,#app[inert] *:after{animation-play-state:paused!important}
 .runway-backdrop{backdrop-filter:none;background:#4d2b3caa}
+/* Filter the stationary artwork inside each moving foot, so pose/sway can reuse
+   the rasterized shadow rather than filtering a large transformed layer. */
+.runway-foot{filter:none}.front-foot canvas{filter:drop-shadow(0 12px 6px #764c5630)}.back-foot canvas{filter:brightness(.94) drop-shadow(0 8px 5px #764c5622)}
+/* Showcase lookbook: a consistent mid-calf crop, complete feet and grounded soles. */
+.runway-modal{width:min(920px,96vw);max-width:920px;padding:18px 24px 16px;max-height:96dvh}
+.runway-heading h2{font-size:28px;margin:5px 0}.runway-heading>p{margin:4px 0}
+.runway-scene{--stage-height:clamp(230px,40vh,360px);height:var(--stage-height);margin:12px 0 8px;background-image:linear-gradient(#fff6e808,#6c3e2614),var(--scene-image);background-position:center 65%;background-size:cover;background-repeat:no-repeat}
+.runway-scene .runway-pair{inset:0;animation:none;transform-origin:50% 73%;scale:1;filter:sepia(.06) saturate(.92)}
+.runway-scene .runway-foot{height:108%;width:auto;max-width:none;aspect-ratio:var(--foot-aspect,.663);left:calc(50% - var(--stage-height)*.54);bottom:13%;transform:none;transform-origin:13% 96%;filter:none;transition:transform .65s ease}
+.runway-scene .front-foot{left:calc(50% - var(--stage-height)*.02);bottom:6%}
+.runway-scene .runway-foot canvas{display:block;width:100%;height:100%;aspect-ratio:auto;filter:drop-shadow(0 3px 2px #63443533)}
+.runway-scene .back-foot canvas{filter:brightness(.93) drop-shadow(0 3px 2px #63443533)}
+.runway-scene .runway-reflection{display:none;left:0;top:0;width:100%;height:100%;bottom:auto;opacity:1;transform:none;filter:none;mask-image:none;overflow:visible}
+.runway-scene .runway-light{display:none}.runway-contact{position:absolute;bottom:5.2%;left:calc(50% - var(--stage-height)*.02);width:calc(var(--stage-height)*.68);height:5%;background:radial-gradient(ellipse,#62413688,transparent 68%);filter:blur(2px);transform:rotate(-2deg)}
+.runway-contact.contact-back{left:calc(50% - var(--stage-height)*.54);bottom:12.2%;opacity:.65}
+.runway-scene[data-runway-pose=tiptoe] .front-foot{transform:rotate(-7deg)}.runway-scene[data-runway-pose=tiptoe] .back-foot{transform:rotate(-4deg)}
+.runway-scene[data-runway-pose=step] .front-foot{transform:translate(-8%,0) rotate(3deg)}.runway-scene[data-runway-pose=step] .back-foot{transform:translate(8%,-3%) rotate(-5deg)}
+.runway-scene.zoomed .runway-pair{scale:1.1;transform-origin:50% 88%}
+.runway-scene[data-showcase-scene=mirror_lounge]{background-position:30% 63%}
+.runway-scene[data-showcase-scene=mirror_lounge] .runway-pair{filter:sepia(.14) saturate(.9) brightness(1.02)}
+.runway-scene[data-showcase-scene=mirror_lounge] .runway-reflection{display:block;left:7.7%;top:0;width:20.5%;height:48%;overflow:hidden;clip-path:polygon(0 0,91% 0,100% 100%,9% 100%);opacity:.66;filter:brightness(.83) saturate(.8)}
+.runway-reflection .mirror-foot{position:absolute;height:145%;width:auto;aspect-ratio:var(--foot-aspect,.663);left:24%;bottom:3%;transform:scaleX(-1);transform-origin:45% 95%;transition:transform .65s ease}
+.runway-reflection .mirror-back{left:-8%;bottom:8%;filter:brightness(.88)}
+.runway-reflection .mirror-foot canvas{position:static;width:100%;height:100%;transform:none}
+.runway-scene[data-runway-pose=tiptoe] .mirror-front{transform:scaleX(-1) rotate(7deg)}.runway-scene[data-runway-pose=tiptoe] .mirror-back{transform:scaleX(-1) rotate(4deg)}
+.runway-scene[data-runway-pose=step] .mirror-front{transform:scaleX(-1) translate(-8%,0) rotate(-3deg)}.runway-scene[data-runway-pose=step] .mirror-back{transform:scaleX(-1) translate(8%,-3%) rotate(5deg)}
+.runway-scene[data-showcase-scene=car]{background-position:center 72%}.runway-scene[data-showcase-scene=car] .runway-pair{filter:sepia(.12) brightness(.94)}
+.runway-scene[data-showcase-scene=car] .front-foot{left:calc(50% + var(--stage-height)*.06);bottom:7%;transform:rotate(-22deg);transform-origin:83% 89%}
+.runway-scene[data-showcase-scene=car] .back-foot{left:calc(50% - var(--stage-height)*.48);bottom:14%;transform:rotate(-26deg);transform-origin:83% 89%}
+.runway-scene[data-showcase-scene=car][data-runway-pose=tiptoe] .front-foot{transform:rotate(-29deg)}.runway-scene[data-showcase-scene=car][data-runway-pose=tiptoe] .back-foot{transform:rotate(-30deg)}
+.runway-scene[data-showcase-scene=car][data-runway-pose=step] .front-foot{transform:translateX(-5%) rotate(-18deg)}.runway-scene[data-showcase-scene=car][data-runway-pose=step] .back-foot{transform:translateX(5%) rotate(-29deg)}
+.runway-scene[data-showcase-scene=vanity]{background-position:center 77%}.runway-scene[data-showcase-scene=vanity] .runway-pair{filter:sepia(.2) brightness(.95) saturate(.88)}
+.runway-scene[data-showcase-scene=balcony]{background-position:center 76%}.runway-scene[data-showcase-scene=balcony] .runway-pair{filter:brightness(1.05) saturate(.94)}
+.scene-atmosphere{position:absolute;inset:0;pointer-events:none}.scene-atmosphere i{display:none}
+[data-showcase-scene=balcony] .scene-atmosphere i{display:block;position:absolute;top:-8%;left:calc(10% + var(--i)*15%);width:10px;height:6px;background:linear-gradient(120deg,#fff2e9,#df9caa);border-radius:90% 0 90% 15%;box-shadow:0 1px 2px #92545b22;animation:petal-drift 9s linear infinite;animation-delay:calc(var(--i)*-1.5s)}
+[data-showcase-scene=vanity] .scene-atmosphere i{display:block;position:absolute;left:calc(9% + var(--i)*3%);top:calc(5% + var(--i)*5%);width:4px;height:4px;border-radius:50%;background:#fff3d0;box-shadow:0 0 12px 5px #ffe5a866;animation:twinkle 4s ease-in-out infinite;animation-delay:calc(var(--i)*-.7s)}
+@keyframes petal-drift{to{translate:-65px 370px;rotate:240deg}}
+.showcase-heading{display:flex;justify-content:space-between;align-items:center;margin:8px 2px 6px;font:11px sans-serif;color:#977660}.showcase-heading>span:last-child{display:flex;align-items:center;gap:3px;font-variant-numeric:tabular-nums}.showcase-heading img{width:17px;height:17px;object-fit:contain}
+.showcase-picker{display:flex;gap:8px;justify-content:center}.showcase-chip{position:relative;flex:1;min-width:0;max-width:160px;padding:3px 3px 5px;border:1px solid #d8c2b1;border-radius:11px;background:#fffaf2;color:#795a59;box-shadow:0 2px 4px #8056580c;overflow:hidden;font:11px sans-serif;transition:border-color .2s,background .2s}
+.showcase-chip>img{display:block;width:100%;height:42px;object-fit:cover;border-radius:7px;margin-bottom:5px}.showcase-chip>span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.showcase-chip small{display:block;font:10px sans-serif;margin-top:3px;color:#ae8259}.showcase-chip.locked>img{filter:saturate(.65)}.showcase-chip.selected{border:2px solid #b16b7b;background:#fbe9e8;padding:2px 2px 4px}.showcase-chip.selected small{color:#9a546a}.showcase-chip:focus-visible{outline:2px solid #ad6e55;outline-offset:2px}
+.runway-reaction{font-size:14px;margin:9px 0}.runway-controls,.runway-actions{gap:8px}.runway-actions{margin-top:10px}.runway-controls button,.runway-actions button{min-height:40px}
+.scene-unlock-badge{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:95%;white-space:nowrap;padding:10px 18px;border:1px solid #ecd5a2;border-radius:30px;background:#fff8e7ed;color:#946642;font:12px sans-serif;box-shadow:0 4px 20px #76513822;animation:renovation-reveal .6s ease both}
+@media(orientation:portrait){.runway-modal{padding:16px 12px}.runway-heading h2{font-size:24px}.runway-scene{--stage-height:270px}.showcase-picker{gap:4px}.showcase-chip{font-size:9px;border-radius:8px}.showcase-chip>img{height:36px}.showcase-chip small{font-size:9px}.runway-actions button{font-size:11px}.runway-scene[data-showcase-scene=mirror_lounge]{background-size:auto 100%;background-position:24% center}.runway-scene[data-showcase-scene=mirror_lounge] .runway-reflection{left:0;width:23%}.runway-scene .runway-foot{left:calc(50% - var(--stage-height)*.54)}.runway-scene .front-foot{left:calc(50% - var(--stage-height)*.02)}}
+@media(max-height:560px) and (orientation:landscape){.runway-modal{padding:10px 16px;width:min(780px,96vw)}.runway{display:grid;grid-template-columns:minmax(0,1fr) 230px;column-gap:16px;align-items:center}.runway-heading{grid-column:1/-1}.runway-heading h2{font-size:20px;margin:2px 0}.runway-heading>p{font-size:10px;margin:2px 0 6px}.runway-scene{--stage-height:235px;grid-column:1;grid-row:2/6;margin:0}.showcase-strip{grid-column:2;grid-row:2}.showcase-heading{margin:0 0 5px;font-size:10px}.showcase-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.showcase-chip{font-size:9px;min-height:60px}.showcase-chip>img{height:27px;margin-bottom:3px}.showcase-chip small{font-size:9px;margin-top:2px}.runway-reaction{grid-column:2;font-size:12px;margin:5px 0}.runway-controls{grid-column:2;display:grid;grid-template-columns:1fr 1fr;gap:5px}.runway-controls button{font-size:10px;min-width:0;padding:5px 6px}.runway-actions{grid-column:2;margin-top:6px;gap:5px}.runway-actions button{font-size:10px;padding:5px 8px}.runway-actions [data-runway-collection]{flex:1}.runway-modal:has([data-journey]){grid-template-columns:175px minmax(0,1fr);padding:8px}.runway-modal:has([data-journey]) .runway{grid-template-columns:minmax(0,1fr) 180px;column-gap:8px}.runway-modal:has([data-journey]) .runway-scene{--stage-height:215px;height:var(--stage-height)}.runway-modal:has([data-journey]) .runway-actions button{padding:5px;font-size:9px}.runway-modal:has([data-journey]) .runway-controls{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-height:420px) and (orientation:landscape){.runway-scene{--stage-height:225px}.runway-modal{padding:8px 14px}.runway-heading .section-kicker{font-size:8px}.runway-heading h2{font-size:18px}.runway-heading>p{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.scene-atmosphere i,.scene-unlock-badge{animation:none!important}.runway-scene .runway-foot,.mirror-foot,.showcase-chip{transition:none}[data-showcase-scene=balcony] .scene-atmosphere i{top:calc(8% + var(--i)*14%)}}
+.showcase-chip{display:block}
+.runway-scene[data-showcase-scene=car] .front-foot{bottom:24%;left:calc(50% + var(--stage-height)*.01)}
+.runway-scene[data-showcase-scene=car] .back-foot{bottom:30%;left:calc(50% - var(--stage-height)*.51)}
+.runway-scene[data-showcase-scene=car] .runway-contact.contact-front{bottom:9%;left:calc(50% - var(--stage-height)*.1);transform:rotate(-22deg)}
+.runway-scene[data-showcase-scene=car] .runway-contact.contact-back{bottom:16%;left:calc(50% - var(--stage-height)*.62);transform:rotate(-26deg)}
+.runway-scene[data-showcase-scene=car].zoomed .runway-pair{scale:1.06}
+.runway-actions [data-runway-back]{min-width:40px}
+.runway-modal button{margin:0}
+.runway-scene[data-showcase-scene=mirror_lounge]{background-position:30% 20%}
+.runway-scene[data-showcase-scene=mirror_lounge] .runway-reflection{left:11%;width:18%;height:65%}
+@media(orientation:portrait){.runway-scene[data-showcase-scene=mirror_lounge]{background-position:24% center}.runway-scene[data-showcase-scene=mirror_lounge] .runway-reflection{left:6%;width:23%;height:48%}}
+@media(max-height:560px) and (orientation:landscape){.runway-modal{max-height:98dvh}.runway-controls{margin-top:3px}.runway-scene{--stage-height:235px}.runway-actions{padding-bottom:4px}.runway-heading>p{margin-bottom:4px}.showcase-chip{min-height:60px}.showcase-heading{margin-bottom:4px}}
+@media(orientation:portrait){.runway-scene .front-foot{left:calc(50% - var(--stage-height)*.17)}.runway-scene[data-showcase-scene=car] .front-foot{left:calc(50% - var(--stage-height)*.13)}.runway-scene[data-showcase-scene=car] .back-foot{left:calc(50% - var(--stage-height)*.55)}}
+.showcase-chip small{display:flex;align-items:center;justify-content:center;gap:2px;min-height:11px}.showcase-chip small .scene-lock{width:10px;height:10px;object-fit:contain}
