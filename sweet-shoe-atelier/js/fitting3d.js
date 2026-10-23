@@ -2,26 +2,6 @@
 // Rigged CC0 lower-body fitting, sharing Shoe3D's renderer and exact shoe meshes.
 (function(A){
 
-function softSurface(T,source,own){
- const p=source.attributes.position,lookup=new Map(),weights=[],faces=[];
- const vertex=i=>{const key=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>v.toFixed(5)).join(',');if(!lookup.has(key)){lookup.set(key,weights.length);weights.push(new Map([[i,1]]));}return lookup.get(key);};
- for(let i=0;i<source.index.count;i+=3)faces.push([0,1,2].map(j=>vertex(source.index.getX(i+j))));
- let ws=weights,fs=faces;
- const blend=parts=>{const m=new Map();for(const [w,k] of parts)for(const [i,v] of w)m.set(i,(m.get(i)||0)+v*k);return m;};
- for(let pass=0;pass<2;pass++){
-  const neighbors=ws.map(()=>new Set()),edges=new Map();
-  for(const f of fs)for(let j=0;j<3;j++){const a=f[j],b=f[(j+1)%3],c=f[(j+2)%3],key=[Math.min(a,b),Math.max(a,b)].join(':');neighbors[a].add(b);neighbors[b].add(a);if(!edges.has(key))edges.set(key,{a,b,op:[]});edges.get(key).op.push(c);}
-  const boundary=ws.map(()=>[]);for(const e of edges.values())if(e.op.length===1){boundary[e.a].push(e.b);boundary[e.b].push(e.a);}
-  const next=ws.map((w,i)=>{const n=[...neighbors[i]],b=boundary[i];if(b.length===2)return blend([[w,.75],[ws[b[0]],.125],[ws[b[1]],.125]]);const beta=n.length===3?3/16:3/(8*Math.max(1,n.length));return blend([[w,1-n.length*beta],...n.map(j=>[ws[j],beta])]);});
-  for(const e of edges.values()){e.id=next.length;next.push(e.op.length===2?blend([[ws[e.a],.375],[ws[e.b],.375],...e.op.map(i=>[ws[i],.125])]):blend([[ws[e.a],.5],[ws[e.b],.5]]));}
-  const id=(a,b)=>edges.get([Math.min(a,b),Math.max(a,b)].join(':')).id,nf=[];
-  for(const [a,b,c] of fs){const ab=id(a,b),bc=id(b,c),ca=id(c,a);nf.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]);}ws=next;fs=nf;
- }
- const geometry=own(new T.BufferGeometry()),pos=new T.Float32BufferAttribute(new Float32Array(ws.length*3),3),colors=new T.Float32BufferAttribute(new Float32Array(ws.length*3).fill(1),3);geometry.setAttribute('position',pos);geometry.setAttribute('color',colors);geometry.setIndex(fs.flat());
- return {geometry,update(values){for(let i=0;i<ws.length;i++){let x=0,y=0,z=0,restY=0;for(const [j,k] of ws[i]){x+=values[j*3]*k;y+=values[j*3+1]*k;z+=values[j*3+2]*k;restY+=p.getY(j)*k;}
-  pos.setXYZ(i,x,y,z);const blush=Math.exp(-(((restY-.405)/.035)**2))*.075+Math.exp(-(((restY-.17)/.028)**2))*.045;colors.setXYZ(i,1,1-blush,1-blush*.7);
- }pos.needsUpdate=true;colors.needsUpdate=true;geometry.computeVertexNormals();}};
-}
 A.Fitting3D={async load(){const {GLTFLoader}=await import('../vendor/addons/GLTFLoader.js');return new GLTFLoader().loadAsync('assets/models/female_base.gltf');},build({THREE:T,model,own,design,last,scene,gltf}){
  const rig=gltf.scene,body=rig.getObjectByName('Superhero_Female');
  if(!body?.isSkinnedMesh)throw Error('Fitting skeleton unavailable');
@@ -39,11 +19,11 @@ A.Fitting3D={async load(){const {GLTFLoader}=await import('../vendor/addons/GLTF
  // The retained ankle is continuous with a fitted skin last inside each shoe.
  const g=body.geometry.clone();own(g);const p=g.attributes.position,idx=g.index,keep=[];
  for(let i=0;i<idx.count;i+=3){const ids=[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];if(ids.every(j=>p.getY(j)<.765)&&ids.every(j=>p.getY(j)>.105))keep.push(...ids);}
- g.setIndex(keep);g.computeBoundingBox();body.geometry=g;body.material=skin;body.castShadow=false;body.receiveShadow=false;body.frustumCulled=false;
- rig.scale.set(10,8.3,10);model.add(rig);rig.updateMatrixWorld(true);
- // Relax the original low-poly silhouette twice with a welded Loop surface.
- // Subdivision weights are built once; each new pose only evaluates the weights.
- const smooth=softSurface(T,g,own),baked=smooth.geometry,visibleBody=new T.Mesh(baked,skin);body.visible=false;visibleBody.name='posed-lower-body';rig.add(visibleBody);
+ // Smooth anatomical profiles in the supplied rig's rest coordinates.
+ const centers=[[.16,.1153,-.0876],[.21,.1172,-.0897],[.26,.1194,-.0913],[.31,.1192,-.0932],[.38,.1191,-.0922],[.43,.118,-.0883],[.48,.108,-.065],[.54,.109,-.052]];
+ const sample=(table,y,col)=>{let i=0;while(i<table.length-2&&y>table[i+1][0])i++;const a=table[i],b=table[i+1],before=table[Math.max(0,i-1)],after=table[Math.min(table.length-1,i+2)],t=T.MathUtils.clamp((y-a[0])/(b[0]-a[0]),0,1),span=b[0]-a[0],m0=(b[col]-before[col])/(b[0]-before[0])*span,m1=(after[col]-a[col])/(after[0]-a[0])*span;return (2*t**3-3*t*t+1)*a[col]+(t**3-2*t*t+t)*m0+(-2*t**3+3*t*t)*b[col]+(t**3-t*t)*m1;};
+ g.setIndex(keep);body.geometry=g;body.material=skin;body.visible=false;
+ rig.scale.set(10,9.2,10);model.add(rig);rig.updateMatrixWorld(true);
  const lift=({flat:.025,kitten:.54,block:.64,wedge:.60}[design.heel]||0),pitch=Math.atan(lift/2.05);
  const legs=['l','r'].map((side,i)=>{
   const thigh=rig.getObjectByName('thigh_'+side),calf=rig.getObjectByName('calf_'+side),foot=rig.getObjectByName('foot_'+side),toe=rig.getObjectByName('ball_'+side);
@@ -53,13 +33,12 @@ A.Fitting3D={async load(){const {GLTFLoader}=await import('../vendor/addons/GLTF
   const vertices=[],indices=[],rows=36,cols=24;
   for(let a=0;a<=rows;a++){const z=-1.40+1.91*a/rows,q=last(z);for(let b=0;b<=cols;b++){const t=b/cols*Math.PI,x=Math.cos(t)*q.width*.91;vertices.push(x,q.base+.025+Math.sin(t)*q.height*.55,z);if(a<rows&&b<cols){const k=a*(cols+1)+b,n=k+cols+1;indices.push(k,n,k+1,n,n+1,k+1);}}}
   const fg=own(new T.BufferGeometry());fg.setAttribute('position',new T.Float32BufferAttribute(vertices,3));fg.setIndex(indices);fg.computeVertexNormals();fg.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(vertices.length).fill(1),3));const insert=new T.Mesh(fg,skin);insert.castShadow=true;shoe.add(insert);
-  const bridgeGeometry=own(new T.BufferGeometry()),bridgePositions=new T.Float32BufferAttribute(new Float32Array(13*41*3),3),bridgeIndices=[];
-  for(let row=0;row<12;row++)for(let col=0;col<40;col++){const k=row*41+col,n=k+41;bridgeIndices.push(k,n,k+1,n,n+1,k+1);}
-  bridgeGeometry.setAttribute('position',bridgePositions);bridgeGeometry.setIndex(bridgeIndices);bridgeGeometry.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(13*41*3).fill(1),3));const bridge=new T.Mesh(bridgeGeometry,skin);bridge.castShadow=true;rig.add(bridge);
-  const ankleVertices=[];for(let j=0;j<p.count;j++)if(p.getY(j)>.14&&p.getY(j)<.18&&(p.getX(j)>0)===(side==='l'))ankleVertices.push(j);
+  const bridgeGeometry=own(new T.BufferGeometry()),bridgePositions=new T.Float32BufferAttribute(new Float32Array(65*49*3),3),bridgeIndices=[];
+  for(let row=0;row<64;row++)for(let col=0;col<48;col++){const k=row*49+col,n=k+49;bridgeIndices.push(k,n,k+1,n,n+1,k+1);}
+  bridgeGeometry.setAttribute('position',bridgePositions);bridgeGeometry.setIndex(bridgeIndices);bridgeGeometry.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(65*49*3).fill(1),3));const bridge=new T.Mesh(bridgeGeometry,skin);bridge.castShadow=true;rig.add(bridge);
   const parentQ=foot.parent.getWorldQuaternion(new T.Quaternion()),restQ=foot.getWorldQuaternion(new T.Quaternion());
   const posed=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),pitch).multiply(restQ);foot.quaternion.copy(parentQ.invert().multiply(posed));toe.rotateX(-pitch*.55);
-  return {thigh,calf,foot,toe,shoe,bridge,ankleVertices,restThigh:thigh.quaternion.clone(),restCalf:calf.quaternion.clone()};
+  return {thigh,calf,foot,toe,shoe,bridge,restThigh:thigh.quaternion.clone(),restCalf:calf.quaternion.clone()};
  });
  // A fluted, layered mint skirt conceals the mid-thigh cut, including orbit views.
  const skirt=new T.Group();model.add(skirt);const mint=own(new T.MeshStandardMaterial({color:'#b5ead6',roughness:.85,side:T.DoubleSide})),cream=own(new T.MeshStandardMaterial({color:'#fff8fa',roughness:.85,side:T.DoubleSide}));
@@ -89,15 +68,24 @@ A.Fitting3D={async load(){const {GLTFLoader}=await import('../vendor/addons/GLTF
   rig.updateMatrixWorld(true);
   let ground=Infinity;const solePoint=new T.Vector3();for(const l of legs){for(const o of l.shoe.children.filter(o=>o.name==='outsole'||o.name.startsWith('heel:'))){const positions=o.geometry.attributes.position;for(let i=0;i<positions.count;i++){solePoint.fromBufferAttribute(positions,i).applyMatrix4(o.matrixWorld);model.worldToLocal(solePoint);ground=Math.min(ground,solePoint.y);}}}
   if(Number.isFinite(ground))rig.position.y-=ground-.015;rig.updateMatrixWorld(true);
-  body.skeleton.update();const point=new T.Vector3(),posedPositions=new Float32Array(p.count*3);
-  for(let i=0;i<p.count;i++){point.fromBufferAttribute(p,i);body.applyBoneTransform(i,point);posedPositions.set([point.x,point.y,point.z],i*3);}
-  smooth.update(posedPositions);
-  for(const l of legs){
-   const center=new T.Vector3();for(const i of l.ankleVertices)center.add(new T.Vector3().fromArray(posedPositions,i*3));center.divideScalar(l.ankleVertices.length);
-   let rx=0,rz=0;for(const i of l.ankleVertices){rx=Math.max(rx,Math.abs(posedPositions[i*3]-center.x));rz=Math.max(rz,Math.abs(posedPositions[i*3+2]-center.z));}
+  body.skeleton.update();
+  // A continuous authored calf replaces the source mesh's overlapping ankle
+  // rings. It still follows the actual calf/thigh bones and fitted shoe socket.
+  const radii=[[.115,.023,.025],[.16,.019,.023],[.21,.020,.026],[.26,.025,.033],[.31,.031,.040],[.36,.033,.042],[.41,.030,.038],[.46,.030,.037],[.50,.038,.046]];
+  const bonePoint=(rest,bone)=>rest.clone().applyMatrix4(body.bindMatrix).applyMatrix4(new T.Matrix4().multiplyMatrices(bone.matrixWorld,body.skeleton.boneInverses[body.skeleton.bones.indexOf(bone)])).applyMatrix4(body.bindMatrixInverse);
+  for(const [index,l] of legs.entries()){
    const start=new T.Vector3(0,last(-1.02).base+.18,-1.02);l.shoe.localToWorld(start);rig.worldToLocal(start);
-   const positions=l.bridge.geometry.attributes.position;for(let row=0;row<=12;row++){const t=row/12,c=start.clone().lerp(center,t);for(let col=0;col<=40;col++){const a=col/40*Math.PI*2;positions.setXYZ(row*41+col,c.x+Math.cos(a)*(.027*(1-t)+rx*1.01*t),c.y,c.z+Math.sin(a)*(.029*(1-t)+rz*1.01*t));}}
-   positions.needsUpdate=true;l.bridge.geometry.computeVertexNormals();
+   const positions=l.bridge.geometry.attributes.position,sign=index?-1:1;
+   for(let row=0;row<=64;row++){
+    const y=.115+.385*row/64,cx=sample(centers,Math.max(.16,y),1)*sign,cz=sample(centers,Math.max(.16,y),2),rx=sample(radii,y,1),rz=sample(radii,y,2);
+    const weight=T.MathUtils.smoothstep(y,.39,.50),join=T.MathUtils.smoothstep(y,.115,.195);
+    for(let col=0;col<=48;col++){
+     const a=col/48*Math.PI*2,rest=new T.Vector3(cx+Math.cos(a)*rx,Math.max(.16,y),cz+Math.sin(a)*rz),point=bonePoint(rest,l.calf).lerp(bonePoint(rest,l.thigh),weight);
+     const low=new T.Vector3(start.x+Math.cos(a)*.023,start.y,start.z+Math.sin(a)*.025);point.lerp(low,1-join);
+     positions.setXYZ(row*49+col,point.x,point.y,point.z);
+    }
+   }
+   positions.needsUpdate=true;l.bridge.geometry.computeVertexNormals();l.bridge.name='continuous-sculpted-calf';
   }
   model.userData.pose=value;
  }
