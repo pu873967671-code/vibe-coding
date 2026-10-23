@@ -180,6 +180,16 @@ function angleComposite(d,angle){
  const natural=['relaxed','crossed','step','seated'].includes(angle),folder=natural?'poses/':'angles/',name=d.heel+'_'+angle,legs=imageOK(folder+name+'_legs'),shade=imageOK(folder+name+'_shade');
  if(!legs||!shade)return angle==='seated'?angleComposite(d,'relaxed'):wornComposite(d);
  const out=makeCanvas(legs.naturalWidth,legs.naturalHeight),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
+ // Authored sole contacts live in source coordinates, so shadows follow every
+ // heel, seated pose, zoom and room crop together with the painted anatomy.
+ if(angle==='seated'){
+  const contacts={flat:[[.58,.928,.23],[.75,.899,.17]],block:[[.405,.928,.25],[.655,.909,.23]],kitten:[[.72,.925,.24],[.895,.908,.17]],wedge:[[.59,.907,.25],[.79,.894,.21]]}[d.heel];
+  for(const [x,y,width] of contacts){
+   ctx.save();ctx.translate(x*out.width,y*out.height);ctx.scale(width*out.width,.022*out.height);
+   const soft=ctx.createRadialGradient(0,0,0,0,0,1);soft.addColorStop(0,'#38251d70');soft.addColorStop(.35,'#49302548');soft.addColorStop(1,'#49302500');
+   ctx.fillStyle=soft;ctx.beginPath();ctx.ellipse(0,0,1,1,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+ }
  ctx.drawImage(legs,0,0);if(!luminous(b,name+'_shade',option('color',d.color)[3],0,0,out.width,out.height,d.material)){b.drawImage(shade,0,0);b.globalCompositeOperation='source-in';b.fillStyle=option('color',d.color)[3];b.fillRect(0,0,out.width,out.height);b.globalCompositeOperation='source-over';}finishFabric(b,d,out.width,out.height,{name:name+'_shade'});
  b.globalCompositeOperation='destination-in';b.drawImage(shade,0,0);ctx.drawImage(body,0,0);
  const anchors=natural?(A.POSE_ANCHORS[name]||[[.28,.82],[.7,.82]]):{flat:{front34:[[.23,.78],[.70,.82]],top:[[.38,.78],[.68,.78]]},block:{front34:[[.23,.75],[.70,.80]],top:[[.35,.78],[.66,.78]]},kitten:{front34:[[.23,.76],[.70,.80]],top:[[.40,.78],[.69,.78]]},wedge:{front34:[[.26,.75],[.70,.80]],top:[[.41,.79],[.72,.79]]}}[d.heel][angle];
