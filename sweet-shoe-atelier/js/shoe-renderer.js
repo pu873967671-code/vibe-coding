@@ -259,7 +259,7 @@ function paintFloor(c,d){
 }
 function hydrateCanvases(root=document){
  for(const c of floorTargets)if(!c.isConnected){floorObserver.unobserve(c);floorLayers.get(c)?.remove();floorTargets.delete(c);}
- root.querySelectorAll('canvas[data-design]').forEach(c=>{
+ root.querySelectorAll('canvas[data-design]:not([data-renderer="three"])').forEach(c=>{
  // Layout width excludes pose/zoom transforms. Resizing a rotated shoe must not
  // inflate its backing store or repeatedly soften the same artwork.
  let width=c.clientWidth;const ratio=Math.min(3,Math.min(2,window.devicePixelRatio||1)*(c.closest('.zoomed')?1.5:1));if(!width||!c.getClientRects().length)return;
