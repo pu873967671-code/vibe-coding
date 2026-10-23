@@ -385,7 +385,7 @@ function resize(){
  renderer.setSize(Math.round(r.width),Math.round(r.height),false);fitCamera(r.width,r.height);invalidate();
 }
 function invalidate(){if(frame||!host||document.hidden)return;frame=requestAnimationFrame(()=>{frame=0;if(host&&model&&host.getClientRects().length){fitCamera(host.clientWidth,host.clientHeight);renderer.render(scene,camera);}});}
-function setView(value){angle=value;if(!camera)return;if(fitting){camera.position.set(...(value==='top'?[1,15,10]:value==='side'?[14,5,2]:[10,6.2,12]));camera.lookAt(0,2.4,0);if(host)fitCamera(host.clientWidth,host.clientHeight);invalidate();return;}const rise=({flat:0,block:.64,kitten:.54,wedge:.60}[current?.heel]||0)*.20;camera.position.set(...(angle==='top'?[.5,7,2]:angle==='side'?[6,1.9+rise,.9]:[3.6,2.15+rise,6]));camera.lookAt(0,.23+rise,0);yaw=0;if(model)model.rotation.y=0;if(host)fitCamera(host.clientWidth,host.clientHeight);invalidate();}
+function setView(value){angle=value;if(!camera)return;const rise=({flat:0,block:.64,kitten:.54,wedge:.60}[current?.heel]||0)*.20;const portrait=fitting&&host&&host.clientHeight>host.clientWidth;camera.position.set(...(angle==='top'?[.5,7,2]:angle==='side'?[6,1.9+rise,.9]:[3.6,(portrait?4.8:2.15)+rise,6]));camera.lookAt(0,.23+rise,0);yaw=0;if(model)model.rotation.y=0;if(host)fitCamera(host.clientWidth,host.clientHeight);invalidate();}
 async function mount(target,design,options={}){
  const token=++request;release();if(failed||!supported(design)||typeof location==='undefined'||location.protocol==='file:')return false;
  try{
@@ -402,8 +402,8 @@ async function mount(target,design,options={}){
 }
 function animateFitting(){
  if(!fitting||!host?.isConnected)return;
- if(!document.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches){model.rotation.z=Math.sin(performance.now()*.0011)*.003;invalidate();}
- idleTimer=setTimeout(animateFitting,80);
+ if(!document.hidden&&!drag&&!matchMedia('(prefers-reduced-motion: reduce)').matches){model.rotation.y=yaw+Math.sin(performance.now()*.00025)*.10;invalidate();}
+ idleTimer=setTimeout(animateFitting,100);
 }
 function updateFitting(options={}){if(!fitting||!model)return false;model.userData.poseFitting(options.pose);setView(options.angle||'front34');resize();return true;}
 // Raster snapshots share this exact renderer, scene builder, camera and lights.
@@ -413,7 +413,7 @@ const snapshots=new Map(),snapshotJobs=new Map();let snapshotPixels=0,snapshotQu
 async function snapshot(design,options={}){
  if(failed||!supported(design)||location.protocol==='file:')return null;
  const width=Math.min(1024,Math.max(96,Math.round(options.width||640))),height=Math.min(1024,Math.max(96,Math.round(options.height||480)));
- const view=options.angle||'front34',key='2252-detail:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
+ const view=options.angle||'front34',key='0014-showcase:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
  if(snapshots.has(key)){const c=snapshots.get(key);snapshots.delete(key);snapshots.set(key,c);return c;}
  if(snapshotJobs.has(key))return snapshotJobs.get(key);
  const job=snapshotQueue.then(async()=>{
@@ -423,7 +423,7 @@ async function snapshot(design,options={}){
   try{
    scene=new THREE.Scene();scene.environment=environment.texture;scene.environmentIntensity=.5;
    camera=new THREE.OrthographicCamera(-3,3,2,-2,.1,40);model=null;current={...design};resources=new Set();fitting=false;
-   build(current);if(rigAsset){A.Fitting3D.build({THREE,model,own,design:current,last,scene,gltf:rigAsset});fitting=true;}setView(view);fitCamera(width,height);
+   build(current);if(options.worn){A.Fitting3D.build({THREE,model,own,design:current,last,scene,gltf:rigAsset});fitting=true;}setView(view);fitCamera(width,height);
    rt=new THREE.WebGLRenderTarget(width,height,{depthBuffer:true,type:THREE.HalfFloatType,samples:2});
    renderer.setRenderTarget(rt);renderer.clear();renderer.render(scene,camera);
    // Render targets contain linear HDR light. The same Neutral/sRGB output
@@ -463,7 +463,8 @@ function info(){
   quality={waistRatio:last(-.36).width/last(.72).width,toeSpring:last(1.5).base-last(.72).base,openingToeFraction:(1.5-.55)/3,openingWidthRatio:mid.hole/mid.width,quarterHeightRatio:Math.sin(mid.arc),heelCounterHeight:last(-1.44).height,outsoleThickness:.038,cameraElevation:Math.atan2(camera.position.y-.23,Math.hypot(camera.position.x,camera.position.z))*180/Math.PI,heightFraction:(bounds.top-bounds.bottom)/2,bounds,toneMapping:'Neutral',sockets:model.children.filter(o=>o.userData.sockets).map(o=>o.userData.sockets)};
  }
  const anatomy=fitting?{pitch:model.userData.pitch,legs:model.userData.legs.map(l=>({thigh:l.thigh.quaternion.toArray(),calf:l.calf.quaternion.toArray(),ankle:l.foot.quaternion.toArray(),toe:l.toe.quaternion.toArray(),shoePosition:l.shoe.getWorldPosition(new THREE.Vector3()).toArray(),shoeQuaternion:l.shoe.getWorldQuaternion(new THREE.Quaternion()).toArray(),heelMeshes:l.shoe.children.filter(o=>o.name.startsWith('heel:')).map(o=>o.name)}))}:null;
- return {fitting,closeup:!!model?.userData.closeup,anatomy,pose:model?.userData.pose,feet:model?.userData.legs?.length||0,ready:!!host,error:lastError,contexts:renderer?1:0,revision:THREE?.REVISION,triangles:renderer?.info.render.triangles||0,resources:resources.size,swatch:current?A.option('color',current.color)[3]:null,heel:current?.heel,material:current?.material,pattern:current?.pattern,pixelRatio:renderer?.getPixelRatio(),pendingFrame:!!frame,snapshots:snapshots.size,snapshotPixels,quality};
+ const products=model?.children.filter(o=>o.userData.sockets).map(o=>({position:o.position.toArray(),rotation:o.rotation.toArray(),heelMeshes:o.children.filter(c=>c.name.startsWith('heel:')).map(c=>c.name)}))||[];
+ return {fitting,products,presentation:model?.userData.presentation||'studio',closeup:!!model?.userData.closeup,anatomy,pose:model?.userData.pose,feet:model?.userData.legs?.length||0,ready:!!host,error:lastError,contexts:renderer?1:0,revision:THREE?.REVISION,triangles:renderer?.info.render.triangles||0,resources:resources.size,swatch:current?A.option('color',current.color)[3]:null,heel:current?.heel,material:current?.material,pattern:current?.pattern,pixelRatio:renderer?.getPixelRatio(),pendingFrame:!!frame,snapshots:snapshots.size,snapshotPixels,quality};
 }
 if(typeof document!=='undefined')document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else invalidate();});
 A.Shoe3D={mount,unmount,updateFitting,supported,setView,setCloseup,resize,snapshot,paintSnapshot,info};
