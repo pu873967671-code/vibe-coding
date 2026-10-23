@@ -134,10 +134,11 @@
       A.Boutique.sync(api.state());
       const b=board();
       root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button></div></div><div class="atelier-orders">${orderCards()}</div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" data-chain="${cell?.chain||''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${tr('merges')}</span><i>·</i><span>${b.cells.filter(c=>c?.kind==='crate').length} ${tr('room')}</span></p></div><div class="mentor-area"><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside><div class="atelier-mentor" aria-hidden="true"><img src="assets/mentor/mentor_${G.active(api.state())?(api.state().mergeGuide===0?'wave':'point'):'think'}.webp" alt=""></div><button class="mentor-bubble secondary" data-mentor-talk hidden>${G.active(api.state())?tr('guide'+Math.min(5,api.state().mergeGuide)):tr('idle')}</button></div>`;
-      controls();detail();api.journey();
+      controls();detail();
       const guide=api.state().mergeGuide;
       if(guide<4){const cells=G.plans[guide].cells,i=cells[selected===cells[0]&&cells.length>1?1:0];root.querySelector(`[data-cell="${i}"]`)?.classList.add('guide-target');}
       if(guide===4)root.querySelector('[data-deliver="0"]')?.classList.add('guide-target');
+      api.journey();
       if(B.ensure(b))api.save();
       const bubble=b.bubbles[0];
       if(bubble&&guide>=6)root.querySelector('.chest-tool').outerHTML=`<button class="bubble-offer chest-tool secondary" data-bubble="${bubble.id}" aria-label="${tr('bubbleOpen')}">${art({kind:'item',chain:bubble.chain,tier:bubble.tier})}<span>${tr('bubbleOpen')}<small data-bubble-clock>${clock(bubble.expiresAt-Date.now())}</small></span></button>`;
@@ -148,6 +149,8 @@
       const banner=document.createElement('div'),c=A.Introduction.copy();
       banner.className='discovery-banner';banner.setAttribute('role','status');
       const unlocks=Object.entries(A.CRAFT_UNLOCKS).filter(([,id])=>id===item.chain+item.tier);
+      if(unlocks.length&&api.moment?.(tr('new')+' · '+name(item),c.unlocked+' · '+unlocks.map(([id])=>A.t(id.split(':')[1])).join(' · ')))return;
+      if(G.active(api.state()))return;
       banner.innerHTML=art(item)+`<div><span class="section-kicker">${c.new}</span><strong>${name(item)}</strong>${unlocks.length?`<small>${c.unlocked} · ${unlocks.map(([id])=>A.t(id.split(':')[1])).join(' · ')}</small>`:`<small>${tr('tier')} ${item.tier} / 7 · ${tr(item.chain)}</small>`}</div>`;
       root.querySelector('.merge-board-wrap')?.append(banner);setTimeout(()=>banner.remove(),3400);
     }
@@ -271,7 +274,7 @@
       tick(now){
         if(now-lastTick<1000)return;lastTick=now;
         document.querySelectorAll('[data-offer-expiry]').forEach(el=>{const remaining=+el.dataset.offerExpiry-Date.now();el.textContent=remaining>0?clock(remaining):tr('bubbleExpired');const buy=el.closest('.modal').querySelector('[data-bubble-buy]');if(buy)buy.disabled=remaining<=0;});
-        const changed=M.tick(board())|B.ensure(board());if(changed){api.save();if(visible&&api.active()&&!pointer)render();}else if(visible&&api.active())controls();
+        const changed=M.tick(board())|B.ensure(board());if(changed){api.save();if(visible&&api.active()&&!pointer)render();else controls();}else controls();
         if(!visible||!api.active()||document.hidden||pointer){lastInput=now;return;}
         if(now-lastInput>=5000&&!mentorHint){mentorHint=true;mentorPose('think',tr('idle'));}
         if(now-lastInput>=5000)for(const i of R.hint(board()))root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
