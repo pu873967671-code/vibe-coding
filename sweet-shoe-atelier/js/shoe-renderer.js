@@ -8,16 +8,23 @@ const TONE_NAMES=[...Object.keys(SHOE_ANCHORS),...['flat','block','kitten','wedg
 ASSET_NAMES.push(...TONE_NAMES.flatMap(n=>['tones/'+n+'_tone','tones/'+n+'_gleam']),...['flat','block','kitten','wedge'].flatMap(h=>['front34','top'].flatMap(v=>['angles/'+h+'_'+v+'_legs','angles/'+h+'_'+v+'_shade'])));
 ASSET_NAMES.push(...['flat','block','kitten','wedge'].flatMap(h=>['relaxed','crossed','step','seated'].flatMap(p=>['poses/'+h+'_'+p+'_legs','poses/'+h+'_'+p+'_shade','tones/'+h+'_'+p+'_shade_tone','tones/'+h+'_'+p+'_shade_gleam'])));
 ASSET_NAMES.push(...Object.keys(A.FABRIC_REGIONS||{}).flatMap(n=>['fabrics/'+n+'_upper','fabrics/'+n+'_edge']));
+ASSET_NAMES.push(...[...TONE_NAMES,...['flat','block','kitten','wedge'].flatMap(h=>['relaxed','crossed','step','seated'].map(p=>h+'_'+p+'_shade'))].flatMap(n=>['tones/'+n+'_shadow','tones/'+n+'_highlight']));
+ASSET_NAMES.push(...Object.keys(A.PRODUCT_FRAMES||{}).map(n=>'tones/'+n+'_contact'));
 A.POSE_ANCHORS={"block_crossed":[[0.375,0.7917771883289124],[0.66875,0.7718832891246684]],"block_relaxed":[[0.78125,0.7562326869806094],[0.40208333333333335,0.8213296398891967]],"block_step":[[0.7916666666666666,0.8512747875354107],[0.24375,0.7039660056657224]],"flat_crossed":[[0.7208333333333333,0.8356545961002786],[0.41041666666666665,0.8245125348189415]],"flat_relaxed":[[0.7708333333333334,0.7569444444444444],[0.425,0.8555555555555555]],"flat_step":[[0.7875,0.8456284153005464],[0.27291666666666664,0.6721311475409836]],"kitten_crossed":[[0.4708333333333333,0.7746835443037975],[0.76875,0.779746835443038]],"kitten_relaxed":[[0.7604166666666666,0.7702349869451697],[0.32083333333333336,0.839425587467363]],"kitten_step":[[0.8041666666666667,0.8218232044198895],[0.23125,0.6850828729281768]],"wedge_crossed":[[0.46458333333333335,0.8027777777777778],[0.7395833333333334,0.7708333333333334]],"wedge_relaxed":[[0.6375,0.7395287958115183],[0.475,0.8232984293193717]],"wedge_step":[[0.8166666666666667,0.8457142857142858],[0.20208333333333334,0.7257142857142858]],"block_seated":[[0.42,0.86],[0.62,0.86]],"flat_seated":[[0.57,0.87],[0.74,0.86]],"kitten_seated":[[0.7,0.87],[0.87,0.85]],"wedge_seated":[[0.59,0.83],[0.77,0.82]]};
+const COLOR_RAMPS={"pink":["#ff548e","#ffadc9","#ffe4e3"],"cream":["#ffaf0f","#fff0d2","#fff8e6"],"blue":["#38a9ff","#a9daff","#e5f1f3"],"green":["#75be2d","#c6e7a5","#eef5d8"],"purple":["#b079ff","#d6b9ff","#f3e7f3"],"peach":["#ff7327","#ffc09e","#ffe9d6"],"rose":["#e00c57","#f478a4","#fcd4d8"],"black":["#515067","#696883","#d2cfce"]};
 function designKey(d){d=cleanDesign(d);return Object.keys(defaults).map(k=>d[k]).join('|');}
 function shoeLayout(d){d=cleanDesign(d);const asset='shoe_'+d.heel+'_'+d.strap,a=SHOE_ANCHORS[asset],width=820,height=a.h/a.w*width,x=70,y=550-height;return {asset,x,y,width,height,toe:[x+a.toe[0]*width,y+a.toe[1]*height],back:[x+a.back[0]*width,y+a.back[1]*height]};}
 // Markup is pure; canvases are populated only in the browser after preload.
 function shoeCanvas(d){return `<canvas class="shoe-canvas" data-design="${designKey(d)}" role="img" aria-label="${Object.keys(defaults).map(k=>option(k,cleanDesign(d)[k])[1]).join(', ')}"></canvas>`;}
 
+function productCanvas(d,view='relaxed'){return shoeCanvas(d).replace('class="shoe-canvas"','class="shoe-canvas product-canvas" data-angle="close_'+view+'"');}
 function createShoeRenderer(images){
 // Share a bounded LRU across studio and worn artwork. A worn source is ~6 MiB;
 // retaining dozens of these on a phone costs far more than rebuilding a cold design.
-const composites=new Map(),painted=new WeakMap(),cacheBudget=24*1024*1024;let cacheBytes=0;
+const composites=new Map(),painted=new WeakMap(),floorLayers=new WeakMap(),cacheBudget=24*1024*1024;let cacheBytes=0;
+const floorTargets=new Set(),floorObserver=typeof ResizeObserver==='undefined'?null:new ResizeObserver(entries=>{
+ for(const {target} of entries)if(target.isConnected)hydrateCanvases(target.parentElement);
+});
 function cached(key){const value=composites.get(key);if(value){composites.delete(key);composites.set(key,value);}return value;}
 function remember(key,canvas){
  const bytes=canvas.width*canvas.height*4;
@@ -28,14 +35,19 @@ let imageCount=images.size;
 function syncAssets(){if(imageCount!==images.size){imageCount=images.size;composites.clear();cacheBytes=0;}}
 function imageOK(name){const im=images.get(name);return im?.naturalWidth?im:null;}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
-// Lift shadows before tinting; highlight maps restore the painted satin sheen.
-// All source luminance is prepared offline, with no runtime pixel reads.
+// Offline weights map every source into the same three clean colour stops.
+// Only draw/composite operations: redirected cross-origin art can stay tainted.
 function luminous(ctx,name,color,x,y,w,h,material='satin'){
  const tone=imageOK('tones/'+name+'_tone'),gleam=imageOK('tones/'+name+'_gleam');
  if(!tone)return false;
- ctx.drawImage(tone,x,y,w,h);ctx.globalCompositeOperation='multiply';ctx.fillStyle=color;ctx.fillRect(x,y,w,h);
- ctx.globalCompositeOperation='destination-in';ctx.drawImage(tone,x,y,w,h);
- if(gleam){ctx.globalCompositeOperation='screen';ctx.globalAlpha=material==='velvet'?.12:material==='mesh'?.12:material==='lace'?.38:1;ctx.drawImage(gleam,x,y,w,h);ctx.globalAlpha=1;}
+ const ramp=Object.values(COLOR_RAMPS).find(r=>r[1]===color)||COLOR_RAMPS.pink;
+ ctx.drawImage(tone,x,y,w,h);ctx.globalCompositeOperation='source-in';ctx.fillStyle=ramp[1];ctx.fillRect(x,y,w,h);
+ for(const [suffix,tint] of [['shadow',ramp[0]],['highlight',ramp[2]]]){
+  const mask=imageOK('tones/'+name+'_'+suffix);if(!mask)continue;
+  const layer=makeCanvas(Math.ceil(w),Math.ceil(h)),p=layer.getContext('2d');p.drawImage(mask,0,0,w,h);p.globalCompositeOperation='source-in';p.fillStyle=tint;p.fillRect(0,0,w,h);
+  ctx.globalCompositeOperation='source-atop';ctx.drawImage(layer,x,y,w,h);
+ }
+ if(gleam){ctx.globalCompositeOperation='screen';ctx.globalAlpha=material==='velvet'?.06:material==='mesh'?.08:material==='lace'?.08:.16;ctx.drawImage(gleam,x,y,w,h);ctx.globalAlpha=1;}
  ctx.globalCompositeOperation='source-over';return true;
 }
 // Each material and motif uses one upper-only mask. Original shade maps light
@@ -49,10 +61,10 @@ function finishFabric(b,d,w,h,source){
   if(d.material==='satin'){
    // Two clean directional ribbons; no photographic/noise texture.
    const g=p.createLinearGradient(0,bh*.1,bw,bh*.9);
-   for(const [at,alpha] of [[0,0],[.23,0],[.34,.34],[.44,0],[.65,0],[.74,.15],[.83,0],[1,0]])g.addColorStop(at,`rgba(255,253,241,${alpha})`);
+   for(const [at,alpha] of [[0,0],[.23,0],[.34,.14],[.44,0],[.65,0],[.74,.06],[.83,0],[1,0]])g.addColorStop(at,`rgba(255,253,241,${alpha})`);
    p.fillStyle=g;p.fillRect(0,0,bw,bh);
   }else if(d.material==='velvet'){
-   p.fillStyle='rgba(99,46,69,.09)';p.fillRect(0,0,bw,bh);
+   p.fillStyle=(COLOR_RAMPS[d.color]||COLOR_RAMPS.pink)[0]+'12';p.fillRect(0,0,bw,bh);
    p.strokeStyle='rgba(255,244,229,.12)';p.lineWidth=.6;
    for(let yy=0;yy<bh;yy+=2.8){p.beginPath();p.moveTo(0,yy);p.lineTo(bw,yy-bh*.1);p.stroke();}
   }else if(d.material==='mesh'){
@@ -61,7 +73,7 @@ function finishFabric(b,d,w,h,source){
    for(let row=0;row<Math.ceil(bh/pitch)+1;row++)for(let col=-1;col<31;col++){
     const px=(col+(row%2)*.5)*pitch,py=row*pitch;
     p.beginPath();p.moveTo(px,py-pitch*.30);p.lineTo(px+pitch*.24,py);p.lineTo(px,py+pitch*.30);p.lineTo(px-pitch*.24,py);p.closePath();
-    p.fillStyle='rgba(83,49,61,.48)';p.fill();
+    p.fillStyle=(COLOR_RAMPS[d.color]||COLOR_RAMPS.pink)[0]+'60';p.fill();
     p.strokeStyle='rgba(255,253,240,.5)';p.lineWidth=Math.max(.55,pitch*.10);p.stroke();
    }
   }else if(d.material==='lace'){
@@ -119,7 +131,7 @@ function finishFabric(b,d,w,h,source){
   if(trim){p.drawImage(trim,x,y,width,height);p.globalCompositeOperation='source-over';b.save();b.globalCompositeOperation='source-atop';b.drawImage(layer,0,0);b.restore();}
  }
  const edge=imageOK('fabrics/'+name+'_edge');
- if(edge){b.save();b.globalCompositeOperation='source-atop';b.drawImage(edge,x,y,width,height);b.restore();}
+ if(edge){const piping=makeCanvas(w,h),p=piping.getContext('2d');p.drawImage(edge,x,y,width,height);p.globalCompositeOperation='source-in';p.fillStyle=(COLOR_RAMPS[d.color]||COLOR_RAMPS.pink)[0];p.fillRect(0,0,w,h);b.save();b.globalCompositeOperation='source-atop';b.globalAlpha=.65;b.drawImage(piping,0,0);b.restore();}
  b.globalCompositeOperation='source-over';
 }
 function composite(d){
@@ -173,8 +185,9 @@ function wornComposite(d){
  return remember(key,out);
 }
 // Extra-angle sources already contain the pair, with matching painted skin.
-function angleComposite(d,angle){
- syncAssets();d=cleanDesign(d);const key='angle:'+angle+':'+designKey(d),hit=cached(key);if(hit)return hit;
+function angleComposite(d,angle,floor='salon',ground=true){
+ if(angle.startsWith('close_'))return productComposite(d,angle.slice(6),floor,ground);
+ syncAssets();d=cleanDesign(d);const key='angle:'+angle+':'+ground+':'+designKey(d),hit=cached(key);if(hit)return hit;
  // Car poses share the dedicated bent-knee painting; never remap calves.
  if(angle.startsWith('seated_'))angle='seated';
  const natural=['relaxed','crossed','step','seated'].includes(angle),folder=natural?'poses/':'angles/',name=d.heel+'_'+angle,legs=imageOK(folder+name+'_legs'),shade=imageOK(folder+name+'_shade');
@@ -182,7 +195,7 @@ function angleComposite(d,angle){
  const out=makeCanvas(legs.naturalWidth,legs.naturalHeight),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
  // Authored sole contacts live in source coordinates, so shadows follow every
  // heel, seated pose, zoom and room crop together with the painted anatomy.
- if(angle==='seated'){
+ if(angle==='seated'&&ground){
   const contacts={flat:[[.58,.928,.23],[.75,.899,.17]],block:[[.405,.928,.25],[.655,.909,.23]],kitten:[[.72,.925,.24],[.895,.908,.17]],wedge:[[.59,.907,.25],[.79,.894,.21]]}[d.heel];
   for(const [x,y,width] of contacts){
    ctx.save();ctx.translate(x*out.width,y*out.height);ctx.scale(width*out.width,.022*out.height);
@@ -205,19 +218,62 @@ function angleComposite(d,angle){
  }
  return remember(key,out);
 }
-function hydrateCanvases(root=document){root.querySelectorAll('canvas[data-design]').forEach(c=>{
+// Ankle-height crop of the exact same complete painted pair. Shared by studio,
+// fitting and Collection; the original full sources remain available to detail QA.
+function productComposite(d,view='relaxed',floor='salon',ground=true){
+ const glossy=floor==='salon'||floor==='vanity';
+ syncAssets();d=cleanDesign(d);const key='product:'+view+':'+glossy+':'+ground+':'+designKey(d),hit=cached(key);if(hit)return hit;
+ const sourceView=view.startsWith('seated_')?'seated':view,source=angleComposite(d,sourceView,floor,false),rect=A.PRODUCT_FRAMES?.[d.heel+'_'+sourceView]||[0,0,source.width,source.height];
+ const [x,y,w,h]=rect,out=makeCanvas(w,h+Math.round(h*.07)),ctx=out.getContext('2d');
+ // Each narrow reflection strip starts at its own painted sole line. Contacts
+ // are offline assets, so redirected/tainted sources need no pixel readback.
+ const contactName=d.heel+'_'+sourceView,contact=imageOK('tones/'+contactName+'_contact');
+ for(const [sx,sy] of A.PRODUCT_CONTACTS?.[contactName]||[]){
+  const band=Math.max(6,Math.round(h*.045)),dx=sx-x,dy=sy-y;
+  ctx.save();ctx.translate(dx,dy);ctx.scale(1,-1);ctx.globalAlpha=glossy?.10:.055;
+  ctx.drawImage(source,sx,sy-band,6,band,0,-band,6,band);ctx.restore();
+ }
+ if(contact&&ground)ctx.drawImage(contact,x,y,w,h,0,0,w,h);
+ ctx.drawImage(source,x,y,w,h,0,0,w,h);
+ const natural=['relaxed','crossed','step','seated'].includes(sourceView),legs=imageOK((natural?'poses/':'angles/')+d.heel+'_'+sourceView+'_legs');
+ if(legs){const skin=makeCanvas(w,h),p=skin.getContext('2d');p.drawImage(legs,x,y,w,h,0,0,w,h);p.globalCompositeOperation='multiply';p.fillStyle='#fff9ed';p.fillRect(0,0,w,h);p.globalCompositeOperation='destination-in';p.drawImage(legs,x,y,w,h,0,0,w,h);p.globalCompositeOperation='screen';p.globalAlpha=.04;p.fillStyle='#ff0000';p.fillRect(0,0,w,h);p.globalAlpha=1;p.globalCompositeOperation='destination-in';p.drawImage(legs,x,y,w,h,0,0,w,h);ctx.drawImage(skin,0,0);}
+ return remember(key,out);
+}
+// Separate floor ink from the pair so multiply reaches the room background,
+// without changing any shoe/skin colours. Use the exact same crop and layout.
+function paintFloor(c,d){
+ const stage=c.closest('.runway-scene,.product-stage,.collection-stage');
+ if(!stage||!c.dataset.angle?.startsWith('close_'))return false;
+ const view=c.dataset.angle.slice(6).replace(/^seated_.*/,'seated'),name=d.heel+'_'+view,frame=A.PRODUCT_FRAMES?.[name],contact=imageOK('tones/'+name+'_contact');
+ if(!frame||!contact)return false;
+ let layer=floorLayers.get(c);
+ if(!layer){layer=document.createElement('canvas');layer.className='product-floor-shadow';layer.setAttribute('aria-hidden','true');stage.append(layer);floorLayers.set(c,layer);if(floorObserver){floorTargets.add(c);floorObserver.observe(c);}}
+ const anchor=c.closest('.runway-angle-art,#preview')||c,style=getComputedStyle(anchor);
+ for(const prop of ['left','top','width','height','translate','rotate','transform','transformOrigin','animation'])layer.style[prop]=prop==='left'?anchor.offsetLeft+'px':prop==='top'?anchor.offsetTop+'px':prop==='width'?c.clientWidth+'px':prop==='height'?c.clientHeight+'px':style[prop];
+ const width=Math.max(1,Math.round(c.clientWidth)),height=Math.max(1,Math.round(width*(frame[3]+Math.round(frame[3]*.07))/frame[2]));
+ if(layer.width!==width||layer.height!==height||layer.dataset.source!==name||layer.dataset.assets!==String(images.size)){
+  layer.width=width;layer.height=height;layer.dataset.source=name;layer.dataset.assets=images.size;
+  layer.getContext('2d').drawImage(contact,...frame,0,0,width,height*frame[3]/(frame[3]+Math.round(frame[3]*.07)));
+ }
+ return true;
+}
+function hydrateCanvases(root=document){
+ for(const c of floorTargets)if(!c.isConnected){floorObserver.unobserve(c);floorLayers.get(c)?.remove();floorTargets.delete(c);}
+ root.querySelectorAll('canvas[data-design]').forEach(c=>{
  // Layout width excludes pose/zoom transforms. Resizing a rotated shoe must not
  // inflate its backing store or repeatedly soften the same artwork.
  let width=c.clientWidth;const ratio=Math.min(3,Math.min(2,window.devicePixelRatio||1)*(c.closest('.zoomed')?1.5:1));if(!width||!c.getClientRects().length)return;
- let w=Math.max(1,Math.round(width*ratio));const key=(c.dataset.angle?'angle:'+c.dataset.angle+':':c.hasAttribute('data-worn')?'worn:':'shoe:')+c.dataset.design,previous=painted.get(c);
+ const floor=c.closest('.runway-scene')?.dataset.showcaseScene||'salon';
+ let w=Math.max(1,Math.round(width*ratio));const key=(c.dataset.angle?'angle:'+c.dataset.angle+':'+floor+':':c.hasAttribute('data-worn')?'worn:':'shoe:')+c.dataset.design,previous=painted.get(c);
+ const parts=c.dataset.design.split('|'),d=Object.fromEntries(Object.keys(defaults).map((k,i)=>[k,parts[i]])),separateFloor=paintFloor(c,d);
  if(previous?.assetCount===images.size&&previous?.key===key&&previous.width===w&&c.width===w&&c.height===previous.height)return;
- const parts=c.dataset.design.split('|'),d=Object.fromEntries(Object.keys(defaults).map((k,i)=>[k,parts[i]])),source=c.dataset.angle?angleComposite(d,c.dataset.angle):c.hasAttribute('data-worn')?wornComposite(d):composite(d);
+ const source=c.dataset.angle?angleComposite(d,c.dataset.angle,floor,!separateFloor):c.hasAttribute('data-worn')?wornComposite(d):composite(d);
  let h=Math.round(w*source.height/source.width);
  if(c.hasAttribute('data-worn')||c.dataset.angle){c.parentElement.style.setProperty('--foot-aspect',source.width/source.height);width=c.clientWidth;w=Math.max(1,Math.round(width*ratio));h=Math.round(w*source.height/source.width);}
- c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(source,0,0,w,h);painted.set(c,{key,width:w,height:h,assetCount:images.size});
+ c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(source,0,0,w,h);if(separateFloor)paintFloor(c,d);painted.set(c,{key,width:w,height:h,assetCount:images.size});
 });}
 
-return {hydrateCanvases,wornComposite,composite,angleComposite};
+return {hydrateCanvases,wornComposite,composite,angleComposite,productComposite};
 }
-Object.assign(A,{SHOE_ANCHORS,ASSET_NAMES,designKey,shoeLayout,shoeCanvas,createShoeRenderer});
+Object.assign(A,{SHOE_ANCHORS,ASSET_NAMES,COLOR_RAMPS,designKey,shoeLayout,shoeCanvas,productCanvas,createShoeRenderer});
 })(globalThis.SweetShoe = globalThis.SweetShoe || {});
