@@ -107,6 +107,7 @@
         setTimeout(()=>{
           if(!visible||!api.active()||!card?.isConnected)return;
           card?.classList.add('delivery-celebrate');
+          api.particles(destination.x,destination.y,false,'spk');
           const coins=document.getElementById('coins').getBoundingClientRect(),stars=document.getElementById('atelierStars').getBoundingClientRect();
           for(let i=0;i<5;i++)fly(resource('coin'),destination,center(coins),28,i*55,'reward-flight');
           for(let i=0;i<Math.min(3,reward.stars);i++)fly(resource('star'),destination,center(stars),28,90+i*75,'reward-flight');
@@ -160,11 +161,20 @@
       if(result.type==='merge'&&!G.active(api.state()))B.offer(board(),result);
       selected=guided?-1:result.to; api.save();api.header();render();
       const target=root.querySelector(`[data-cell="${result.to}"]`);
-      if(result.type==='generate')root.querySelector(`[data-cell="${result.from}"]`)?.classList.add('generator-tapped');
+      if(result.type==='generate'){
+        const source=root.querySelector(`[data-cell="${result.from}"]`);
+        source?.classList.add('generator-tapped');
+        if(source&&target){
+          const from=source.getBoundingClientRect(),to=target.getBoundingClientRect();
+          target.style.setProperty('--spawn-x',(from.x-to.x)+'px');
+          target.style.setProperty('--spawn-y',(from.y-to.y)+'px');
+          target.classList.add('from-generator');
+        }
+      }
       target?.classList.add(result.type==='merge'?'just-merged':'just-spawned');
       if(result.type==='merge'||result.type==='gift') {
         api.sound(result.discovery?'discovery':'merge',result.item.tier);
-        const r=target.getBoundingClientRect();api.particles(r.x+r.width/2,r.y+r.height/2);
+        const r=target.getBoundingClientRect();api.particles(r.x+r.width/2,r.y+r.height/2,false,result.item.chain);
         if(result.discovery)discovery(result.item);
         if(result.opened?.length)setTimeout(()=>{if(visible&&api.active())api.sound('crate');},120);
         for(const index of result.opened||[])root.querySelector(`[data-cell="${index}"]`)?.classList.add('just-opened');
