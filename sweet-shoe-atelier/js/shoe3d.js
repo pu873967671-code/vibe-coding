@@ -9,6 +9,7 @@ let request=0,frame=0,observer,drag,failed=false,angle='front34',yaw=0;
 let resources=new Set();
 const own=value=>(resources.add(value),value);
 const TAU=Math.PI*2;
+const OPENING_START=-1.32,OPENING_END=.18;
 function supported(d){return ['heel','strap','decoration','charm'].every(k=>A.opts[k].some(o=>o[0]===(d[k]||'none')));}
 function release(){
  cancelAnimationFrame(frame);frame=0;clearTimeout(idleTimer);idleTimer=0;fitting=false;observer?.disconnect();observer=null;
@@ -60,9 +61,10 @@ async function init(){
 // sections, with the crown removed exactly where the foot opening lies.
 function last(z){
  const t=(z+1.5)/3;
- // Heel → waist → ball → almond toe. The waist is 69% of ball width;
- // closely spaced round-end sections avoid the old straight, boxy toe cap.
- const profile=[[0,.003,.22],[.018,.135,.25],[.055,.245,.27],[.13,.305,.28],[.25,.32,.29],[.38,.322,.31],[.49,.385,.34],[.63,.455,.35],[.74,.46,.33],[.83,.43,.30],[.91,.35,.25],[.965,.23,.17],[.991,.115,.09],[1,.003,.045]];
+ // A 3-unit last with a 1.15-unit ball: a real 2.6:1 ballet proportion.
+ // The heel cup rises into a rounded counter; the almond cap retains volume
+ // ahead of the shorter vamp instead of collapsing into a flat canoe.
+ const profile=[[0,.003,.22],[.018,.195,.32],[.055,.32,.37],[.13,.365,.38],[.25,.385,.39],[.38,.40,.40],[.49,.48,.42],[.63,.57,.43],[.74,.575,.41],[.83,.53,.38],[.91,.435,.32],[.965,.285,.23],[.991,.14,.12],[1,.003,.008]];
  let i=0;while(i<profile.length-2&&t>profile[i+1][0])i++;
  const a=profile[i],b=profile[i+1],p=profile[Math.max(0,i-1)],n=profile[Math.min(profile.length-1,i+2)],u=(t-a[0])/(b[0]-a[0]);
  const value=k=>{
@@ -72,12 +74,12 @@ function last(z){
  const toe=Math.max(0,(t-.7)/.3);
  const lift={flat:.025,block:.64,kitten:.54,wedge:.60}[current?.heel||'flat'];
  const rear=Math.max(0,Math.min(1,(.72-t)/.48)),bend=rear*rear*(3-2*rear);
- return {width:Math.max(.003,value(1)),height:Math.max(.045,value(2)),base:.075+.075*toe*toe+lift*bend};
+ return {width:Math.max(.003,value(1)),height:Math.max(.008,value(2)),base:.075+.075*toe*toe+lift*bend};
 }
 function section(z){
- // The vamp ends 33% behind the toe. A broad opening leaves low quarters;
- // the rounded ends retain a short toe cap and a low, curved heel counter.
- const p=last(z),u=(z+1.44)/1.99,hole=u>0&&u<1?p.width*.968*Math.sin(Math.PI*u)**.18:0;
+ // An instep-sized oval: a closed heel cup and a vamp covering 44% of length.
+ // Elliptic shoulders avoid the old long, abruptly squared collar opening.
+ const p=last(z),u=(z-OPENING_START)/(OPENING_END-OPENING_START),hole=u>0&&u<1?p.width*.89*Math.sin(Math.PI*u)**.42:0;
  return {...p,arc:Math.acos(Math.min(.999,hole/p.width)),hole};
 }
 function upperGeometry(){
@@ -100,6 +102,9 @@ function upperGeometry(){
   const a=i*(cross+1)+cross,b=(long+1)*(cross+1)+a;
   const n=new THREE.Vector3().fromBufferAttribute(normals,a).add(new THREE.Vector3().fromBufferAttribute(normals,b)).normalize();normals.setXYZ(a,n.x,n.y,n.z);normals.setXYZ(b,n.x,n.y,n.z);
  }
+ // Explicit tangents share the welded crown normals; derivative tangents
+ // otherwise create a false centre seam in the satin anisotropic highlight.
+ g.computeTangents();
  return g;
 }
 function soleGeometry(insole=false,edge=false){
@@ -108,7 +113,7 @@ function soleGeometry(insole=false,edge=false){
   const z=-1.5+3*(side?steps-i:i)/steps,x=(side?-1:1)*last(z).width*scale;
   if(!side&&!i)shape.moveTo(x,-z*scale);else shape.lineTo(x,-z*scale);
  }
- shape.closePath();const g=own(new THREE.ExtrudeGeometry(shape,{depth:edge?.009:insole?.016:.028,bevelEnabled:true,bevelSize:insole?.006:.009,bevelThickness:edge?.003:.005,bevelSegments:6,steps:1,curveSegments:32}));g.rotateX(-Math.PI/2);
+ shape.closePath();const g=own(new THREE.ExtrudeGeometry(shape,{depth:edge?.009:insole?.016:.032,bevelEnabled:true,bevelSize:insole?.006:.014,bevelThickness:edge?.004:.007,bevelSegments:6,steps:1,curveSegments:32}));g.rotateX(-Math.PI/2);
  // The thin sole follows the arch and a restrained 2.5%-length toe spring.
  const pos=g.attributes.position;for(let i=0;i<pos.count;i++)pos.setY(i,pos.getY(i)+last(pos.getZ(i)).base-.075);
  g.computeVertexNormals();return g;
@@ -146,7 +151,7 @@ function surfaceTexture(kind){
 }
 function upperMaterial(d){
  const type=d.material,color=A.option('color',d.color)[3];
- const values={satin:{roughness:.23,metalness:0,clearcoat:.22,clearcoatRoughness:.24,sheen:.16,sheenRoughness:.4,anisotropy:.92,anisotropyRotation:Math.PI/2},velvet:{roughness:.92,sheen:1,sheenRoughness:.8},lace:{roughness:.78,sheen:.3},mesh:{roughness:.48,sheen:.45,transmission:.12,thickness:.015,ior:1.35},glitter:{roughness:.3,metalness:.22,clearcoat:.4},leather:{roughness:.43,clearcoat:.22},cotton:{roughness:.95}};
+ const values={satin:{roughness:.29,metalness:0,clearcoat:.18,clearcoatRoughness:.28,sheen:.24,sheenRoughness:.4,anisotropy:.62,anisotropyRotation:Math.PI/2},velvet:{roughness:.92,sheen:1,sheenRoughness:.8},lace:{roughness:.78,sheen:.3},mesh:{roughness:.48,sheen:.45,transmission:.12,thickness:.015,ior:1.35},glitter:{roughness:.3,metalness:.22,clearcoat:.4},leather:{roughness:.43,clearcoat:.22},cotton:{roughness:.95}};
  const m=own(new THREE.MeshPhysicalMaterial({color,side:THREE.DoubleSide,...(values[type]||values.satin)}));
  m.sheenColor=new THREE.Color(color).lerp(new THREE.Color('#fff7f5'),.38);
  if(['mesh','lace','glitter','velvet','cotton'].includes(type)){
@@ -186,7 +191,7 @@ function ribbon(points,width,material,parent,vertical=false,closed=false){
  // A cambered silk strip with actual edge thickness and a softly twisting fold.
  for(let layer=0;layer<2;layer++)for(let i=0;i<=steps;i++){
   const t=i/steps,p=curve.getPoint(t),tangent=curve.getTangent(t).normalize();
-  let side=vertical==='depth'?new THREE.Vector3(0,0,1):vertical?new THREE.Vector3(0,1,0):new THREE.Vector3(-tangent.y,tangent.x,0);
+  let side=vertical==='width'?new THREE.Vector3(1,0,0):vertical==='depth'?new THREE.Vector3(0,0,1):vertical?new THREE.Vector3(0,1,0):new THREE.Vector3(-tangent.y,tangent.x,0);
   side.addScaledVector(tangent,-side.dot(tangent));if(side.lengthSq()<.001)side.set(1,0,0);side.normalize();side.applyAxisAngle(tangent,Math.sin(t*Math.PI*2)*.28);
   const normal=new THREE.Vector3().crossVectors(tangent,side).normalize();
   const breadth=width*(closed?1:.65+.35*Math.sin(Math.PI*t)**.7);
@@ -200,10 +205,11 @@ function ribbon(points,width,material,parent,vertical=false,closed=false){
 function bow(parent,material,scale=1){
  const group=new THREE.Group();group.name='satin-loop-bow';group.scale.setScalar(scale);parent.add(group);
  for(const side of [-1,1]){
-  ribbon([[side*.025,0,.008],[side*.18,.125,.025],[side*.34,.095,.075],[side*.29,-.055,.035],[side*.045,-.02,-.015]],.14,material,group);
-  ribbon([[side*.025,-.025,-.012],[side*.08,-.16,.025],[side*.17,-.27,-.045]],.12,material,group);
+  ribbon([[side*.025,0,.008],[side*.15,.115,.035],[side*.31,.105,.085],[side*.29,-.05,.13],[side*.045,-.02,-.015]],.115,material,group).name='folded-bow-loop';
+  ribbon([[side*.025,-.025,-.012],[side*.09,-.14,.045],[side*.16,-.25,-.015],[side*.12,-.28,.01]],.10,material,group).name='silk-bow-tail';
  }
- const knot=mesh(own(new THREE.SphereGeometry(1,32,20)),material,group);knot.scale.set(.052,.066,.043);knot.name='gathered-silk-knot';return group;
+ const wrap=[];for(let i=0;i<24;i++){const a=i/24*TAU;wrap.push([0,Math.cos(a)*.057,Math.sin(a)*.045+.02]);}
+ ribbon(wrap,.075,material,group,'width',true).name='gathered-silk-knot';return group;
 }
 function stitchGeometry(curve){
  const positions=[],indices=[],count=116,radial=5,along=3;
@@ -227,7 +233,7 @@ function crystalGeometry(){
 }
 function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
  // Sockets are shoe-local and authored against the same last as the upper.
- const sockets={heelBack:[0,last(-1.42).base+.18,-1.565],toe:[0,last(.88).base+last(.88).height+.035,.88],ankle:[0,last(-.95).base+.39,-.94]};
+ const sockets={heelBack:[0,last(-1.42).base+.25,-1.535],toe:[0,last(.88).base+last(.88).height+.018,.88],ankle:[0,last(-.95).base+.43,-.94]};
  shoe.userData.sockets=sockets;
  const at=(name)=>{const g=new THREE.Group();g.name='socket:'+name;g.position.set(...sockets[name]);shoe.add(g);return g;};
  if(d.decoration&&d.decoration!=='none'){
@@ -269,8 +275,9 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
    const frame=new THREE.CatmullRomCurve3([[-.035,-.044,0],[.035,-.044,0],[.041,.035,0],[-.035,.044,0]].map(p=>new THREE.Vector3(...p)),true);
    const buckle=mesh(own(new THREE.TubeGeometry(frame,48,.008,8,true)),metalMat,ankle);buckle.rotation.y=Math.PI/2;buckle.position.set(.272,-.028,-.025);buckle.name='polished-strap-buckle';
   }
-  // Short tabs begin on the actual quarters, with a slight outward fold.
-  for(const side of [-1,1])ribbon([[side*.24,-.30,-.13],[side*.275,-.17,-.14],[side*.265,-.015,-.12]],.06,material,ankle,'depth');
+  // Sample the actual quarter so every heel retains a sewn-in attachment.
+  const quarter=section(-1.04),joinY=quarter.base+quarter.height*Math.sin(quarter.arc)-sockets.ankle[1];
+  for(const side of [-1,1])ribbon([[side*(quarter.hole+.012),joinY-.025,-.10],[side*.285,joinY+.035,-.12],[side*.265,-.015,-.12]],.06,material,ankle,'depth').name='sewn-strap-tab';
 
  }
 }
@@ -297,7 +304,7 @@ function build(d,options={}){
  }
  const rim=[],stitches=[];
  for(let side=0;side<2;side++)for(let i=0;i<=100;i++){
-  const z=-1.44+1.99*(side?100-i:i)/100,p=section(z),sign=side?-1:1;
+  const z=OPENING_START+(OPENING_END-OPENING_START)*(side?100-i:i)/100,p=section(z),sign=side?-1:1;
   rim.push(new THREE.Vector3(sign*p.hole,p.base+p.height*Math.sin(p.arc),z));
   // Follow the actual loft 3 mm below the collar; an arbitrary Y offset put
   // the old thread inside the upper, making it disappear in product views.
@@ -322,7 +329,7 @@ function build(d,options={}){
   c.filter='blur(4px)';c.fillStyle='#633b5240';outline();c.fill();
   c.filter='blur(5px)';c.fillStyle='#59304740';for(const [z,w,h] of [[-.96,.23,.25],[.55,.35,.35]]){c.beginPath();c.ellipse(s/2,(z+1.7)/3.4*s,w/1.18*s,h/3.4*s,0,0,TAU);c.fill();}
  });
- const contactGeo=own(new THREE.PlaneGeometry(1.18,3.4)),contactMat=own(new THREE.MeshBasicMaterial({map:contact,transparent:true,depthWrite:false,opacity:.8}));
+ const contactGeo=own(new THREE.PlaneGeometry(1.42,3.4)),contactMat=own(new THREE.MeshBasicMaterial({map:contact,transparent:true,depthWrite:false,opacity:.72}));
  model=new THREE.Group();scene.add(model);
  for(let i=0;i<2;i++){
   const shoe=new THREE.Group();shoe.position.set(i?.63:-.63,0,i?.36:-.42);shoe.rotation.y=i?-.16:.17;model.add(shoe);
@@ -335,6 +342,13 @@ function build(d,options={}){
   const labelMap=texture((c,s)=>{c.fillStyle='#9d7e8c';c.textAlign='center';c.font='42px Georgia';c.fillText('S  ·  A',s/2,s*.51);c.strokeStyle='#c9acb9';c.lineWidth=2;c.strokeRect(s*.2,s*.36,s*.6,s*.23);},256);labelMap.colorSpace=THREE.SRGBColorSpace;
   const label=mesh(own(new THREE.PlaneGeometry(.27,.23)),own(new THREE.MeshPhysicalMaterial({map:labelMap,transparent:true,depthWrite:false,roughness:.9})),shoe);label.rotation.x=-Math.PI/2;label.position.set(0,last(-.72).base+.034,-.72);label.castShadow=false;label.name='debossed-atelier-mark';
   if(heel)mesh(heel,d.heel==='flat'?soleMat:heelMat,shoe).name='heel:'+d.heel;
+  if(d.heel!=='wedge'){
+   const cap=heel.clone();own(cap);const p=cap.attributes.position,source=heel.attributes.position;
+   // Extrude only the ground-contact ring. Compressing the complete flared
+   // kitten heel would produce a conspicuous wide saucer beneath its tip.
+   for(let j=0;j<p.count;j++){const t=(p.getY(j)-.018)/Math.max(.001,last(-.96).base-.058),ring=j%65;p.setXYZ(j,j<29*65?source.getX(ring):0,.009+Math.max(0,t)*.023,j<29*65?source.getZ(ring):-.975);}
+   cap.computeVertexNormals();mesh(cap,soleMat,shoe).name='rubber-heel-cap';
+  }
   if(d.heel==='wedge'){
    // A continuous contrasting satin band follows the actual side-wall arch.
    const band=heel.clone();own(band);const p=band.attributes.position;
@@ -413,7 +427,7 @@ const snapshots=new Map(),snapshotJobs=new Map();let snapshotPixels=0,snapshotQu
 async function snapshot(design,options={}){
  if(failed||!supported(design)||location.protocol==='file:')return null;
  const width=Math.min(1024,Math.max(96,Math.round(options.width||640))),height=Math.min(1024,Math.max(96,Math.round(options.height||480)));
- const view=options.angle||'front34',key='0014-showcase:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
+ const view=options.angle||'front34',key='0022-sculpt:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
  if(snapshots.has(key)){const c=snapshots.get(key);snapshots.delete(key);snapshots.set(key,c);return c;}
  if(snapshotJobs.has(key))return snapshotJobs.get(key);
  const job=snapshotQueue.then(async()=>{
@@ -459,8 +473,10 @@ function info(){
  if(model&&camera){
   const bounds={left:1,right:-1,top:-1,bottom:1};model.updateMatrixWorld(true);camera.updateMatrixWorld(true);
   const v=new THREE.Vector3();model.traverseVisible(o=>{if(!o.isMesh||!o.castShadow)return;const pos=o.geometry.attributes.position;for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld).project(camera);bounds.left=Math.min(bounds.left,v.x);bounds.right=Math.max(bounds.right,v.x);bounds.top=Math.max(bounds.top,v.y);bounds.bottom=Math.min(bounds.bottom,v.y);}});
-  const mid=section(-.44);
-  quality={waistRatio:last(-.36).width/last(.72).width,toeSpring:last(1.5).base-last(.72).base,openingToeFraction:(1.5-.55)/3,openingWidthRatio:mid.hole/mid.width,quarterHeightRatio:Math.sin(mid.arc),heelCounterHeight:last(-1.44).height,outsoleThickness:.038,cameraElevation:Math.atan2(camera.position.y-.23,Math.hypot(camera.position.x,camera.position.z))*180/Math.PI,heightFraction:(bounds.top-bounds.bottom)/2,bounds,toneMapping:'Neutral',sockets:model.children.filter(o=>o.userData.sockets).map(o=>o.userData.sockets)};
+  const mid=section((OPENING_START+OPENING_END)/2),details={binding:0,stitches:0,bow:0};
+  model.traverse(o=>{if(o.name==='padded-collar-binding')details.binding++;if(o.name==='hand-stitched-topline')details.stitches++;if(o.name==='satin-loop-bow'||o.name==='outer-ankle-bow')details.bow++;});
+  let ball=0;for(let z=-1.5;z<=1.5;z+=.005)ball=Math.max(ball,last(z).width);
+  quality={lengthWidthRatio:3/(2*ball),toeBoxHeight:last(.78).height,details,waistRatio:last(-.36).width/last(.72).width,toeSpring:last(1.5).base-last(.72).base,openingToeFraction:(1.5-OPENING_END)/3,openingWidthRatio:mid.hole/mid.width,quarterHeightRatio:Math.sin(mid.arc),heelCounterHeight:last(-1.44).height,outsoleThickness:.046,cameraElevation:Math.atan2(camera.position.y-.23,Math.hypot(camera.position.x,camera.position.z))*180/Math.PI,heightFraction:(bounds.top-bounds.bottom)/2,bounds,toneMapping:'Neutral',sockets:model.children.filter(o=>o.userData.sockets).map(o=>o.userData.sockets)};
  }
  const anatomy=fitting?{pitch:model.userData.pitch,legs:model.userData.legs.map(l=>({thigh:l.thigh.quaternion.toArray(),calf:l.calf.quaternion.toArray(),ankle:l.foot.quaternion.toArray(),toe:l.toe.quaternion.toArray(),shoePosition:l.shoe.getWorldPosition(new THREE.Vector3()).toArray(),shoeQuaternion:l.shoe.getWorldQuaternion(new THREE.Quaternion()).toArray(),heelMeshes:l.shoe.children.filter(o=>o.name.startsWith('heel:')).map(o=>o.name)}))}:null;
  const products=model?.children.filter(o=>o.userData.sockets).map(o=>({position:o.position.toArray(),rotation:o.rotation.toArray(),heelMeshes:o.children.filter(c=>c.name.startsWith('heel:')).map(c=>c.name)}))||[];
