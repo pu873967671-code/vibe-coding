@@ -81,3 +81,5 @@ Existing filenames now carry the refreshed mint atelier/shop/fitting backgrounds
 
 ## Supervisor 22:33 / 22:20 polish
 `ui/logo_v4.webp` is now the active loading/title/summary logo; v2/v3 remain source-only. Procedural fitting uses two welded Loop subdivision passes, soft peach toon bands, a flared scalloped mint skirt and shorter proportions. Shoe meshes add dashed stitches, padded binding, a tiny insole mark, cambered silk strips/bow loops, buckles, iridescent pearls and transmissive faceted crystals. All geometry/textures remain local code-generated assets; no CDN/model download is introduced.
+
+Supervisor 22:52: visible calves are now continuous code-authored Hermite profiles following the supplied CC0 rig, avoiding overlapping source ankle rings and unused subdivision/bake work. Ribbons have closed thin strip geometry; crystal jewellery uses authored table/crown/girdle/pavilion facets. Close-up uses the same local live renderer; no new image, model, CDN or font asset is added.
