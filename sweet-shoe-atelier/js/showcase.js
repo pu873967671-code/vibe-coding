@@ -16,22 +16,31 @@
  const framing={
   salon:{size:[1536,1024],position:[.5,.65],feet:[.55,.87],height:770},
   mirror_lounge:{size:[1672,941],position:[.30,.20],portrait:[.24,.5],feet:[.59,.58],height:470},
-  car:{size:[1536,1024],position:[.5,.72],feet:[.40,.90],height:490},
+  car:{size:[1536,1024],position:[.5,.72],portrait:[.30,.72],feet:[.32,.77],height:350},
   vanity:{size:[1536,1024],position:[.5,.77],feet:[.57,.88],height:650},
   balcony:{size:[1672,940],position:[.5,.76],feet:[.53,.87],height:690}
  };
  function frame(stage){
   if(!stage)return;const c=framing[stage.dataset.showcaseScene]||framing.salon;
   const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
+  const dock=stage.closest('.runway')?.querySelector('.runway-dock'),clearance=(dock?.offsetHeight||0)+28;
+  stage.style.setProperty('--dock-clearance',clearance+'px');
   const [iw,ih]=c.size,p=[...(w<h&&c.portrait?c.portrait:c.position)],scale=Math.max(w/iw,h/ih);
   // Shallow landscape stages pan down with the room instead of cutting off toes.
   const floor=c.feet[1]*ih*scale+(h-ih*scale)*p[1];
-  if(floor>h*.88&&h<ih*scale)p[1]=Math.max(0,Math.min(1,(h*.84-c.feet[1]*ih*scale)/(h-ih*scale)));
+  if(floor>h-clearance&&h<ih*scale)p[1]=Math.max(0,Math.min(1,(h-clearance-c.feet[1]*ih*scale)/(h-ih*scale)));
   const ox=(w-iw*scale)*p[0],oy=(h-ih*scale)*p[1];
   stage.style.backgroundPosition=`${p[0]*100}% ${p[1]*100}%`;
   const zoom=stage.classList.contains('zoomed')?1.14:1;
+  const footY=Math.min(h-clearance,c.feet[1]*ih*scale+oy);
+  // Phone cover-crops can move the authored floor anchor outside the screen.
+  // Reserve enough width for the entire painted pair (or both side-detail feet).
+  const detail=stage.dataset.runwayAngle==='side'&&stage.dataset.showcaseScene!=='car';
+  const fitHeight=Math.max(1,Math.min(c.height*scale*zoom*(stage.dataset.showcaseScene==='car'&&w<h?.9:1),(footY-76)/(detail?1.12:1),(w-32)/(detail?1.35:.72)));
+  const halfWidth=fitHeight*(detail?.66:.36),roomX=c.feet[0]*iw*scale+ox;
+  const fitLeft=Math.max(16+halfWidth,Math.min(w-16-halfWidth,roomX));
   for(const [key,value] of Object.entries({
-   'fit-height':stage.dataset.showcaseScene==='car'?Math.min(c.height*scale*zoom,h*.90):c.height*scale*zoom,'fit-left':c.feet[0]*iw*scale+ox,'fit-bottom':h-(c.feet[1]*ih*scale+oy),
+   'fit-height':fitHeight,'fit-left':fitLeft,'fit-bottom':h-footY,
    'mirror-left':168*scale+ox,'mirror-top':oy,'mirror-width':330*scale,'mirror-height':470*scale
   }))stage.style.setProperty('--'+key,value+'px');
  }
