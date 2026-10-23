@@ -20,15 +20,15 @@
   // Independent of the board guide: later lessons never lock navigation or spend for the player.
   A.Introduction={
     active:s=>s.introduction>0&&s.introduction<9,
-    begin(s){if(s.introduction===0)s.introduction=1;this.sync(s);},
+    begin(s){if(s.introduction===0)s.introduction=s.introductionFlow===2?3:1;this.sync(s);},
     sync(s){
       if(s.introduction===1&&(s.stars>=2||A.Boutique.count(s)>0))s.introduction=2;
-      if(s.introduction===2&&A.Boutique.count(s)>0)s.introduction=3;
+      if(s.introduction===2&&A.Boutique.count(s)>0)s.introduction=s.introductionFlow===2?8:3;
     },
     advance(s,event){
       const expected={3:'studio',4:'bow',5:'commission',6:'fitting',7:'pose',8:'finish'};
       if(expected[s.introduction]!==event)return false;
-      s.introduction++;return true;
+      if(event==='pose'&&s.introductionFlow===2)s.introduction=2;else s.introduction++;return true;
     },
     skip(s){s.introduction=9;}
   };
