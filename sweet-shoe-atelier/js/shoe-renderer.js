@@ -121,6 +121,22 @@ function wornComposite(d){
 // Extra-angle sources already contain the pair, with matching painted skin.
 function angleComposite(d,angle){
  syncAssets();d=cleanDesign(d);const key='angle:'+angle+':'+designKey(d),hit=cached(key);if(hit)return hit;
+ // A seated look-down composition reuses the heel-specific painted anatomy.
+ // Repose each complete calf + dynamic shoe together; no pixel reads or new masks.
+ if(angle.startsWith('seated_')){
+  const source=angleComposite(d,'top'),out=makeCanvas(1400,1000),ctx=out.getContext('2d'),pose=angle.slice(7);
+  for(let i=0;i<2;i++){
+   const crossed=pose==='crossed',step=pose==='step',sw=source.width/2;
+   ctx.save();ctx.translate(i?290:170,i?960:820);
+   ctx.rotate((i?(crossed?-132:step?-106:-116):(crossed?-105:step?-121:-113))*Math.PI/180);
+   ctx.scale(.60,.59);
+   // Continue the upper calf behind the seat; the outer edge leaves the frame softly.
+   ctx.drawImage(source,i*sw,0,sw,1,-sw/2,-1200,sw,1200);
+   ctx.drawImage(source,i*sw,0,sw,source.height,-sw/2,0,sw,source.height);ctx.restore();
+  }
+  const edge=ctx.createLinearGradient(0,0,150,0);edge.addColorStop(0,'transparent');edge.addColorStop(1,'#000');ctx.globalCompositeOperation='destination-in';ctx.fillStyle=edge;ctx.fillRect(0,0,out.width,out.height);
+  return remember(key,out);
+ }
  const natural=['relaxed','crossed','step'].includes(angle),folder=natural?'poses/':'angles/',name=d.heel+'_'+angle,legs=imageOK(folder+name+'_legs'),shade=imageOK(folder+name+'_shade');
  if(!legs||!shade)return wornComposite(d);
  const out=makeCanvas(legs.naturalWidth,legs.naturalHeight),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
