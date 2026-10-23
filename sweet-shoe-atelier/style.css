@@ -689,3 +689,33 @@ body:not(.dialogue-active) .atelier-mentor{visibility:visible}.dialogue-active .
 .collection-stage>.product-floor-shadow{z-index:0}
 .collection-stage>.product-canvas{position:relative;z-index:1;filter:none}
 .collection-stage:before{display:none}
+
+/* Real product lighting and geometry; the old product composition remains the
+   fallback for silhouettes/accessories that have not migrated yet. */
+.stage.shoe3d-stage{background:radial-gradient(ellipse at 50% 32%,#ffffffd9,#fff1f5b8 60%,#e3e9f4ba),url('assets/scenes/close_salon.webp') center/cover}
+.shoe3d-stage .pedestal,.shoe3d-stage .spark,.shoe3d-stage>.product-floor-shadow{display:none}
+#studioScreen .stage #preview.shoe3d-host{transform:none;width:100%;height:94%;left:0;bottom:5%;max-height:none;filter:none;animation:none}
+#preview.shoe3d-host canvas.shoe3d-canvas{display:block;width:100%;height:100%;mask-image:none;object-fit:fill;aspect-ratio:auto;cursor:grab;touch-action:pan-y;outline-offset:-5px}
+#preview.shoe3d-host canvas.shoe3d-canvas:active{cursor:grabbing}
+#preview.shoe3d-host canvas.shoe3d-canvas:focus-visible{outline:2px solid #be739a;border-radius:18px}
+.shoe3d-stage .studio-angles{background:#fff9fbd9;backdrop-filter:blur(8px)}
+
+#studioScreen .stage.shoe3d-stage{background:radial-gradient(ellipse at 50% 25%,#fffafd,#f6e6ee 70%,#ece8f4)}
+.shoe3d-host:after{content:attr(data-turn-hint);position:absolute;left:50%;bottom:44px;translate:-50% 0;font:10px/1.3 sans-serif;letter-spacing:.3px;color:#956f83;white-space:nowrap;pointer-events:none}
+@media(orientation:portrait){.shoe3d-host:after{display:none}}
+.packing #preview.shoe3d-host{opacity:0}
+@media(max-height:560px) and (orientation:landscape){.shoe3d-host:after{display:none}}
+
+/* Accessory-aware product framing keeps the controls outside the pair. */
+#studioScreen .stage #preview.shoe3d-host{height:84%;bottom:14%}
+.shoe3d-host:after{top:8px;bottom:auto}
+.collection-stage.has-shoe3d-snapshot{background:radial-gradient(ellipse at 50% 25%,#fffafd,#f6e6ee 70%,#ece8f4)}
+.collection-stage .shoe3d-snapshot{width:100%;height:100%;object-fit:contain;filter:none;mask-image:none}
+.collection-thumbnail{width:100%;height:70px;display:grid;place-items:center;overflow:hidden}
+.collection-thumbnail canvas.shoe3d-snapshot{width:100%;height:100%;object-fit:contain;aspect-ratio:4/3}
+.runway-product-detail{display:none;position:absolute;left:4%;right:4%;top:78px;bottom:var(--dock-clearance,180px);z-index:5;border-radius:24px;background:radial-gradient(ellipse at 50% 25%,#fffafdf5,#f6e6eef0 70%,#ece8f4ed)}
+.runway-product-detail canvas{width:100%;height:100%;object-fit:contain}
+.show-product-detail .runway-product-detail{display:block}
+.show-product-detail .runway-angle-art,.show-product-detail .runway-pair,.show-product-detail>.product-floor-shadow{visibility:hidden}
+.runway-scene.zoomed .runway-product-detail canvas{scale:1.04}
+@media(max-height:560px) and (orientation:landscape){.runway-product-detail{top:50px;border-radius:16px}}
