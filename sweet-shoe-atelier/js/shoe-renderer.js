@@ -33,6 +33,16 @@ function remember(key,canvas){
 }
 let imageCount=images.size;
 function syncAssets(){if(imageCount!==images.size){imageCount=images.size;composites.clear();cacheBytes=0;}}
+// Shared high-key product lighting: pink-white key, cool mint bounce. Grading
+// touches only the authored anatomy, before the exact-swatch shoe is composited.
+function porcelain(legs){
+ const key='porcelain:'+legs.src,hit=cached(key);if(hit)return hit;
+ const out=makeCanvas(legs.naturalWidth,legs.naturalHeight),p=out.getContext('2d');
+ p.drawImage(legs,0,0);p.globalCompositeOperation='multiply';p.fillStyle='#fff5fb';p.fillRect(0,0,out.width,out.height);
+ p.globalCompositeOperation='screen';p.globalAlpha=.14;p.fillStyle='#fff8fc';p.fillRect(0,0,out.width,out.height);
+ p.globalAlpha=1;p.globalCompositeOperation='destination-in';p.drawImage(legs,0,0);
+ return remember(key,out);
+}
 function imageOK(name){const im=images.get(name);return im?.naturalWidth?im:null;}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 // Offline weights map every source into the same three clean colour stops.
@@ -163,9 +173,9 @@ function wornComposite(d){
  syncAssets();d=cleanDesign(d);const key='worn:'+designKey(d),hit=cached(key);if(hit)return hit;
  const leg=imageOK('legs/leg_'+d.heel),mask=imageOK('legs/mask_'+d.heel);
  if(!leg)return fallbackWorn(d);
- if(!mask){const out=makeCanvas(leg.naturalWidth,leg.naturalHeight+1200),ctx=out.getContext('2d');const calf=imageOK('legs/calf_'+d.heel);if(calf)ctx.drawImage(calf,0,0);else ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,1200);ctx.drawImage(leg,0,1200);return remember(key,out);}
+ if(!mask){const out=makeCanvas(leg.naturalWidth,leg.naturalHeight+1200),ctx=out.getContext('2d');const calf=imageOK('legs/calf_'+d.heel);if(calf)ctx.drawImage(porcelain(calf),0,0);else ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,1200);ctx.drawImage(porcelain(leg),0,1200);return remember(key,out);}
  const stem=1200,out=makeCanvas(leg.naturalWidth,leg.naturalHeight+stem),ctx=out.getContext('2d'),body=makeCanvas(out.width,out.height),b=body.getContext('2d');
- const calf=imageOK('legs/calf_'+d.heel);if(calf)ctx.drawImage(calf,0,0);else ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,stem);ctx.drawImage(leg,0,stem);if(!luminous(b,'leg_'+d.heel,option('color',d.color)[3],0,stem,leg.naturalWidth,leg.naturalHeight,d.material))b.drawImage(leg,0,stem);
+ const calf=imageOK('legs/calf_'+d.heel);if(calf)ctx.drawImage(porcelain(calf),0,0);else ctx.drawImage(leg,0,0,leg.naturalWidth,2,0,0,leg.naturalWidth,stem);ctx.drawImage(porcelain(leg),0,stem);if(!luminous(b,'leg_'+d.heel,option('color',d.color)[3],0,stem,leg.naturalWidth,leg.naturalHeight,d.material))b.drawImage(leg,0,stem);
  finishFabric(b,d,out.width,out.height,{name:'leg_'+d.heel,y:stem,width:leg.naturalWidth,height:leg.naturalHeight});
  b.globalCompositeOperation='destination-in';b.drawImage(mask,0,stem);ctx.drawImage(body,0,0);
  const anchors={flat:{toe:[170,487],back:[1100,326],ankle:[940,240]},block:{toe:[170,710],back:[1100,300],ankle:[940,220]},kitten:{toe:[170,535],back:[1100,200],ankle:[940,150]},wedge:{toe:[170,685],back:[1095,330],ankle:[940,230]}}[d.heel];
@@ -203,7 +213,7 @@ function angleComposite(d,angle,floor='salon',ground=true){
    ctx.fillStyle=soft;ctx.beginPath();ctx.ellipse(0,0,1,1,0,0,Math.PI*2);ctx.fill();ctx.restore();
   }
  }
- ctx.drawImage(legs,0,0);if(!luminous(b,name+'_shade',option('color',d.color)[3],0,0,out.width,out.height,d.material)){b.drawImage(shade,0,0);b.globalCompositeOperation='source-in';b.fillStyle=option('color',d.color)[3];b.fillRect(0,0,out.width,out.height);b.globalCompositeOperation='source-over';}finishFabric(b,d,out.width,out.height,{name:name+'_shade'});
+ ctx.drawImage(porcelain(legs),0,0);if(!luminous(b,name+'_shade',option('color',d.color)[3],0,0,out.width,out.height,d.material)){b.drawImage(shade,0,0);b.globalCompositeOperation='source-in';b.fillStyle=option('color',d.color)[3];b.fillRect(0,0,out.width,out.height);b.globalCompositeOperation='source-over';}finishFabric(b,d,out.width,out.height,{name:name+'_shade'});
  b.globalCompositeOperation='destination-in';b.drawImage(shade,0,0);ctx.drawImage(body,0,0);
  const anchors=natural?(A.POSE_ANCHORS[name]||[[.28,.82],[.7,.82]]):{flat:{front34:[[.23,.78],[.70,.82]],top:[[.38,.78],[.68,.78]]},block:{front34:[[.23,.75],[.70,.80]],top:[[.35,.78],[.66,.78]]},kitten:{front34:[[.23,.76],[.70,.80]],top:[[.40,.78],[.69,.78]]},wedge:{front34:[[.26,.75],[.70,.80]],top:[[.41,.79],[.72,.79]]}}[d.heel][angle];
  function sprite(id,x,y,size){const im=imageOK(id);if(!im)return;const w=out.width*size;ctx.save();ctx.shadowColor='#593d422d';ctx.shadowBlur=4;ctx.drawImage(im,x-w/2,y-w*.3,w,w*im.naturalHeight/im.naturalWidth);ctx.restore();}
@@ -235,8 +245,8 @@ function productComposite(d,view='relaxed',floor='salon',ground=true){
  }
  if(contact&&ground)ctx.drawImage(contact,x,y,w,h,0,0,w,h);
  ctx.drawImage(source,x,y,w,h,0,0,w,h);
- const natural=['relaxed','crossed','step','seated'].includes(sourceView),legs=imageOK((natural?'poses/':'angles/')+d.heel+'_'+sourceView+'_legs');
- if(legs){const skin=makeCanvas(w,h),p=skin.getContext('2d');p.drawImage(legs,x,y,w,h,0,0,w,h);p.globalCompositeOperation='multiply';p.fillStyle='#fff9ed';p.fillRect(0,0,w,h);p.globalCompositeOperation='destination-in';p.drawImage(legs,x,y,w,h,0,0,w,h);p.globalCompositeOperation='screen';p.globalAlpha=.04;p.fillStyle='#ff0000';p.fillRect(0,0,w,h);p.globalAlpha=1;p.globalCompositeOperation='destination-in';p.drawImage(legs,x,y,w,h,0,0,w,h);ctx.drawImage(skin,0,0);}
+ // Anatomy is already porcelain-graded in angleComposite; never paint raw
+ // legs over the finished shoe/accessories or apply a second yellow wash.
  return remember(key,out);
 }
 // Separate floor ink from the pair so multiply reaches the room background,
