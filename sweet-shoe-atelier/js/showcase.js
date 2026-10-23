@@ -16,7 +16,7 @@
  const framing={
   salon:{size:[1536,1024],position:[.5,.65],feet:[.55,.87],height:770},
   mirror_lounge:{size:[1672,941],position:[.30,.20],portrait:[.24,.5],feet:[.59,.58],height:470},
-  car:{size:[1536,1024],position:[.5,.72],feet:[.60,.87],height:620},
+  car:{size:[1536,1024],position:[.5,.72],feet:[.40,.90],height:490},
   vanity:{size:[1536,1024],position:[.5,.77],feet:[.57,.88],height:650},
   balcony:{size:[1672,940],position:[.5,.76],feet:[.53,.87],height:690}
  };
@@ -31,7 +31,7 @@
   stage.style.backgroundPosition=`${p[0]*100}% ${p[1]*100}%`;
   const zoom=stage.classList.contains('zoomed')?1.14:1;
   for(const [key,value] of Object.entries({
-   'fit-height':stage.dataset.showcaseScene==='car'?Math.min(c.height*scale*zoom,h*1.18):c.height*scale*zoom,'fit-left':c.feet[0]*iw*scale+ox,'fit-bottom':h-(c.feet[1]*ih*scale+oy),
+   'fit-height':stage.dataset.showcaseScene==='car'?Math.min(c.height*scale*zoom,h*.90):c.height*scale*zoom,'fit-left':c.feet[0]*iw*scale+ox,'fit-bottom':h-(c.feet[1]*ih*scale+oy),
    'mirror-left':168*scale+ox,'mirror-top':oy,'mirror-width':330*scale,'mirror-height':470*scale
   }))stage.style.setProperty('--'+key,value+'px');
  }
