@@ -5,6 +5,7 @@ Object.assign(I18N.en,{music:'Music',effects:'Sound effects',renovationStars:'Re
 Object.assign(I18N.zh,{music:'音乐',effects:'音效',renovationStars:'翻新星星'});
 const categories={color:'color',material:'material',pattern:'pattern',strap:'strap',decoration:'decoration',heel:'heel',charm:'charm'};
 const raw={color:[['pink',0,'#ffadc9'],['cream',0,'#fff0d2'],['blue',0,'#a9daff'],['green',0,'#c6e7a5'],['purple',25,'#d6b9ff'],['peach',20,'#ffc09e'],['rose',40,'#f478a4'],['black',45,'#34334f']],material:[['satin',0],['mesh',0],['lace',25],['velvet',40],['glitter',50]],pattern:[['none',0],['flowers',0],['hearts',20],['dots',15],['stars',35]],strap:[['none',0],['thin',0],['pearl',0],['cross',25],['ribbon',35]],decoration:[['none',0],['small',0],['big',30],['drop',20],['flower',35]],heel:[['flat',0],['block',0],['kitten',20],['wedge',35]],charm:[['none',0],['pearl',0],['crystal',30],['mini',20]]};
+A.normalizeLanguage=value=>typeof value==='string'?(/^zh(?:[-_]|$)/i.test(value)?'zh':/^en(?:[-_]|$)/i.test(value)?'en':null):null;
 A.lang='en';const t=k=>(I18N[A.lang][k]||k).replace(/^[♡✧▧♧]\s*/,'');
 const opts=Object.fromEntries(Object.entries(raw).map(([k,list])=>[k,list.map(o=>[o[0],o[0],o[1],o[2]])]));
 function option(k,v){const o=opts[k].find(o=>o[0]===v)||opts[k][0];return [o[0],t(o[0]),o[2],o[3]];}
