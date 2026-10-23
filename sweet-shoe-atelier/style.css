@@ -662,3 +662,30 @@ body:not(.dialogue-active) .atelier-mentor{visibility:visible}.dialogue-active .
 .just-spawned.from-generator .merge-art{animation:gather-flight .38s cubic-bezier(.2,.7,.35,1) both}
 @keyframes gather-flight{0%{transform:translate(var(--spawn-x),var(--spawn-y)) scale(.35);opacity:.5}48%{transform:translate(calc(var(--spawn-x)*.4),calc(var(--spawn-y)*.4 - 14px)) scale(.95);opacity:1}80%{transform:translate(0,1px) scale(1.08)}100%{transform:none;opacity:1}}
 @media(prefers-reduced-motion:reduce){.just-spawned.from-generator .merge-art{animation:none}}
+/* 15:06 product camera: ankle-height pair, shared with the design studio. */
+.stage.product-stage{background:url('assets/scenes/close_salon.webp') 50% 74%/cover;border-radius:18px;overflow:hidden}
+.product-stage .pedestal{display:none}.product-stage:before{display:none}
+.product-stage #preview{width:86%;height:78%;max-height:none;aspect-ratio:auto;bottom:13%;filter:drop-shadow(0 3px 2px #67422d33)}
+.product-stage #preview canvas{width:100%;height:100%;object-fit:contain;aspect-ratio:auto;mask-image:linear-gradient(transparent,#000 14px)}
+.studio-angles{position:absolute;z-index:5;bottom:10px;left:50%;translate:-50% 0;display:flex;gap:4px;padding:3px;border-radius:14px;background:#fff9efd9;white-space:nowrap}
+.studio-angles button{min-height:40px;padding:4px 10px;font:11px sans-serif;box-shadow:none}.studio-angles button[aria-pressed=true]{background:#ad5271;color:#fff;border-color:#ad5271}
+.runway-scene .runway-angle-art{aspect-ratio:var(--foot-aspect,1.2);filter:drop-shadow(0 3px 2px #68452b30)}
+.runway-angle-art:after{left:5%;right:5%;bottom:6%;height:4%;background:radial-gradient(ellipse,#59351f66,transparent 72%)}
+.runway-scene[data-showcase-scene=car]:before{display:none}
+.collection-stage{background:url('assets/scenes/close_salon.webp') 50% 74%/cover}
+.collection-stage .product-canvas{width:88%;height:85%;max-height:100%;aspect-ratio:auto;object-fit:contain;mask-image:linear-gradient(transparent,#000 16px)}
+.collection-filmstrip .product-canvas{aspect-ratio:1.3;height:70px;object-fit:contain}
+@media(max-height:560px) and (orientation:landscape){.studio-angles{bottom:3px}.studio-angles button{min-height:40px;padding:2px 8px}.product-stage #preview{height:80%;bottom:17%}}
+
+/* Sole contacts are source-aligned in the shared product canvas. */
+.runway-scene .runway-angle-art:after{display:none}
+.runway-scene .runway-angle-art,.product-stage #preview{filter:none}
+/* Warm floor occlusion blends with the room, underneath the unchanged pair. */
+.product-floor-shadow{position:absolute;object-fit:contain;mix-blend-mode:multiply;pointer-events:none;filter:none!important;max-height:none!important;mask-image:none!important;aspect-ratio:auto!important}
+.runway-scene>.product-floor-shadow{z-index:1}
+.runway-scene .runway-angle-art{z-index:2}
+.runway-scene[data-runway-angle=side]:not([data-showcase-scene=car])>.product-floor-shadow{display:none}
+.product-stage>.product-floor-shadow{z-index:1}
+.collection-stage>.product-floor-shadow{z-index:0}
+.collection-stage>.product-canvas{position:relative;z-index:1;filter:none}
+.collection-stage:before{display:none}
