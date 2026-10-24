@@ -265,8 +265,8 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
  shoe.userData.sockets=sockets;
  const at=(name)=>{const g=new THREE.Group();g.name='socket:'+name;g.position.set(...sockets[name]);shoe.add(g);return g;};
  if(d.decoration&&d.decoration!=='none'){
-  const back=at('heelBack');
-  if(['small','big'].includes(d.decoration))bow(back,material,d.decoration==='big'?1.05:.72);
+  const back=at('heelBack');if(shoe.userData.shellSection)back.rotation.y=-Math.PI/2;
+  if(['small','big'].includes(d.decoration)){const tie=bow(back,material,d.decoration==='big'?.78:.55);if(shoe.userData.shellSection){tie.scale.z*=.72;tie.rotation.x=-.10;}}
   if(d.decoration==='drop'){
    const chain=mesh(own(new THREE.TorusGeometry(.05,.008,8,32)),metalMat,back);chain.position.y=-.025;
    const drop=mesh(own(new THREE.SphereGeometry(.064,40,28)),pearlMat,back);drop.position.set(0,-.13,-.015);drop.scale.y=1.4;
@@ -284,7 +284,20 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
    const gem=mesh((d.charm==='crystal'?crystalGeometry():own(new THREE.SphereGeometry(.083,40,28))),d.charm==='crystal'?crystalMat:pearlMat,toe);gem.position.y=.035;
   }
  }
- if(d.strap&&d.strap!=='none'&&!shoe.userData.professionalStrap){
+ if(d.strap&&d.strap!=='none'&&shoe.userData.shellSection){
+  const sectionAt=shoe.userData.shellSection;
+  for(const sign of d.strap==='cross'?[-1,1]:[0]){
+   const points=[];
+   for(let i=0;i<=32;i++){
+    const t=i/32,z=-.40+sign*(t-.5)*.48,q=sectionAt(z),x=THREE.MathUtils.lerp(q.left+.022,q.right-.022,t);
+    points.push([x,q.top-.045+Math.sin(t*Math.PI)*.075,z]);
+   }
+   if(d.strap==='pearl'){
+    const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
+    for(let i=0;i<=16;i++){const bead=mesh(own(new THREE.SphereGeometry(.030,24,16)),pearlMat,shoe);bead.position.copy(curve.getPoint(i/16));bead.name='shell-sewn-pearl';}
+   }else ribbon(points,d.strap==='ribbon'?.095:.052,material,shoe,'depth').name='shell-sewn-strap';
+  }
+ }else if(d.strap&&d.strap!=='none'&&!shoe.userData.professionalStrap){
   const ankle=at('ankle'),points=[];
   // Periodic curve and matched edge tangents give the satin a seamless,
   // softly sagging band, rather than an upright wire with an open join.
@@ -312,7 +325,7 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
 // Professional closed pump shell: original vamp, toe, collar, counter and
 // footbed remain one authored mesh. Only the heel pitch is smoothly changed.
 function buildProfessional(d){
- const lift={flat:.12,kitten:.62,block:.72,wedge:.68}[d.heel],swatch=new THREE.Color(A.option('color',d.color)[3]);
+ const lift={flat:.105,kitten:.62,block:.72,wedge:.68}[d.heel],swatch=new THREE.Color(A.option('color',d.color)[3]);
  const upper=upperMaterial(d);upper.side=THREE.DoubleSide;upper.anisotropy=0;
  const lining=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#fff4e7'),.88),roughness:.72,sheen:.12}));
  const sole=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#8d686e'),.48),roughness:.62}));
@@ -329,7 +342,15 @@ function buildProfessional(d){
   for(let i=0;i<p.count;i++){
    const z=p.getZ(i),y=p.getY(i),delta=(mary?1.28:1.64)-lift;
    const originalHeel=role==='source-heel'||role==='source-cap',f=originalHeel?(lift-.018)/1.64:1;
-   p.setY(i,originalHeel?.018+(y-.018)*f:y+(mary?-delta*smooth(z):shift(z)));
+   let height=originalHeel?.018+(y-.018)*f:y+(mary?-delta*smooth(z):shift(z));
+   if(d.heel==='flat'&&!originalHeel){
+    // Retain the complete closed counter, but lower pump quarters by 40%.
+    const floor=.065+(lift-.065)*smooth(z),scale=.46+.32*(1-smooth(z))+.14*THREE.MathUtils.smoothstep(-z,.95,1.45);
+    height=floor+(y-base(z))*scale;
+    if(role==='forefoot-sole')height=floor+(y-base(z))*.30;
+    p.setX(i,p.getX(i)*(1-.10*THREE.MathUtils.smoothstep(z,-.15,1.35)));
+   }
+   p.setY(i,height);
    if(n){const slope=originalHeel?0:mary?delta*(smooth(z-.001)-smooth(z+.001))/.002:(shift(z+.001)-shift(z-.001))/.002;const v=new THREE.Vector3(n.getX(i),n.getY(i)/f,n.getZ(i)-slope*n.getY(i)).normalize();n.setXYZ(i,v.x,v.y,v.z);}
   }
   if(role==='upper'){g.computeVertexNormals();const buckets=new Map(),normal=g.attributes.normal;for(let k=0;k<p.count;k++){const key=[p.getX(k),p.getY(k),p.getZ(k)].map(v=>Math.round(v*10000)).join(':');if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(k);}for(const ids of buckets.values()){const sum=new THREE.Vector3();for(const k of ids)sum.add(new THREE.Vector3().fromBufferAttribute(normal,k));sum.normalize();for(const k of ids)normal.setXYZ(k,sum.x,sum.y,sum.z);}}
@@ -338,27 +359,39 @@ function buildProfessional(d){
  const parts=shoeAsset.children.filter(o=>o.isMesh&&!['source-heel','source-cap','lining'].includes(o.name)).map(o=>({name:o.name,g:deform(o.geometry,o.name)}));
  const shell=parts.find(o=>o.name==='upper').g;
  const surface=(z)=>{const p=shell.attributes.position;let y=-Infinity;for(let i=0;i<p.count;i++)if(Math.abs(p.getZ(i)-z)<.15)y=Math.max(y,p.getY(i));return Number.isFinite(y)?y:.45;};
- const sockets={heelBack:[0,surface(-1.42)-.13,-1.50],toe:[0,surface(.88)+.025,.88],ankle:[0,surface(-.65)+.025,-.65]};
+ const shellMesh=new THREE.Mesh(shell),ray=new THREE.Raycaster();shellMesh.material.side=THREE.DoubleSide;shellMesh.updateMatrixWorld();
+ const hit=(x,y,z,dx,dy,dz)=>{ray.set(new THREE.Vector3(x,y,z),new THREE.Vector3(dx,dy,dz));return ray.intersectObject(shellMesh)[0]?.point;};
+ const toePoint=hit(.035,4,.88,0,-1,0)||new THREE.Vector3(.035,surface(.88),.88);
+ const backY=surface(-1.20)-.16,backPoint=hit(2,backY,-1.20,-1,0,0)||new THREE.Vector3(.32,backY,-1.20);
+ const sockets={heelBack:[backPoint.x+.008,backPoint.y,backPoint.z],toe:[toePoint.x,toePoint.y+.008,toePoint.z],ankle:[.035,surface(-.55),-.55]};
+ const shellSection=z=>{const p=shell.attributes.position;let left=Infinity,right=-Infinity,top=-Infinity,bottom=Infinity;for(let k=0;k<p.count;k++)if(Math.abs(p.getZ(k)-z)<.085){left=Math.min(left,p.getX(k));right=Math.max(right,p.getX(k));top=Math.max(top,p.getY(k));bottom=Math.min(bottom,p.getY(k));}return {left,right,top,bottom};};
  let motif;if(d.pattern!=='none')motif=own(new THREE.MeshPhysicalMaterial({map:motifTexture(d.pattern),transparent:true,alphaTest:.05,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,roughness:.6,side:THREE.DoubleSide}));
  const shadowMap=texture((c,s)=>{c.filter='blur(18px)';c.fillStyle='#734d6550';c.beginPath();c.ellipse(s*.5,s*.52,s*.27,s*.42,0,0,TAU);c.fill();c.filter='blur(5px)';c.fillStyle='#734d6530';c.beginPath();c.ellipse(s*.5,s*.64,s*.24,s*.24,0,0,TAU);c.fill();});
  const shadowGeo=own(new THREE.PlaneGeometry(1.42,3.35)),shadowMat=own(new THREE.MeshBasicMaterial({map:shadowMap,transparent:true,depthWrite:false,opacity:.65}));
  model=new THREE.Group();scene.add(model);model.userData.bodySource='hiirusama-cc0';
  for(let i=0;i<2;i++){
-  const shoe=new THREE.Group();shoe.position.set(i?.63:-.63,0,i?.36:-.42);shoe.rotation.y=i?-.16:.17;shoe.userData.sockets=structuredClone(sockets);model.add(shoe);
+  const shoe=new THREE.Group();shoe.position.set(i?.63:-.63,0,i?.36:-.42);shoe.rotation.y=i?-.16:.17;shoe.userData.sockets=structuredClone(sockets);shoe.userData.shellSection=shellSection;model.add(shoe);
   for(const part of parts){const m=part.name==='upper'?upper:part.name==='outsole'?lining:sole;const item=mesh(part.g,m,shoe);item.name=part.name;if(part.name==='upper')item.receiveShadow=false;}
   if(motif)mesh(shell,motif,shoe).name='upper-pattern';
   // Preserve the artist's slender heel; chunky and wedge supports use the
   // professional heel seat instead of replacing the shoe shell.
   if(d.heel==='kitten')for(const o of shoeAsset.children.filter(o=>['source-heel','source-cap'].includes(o.name))){mesh(deform(o.geometry,o.name),o.name==='source-cap'?sole:upper,shoe).name=o.name==='source-heel'?'heel:kitten':'rubber-heel-cap';}
   else {
+   if(d.heel==='wedge'){
+    const pos=[],uv=[],indices=[],rows=64;
+    const sections=Array.from({length:rows+1},(_,k)=>shellSection(-1.45+k/rows*2.06));
+    for(let k=0;k<=rows;k++){
+     const z=-1.45+k/rows*2.06,q={left:0,right:0};let total=0;for(let n=Math.max(0,k-5);n<=Math.min(rows,k+5);n++){const w=6-Math.abs(n-k);q.left+=sections[n].left*w;q.right+=sections[n].right*w;total+=w;}q.left/=total;q.right/=total;const blend=THREE.MathUtils.smoothstep(z,.15,.61),top=.12+(lift-.12)*smooth(z)+.018;
+     for(const [x,y] of [[q.left+.018,.022],[q.left+.008,top],[q.right-.008,top],[q.right-.018,.022]]){pos.push(x,THREE.MathUtils.lerp(y,.025,blend*.20),z);uv.push(k/rows,y);}
+     if(k<rows)for(let j=0;j<4;j++){const a=k*4+j,b=k*4+(j+1)%4;indices.push(a,a+4,b,b,a+4,b+4);}
+    }
+    indices.push(0,1,2,0,2,3,rows*4,rows*4+2,rows*4+1,rows*4,rows*4+3,rows*4+2);
+    const wedge=own(new THREE.BufferGeometry());wedge.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));wedge.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));wedge.setIndex(indices);wedge.computeVertexNormals();mesh(wedge,upper,shoe).name='heel:wedge';
+   }else{
    const g=heelGeometry(d.heel),p=g.attributes.position,old=last(-.96).base-.04;
    for(let j=0;j<p.count;j++)p.setY(j,.018+(p.getY(j)-.018)*(lift-.035)/Math.max(.01,old-.018));
    p.needsUpdate=true;g.computeVertexNormals();mesh(g,d.heel==='flat'?sole:upper,shoe).name='heel:'+d.heel;
-  }
-  // The artist's Mary Jane strap and buckle are an optional sewn-on detail.
-  if(d.strap==='thin'&&maryAsset){
-   shoe.userData.professionalStrap=true;
-   for(const o of maryAsset.children.filter(o=>['maryjane-strap','buckle'].includes(o.name)))mesh(deform(o.geometry,o.name,true),o.name==='buckle'?metal:upper,shoe).name=o.name;
+   }
   }
   accessories(shoe,d,trim,pearl,metal,crystal);
   const shadow=new THREE.Mesh(shadowGeo,shadowMat);shadow.rotation.x=-Math.PI/2;shadow.position.y=.003;shoe.add(shadow);
@@ -472,7 +505,7 @@ function fitCamera(width,height,live=true){
  const studio=live&&!fitting&&host?.id==='preview'?host.closest('.stage'):null;
  const margin=stage?.classList.contains('zoomed')?.96:.90;
  const controls=studio?.querySelector('.studio-angles');
- const top=stage?Math.min(76,height*.13):studio?8:0,bottom=stage?parseFloat(stage.style.getPropertyValue('--dock-clearance'))||190:controls?Math.max(0,host.getBoundingClientRect().bottom-controls.getBoundingClientRect().top+12):0;
+ const top=stage?24:studio?8:0,bottom=stage?48:controls?Math.max(0,host.getBoundingClientRect().bottom-controls.getBoundingClientRect().top+12):0;
  const available=Math.max(16,height-top-bottom);
  const h=stage||studio?Math.max((max.y-min.y)*height/available/margin,(max.x-min.x)/aspect/margin):Math.max((max.y-min.y)/.84,(max.x-min.x)/aspect/.84);
  if(stage||studio)cy+=(top-bottom)/height*h/2;
@@ -491,7 +524,7 @@ function resize(){
  renderer.setSize(Math.round(r.width),Math.round(r.height),false);fitCamera(r.width,r.height);invalidate();
 }
 function invalidate(){if(frame||!host||document.hidden)return;frame=requestAnimationFrame(()=>{frame=0;if(host&&model&&host.getClientRects().length){fitCamera(host.clientWidth,host.clientHeight);renderer.render(scene,camera);}});}
-function setView(value){angle=value;if(!camera)return;const rise=({flat:0,block:.64,kitten:.54,wedge:.60}[current?.heel]||0)*.20;const portrait=fitting&&host&&host.clientHeight>host.clientWidth;camera.position.set(...(angle==='top'?[.5,7,2]:angle==='side'?[6,1.9+rise,.9]:[3.6,(portrait?4.8:2.15)+rise,6]));camera.lookAt(0,.23+rise,0);yaw=0;if(model)model.rotation.y=0;if(host)fitCamera(host.clientWidth,host.clientHeight);invalidate();}
+function setView(value){angle=value;if(!camera)return;const rise=({flat:0,block:.64,kitten:.54,wedge:.60}[current?.heel]||0)*.20;const portrait=fitting&&host&&host.clientHeight>host.clientWidth;camera.position.set(...(angle==='top'?[.5,7,2]:angle==='side'?[6,1.9+rise,.9]:[3.6,(portrait?3.0:2.15)+rise,6]));camera.lookAt(0,.23+rise,0);yaw=0;if(model)model.rotation.y=0;if(host)fitCamera(host.clientWidth,host.clientHeight);invalidate();}
 async function mount(target,design,options={}){
  const token=++request;release();if(failed||!supported(design)||typeof location==='undefined'||location.protocol==='file:')return false;
  try{
@@ -508,7 +541,7 @@ async function mount(target,design,options={}){
 }
 function animateFitting(){
  if(!fitting||!host?.isConnected)return;
- if(!document.hidden&&!drag&&!matchMedia('(prefers-reduced-motion: reduce)').matches){model.rotation.y=yaw+Math.sin(performance.now()*.00025)*.10;invalidate();}
+ if(!document.hidden&&!drag&&!matchMedia('(prefers-reduced-motion: reduce)').matches){model.rotation.y=yaw+Math.sin(performance.now()*.00016)*.26;invalidate();}
  idleTimer=setTimeout(animateFitting,100);
 }
 function updateFitting(options={}){if(!fitting||!model)return false;model.userData.poseFitting(options.pose);setView(options.angle||'front34');resize();return true;}
@@ -519,7 +552,7 @@ const snapshots=new Map(),snapshotJobs=new Map();let snapshotPixels=0,snapshotQu
 async function snapshot(design,options={}){
  if(failed||!supported(design)||location.protocol==='file:')return null;
  const width=Math.min(1024,Math.max(96,Math.round(options.width||640))),height=Math.min(1024,Math.max(96,Math.round(options.height||480)));
- const view=options.angle||'front34',key='hiirusama-v1:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
+ const view=options.angle||'front34',key='hiirusama-v2:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
  if(snapshots.has(key)){const c=snapshots.get(key);snapshots.delete(key);snapshots.set(key,c);return c;}
  if(snapshotJobs.has(key))return snapshotJobs.get(key);
  const job=snapshotQueue.then(async()=>{
