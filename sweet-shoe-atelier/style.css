@@ -1167,3 +1167,10 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 .runway-scene:has(.runway-worn-window)>.runway-contact,.runway-scene:has(.runway-worn-window)>.runway-light,.runway-scene:has(.runway-worn-window)>.runway-mirror{display:none}
 
 .runway-scene:has(.runway-worn-window) .runway-spark{animation:showcase-soft-glint 6.8s ease-in-out infinite;pointer-events:none}
+
+/* Styles grow within the editor: two generous columns and a native scroll lane. */
+#studioScreen #options[data-category="heel"]{grid-template-columns:repeat(2,minmax(0,1fr));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9edac4 #eff9f4;scroll-padding:6px;padding:3px 6px 6px 3px;min-height:0;flex:1}
+#options[data-category="heel"] .option{min-height:100px;flex-shrink:0}
+#options[data-category="heel"] canvas.shoe2d-option{height:62px}
+@media(orientation:portrait){#studioScreen #options[data-category="heel"]{height:135px;min-height:135px;flex:none}#options[data-category="heel"] .option{min-height:82px}#options[data-category="heel"] canvas.shoe2d-option{height:42px}}
+@media(max-height:560px) and (orientation:landscape){#options[data-category="heel"] .option{min-height:72px}#options[data-category="heel"] canvas.shoe2d-option{height:34px}}
