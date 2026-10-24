@@ -17,7 +17,7 @@ function shoeLayout(d){d=cleanDesign(d);const asset='shoe_'+d.heel+'_'+d.strap,a
 // Markup is pure; canvases are populated only in the browser after preload.
 function shoeCanvas(d){return `<canvas class="shoe-canvas" data-design="${designKey(d)}" role="img" aria-label="${Object.keys(defaults).map(k=>option(k,cleanDesign(d)[k])[1]).join(', ')}"></canvas>`;}
 
-function productCanvas(d,view='relaxed'){return shoeCanvas(d).replace('class="shoe-canvas"','class="shoe-canvas product-canvas" data-angle="close_'+view+'"');}
+function productCanvas(d,view='relaxed'){return shoeCanvas(d).replace('class="shoe-canvas"','class="shoe-canvas product-canvas" data-pair="true"');}
 function createShoeRenderer(images){
 // Share a bounded LRU across studio and worn artwork. A worn source is ~6 MiB;
 // retaining dozens of these on a phone costs far more than rebuilding a cold design.
@@ -268,20 +268,20 @@ function paintFloor(c,d){
  return true;
 }
 function hydrateCanvases(root=document){
- for(const c of floorTargets)if(!c.isConnected){floorObserver.unobserve(c);floorLayers.get(c)?.remove();floorTargets.delete(c);}
- root.querySelectorAll('canvas[data-design]:not([data-renderer="three"])').forEach(c=>{
- // Layout width excludes pose/zoom transforms. Resizing a rotated shoe must not
- // inflate its backing store or repeatedly soften the same artwork.
- let width=c.clientWidth;const ratio=Math.min(3,Math.min(2,window.devicePixelRatio||1)*(c.closest('.zoomed')?1.5:1));if(!width||!c.getClientRects().length)return;
- const floor=c.closest('.runway-scene')?.dataset.showcaseScene||'salon';
- let w=Math.max(1,Math.round(width*ratio));const key=(c.dataset.angle?'angle:'+c.dataset.angle+':'+floor+':':c.hasAttribute('data-worn')?'worn:':'shoe:')+c.dataset.design,previous=painted.get(c);
- const parts=c.dataset.design.split('|'),d=Object.fromEntries(Object.keys(defaults).map((k,i)=>[k,parts[i]])),separateFloor=paintFloor(c,d);
- if(previous?.assetCount===images.size&&previous?.key===key&&previous.width===w&&c.width===w&&c.height===previous.height)return;
- const source=c.dataset.angle?angleComposite(d,c.dataset.angle,floor,!separateFloor):c.hasAttribute('data-worn')?wornComposite(d):composite(d);
- let h=Math.round(w*source.height/source.width);
- if(c.hasAttribute('data-worn')||c.dataset.angle){c.parentElement.style.setProperty('--foot-aspect',source.width/source.height);width=c.clientWidth;w=Math.max(1,Math.round(width*ratio));h=Math.round(w*source.height/source.width);}
- c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(source,0,0,w,h);if(separateFloor)paintFloor(c,d);painted.set(c,{key,width:w,height:h,assetCount:images.size});
-});}
+ // One authored frame is used everywhere; CSS fitting never changes the last,
+ // camera, toe position or ground line when a finish/accessory changes.
+ root.querySelectorAll('canvas[data-design]').forEach(c=>{
+  if(!c.getClientRects().length)return;
+  const key=c.dataset.design+'|pair:'+c.hasAttribute('data-pair');
+  if(painted.get(c)?.key===key)return;
+  const parts=c.dataset.design.split('|'),d=Object.fromEntries(Object.keys(defaults).map((k,i)=>[k,parts[i]]));
+  if(!c.dataset.paintedFrame){c.width=1024;c.height=640;c.dataset.paintedFrame='true';}
+  painted.set(c,{key});
+  A.Shoe2D.render(c,d,{pair:c.hasAttribute('data-pair')}).then(ok=>{
+   if(!ok&&painted.get(c)?.key===key)painted.delete(c);
+  }).catch(()=>painted.delete(c));
+ });
+}
 
 return {hydrateCanvases,wornComposite,composite,angleComposite,productComposite};
 }
