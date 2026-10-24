@@ -9,12 +9,14 @@
     en: {fab:['Cotton ball','Thread spool','Yarn skein','Folded fabric','Printed fabric','Satin bolt','Silk bolt'],lea:['Leather scrap','Leather strip','Insole','Outsole','Heel block','Wooden shoe last','Blush pump'],spk:['Glass bead','Seed pearls','Pearl strand','Crystal','Pink gem','Gem brooch','Jeweled tiara'],rib:['Ribbon scrap','Ribbon roll','Lace trim','Satin bow','Rosette','Corsage','Couture bow']},
     zh: {fab:['棉花球','线轴','毛线团','折叠布料','印花布卷','缎布','丝绸'],lea:['皮革碎片','皮革条','鞋垫','鞋底','鞋跟块','木鞋楦','裸粉高跟鞋'],spk:['玻璃珠','小珍珠','珍珠串','水晶','粉宝石','宝石胸针','宝石皇冠'],rib:['丝带碎片','丝带卷','蕾丝边','缎带蝴蝶结','玫瑰花结','胸花','华丽蝴蝶结']}
   };
-  Object.assign(text.en,{chest:'Supply chest',gifts:'little gifts inside',chestHint:'Tap this chest to unpack a material. Four gifts, no energy needed.',chestSpace:'Make one free space to unpack your gift. Your rewards are safe.',giftReady:'A thank-you gift is ready!',giftProgress:'Deliver 5 wishes for a supply chest.',claimGift:'Collect your gift',nextGift:'Next thank-you gift',bookHint:'Every new material you craft becomes a page in your story.',bookOpen:'Explore the material book',bookLater:'A new craft awaits in a later chapter.',discovered:'discovered',back:'Back to the workroom',craftFrom:'Merge two of',gatherFrom:'Gather from',chestCollected:'A gift from your happy customers',idle:'These two pieces can become something lovely.'});
+  Object.assign(text.en,{chest:'Supply chest',gifts:'little gifts inside',chestHint:'Tap this chest to unpack a material. Four gifts, no energy needed.',chestSpace:'Make one free space to unpack your gift. Your rewards are safe.',giftReady:'A thank-you gift is ready!',giftProgress:'Deliver 5 wishes for a supply chest.',claimGift:'Collect your gift',nextGift:'Next thank-you gift',bookHint:'Every new material you craft becomes a page in your story.',bookOpen:'Explore the material book',bookLater:'A new craft awaits in a later chapter.',discovered:'discovered',back:'Back to the workroom',craftFrom:'Merge two matching pieces:',gatherFrom:'Gather from',chestCollected:'A gift from your happy customers',idle:'These two pieces can become something lovely.'});
   Object.assign(text.zh,{chest:'材料宝箱',gifts:'份小礼物',chestHint:'点击宝箱，领取一份材料。内含四份礼物，无需能量。',chestSpace:'请腾出一个空位领取礼物。奖励会为你保留。',giftReady:'顾客的谢礼已备好！',giftProgress:'每完成5份心愿，获得一个材料宝箱。',claimGift:'领取谢礼',nextGift:'下一份谢礼',bookHint:'每一份新材料，都是你的手作故事的一页。',bookOpen:'打开材料图鉴',bookLater:'新的手艺将在之后的章节开启。',discovered:'已发现',back:'回到工坊',craftFrom:'合成两个',gatherFrom:'获取自',chestCollected:'来自顾客的一份心意',idle:'这两份材料可以合成新的美好。'});
   Object.assign(text.en,{bubble:'A little extra magic',bubbleHint:'An optional duplicate of your crafted material. Your original is already on the board.',bubbleExpired:'This bubble has floated away.',bubbleGems:'Earn gems by completing your introduction. More gem rewards arrive in later chapters.',bubbleDismiss:'Let it float away · free',bubbleBuy:'Keep this material',bubbleOpen:'A bonus bubble',guideName:'Mimi',guideSkip:'Skip guide',guideDone:'Your atelier awaits',guideFinish:'Our next little wish',guideReward:'Beautifully done! +5 gems. Materials you discover unlock new details in the studio.',guide0:'Welcome, darling. Tap the glowing sewing basket to gather a cotton ball.',guide1:'Tap the two glowing cotton balls, one after the other. You’ll craft a thread spool.',guide2:'Make room to grow: tap the glowing spool, then the empty space beside the sealed crate.',guide3:'Now tap the other glowing spool, then its match beside the crate. A merge opens the crate!',guide4:'Your first wish is ready! Tap the glowing Deliver button to send your thread to Rosie.',guide5:'Your first customer is delighted! One more wish will earn the stars for our first renovation.'});
   Object.assign(text.zh,{bubble:'一份额外的小魔法',bubbleHint:'可选的材料副本。你合成的原材料已经在棋盘上。',bubbleExpired:'气泡已经飘走了。',bubbleGems:'完成入门引导即可获得宝石，更多宝石奖励将在后续章节开放。',bubbleDismiss:'免费放走气泡',bubbleBuy:'留下这份材料',bubbleOpen:'惊喜气泡',guideName:'米米',guideSkip:'跳过引导',guideDone:'小小工坊，等你创造',guideFinish:'下一份小小心愿',guideReward:'做得漂亮！获得5颗宝石。发现材料，就能解锁工作室的新细节。',guide0:'欢迎，亲爱的。点击发光的缝纫篮，收集一团棉花。',guide1:'依次点击两团发光的棉花，就能合成一枚线轴。',guide2:'先腾出更多空间：点击发光的线轴，再点击封存木箱旁的空位。',guide3:'点击另一枚发光的线轴，再点击木箱旁的线轴。合成就能打开木箱！',guide4:'第一份心愿准备好了！点击发光的交付按钮，把线轴送给小桃。',guide5:'第一位顾客很开心！再完成一份心愿，就能用星星装修小店。'});
   Object.assign(text.en,{jewelry:'Jewelry box',ribbonDrawer:'Ribbon drawer'});
   Object.assign(text.zh,{jewelry:'珠宝盒',ribbonDrawer:'丝带抽屉'});
+  Object.assign(text.en,{swapWish:'Swap wish · free',keepMaterials:'Keep all your materials',restingWish:'This basket needs a little rest.'});
+  Object.assign(text.zh,{swapWish:'选择新心愿 · 免费',keepMaterials:'保留全部材料',restingWish:'工具篮正在补充材料。'});
   const tr = k => text[A.lang][k] || k;
   const name = cell => !cell ? tr('free') : cell.kind === 'chest' ? tr('chest') : cell.kind === 'crate' ? tr('crateName') : cell.kind === 'generator' ? tr({fab:'cotton',lea:'leather',spk:'jewelry',rib:'ribbonDrawer'}[cell.chain]) : names[A.lang][cell.chain][cell.tier - 1];
   A.materialName=name;
@@ -27,10 +29,10 @@
   }
   const clock = ms => {const sec=Math.max(0,Math.ceil(ms/1000));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');};
   A.createMergeScreen = function (root, api) {
-    let selected = -1, pointer = null, ghost = null, over = null, lastTick = 0, visible = false, lastInput = performance.now(), mentorHint = false;
+    let selected = -1, pointer = null, ghost = null, over = null, lastTick = 0, visible = false, lastInput = performance.now(), mentorHint = false, orderHelp = false;
     const board = () => api.state().atelier;
     function activity() {
-      lastInput=performance.now();mentorHint=false;
+      lastInput=performance.now();mentorHint=false;orderHelp=false;
       root.querySelectorAll('.idle-match').forEach(el=>el.classList.remove('idle-match'));
     }
     function controls() {
@@ -66,11 +68,34 @@
       if(!offer){api.toast(tr('bubbleExpired'));return;}
       api.modal('bubble',`<div class="bubble-dialog"><span class="section-kicker">${tr('kicker')}</span><h2>${tr('bubble')}</h2><div class="bubble-orb">${art({kind:'item',chain:offer.chain,tier:offer.tier})}</div><h3>${names[A.lang][offer.chain][offer.tier-1]}</h3><p>${tr('bubbleHint')}</p><p>${tr('rest')} <strong data-offer-expiry="${offer.expiresAt}">${clock(offer.expiresAt-Date.now())}</strong></p><button class="primary" data-bubble-buy="${id}"><img class="resource-icon" src="assets/items/ui_gem.webp" alt="">${B.price(offer)} · ${tr('bubbleBuy')}</button><button class="secondary" data-bubble-dismiss="${id}">${tr('bubbleDismiss')}</button></div>`);
     }
+    // Give an unfinished wish a useful next step without spending or opening a dialog.
+    function helpOrder(order) {
+      const b=board(),status=O.availability(b,order),missing=order.needs.find((_,i)=>!status[i].ready);
+      if(!missing)return;
+      const reserved=new Set(status.flatMap(n=>n.indices));
+      let targets=[];
+      for(let tier=missing.tier-1;tier>=1&&!targets.length;tier--) {
+        const matches=b.cells.map((c,i)=>!reserved.has(i)&&c?.kind==='item'&&c.chain===missing.chain&&c.tier===tier?i:-1).filter(i=>i>=0);
+        if(matches.length>=2)targets=matches.slice(0,2);
+      }
+      const merging=targets.length===2;
+      if(!merging)targets=[b.cells.findIndex(c=>c?.kind==='generator'&&c.chain===missing.chain)].filter(i=>i>=0);
+      if(!targets.length)return;
+      selected=-1;orderHelp=true;
+      root.querySelectorAll('.selected,.idle-match').forEach(el=>el.classList.remove('selected','idle-match'));
+      root.querySelectorAll('[data-cell]').forEach(el=>el.setAttribute('aria-pressed','false'));
+      for(const i of targets)root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
+      const target={kind:'item',chain:missing.chain,tier:missing.tier},source=b.cells[targets[0]];
+      const instruction=merging?tr('craftFrom')+' '+name(source):tr('gatherFrom')+' '+name(source)+(source.charges?'':' · '+tr('rest')+' '+clock(source.readyAt-Date.now()));
+      const relief=O.relief(b,order),alternative=relief.available?{kind:'item',...relief.next}:null;
+      root.querySelector('#mergeDetail').innerHTML=`<div class="detail-heading">${art(target)}<div><span class="section-kicker">${tr('orders')}</span><h3>${name(target)}</h3><p>${alternative?tr('restingWish'):instruction}</p></div></div>${alternative?`<button class="secondary order-relief" data-order-relief="${order.id}" data-relief-chain="${alternative.chain}" data-relief-tier="${alternative.tier}" aria-label="${tr('swapWish')} · ${name(alternative)} · ${tr('keepMaterials')}">${art(alternative)}<span><strong>${tr('swapWish')}</strong><small>${name(alternative)} · ${tr('keepMaterials')}</small></span><b aria-hidden="true">↻</b></button>`:chainPreview(target.chain,target.tier)+`<p class="detail-tip">${tr(merging?'step2':'tap')}</p>`}`;
+      root.querySelector(alternative?'[data-order-relief]':`[data-cell="${targets[0]}"]`)?.focus({preventScroll:true});
+    }
     function orderCards() {
       return O.ensure(board()).map(order=>{
         const status=O.availability(board(),order),ready=status.every(n=>n.ready),payout=O.reward(order,api.state());
         const person=A.themes[order.person].asset;
-        return `<article class="atelier-order ${ready?'ready':''}" data-order="${order.id}"><div class="order-customer"><span class="order-avatar" aria-hidden="true"><img src="assets/${person}_neutral.webp" alt=""></span><span>${A.t('name'+order.person)}</span><span class="order-reward">${resource('coin')}${payout.coins} ${resource('star')}${payout.stars}</span></div><div class="order-request" data-needs="${order.needs.length}">${order.needs.map((n,i)=>`<span class="requested-item ${status[i].ready?'fulfilled':''}" aria-label="${names[A.lang][n.chain][n.tier-1]} · ${status[i].ready?'✓':tr('gather')}" title="${names[A.lang][n.chain][n.tier-1]} · ${tr('tier')} ${n.tier}">${art({kind:'item',chain:n.chain,tier:n.tier})}<span class="request-name">${names[A.lang][n.chain][n.tier-1]}</span><b class="request-check">${status[i].ready?'✓':n.tier}</b></span>`).join('')}</div><button class="order-deliver ${ready?'primary':'secondary'}" data-deliver="${order.id}" ${ready&&(!G.active(api.state())||(api.state().mergeGuide===4&&order.id===0))?'':'disabled'}>${ready?'✓ '+tr('deliver'):tr('gather')}</button></article>`;
+        return `<article class="atelier-order ${ready?'ready':''}" data-order="${order.id}"><div class="order-customer"><span class="order-avatar" aria-hidden="true"><img src="assets/${person}_neutral.webp" alt=""></span><span>${A.t('name'+order.person)}</span><span class="order-reward">${resource('coin')}${payout.coins} ${resource('star')}${payout.stars}</span></div><div class="order-request" data-needs="${order.needs.length}">${order.needs.map((n,i)=>`<span class="requested-item ${status[i].ready?'fulfilled':''}" aria-label="${names[A.lang][n.chain][n.tier-1]} · ${status[i].ready?'✓':tr('gather')}" title="${names[A.lang][n.chain][n.tier-1]} · ${tr('tier')} ${n.tier}">${art({kind:'item',chain:n.chain,tier:n.tier})}<span class="request-name">${names[A.lang][n.chain][n.tier-1]}</span><b class="request-check">${status[i].ready?'✓':n.tier}</b></span>`).join('')}</div><button class="order-deliver ${ready?'primary':'secondary'}" data-deliver="${order.id}" ${!G.active(api.state())||(ready&&api.state().mergeGuide===4&&order.id===0)?'':'disabled'}>${ready?'✓ '+tr('deliver'):tr('gather')}</button></article>`;
       }).join('');
     }
     // The transaction commits before animation; flights are disposable presentation only.
@@ -133,8 +158,8 @@
     }
     function render() {
       A.Boutique.sync(api.state());
-      const b=board();
-      root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button></div></div><div class="atelier-orders">${orderCards()}</div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" data-chain="${cell?.chain||''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${tr('merges')}</span><i>·</i><span>${b.cells.filter(c=>c?.kind==='crate').length} ${tr('room')}</span></p></div><div class="mentor-area"><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside><div class="atelier-mentor" aria-hidden="true"><img src="assets/mentor/mentor_${G.active(api.state())?(api.state().mergeGuide===0?'wave':'point'):'think'}.webp" alt=""></div><button class="mentor-bubble secondary" data-mentor-talk hidden>${G.active(api.state())?tr('guide'+Math.min(5,api.state().mergeGuide)):tr('idle')}</button></div>`;
+      const b=board(),crates=b.cells.filter(c=>c?.kind==='crate').length;
+      root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button></div></div><div class="atelier-orders">${orderCards()}</div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" data-chain="${cell?.chain||''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${A.lang==='en'&&b.merges===1?'piece crafted':tr('merges')}</span><i>·</i><span>${crates} ${A.lang==='en'&&crates===1?'space waiting to be opened':tr('room')}</span></p></div><div class="mentor-area"><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside><div class="atelier-mentor" aria-hidden="true"><img src="assets/mentor/mentor_${G.active(api.state())?(api.state().mergeGuide===0?'wave':'point'):'think'}.webp" alt=""></div><button class="mentor-bubble secondary" data-mentor-talk hidden>${G.active(api.state())?tr('guide'+Math.min(5,api.state().mergeGuide)):tr('idle')}</button></div>`;
       controls();detail();
       const guide=api.state().mergeGuide;
       if(guide<4){const cells=G.plans[guide].cells,i=cells[selected===cells[0]&&cells.length>1?1:0];root.querySelector(`[data-cell="${i}"]`)?.classList.add('guide-target');}
@@ -179,8 +204,9 @@
         if(result.opened?.length)setTimeout(()=>{if(visible&&api.active())api.sound('crate');},120);
         for(const index of result.opened||[])root.querySelector(`[data-cell="${index}"]`)?.classList.add('just-opened');
       } else {api.sound(result.discovery?'discovery':'pop');if(result.discovery)discovery(result.item);}
-      if(result.type==='chest')mentorPose('present',tr('chestCollected'));
-      if(result.type==='chest')api.toast(tr('chestCollected'));
+      // The live detail panel announces the chest and its four gifts. Keep
+      // its unpack action clear of duplicate speech and bottom toasts.
+      if(result.type==='chest'){api.toast('');mentorPose('present');}
       return true;
     }
     function activate(index) {
@@ -250,10 +276,22 @@
       if(e.target.closest('[data-claim-chest]')){commit(R.claim(board()));return;}
       const openChest=e.target.closest('[data-open-chest]');
       if(openChest){activate(+openChest.dataset.openChest);return;}
+      const reliefButton=e.target.closest('[data-order-relief]');
+      if(reliefButton){
+        if(G.active(api.state()))return;
+        const order=O.ensure(board()).find(o=>o.id===+reliefButton.dataset.orderRelief);
+        if(!order)return;
+        const offer=O.relief(board(),order);
+        // Recheck the exact illustrated offer before committing after a recharge.
+        if(!offer.available||offer.next.chain!==reliefButton.dataset.reliefChain||offer.next.tier!==+reliefButton.dataset.reliefTier){helpOrder(order);return;}
+        const result=O.replace(api.state(),order.id);
+        if(result.ok){selected=-1;api.save();api.sound('navigation');api.toast('');render();if(O.indices(board(),order))root.querySelector(`[data-deliver="${order.id}"]`)?.focus({preventScroll:true});else helpOrder(order);}
+        return;
+      }
       const delivery=e.target.closest('[data-deliver]');
       if(delivery) {
         const order=O.ensure(board()).find(o=>o.id===+delivery.dataset.deliver),consumed=order&&O.indices(board(),order);
-        if(!consumed)return;
+        if(!consumed){if(order&&!G.active(api.state()))helpOrder(order);return;}
         const rect=delivery.closest('[data-order]').getBoundingClientRect(),flight=deliveryFlight(consumed,rect,O.reward(order,api.state()),order);
         const result=O.deliver(api.state(),order.id);
         if(result.ok){G.advance(api.state(),{ok:true,type:'delivery'});A.Introduction.sync(api.state());selected=-1;api.save();api.header();render();flight(result.nextId);api.toast((R.pending(board())?tr('giftReady'):tr('delivered'))+' +'+result.reward.coins+' · +'+result.reward.stars+' ★');}
@@ -286,6 +324,7 @@
         document.querySelectorAll('[data-offer-expiry]').forEach(el=>{const remaining=+el.dataset.offerExpiry-Date.now();el.textContent=remaining>0?clock(remaining):tr('bubbleExpired');const buy=el.closest('.modal').querySelector('[data-bubble-buy]');if(buy)buy.disabled=remaining<=0;});
         const changed=M.tick(board())|B.ensure(board());if(changed){api.save();if(visible&&api.active()&&!pointer)render();else controls();}else controls();
         if(!visible||!api.active()||document.hidden||pointer){lastInput=now;return;}
+        if(orderHelp)return;
         if(now-lastInput>=5000&&!mentorHint){mentorHint=true;mentorPose('think',tr('idle'));}
         if(now-lastInput>=5000)for(const i of R.hint(board()))root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
       }
