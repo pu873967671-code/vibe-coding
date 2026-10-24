@@ -3,9 +3,9 @@
 // A design is a finish applied to one immutable painting. Neither a colour nor
 // a fabric selection changes the source frame, silhouette, or camera.
 const WIDTH=1024,HEIGHT=640,HEELS=['flat','block','kitten','wedge'];
-// Binding/insole/sole authoring masks ship with the kit. Their pixels already
-// remain in the full base, so the preview need not decode those extra bitmaps.
-const PARTS=['base','upper','shadow','highlight'];
+// The binding mask restores the painted inner seam over the sewn strap tab.
+// Insole/sole pixels stay in the immutable base and need no extra bitmap decode.
+const PARTS=['base','upper','shadow','highlight','binding'];
 const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#696883'};
 const loads=new Map(),cache=new Map(),jobs=new Map(),paintTokens=new WeakMap(),fallbacks=new Map();
 const CACHE_LIMIT=8;
@@ -119,24 +119,91 @@ async function composite(input){
   p.globalCompositeOperation='source-atop';p.drawImage(tint,0,0);p.drawImage(materialLayer(design,parts.upper),0,0);
   const pattern=patternLayer(design,parts.upper);if(pattern)p.drawImage(pattern,0,0);
   p.globalCompositeOperation='source-over';
-  drawAccessories(p,design,sprites);
+  drawAccessories(p,design,sprites,parts.base,parts.binding);
   cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);
   return out;
  }).finally(()=>jobs.delete(id));
  jobs.set(id,job);return job;
 }
-function drawAccessories(p,d,sprites){
- const a=ANCHORS[d.heel]||ANCHORS.flat;
- const sprite=(name,point,w,rotation=0,h)=>{const im=sprites[name];if(!im)return;p.save();p.translate(point[0],point[1]);p.rotate(rotation);const height=h||w*im.naturalHeight/im.naturalWidth;p.drawImage(im,-w/2,-height/2,w,height);p.restore();};
- if(d.strap==='thin')sprite('maryjane',a.strap,146,a.strapAngle,32);
- if(d.strap==='pearl')sprite('pearls',a.strap,146,a.strapAngle,33);
- if(d.strap==='cross')sprite('laces',a.lace,105,.18,65);
- if(d.strap==='ribbon'){sprite('maryjane',a.strap,146,a.strapAngle,32);sprite('bow',[a.strap[0]+45,a.strap[1]+43],75,-.12);}
- const decor={small:['bow',90],big:['bow',130],drop:['drop',35],flower:['flower',88]}[d.decoration];
- if(decor)sprite(decor[0],a.back,decor[1],-.22);
- if(d.charm==='pearl')sprite('pearl',a.toe,59,-.12);
- if(d.charm==='crystal')sprite('crystal',a.toe,58,-.12);
- if(d.charm==='mini')sprite('bow',a.toe,93,-.12);
+// Accessory geometry lives in the immutable 1024×640 painting coordinates.
+// The same layer supplies both the ornament and its shoe-clipped contact shadow.
+function drawAccessories(p,d,sprites,base,binding){
+ const a=ANCHORS[d.heel]||ANCHORS.flat,layer=canvas(),q=layer.getContext('2d');
+ const bandStart=d.heel==='flat'?[-66,-53]:d.heel==='kitten'?[-84,-34]:[-85,d.heel==='wedge'?-38:-37];
+ const sprite=(name,point,w,rotation=0,h)=>{const im=sprites[name];if(!im)return;q.save();q.translate(point[0],point[1]);q.rotate(rotation);const height=h||w*im.naturalHeight/im.naturalWidth;q.drawImage(im,-w/2,-height/2,w,height);q.restore();};
+ const band=()=>{
+  // One constant-width satin strip, not a hooked arc. Each start is sewn into
+  // the actual far collar; the outer end continues underneath its buckle.
+  // Clipping to the immutable painting tucks the far cut edge into the shoe
+  // silhouette instead of exposing a suspended pink cap above the opening.
+  const strip=canvas(),b=strip.getContext('2d');
+  const start=bandStart;
+  const end=d.heel==='flat'?[60,53]:[58,62];
+  const bridge=()=>{b.beginPath();b.moveTo(...start);b.bezierCurveTo(start[0]+36,start[1]+45,end[0]-32,end[1]-35,...end);};
+  b.save();b.translate(...a.strap);b.lineCap='butt';b.lineJoin='round';
+  const colour=COLORS[d.color]||COLORS.pink,shade=colour.match(/[a-f\d]{2}/gi).map(v=>Math.round(parseInt(v,16)*.70));
+  bridge();b.strokeStyle='rgb('+shade.join(',')+')';b.lineWidth=56;b.stroke();
+  const silk=b.createLinearGradient(-65,-28,57,58);
+  silk.addColorStop(0,colour);silk.addColorStop(.27,'#fff1ed');silk.addColorStop(.47,colour);silk.addColorStop(1,colour);
+  bridge();b.strokeStyle=silk;b.lineWidth=51;b.stroke();
+  // Restrained continuous sheen follows the strip, with no detached arc line.
+  bridge();b.strokeStyle='rgba(255,249,241,.22)';b.lineWidth=30;b.stroke();
+  b.restore();clip(b,base);q.drawImage(strip,0,0);
+  q.save();q.translate(...a.strap);
+  // Raised outer gold frame, inset satin and a polished fastening tongue.
+  q.save();q.translate(49,35);q.rotate(-.39);q.scale(1.6,1.6);
+  q.shadowColor='rgba(76,38,45,.48)';q.shadowBlur=3;q.shadowOffsetY=2;
+  q.fillStyle='#9b693c';q.beginPath();q.roundRect(-21,-17,42,35,8);q.fill();
+  q.shadowColor='transparent';
+  const gold=q.createLinearGradient(-19,-16,19,16);gold.addColorStop(0,'#fff2bf');gold.addColorStop(.4,'#e6c079');gold.addColorStop(.72,'#ad7943');gold.addColorStop(1,'#ffe6a7');
+  q.strokeStyle=gold;q.lineWidth=5;q.beginPath();q.roundRect(-18,-14,36,29,6);q.stroke();
+  q.fillStyle=colour;q.fillRect(-12,-8,24,17);q.strokeStyle='#ffedb2';q.lineWidth=3;q.beginPath();q.moveTo(0,-12);q.lineTo(0,14);q.moveTo(0,1);q.lineTo(13,1);q.stroke();
+  q.restore();
+  q.restore();
+ };
+ if(d.strap==='thin'||d.strap==='ribbon')band();
+ if(d.strap==='pearl')sprite('pearls',a.strap,202,a.strapAngle,62);
+ if(d.strap==='cross'){
+  // Widen the lacing in the shoe's perspective. A rectangular enlargement
+  // leaves its far eyelets floating and its loose ends below the sole.
+  q.save();q.translate(a.lace[0],a.lace[1]);q.lineCap='round';
+  const rows=[[[-88,-25],[132,-65]],[[-122,24],[158,-6]],[[-140,78],[172,57]]];
+  const eyelet=([x,y])=>{
+   q.save();q.translate(x,y);q.rotate(-.18);
+   q.fillStyle='#9c714c';q.beginPath();q.ellipse(0,2,15,10,0,0,Math.PI*2);q.fill();
+   const gold=q.createLinearGradient(-12,-8,10,8);gold.addColorStop(0,'#fff0be');gold.addColorStop(.5,'#d3ac65');gold.addColorStop(1,'#ad7c45');
+   q.fillStyle=gold;q.beginPath();q.ellipse(0,0,14,9,0,0,Math.PI*2);q.fill();
+   q.fillStyle='#9b6f78';q.beginPath();q.ellipse(0,0,7,4,0,0,Math.PI*2);q.fill();q.restore();
+  };
+  const cord=(from,to)=>{
+   const path=()=>{q.beginPath();q.moveTo(...from);q.bezierCurveTo(from[0]+(to[0]-from[0])*.32,from[1]+8,to[0]-(to[0]-from[0])*.25,to[1]+9,...to);};
+   for(const [width,color] of [[16,'#9d7382'],[12,'#ecc4d1'],[7,'#fff0e5']]){path();q.lineWidth=width;q.strokeStyle=color;q.stroke();}
+  };
+  rows.forEach(row=>row.forEach(eyelet));
+  for(let i=0;i<rows.length-1;i++){cord(rows[i][0],rows[i+1][1]);cord(rows[i][1],rows[i+1][0]);}
+  cord(rows[0][0],[115,-43]);cord(rows[0][1],[115,-43]);q.restore();
+  sprite('bow',[a.lace[0]+115,a.lace[1]-43],150,-.18);
+ }
+ if(d.strap==='ribbon')sprite('bow',[a.strap[0]+54,a.strap[1]+42],151,-.16);
+ const decor={small:['bow',260],big:['bow',370],drop:['drop',105],flower:['flower',172]}[d.decoration];
+ // Spread the enlarged silk inward from its permanent counter mount. This
+ // fixed per-option offset keeps the complete bow clear of the source edges.
+ if(decor)sprite(decor[0],decor[0]==='bow'?[a.back[0]-50,a.back[1]+18]:a.back,decor[1],-.18);
+ if(d.charm==='pearl')sprite('pearl',a.toe,118,-.12);
+ if(d.charm==='crystal')sprite('crystal',a.toe,116,-.12);
+ if(d.charm==='mini')sprite('bow',a.toe,186,-.12);
+ const shadow=canvas(),s=shadow.getContext('2d');
+ s.drawImage(layer,0,0);s.globalCompositeOperation='source-in';s.fillStyle='rgba(84,42,56,.42)';s.fillRect(0,0,WIDTH,HEIGHT);
+ const contact=canvas(),c=contact.getContext('2d');
+ c.filter='blur(5px)';c.drawImage(shadow,3,7);c.filter='blur(1.4px)';c.globalAlpha=.52;c.drawImage(shadow,1,2);c.filter='none';c.globalAlpha=1;
+ clip(c,base);p.drawImage(contact,0,0);p.drawImage(layer,0,0);
+ if(binding&&(d.strap==='thin'||d.strap==='ribbon')){
+  // Restore the actual painted piping alpha, rather than an estimated seam
+  // polygon, so the sewn far tab cannot leave a cream triangular crop edge.
+  const seam=canvas(),edge=seam.getContext('2d'),x=a.strap[0]+bandStart[0],y=a.strap[1]+bandStart[1];
+  edge.drawImage(base,0,0);clip(edge,binding);
+  p.save();p.beginPath();p.ellipse(x-6,y-8,35,27,-.45,0,Math.PI*2);p.clip();p.drawImage(seam,0,0);p.restore();
+ }
 }
 function draw(source,target,options){
  const p=target.getContext('2d');p.clearRect(0,0,target.width,target.height);p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';
