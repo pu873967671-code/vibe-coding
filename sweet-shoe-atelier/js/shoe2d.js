@@ -10,6 +10,9 @@ const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purp
 const loads=new Map(),cache=new Map(),jobs=new Map(),paintTokens=new WeakMap(),fallbacks=new Map();
 const CACHE_LIMIT=8;
 const ACCESSORIES={bow:'bow',pearls:'pearls',laces:'laces',maryjane:'maryjane',drop:'drop',crystal:'crystal',flower:'flower',pearl:'pearl'};
+const ACCESSORY_OPTIONS=Object.freeze({strap:['thin','ribbon','cross','pearl'],decoration:['small','big','flower','drop'],charm:['mini','pearl','crystal']});
+const TINTABLE_ACCESSORIES=new Set(['strap_thin','strap_ribbon','strap_cross','decoration_small','decoration_big','charm_mini']);
+const perspectiveLayers=Object.create(null),perspectiveTints=Object.create(null),perspectiveLoads=new Map(),accessoryFallbacks=new Map(),tintFallbacks=new Map();
 let accessoryLoad;
 const ANCHORS={
  flat:{toe:[285,432],back:[854,294],strap:[576,352],lace:[350,405],strapAngle:.70},
@@ -17,7 +20,29 @@ const ANCHORS={
  block:{toe:[285,446],back:[854,197],strap:[595,319],lace:[352,423],strapAngle:.87},
  wedge:{toe:[285,426],back:[855,188],strap:[595,304],lace:[352,405],strapAngle:.87}
 };
-function accessories(){return accessoryLoad||(accessoryLoad=Promise.all(Object.entries(ACCESSORIES).map(async([name,file])=>[name,await image('assets/shoe2d/accessories/'+file+'.webp')])).then(Object.fromEntries));}
+async function accessories(heel){
+ const legacy=await (accessoryLoad||(accessoryLoad=Promise.all(Object.entries(ACCESSORIES).map(async([name,file])=>[name,await image('assets/shoe2d/accessories/'+file+'.webp')])).then(Object.fromEntries)));
+ if(heel){
+  if(!perspectiveLoads.has(heel)){
+   const variants=Object.entries(ACCESSORY_OPTIONS).flatMap(([category,values])=>values.map(value=>category+'_'+value));
+   perspectiveLoads.set(heel,Promise.all(variants.map(async name=>{
+    const prefix='assets/shoe2d/accessories/'+heel+'_'+name;
+    const tintable=TINTABLE_ACCESSORIES.has(name);
+    const [im,mask]=await Promise.all([image(prefix+'.webp'),tintable?image(prefix+'_tint.webp'):null]);
+    const valid=im?.naturalWidth===WIDTH&&im?.naturalHeight===HEIGHT;
+    const tintValid=mask?.naturalWidth===WIDTH&&mask?.naturalHeight===HEIGHT;
+    if(!valid)accessoryFallbacks.set(heel+'_'+name,'perspective layer unavailable; legacy ornament');
+    if(tintable&&!tintValid)tintFallbacks.set(heel+'_'+name,'fabric mask unavailable; neutral painted ornament');
+    return [name,valid?im:null,tintValid?mask:null];
+   })).then(entries=>{
+    perspectiveLayers[heel]=Object.fromEntries(entries.map(([name,im])=>[name,im]));
+    perspectiveTints[heel]=Object.fromEntries(entries.map(([name,,mask])=>[name,mask]));
+   }));
+  }
+  await perspectiveLoads.get(heel);
+ }
+ return {...legacy,layers:perspectiveLayers,tints:perspectiveTints};
+}
 function canvas(){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;return c;}
 function clean(design){return A.cleanDesign?A.cleanDesign(design):{color:'pink',material:'satin',pattern:'none',strap:'none',decoration:'none',heel:'flat',charm:'none',...design};}
 function key(design){return [design.heel,design.color,design.material,design.pattern,design.strap,design.decoration,design.charm].join('|');}
@@ -107,7 +132,7 @@ async function composite(input){
  const design=clean(input),id=key(design);
  if(cache.has(id)){const hit=cache.get(id);cache.delete(id);cache.set(id,hit);return hit;}
  if(jobs.has(id))return jobs.get(id);
- const job=Promise.all([load(design.heel),accessories()]).then(([parts,sprites])=>{
+ const job=Promise.all([load(design.heel),accessories(design.heel)]).then(([parts,sprites])=>{
   const out=canvas(),p=out.getContext('2d'),tint=canvas(),q=tint.getContext('2d');
   if(!parts.upper){p.drawImage(parts.base,0,0);cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);return out;}
   q.drawImage(parts.upper,0,0);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[design.color]||COLORS.pink;q.fillRect(0,0,WIDTH,HEIGHT);
@@ -125,9 +150,32 @@ async function composite(input){
  }).finally(()=>jobs.delete(id));
  jobs.set(id,job);return job;
 }
-// Accessory geometry lives in the immutable 1024×640 painting coordinates.
-// The same layer supplies both the ornament and its shoe-clipped contact shadow.
+// Every reviewed edit is extracted onto its original 1024×640 source frame.
+// Its perspective and contact shading are already painted: drawing it at the
+// origin keeps the base camera/silhouette exact through all finish changes.
 function drawAccessories(p,d,sprites,base,binding){
+ for(const category of Object.keys(ACCESSORY_OPTIONS)){
+  const value=d[category];if(!value||value==='none')continue;
+  const name=category+'_'+value,layer=sprites.layers?.[d.heel]?.[name];
+  if(layer){
+   const mask=sprites.tints?.[d.heel]?.[name];
+   p.drawImage(mask?tintAccessory(layer,mask,COLORS[d.color]||COLORS.pink):layer,0,0);
+  }
+  else drawLegacyAccessories(p,{...d,strap:'none',decoration:'none',charm:'none',[category]:value},sprites,base,binding);
+ }
+}
+// Tint only the extracted fabric, preserving painted folds, jewellery and
+// contact ink. The last source-atop pass preserves the source alpha exactly,
+// including its soft antialiased edges, at every selected colour.
+function tintAccessory(layer,mask,colour){
+ const dyed=canvas(),q=dyed.getContext('2d');
+ q.drawImage(layer,0,0);q.globalCompositeOperation='multiply';q.fillStyle=colour;q.fillRect(0,0,WIDTH,HEIGHT);
+ q.globalCompositeOperation='destination-in';q.drawImage(mask,0,0);
+ const out=canvas(),p=out.getContext('2d');p.drawImage(layer,0,0);
+ p.globalCompositeOperation='source-atop';p.drawImage(dyed,0,0);return out;
+}
+// Missing image fallback retains the last complete, playable ornament kit.
+function drawLegacyAccessories(p,d,sprites,base,binding){
  const a=ANCHORS[d.heel]||ANCHORS.flat,layer=canvas(),q=layer.getContext('2d');
  const bandStart=d.heel==='flat'?[-66,-53]:d.heel==='kitten'?[-84,-34]:[-85,d.heel==='wedge'?-38:-37];
  const sprite=(name,point,w,rotation=0,h)=>{const im=sprites[name];if(!im)return;q.save();q.translate(point[0],point[1]);q.rotate(rotation);const height=h||w*im.naturalHeight/im.naturalWidth;q.drawImage(im,-w/2,-height/2,w,height);q.restore();};
@@ -230,6 +278,6 @@ function mount(host,input,options={}){
  },dispose(){disposed=true;paintTokens.set(target,{});target.remove();host.classList.remove('shoe2d-host');},debug(){return {renderer:'painted-2d',ready:target.dataset.shoe2dReady==='true',design:{...design},width:WIDTH,height:HEIGHT,toe:[96,540],ground:540,length:832,error,fallback:fallbacks.get(design.heel)||null,cacheEntries:cache.size};}};
  controller.ready=controller.update(design);return controller;
 }
-const api={mount,render,composite,preload:()=>Promise.allSettled([...HEELS.map(load),accessories()]),anchors:ANCHORS,frame:Object.freeze({width:WIDTH,height:HEIGHT,toeX:96,groundY:540,length:832}),info:()=>({renderer:'painted-2d',cacheEntries:cache.size,cacheLimit:CACHE_LIMIT,loadedHeels:[...loads.keys()],fallbacks:Object.fromEntries(fallbacks),pendingComposites:jobs.size})};
+const api={mount,render,composite,preload:()=>Promise.allSettled(HEELS.flatMap(heel=>[load(heel),accessories(heel)])),anchors:ANCHORS,frame:Object.freeze({width:WIDTH,height:HEIGHT,toeX:96,groundY:540,length:832}),info:()=>({renderer:'painted-2d',cacheEntries:cache.size,cacheLimit:CACHE_LIMIT,loadedHeels:[...loads.keys()],fallbacks:Object.fromEntries(fallbacks),pendingComposites:jobs.size,perspectiveLayers:Object.fromEntries(Object.entries(perspectiveLayers).map(([heel,layers])=>[heel,Object.values(layers).filter(Boolean).length])),accessoryFallbacks:Object.fromEntries(accessoryFallbacks),tintMasks:Object.fromEntries(Object.entries(perspectiveTints).map(([heel,masks])=>[heel,Object.values(masks).filter(Boolean).length])),tintFallbacks:Object.fromEntries(tintFallbacks)})};
 A.Shoe2D=api;globalThis.Shoe2D=api;
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
