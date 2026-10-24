@@ -375,7 +375,10 @@ function buildProfessional(d){
   // retaining the derivative of the original high-heel displacement.
   if(d.heel==='flat'||role==='upper')g.computeVertexNormals();
   if(role==='upper'){const p=g.attributes.position,buckets=new Map(),normal=g.attributes.normal;for(let k=0;k<p.count;k++){const key=[p.getX(k),p.getY(k),p.getZ(k)].map(v=>Math.round(v*10000)).join(':');if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(k);}for(const ids of buckets.values()){const sum=new THREE.Vector3();for(const k of ids)sum.add(new THREE.Vector3().fromBufferAttribute(normal,k));sum.normalize();for(const k of ids)normal.setXYZ(k,sum.x,sum.y,sum.z);}}
-  g.computeBoundingBox();return g;
+  // Raycaster rejects against the cached source sphere before triangles.
+  // Rear pitch moves the heel seat outside that original high-pump sphere;
+  // refresh both bounds so support and ornaments hit the actual low shell.
+  g.computeBoundingBox();g.computeBoundingSphere();return g;
  };
  const parts=shoeAsset.children.filter(o=>o.isMesh&&!['source-heel','source-cap','lining'].includes(o.name)).map(o=>({name:o.name,g:deform(o.geometry,o.name)}));
  // Preserve the light interior while tinting the exposed rear seat to the
