@@ -43,7 +43,7 @@ async function readSave(){
 function persist(){state.design={...design};state.version=3;state.savedAt=Date.now();memory=JSON.stringify(state);try{localStorage.setItem('sweet-shoe-v3',memory);}catch{}if(sdkActive&&['crazygames','local'].includes(sdk.environment))try{Promise.resolve(sdk.data.setItem('sweet-shoe-v3',memory)).catch(()=>{});}catch{}}
 function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,250);}
 const audio=A.createAudioEngine(()=>state,()=>adActive||document.hidden||modalKind==='pause',()=>modalKind==='runway'||modalKind==='shop'||modalKind==='collection'?'tea':mode);
-function toast(text){clearTimeout(toastTimer);$('toast').textContent=text;$('toast').classList.add('show');toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3200);}
+function toast(text){clearTimeout(toastTimer);if(!text){$('toast').classList.remove('show');return;}$('toast').textContent=text;$('toast').classList.add('show');toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3200);}
 function particles(x=innerWidth/2,y=innerHeight/2,coin=false,chain=''){
  if(reducedMotion)return;const host=$('particles'),target=$('coins').getBoundingClientRect();
  // Bound bursts during fast merging; short radial glints keep the board readable.
@@ -142,10 +142,10 @@ function renderTimer(){
  if(combo.textContent!==String(state.combo))combo.textContent=state.combo;
 }
 function renderAll(){document.body.classList.toggle('merge-active',mode==='merge');renderHeader();$('studioScreen').hidden=mode==='merge';mergeScreen.show(mode==='merge');if(mode!=='merge'){renderPreview();renderTabs();renderCustomer();}setTutorial();renderJourney();syncGameplay();audio.update();}
-function modal(kind,html){modalKind=kind;$('modalRoot').innerHTML=`<div class="backdrop${kind==='runway'?' runway-backdrop':''}"><section class="modal${kind==='runway'?' runway-modal':kind==='shop'?' boutique-modal':kind==='collection'?' collection-modal':''}" data-modal-kind="${kind}" role="dialog" aria-modal="true" aria-label="${t(kind==='pause'?'pause':'brand')}">${html}${['welcome','opening','atelier-book'].includes(kind)?'':`<button class="modal-dismiss secondary" data-modal-dismiss aria-label="${A.lang==='zh'?'关闭':'Close'}">×</button>`}</section></div>`;$('app').inert=true;setTutorial();syncGameplay();audio.update();renderJourney();hydrateCanvases($('modalRoot'));$('modalRoot').querySelector('button:not(:disabled)')?.focus();}
+function modal(kind,html){runwayFitting?.dispose();runwayFitting=null;modalKind=kind;$('modalRoot').innerHTML=`<div class="backdrop${kind==='runway'?' runway-backdrop':''}"><section class="modal${kind==='runway'?' runway-modal':kind==='shop'?' boutique-modal':kind==='collection'?' collection-modal':''}" data-modal-kind="${kind}" role="dialog" aria-modal="true" aria-label="${t(kind==='pause'?'pause':'brand')}">${html}${['welcome','opening','atelier-book'].includes(kind)?'':`<button class="modal-dismiss secondary" data-modal-dismiss aria-label="${A.lang==='zh'?'关闭':'Close'}">×</button>`}</section></div>`;$('app').inert=true;setTutorial();syncGameplay();audio.update();renderJourney();hydrateCanvases($('modalRoot'));$('modalRoot').querySelector('button:not(:disabled)')?.focus();}
 function dismissModal(){if(adActive||busy)return;if(modalKind==='opening'){finishOpening();return;}if(modalKind==='welcome')return;if(modalKind==='chapter'){continueBoutique();return;}if(modalKind==='result'){action('next');return;}closeModal();}
 $('modalRoot').addEventListener('click',e=>{if(e.target.classList.contains('backdrop')||e.target.closest('[data-modal-dismiss]'))dismissModal();});
-function closeModal(){modalKind='';$('app').inert=false;$('modalRoot').innerHTML='';setTutorial();syncGameplay();audio.update();renderJourney();(mode==='merge'?$('atelierScreen').querySelector('[data-cell="23"]'):$('pack'))?.focus();}
+function closeModal(){runwayFitting?.dispose();runwayFitting=null;modalKind='';$('app').inert=false;$('modalRoot').innerHTML='';setTutorial();syncGameplay();audio.update();renderJourney();(mode==='merge'?$('atelierScreen').querySelector('[data-cell="23"]'):$('pack'))?.focus();}
 const btn=(action,label,secondary=false)=>`<button class="${secondary?'secondary':'primary'}" data-action="${action}">${['welcome','titleFree','next','newDay'].includes(action)?icon(action==='titleFree'?'color':action==='welcome'?'heart':'gift'):''}<span>${t(label).replace(/^[^\p{L}]+/u,'')}</span></button>`;
 function openPause(){
  if(busy||adActive)return;
@@ -178,7 +178,7 @@ function openGallery(selected=0){
 
 }
 
-let runwayReturn=null,runwayIndex=0;
+let runwayReturn=null,runwayIndex=0,runwayFitting=null;
 const runwayText=(en,zh)=>A.lang==='zh'?zh:en;
 function setRunwayProduct(scene,on){
  if(!scene?.isConnected)return;
@@ -193,9 +193,10 @@ function openRunway(index=0,refresh=false){
  clearTimeout(toastTimer);$('toast').classList.remove('show');
  if(!refresh)runwayReturn={kind:modalKind,html:$('modalRoot').querySelector('.modal')?.innerHTML||''};
  runwayIndex=index;const sceneId=state.showcase.owned.includes(artwork.scene)?artwork.scene:state.showcase.selected;
- modal('runway',`<div class="runway"><div class="runway-heading"><button class="secondary runway-return" data-runway-back aria-label="${runwayText('Back','返回')}">‹</button><span class="section-kicker">${t('brand')} · ${runwayText('THE FITTING ROOM','试穿沙龙')}</span><h2>${runwayText('The fitting room','试穿沙龙')}</h2><p>${option('color',artwork.design.color)[1]} · ${option('material',artwork.design.material)[1]} · ${option('heel',artwork.design.heel)[1]}</p></div><div class="runway-scene" data-showcase-scene="${sceneId}" data-material="${artwork.design.material}" style="--scene-image:url('assets/${A.Showcase.find(sceneId).closeImage}.webp')" data-runway-pose="stand" data-runway-angle="front34"><div class="runway-contact contact-back"></div><div class="runway-contact contact-front"></div><div class="runway-mirror" aria-hidden="true"></div><div class="runway-light"></div><div class="runway-painted-window">${productCanvas(artwork.design)}</div><div class="scene-atmosphere" aria-hidden="true">${Array.from({length:6},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div><img class="runway-spark spark-one" src="assets/sparkle.webp" alt=""><img class="runway-spark spark-two" src="assets/sparkle.webp" alt=""><span class="runway-monogram">${A.lang==='zh'?'小鞋铺':'SSA'}</span></div><div class="runway-dock"><div class="showcase-strip">${A.Showcase.picker(state,sceneId)}</div><p class="runway-reaction">“${runwayText('Exactly the pair I dreamed of.','就是我梦里的那双鞋。')}”</p><div class="runway-actions"><button class="secondary" data-runway-share>${runwayText('Share','分享')} ↗</button><button class="primary" data-runway-collection>✓ ${runwayText('Continue','继续')}</button></div></div></div>`);
+ modal('runway',`<div class="runway"><div class="runway-heading"><button class="secondary runway-return" data-runway-back aria-label="${runwayText('Back','返回')}">‹</button><span class="section-kicker">${t('brand')} · ${runwayText('THE FITTING ROOM','试穿沙龙')}</span><h2>${runwayText('The fitting room','试穿沙龙')}</h2><p>${option('color',artwork.design.color)[1]} · ${option('material',artwork.design.material)[1]} · ${option('heel',artwork.design.heel)[1]}</p></div><div class="runway-scene" data-showcase-scene="${sceneId}" data-material="${artwork.design.material}" style="--scene-image:url('assets/${A.Showcase.find(sceneId).closeImage}.webp')" data-runway-pose="stand" data-runway-angle="front34"><div class="runway-contact contact-back"></div><div class="runway-contact contact-front"></div><div class="runway-mirror" aria-hidden="true"></div><div class="runway-light"></div><div class="runway-painted-window runway-worn-window"></div><div class="scene-atmosphere" aria-hidden="true">${Array.from({length:6},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div><img class="runway-spark spark-one" src="assets/sparkle.webp" alt=""><img class="runway-spark spark-two" src="assets/sparkle.webp" alt=""><span class="runway-monogram">${A.lang==='zh'?'小鞋铺':'SSA'}</span></div><div class="runway-dock"><div class="showcase-strip">${A.Showcase.picker(state,sceneId)}</div><p class="runway-reaction">“${runwayText('Exactly the pair I dreamed of.','就是我梦里的那双鞋。')}”</p><div class="runway-actions"><button class="secondary" data-runway-share>${runwayText('Share','分享')} ↗</button><button class="primary" data-runway-collection>✓ ${runwayText('Continue','继续')}</button></div></div></div>`);
  A.Introduction.advance(state,'fitting');persist();renderJourney();refreshFitting($('modalRoot').querySelector('.runway-scene'));hydrateCanvases($('modalRoot'));scheduleCanvasResize();
- setRunwayProduct($('modalRoot').querySelector('.runway-scene'),true);
+ runwayFitting?.dispose();runwayFitting=A.Fitting2D.mount($('modalRoot').querySelector('.runway-painted-window'),artwork.design);
+ setRunwayProduct($('modalRoot').querySelector('.runway-scene'),false);
 }
 async function shareRunway(){
  const artwork=state.gallery[runwayIndex];if(!artwork)return;
@@ -203,7 +204,7 @@ async function shareRunway(){
  const title=t('brand'),text=option('color',artwork.design.color)[1]+' · '+option('heel',artwork.design.heel)[1];
  try{
   const source=document.createElement('canvas');source.width=1440;source.height=900;
-  await A.Shoe2D.render(source,artwork.design,{pair:true});
+  await A.Fitting2D.render(source,artwork.design);
   const blob=source?await new Promise(resolve=>source.toBlob(resolve,'image/png')):null;
   const file=blob?new File([blob],'sweet-shoe-atelier.png',{type:'image/png'}):null;
   if(file&&navigator.canShare?.({files:[file]}))await navigator.share({title,text,files:[file]});
