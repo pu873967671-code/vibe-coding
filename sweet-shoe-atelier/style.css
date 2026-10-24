@@ -1062,3 +1062,21 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
  .mentor-area .chain-preview{gap:2px;justify-content:space-between}
  .mentor-area .chain-piece{min-width:0;flex:1}
 }
+
+/* Mimi exports share a head-centred 800×1000 frame. Size story/dialogue art
+   by height so a wide pointing/presenting gesture never shrinks her face. */
+.vn-mentor,.vn-story .opening-character{width:auto;max-width:none}
+@media(orientation:portrait){
+ .vn-mentor{left:calc(34vw - 28.8dvh)}
+ .vn-story .opening-character{left:calc(34vw - 30dvh)}
+}
+/* Painted shoe kit: one authored camera, one stable source-pixel frame. */
+#studioScreen .stage.shoe2d-stage{overflow:hidden;border-radius:24px;background:radial-gradient(ellipse at 48% 25%,#fffefd 10%,#fff5f8 65%,#eef8f3);border:1px solid #f5dce6}
+#studioScreen .shoe2d-stage:before{inset:0;border-radius:inherit;background:radial-gradient(ellipse at 50% 84%,#e2ece55c,transparent 58%)}
+#studioScreen .shoe2d-stage .pedestal,#studioScreen .shoe2d-stage .spark,#studioScreen .shoe2d-stage>.product-floor-shadow{display:none}
+#studioScreen .stage.shoe2d-stage #preview{inset:0;width:100%;height:100%;max-height:none;aspect-ratio:auto;transform:none;filter:none;transition:opacity .4s;animation:none}
+#studioScreen .stage.shoe2d-stage #preview canvas{display:block;width:100%;height:100%;object-fit:contain;aspect-ratio:1024/640;mask-image:none;transform:none;filter:none}
+#studioScreen .stage.shoe2d-stage.packing #preview{opacity:0}
+#options canvas.shoe2d-option{width:100%;height:54px;object-fit:contain;aspect-ratio:1024/640}
+@media(max-height:560px) and (orientation:landscape){#options canvas.shoe2d-option{height:29px}}
+@media(orientation:portrait){#options canvas.shoe2d-option{height:30px}#studioScreen .stage.shoe2d-stage{border-radius:18px}}
