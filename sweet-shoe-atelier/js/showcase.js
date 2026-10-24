@@ -12,7 +12,7 @@
  const find=id=>scenes.find(x=>x.id===id);
  function sanitize(value){const owned=['salon',...new Set((Array.isArray(value?.owned)?value.owned:[]).filter(id=>id!=='salon'&&find(id)))];return {version:1,owned,selected:owned.includes(value?.selected)?value.selected:'salon'};}
  function choose(state,id,artwork){const scene=find(id);if(!scene)return {ok:false,reason:'scene'};const room=state.showcase||(state.showcase=sanitize());const unlocked=!room.owned.includes(id);if(unlocked){if(!Number.isFinite(state.coins)||state.coins<scene.price)return {ok:false,reason:'coins'};state.coins-=scene.price;room.owned.push(id);}room.selected=id;if(artwork)artwork.scene=id;return {ok:true,unlocked,scene};}
- function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.image}${s.id==='salon'?'':'_thumb'}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+s.price}</small></button>`;}).join('')}</div>`;}
+ function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.image}${s.id==='salon'?'':'_thumb'}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+(zh?'解锁 ':'Buy ')+s.price}</small></button>`;}).join('')}</div>`;}
  // Coordinates are authored against the local background, so cover-cropping
  // changes the room and the fitted pair together at every aspect ratio.
  const framing={
@@ -31,6 +31,14 @@
   const fitHeight=Math.min(Math.min(available*(detail?.84:.94)*zoom,available*(detail?.87:1)),(w-40)/(detail?1.35:ratio));
   for(const [key,value] of Object.entries({'dock-clearance':clearance,'fit-height':fitHeight,'fit-left':w*.5,'fit-bottom':clearance+Math.max(0,(available-fitHeight)*.12)}))stage.style.setProperty('--'+key,value+'px');
   stage.style.backgroundPosition='50% 72%';
+  // Buying a room rebuilds the dock. Keep the selected chip fully visible,
+  // without scrolling the viewport or moving the separate Share actions.
+  const picker=stage.closest('.runway')?.querySelector('.showcase-picker'),chip=picker?.querySelector('.showcase-chip.selected');
+  if(picker&&chip&&(stage.dataset.revealedScene!==stage.dataset.showcaseScene||stage.dataset.revealedPickerWidth!==String(picker.clientWidth))){
+   const p=picker.getBoundingClientRect(),c=chip.getBoundingClientRect();
+   if(c.right>p.right-2)picker.scrollLeft+=c.right-p.right+2;else if(c.left<p.left+2)picker.scrollLeft-=p.left-c.left+2;
+   stage.dataset.revealedScene=stage.dataset.showcaseScene;stage.dataset.revealedPickerWidth=String(picker.clientWidth);
+  }
  }
  A.Showcase={scenes,find,sanitize,choose,picker,frame,framing};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
