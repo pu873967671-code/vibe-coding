@@ -1079,7 +1079,11 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 #studioScreen .stage.shoe2d-stage.packing #preview{opacity:0}
 #options canvas.shoe2d-option{width:100%;height:54px;object-fit:contain;aspect-ratio:1024/640}
 @media(max-height:560px) and (orientation:landscape){#options canvas.shoe2d-option{height:29px}}
-@media(orientation:portrait){#options canvas.shoe2d-option{height:30px}#studioScreen .stage.shoe2d-stage{border-radius:18px}}
+@media(orientation:portrait){#options canvas.shoe2d-option{height:30px}#studioScreen .stage.shoe2d-stage{border-radius:18px}
+ /* Two complete option rows keep the shoe stage fixed while categories change.
+    Longer translated labels scroll inside this reserved editor space. */
+ #studioScreen #options{height:135px;min-height:135px;flex:none;overflow-y:auto;overscroll-behavior:contain}
+}
 
 /* Painted kit: the same finished source supplies every product surface. */
 .shoe-canvas[data-renderer="painted-2d"]{aspect-ratio:1024/640;object-fit:contain;mask-image:none;animation:none;transform:none;filter:none}
