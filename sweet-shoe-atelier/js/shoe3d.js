@@ -10,6 +10,7 @@ let resources=new Set();
 const own=value=>(resources.add(value),value);
 const TAU=Math.PI*2;
 const OPENING_START=-1.12,OPENING_END=.15;
+const PEARL_SCALE=.65;
 function supported(d){return ['heel','strap','decoration','charm'].every(k=>A.opts[k].some(o=>o[0]===(d[k]||'none')));}
 function release(){
  cancelAnimationFrame(frame);frame=0;clearTimeout(idleTimer);idleTimer=0;fitting=false;observer?.disconnect();observer=null;
@@ -265,11 +266,12 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
  shoe.userData.sockets=sockets;
  const at=(name)=>{const g=new THREE.Group();g.name='socket:'+name;g.position.set(...sockets[name]);shoe.add(g);return g;};
  if(d.decoration&&d.decoration!=='none'){
-  const back=at('heelBack');if(shoe.userData.shellSection)back.rotation.y=-Math.PI/2;
-  if(['small','big'].includes(d.decoration)){const tie=bow(back,material,d.decoration==='big'?.78:.55);if(shoe.userData.shellSection){tie.scale.z*=.72;tie.rotation.x=-.10;}}
+  const back=at('heelBack');if(shoe.userData.backFrame)back.quaternion.fromArray(shoe.userData.backFrame);
+  else if(shoe.userData.shellSection)back.rotation.y=-Math.PI/2;
+  if(['small','big'].includes(d.decoration)){const tie=bow(back,material,d.decoration==='big'?.78:.55);if(shoe.userData.shellSection){tie.scale.z*=.40;tie.rotation.x=-.10;}}
   if(d.decoration==='drop'){
    const chain=mesh(own(new THREE.TorusGeometry(.05,.008,8,32)),metalMat,back);chain.position.y=-.025;
-   const drop=mesh(own(new THREE.SphereGeometry(.064,40,28)),pearlMat,back);drop.position.set(0,-.13,-.015);drop.scale.y=1.4;
+   const drop=mesh(own(new THREE.SphereGeometry(.064*PEARL_SCALE,40,28)),pearlMat,back);drop.position.set(0,-.13,-.015);drop.scale.y=1.4;
   }
   if(d.decoration==='flower')for(let i=0;i<6;i++){
    const p=mesh(own(new THREE.SphereGeometry(.09,20,12)),i===5?pearlMat:material,back);
@@ -280,8 +282,9 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
   const toe=at('toe');
   if(d.charm==='mini'){const b=bow(toe,material,.57);b.rotation.x=-Math.PI/2;}
   else{
-   const bezel=mesh(own(new THREE.TorusGeometry(.095,.012,10,40)),metalMat,toe);bezel.rotation.x=-Math.PI/2;
-   const gem=mesh((d.charm==='crystal'?crystalGeometry():own(new THREE.SphereGeometry(.083,40,28))),d.charm==='crystal'?crystalMat:pearlMat,toe);gem.position.y=.035;
+   const size=d.charm==='pearl'?PEARL_SCALE:1;
+   const bezel=mesh(own(new THREE.TorusGeometry(.095*size,.012*size,10,40)),metalMat,toe);bezel.rotation.x=-Math.PI/2;
+   const gem=mesh((d.charm==='crystal'?crystalGeometry():own(new THREE.SphereGeometry(.083*size,40,28))),d.charm==='crystal'?crystalMat:pearlMat,toe);gem.position.y=.035*size;
   }
  }
  if(d.strap&&d.strap!=='none'&&shoe.userData.shellSection){
@@ -294,7 +297,7 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
    }
    if(d.strap==='pearl'){
     const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
-    for(let i=0;i<=16;i++){const bead=mesh(own(new THREE.SphereGeometry(.030,24,16)),pearlMat,shoe);bead.position.copy(curve.getPoint(i/16));bead.name='shell-sewn-pearl';}
+    for(let i=0;i<=16;i++){const bead=mesh(own(new THREE.SphereGeometry(.030*PEARL_SCALE,24,16)),pearlMat,shoe);bead.position.copy(curve.getPoint(i/16));bead.name='shell-sewn-pearl';}
    }else ribbon(points,d.strap==='ribbon'?.095:.052,material,shoe,'depth').name='shell-sewn-strap';
   }
  }else if(d.strap&&d.strap!=='none'&&!shoe.userData.professionalStrap){
@@ -303,7 +306,7 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
   // softly sagging band, rather than an upright wire with an open join.
   for(let i=0;i<64;i++){const a=i/64*TAU;points.push(new THREE.Vector3(Math.cos(a)*.265,-.045*(1+Math.sin(a)),Math.sin(a)*.30));}
   const loop=new THREE.CatmullRomCurve3(points,true,'centripetal');
-  if(d.strap==='pearl')for(let i=0;i<24;i++){const p=mesh(own(new THREE.SphereGeometry(.032,24,16)),pearlMat,ankle);p.position.copy(loop.getPoint(i/24));}
+  if(d.strap==='pearl')for(let i=0;i<24;i++){const p=mesh(own(new THREE.SphereGeometry(.032*PEARL_SCALE,24,16)),pearlMat,ankle);p.position.copy(loop.getPoint(i/24));}
   else if(d.strap==='thin')ribbon(points.map(p=>p.toArray()),.042,material,ankle,true,true).name='closed-ankle-ribbon';
   else{
    for(const sign of d.strap==='cross'?[-1,1]:[1]){
@@ -325,7 +328,7 @@ function accessories(shoe,d,material,pearlMat,metalMat,crystalMat){
 // Professional closed pump shell: original vamp, toe, collar, counter and
 // footbed remain one authored mesh. Only the heel pitch is smoothly changed.
 function buildProfessional(d){
- const lift={flat:.105,kitten:.62,block:.72,wedge:.68}[d.heel],swatch=new THREE.Color(A.option('color',d.color)[3]);
+ const lift={flat:.32,kitten:.62,block:.72,wedge:.68}[d.heel],swatch=new THREE.Color(A.option('color',d.color)[3]);
  const upper=upperMaterial(d);upper.side=THREE.DoubleSide;upper.anisotropy=0;
  const lining=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#fff4e7'),.88),roughness:.72,sheen:.12}));
  const sole=own(new THREE.MeshPhysicalMaterial({color:swatch.clone().lerp(new THREE.Color('#8d686e'),.48),roughness:.62}));
@@ -344,31 +347,44 @@ function buildProfessional(d){
    const originalHeel=role==='source-heel'||role==='source-cap',f=originalHeel?(lift-.018)/1.64:1;
    let height=originalHeel?.018+(y-.018)*f:y+(mary?-delta*smooth(z):shift(z));
    if(d.heel==='flat'&&!originalHeel){
-    // Retain the complete closed counter, but lower pump quarters by 40%.
-    const floor=.065+(lift-.065)*smooth(z),scale=.46+.32*(1-smooth(z))+.14*THREE.MathUtils.smoothstep(-z,.95,1.45);
-    height=floor+(y-base(z))*scale;
-    if(role==='forefoot-sole')height=floor+(y-base(z))*.30;
-    p.setX(i,p.getX(i)*(1-.10*THREE.MathUtils.smoothstep(z,-.15,1.35)));
+    // Rigid rear pitch around the ball; the authored toe/vamp are never
+    // squashed, narrowed or remapped against a guessed sole-height profile.
+    const t=THREE.MathUtils.clamp((.65-z)/1.10,0,1),a=-.64*t*t*(3-2*t),dy=y-.18,dz=z-.35;
+    height=.18+dy*Math.cos(a)-dz*Math.sin(a);
+    p.setZ(i,.35+dy*Math.sin(a)+dz*Math.cos(a));
    }
    p.setY(i,height);
    if(n){const slope=originalHeel?0:mary?delta*(smooth(z-.001)-smooth(z+.001))/.002:(shift(z+.001)-shift(z-.001))/.002;const v=new THREE.Vector3(n.getX(i),n.getY(i)/f,n.getZ(i)-slope*n.getY(i)).normalize();n.setXYZ(i,v.x,v.y,v.z);}
   }
-  if(role==='upper'){g.computeVertexNormals();const buckets=new Map(),normal=g.attributes.normal;for(let k=0;k<p.count;k++){const key=[p.getX(k),p.getY(k),p.getZ(k)].map(v=>Math.round(v*10000)).join(':');if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(k);}for(const ids of buckets.values()){const sum=new THREE.Vector3();for(const k of ids)sum.add(new THREE.Vector3().fromBufferAttribute(normal,k));sum.normalize();for(const k of ids)normal.setXYZ(k,sum.x,sum.y,sum.z);}}
+  if(role==='upper'&&d.heel==='flat'){
+   // Trim triangles at a continuous collar curve, never squash their height.
+   const cap=z=>1.08+.065*THREE.MathUtils.smoothstep(-z,1.45,2.25);
+   const positions=[],uvs=[],uv=g.attributes.uv,idx=g.index,count=idx?idx.count:p.count;
+   const read=k=>({v:new THREE.Vector3().fromBufferAttribute(p,k),uv:uv?new THREE.Vector2().fromBufferAttribute(uv,k):new THREE.Vector2()});
+   const inside=q=>q.v.y<=cap(q.v.z);
+   const crossing=(a,b)=>{let lo=0,hi=1;const start=inside(a);for(let j=0;j<20;j++){const t=(lo+hi)/2,v=a.v.clone().lerp(b.v,t);if((v.y<=cap(v.z))===start)lo=t;else hi=t;}const t=(lo+hi)/2;return {v:a.v.clone().lerp(b.v,t),uv:a.uv.clone().lerp(b.uv,t)};};
+   for(let k=0;k<count;k+=3){const tri=[0,1,2].map(j=>read(idx?idx.getX(k+j):k+j)),poly=[];for(let j=0;j<3;j++){const a=tri[j],b=tri[(j+1)%3];if(inside(a))poly.push(a);if(inside(a)!==inside(b))poly.push(crossing(a,b));}for(let j=1;j<poly.length-1;j++)for(const q of [poly[0],poly[j],poly[j+1]]){positions.push(...q.v.toArray());uvs.push(...q.uv.toArray());}}
+   g.setIndex(null);g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.deleteAttribute('normal');
+  }
+  if(role==='upper'){g.computeVertexNormals();const p=g.attributes.position,buckets=new Map(),normal=g.attributes.normal;for(let k=0;k<p.count;k++){const key=[p.getX(k),p.getY(k),p.getZ(k)].map(v=>Math.round(v*10000)).join(':');if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(k);}for(const ids of buckets.values()){const sum=new THREE.Vector3();for(const k of ids)sum.add(new THREE.Vector3().fromBufferAttribute(normal,k));sum.normalize();for(const k of ids)normal.setXYZ(k,sum.x,sum.y,sum.z);}}
   g.computeBoundingBox();return g;
  };
  const parts=shoeAsset.children.filter(o=>o.isMesh&&!['source-heel','source-cap','lining'].includes(o.name)).map(o=>({name:o.name,g:deform(o.geometry,o.name)}));
  const shell=parts.find(o=>o.name==='upper').g;
  const surface=(z)=>{const p=shell.attributes.position;let y=-Infinity;for(let i=0;i<p.count;i++)if(Math.abs(p.getZ(i)-z)<.15)y=Math.max(y,p.getY(i));return Number.isFinite(y)?y:.45;};
- const shellMesh=new THREE.Mesh(shell),ray=new THREE.Raycaster();shellMesh.material.side=THREE.DoubleSide;shellMesh.updateMatrixWorld();
+ const shellMesh=new THREE.Mesh(shell,upper),ray=new THREE.Raycaster();shellMesh.updateMatrixWorld();
+ const footbed=parts.find(o=>o.name==='outsole').g,seatMesh=new THREE.Mesh(footbed,upper);seatMesh.updateMatrixWorld();
  const hit=(x,y,z,dx,dy,dz)=>{ray.set(new THREE.Vector3(x,y,z),new THREE.Vector3(dx,dy,dz));return ray.intersectObject(shellMesh)[0]?.point;};
  const toePoint=hit(.035,4,.88,0,-1,0)||new THREE.Vector3(.035,surface(.88),.88);
- const backY=surface(-1.20)-.16,backPoint=hit(2,backY,-1.20,-1,0,0)||new THREE.Vector3(.32,backY,-1.20);
- const sockets={heelBack:[backPoint.x+.008,backPoint.y,backPoint.z],toe:[toePoint.x,toePoint.y+.008,toePoint.z],ankle:[.035,surface(-.55),-.55]};
+ const backZ=d.heel==='flat'?-1.84:-1.20,backY=surface(backZ)-.18,backPoint=hit(2,backY,backZ,-1,0,0)||new THREE.Vector3(.32,backY,backZ);
+ const sockets={heelBack:[backPoint.x+.002,backPoint.y,backPoint.z],toe:[toePoint.x,toePoint.y+.008,toePoint.z],ankle:[.035,surface(-.55),-.55]};
  const shellSection=z=>{const p=shell.attributes.position;let left=Infinity,right=-Infinity,top=-Infinity,bottom=Infinity;for(let k=0;k<p.count;k++)if(Math.abs(p.getZ(k)-z)<.085){left=Math.min(left,p.getX(k));right=Math.max(right,p.getX(k));top=Math.max(top,p.getY(k));bottom=Math.min(bottom,p.getY(k));}return {left,right,top,bottom};};
  let motif;if(d.pattern!=='none')motif=own(new THREE.MeshPhysicalMaterial({map:motifTexture(d.pattern),transparent:true,alphaTest:.05,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,roughness:.6,side:THREE.DoubleSide}));
  const shadowMap=texture((c,s)=>{c.filter='blur(18px)';c.fillStyle='#734d6550';c.beginPath();c.ellipse(s*.5,s*.52,s*.27,s*.42,0,0,TAU);c.fill();c.filter='blur(5px)';c.fillStyle='#734d6530';c.beginPath();c.ellipse(s*.5,s*.64,s*.24,s*.24,0,0,TAU);c.fill();});
  const shadowGeo=own(new THREE.PlaneGeometry(1.42,3.35)),shadowMat=own(new THREE.MeshBasicMaterial({map:shadowMap,transparent:true,depthWrite:false,opacity:.65}));
  model=new THREE.Group();scene.add(model);model.userData.bodySource='hiirusama-cc0';
+ const size=shell.boundingBox.getSize(new THREE.Vector3());
+ model.userData.profile={sideRatio:size.z/(shell.boundingBox.max.y-.018),length:size.z,height:shell.boundingBox.max.y-.018,pearlScale:PEARL_SCALE,flatPitch:d.heel==='flat'?.64:null};
  for(let i=0;i<2;i++){
   const shoe=new THREE.Group();shoe.position.set(i?.63:-.63,0,i?.36:-.42);shoe.rotation.y=i?-.16:.17;shoe.userData.sockets=structuredClone(sockets);shoe.userData.shellSection=shellSection;model.add(shoe);
   for(const part of parts){const m=part.name==='upper'?upper:part.name==='outsole'?lining:sole;const item=mesh(part.g,m,shoe);item.name=part.name;if(part.name==='upper')item.receiveShadow=false;}
@@ -389,11 +405,27 @@ function buildProfessional(d){
     const wedge=own(new THREE.BufferGeometry());wedge.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));wedge.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));wedge.setIndex(indices);wedge.computeVertexNormals();mesh(wedge,upper,shoe).name='heel:wedge';
    }else{
    const g=heelGeometry(d.heel),p=g.attributes.position,old=last(-.96).base-.04;
-   for(let j=0;j<p.count;j++)p.setY(j,.018+(p.getY(j)-.018)*(lift-.035)/Math.max(.01,old-.018));
+   for(let j=0;j<p.count;j++){
+    const t=(p.getY(j)-.018)/Math.max(.01,old-.018);
+    if(d.heel==='flat'){p.setZ(j,p.getZ(j)-.72);p.setX(j,p.getX(j)*1.16+.06);}
+    let contact;
+    if(d.heel==='flat'){ray.set(new THREE.Vector3(p.getX(j),0,p.getZ(j)),new THREE.Vector3(0,1,0));contact=ray.intersectObject(seatMesh)[0]?.point;}
+    const seat=contact?contact.y+.009:lift-.017+(d.heel==='flat'?.27*(p.getZ(j)+1.75):0);
+    p.setY(j,.018+t*(seat-.018));
+   }
    p.needsUpdate=true;g.computeVertexNormals();mesh(g,d.heel==='flat'?sole:upper,shoe).name='heel:'+d.heel;
    }
   }
   accessories(shoe,d,trim,pearl,metal,crystal);
+  // The bow follows the actual convex quarter, including its two loops and
+  // tails. Keep a tiny fabric clearance instead of a floating guessed socket.
+  shoe.updateMatrixWorld(true);
+  shoe.getObjectByName('satin-loop-bow')?.traverse(o=>{
+   if(!o.isMesh)return;
+   const relative=new THREE.Matrix4().copy(shoe.matrixWorld).invert().multiply(o.matrixWorld),inverse=relative.clone().invert(),p=o.geometry.attributes.position;
+   for(let k=0;k<p.count;k++){const q=new THREE.Vector3().fromBufferAttribute(p,k).applyMatrix4(relative),contact=hit(2,q.y,q.z,-1,0,0);if(contact){q.x=contact.x+.009+Math.max(0,q.x-backPoint.x)*.28;q.applyMatrix4(inverse);p.setXYZ(k,q.x,q.y,q.z);}}
+   p.needsUpdate=true;o.geometry.computeVertexNormals();o.geometry.computeBoundingBox();
+  });
   const shadow=new THREE.Mesh(shadowGeo,shadowMat);shadow.rotation.x=-Math.PI/2;shadow.position.y=.003;shoe.add(shadow);
  }
  addProductLights();
@@ -552,7 +584,7 @@ const snapshots=new Map(),snapshotJobs=new Map();let snapshotPixels=0,snapshotQu
 async function snapshot(design,options={}){
  if(failed||!supported(design)||location.protocol==='file:')return null;
  const width=Math.min(1024,Math.max(96,Math.round(options.width||640))),height=Math.min(1024,Math.max(96,Math.round(options.height||480)));
- const view=options.angle||'front34',key='hiirusama-v2:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
+ const view=options.angle||'front34',key='hiirusama-v3:'+(options.worn?'worn:':'product:')+A.designKey(design)+':'+view+':'+width+'x'+height;
  if(snapshots.has(key)){const c=snapshots.get(key);snapshots.delete(key);snapshots.set(key,c);return c;}
  if(snapshotJobs.has(key))return snapshotJobs.get(key);
  const job=snapshotQueue.then(async()=>{
@@ -603,7 +635,7 @@ function info(){
   let ball=0;for(let z=-1.5;z<=1.5;z+=.005)ball=Math.max(ball,last(z).width);
   quality={lengthWidthRatio:3/(2*ball),toeBoxHeight:last(.78).height,details,waistRatio:last(-.36).width/last(.72).width,toeSpring:last(1.5).base-last(.72).base,openingToeFraction:(1.5-OPENING_END)/3,openingWidthRatio:mid.hole/mid.width,openingLengthFraction:(OPENING_END-OPENING_START)/3,toeTipWidthRatio:last(1.23).width/ball,quarterHeightRatio:Math.sin(mid.arc),heelCounterHeight:last(-1.44).height,outsoleThickness:.046,cameraElevation:Math.atan2(camera.position.y-.23,Math.hypot(camera.position.x,camera.position.z))*180/Math.PI,heightFraction:(bounds.top-bounds.bottom)/2,bounds,toneMapping:'Neutral',sockets:model.children.filter(o=>o.userData.sockets).map(o=>o.userData.sockets)};
  }
- if(quality&&shoeAsset){quality={source:'hiirusama-cc0',lengthWidthRatio:3/1.1469604969,bounds:quality.bounds,heightFraction:quality.heightFraction,sockets:quality.sockets,details:quality.details,toneMapping:'Neutral'};}
+ if(quality&&shoeAsset){quality={source:'hiirusama-cc0',lengthWidthRatio:3/1.1469604969,profile:model.userData.profile,bounds:quality.bounds,heightFraction:quality.heightFraction,sockets:quality.sockets,details:quality.details,toneMapping:'Neutral'};}
  const anatomy=fitting?{pitch:model.userData.pitch,legs:model.userData.legs.map(l=>({thigh:l.thigh.quaternion.toArray(),calf:l.calf.quaternion.toArray(),ankle:l.foot.quaternion.toArray(),toe:l.toe.quaternion.toArray(),shoePosition:l.shoe.getWorldPosition(new THREE.Vector3()).toArray(),shoeQuaternion:l.shoe.getWorldQuaternion(new THREE.Quaternion()).toArray(),heelMeshes:l.shoe.children.filter(o=>o.name.startsWith('heel:')).map(o=>o.name)}))}:null;
  const products=model?.children.filter(o=>o.userData.sockets).map(o=>({position:o.position.toArray(),rotation:o.rotation.toArray(),heelMeshes:o.children.filter(c=>c.name.startsWith('heel:')).map(c=>c.name)}))||[];
  return {bodySource:shoeAsset?'hiirusama-cc0':'procedural-fallback',assetError,fitting,products,presentation:model?.userData.presentation||'studio',closeup:!!model?.userData.closeup,anatomy,pose:model?.userData.pose,feet:model?.userData.legs?.length||0,ready:!!host,error:lastError,contexts:renderer?1:0,revision:THREE?.REVISION,triangles:renderer?.info.render.triangles||0,resources:resources.size,swatch:current?A.option('color',current.color)[3]:null,heel:current?.heel,material:current?.material,pattern:current?.pattern,pixelRatio:renderer?.getPixelRatio(),pendingFrame:!!frame,snapshots:snapshots.size,snapshotPixels,quality};
