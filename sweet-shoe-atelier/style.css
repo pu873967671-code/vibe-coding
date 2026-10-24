@@ -1046,3 +1046,19 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
  .runway-dock .showcase-strip,.runway-dock .showcase-picker{height:46px}
  .runway-dock .showcase-chip{min-height:44px}
 }
+
+/* Supervisor 13:32: enlarge Mimi in the reserved portrait lane. The board keeps
+   its complete nine rows; the speech surface starts beyond her bust crop. */
+@media(orientation:portrait){
+ .mentor-area{grid-template-columns:152px minmax(0,1fr);gap:8px}
+ .mentor-area .atelier-mentor{left:0;width:152px;height:112px;border-radius:44% 44% 18px 18px}
+ .mentor-area .atelier-mentor img{height:400px;top:-1px}
+ .mentor-area .merge-detail{grid-column:2;min-width:0}
+ .mentor-area .mentor-bubble{left:160px;right:0;width:auto}
+ .mentor-area .detail-heading{gap:5px}
+ .mentor-area .detail-heading>.merge-art{width:24px;height:24px;flex:none}
+ .mentor-area h3{font-size:13px;line-height:1.25}
+ .mentor-area p{font-size:10px;line-height:1.4}
+ .mentor-area .chain-preview{gap:2px;justify-content:space-between}
+ .mentor-area .chain-piece{min-width:0;flex:1}
+}
