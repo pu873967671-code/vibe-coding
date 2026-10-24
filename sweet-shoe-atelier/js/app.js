@@ -17,7 +17,8 @@ function optionPreview(k,v){
  if(k==='color')return `<span class="swatch" style="--swatch:${option(k,v)[3]}"></span>`;
  if(k==='material')return `<span class="texture-swatch ${v}" style="background-image:url('assets/tex_${v}.webp')"></span>`;
  if(k==='pattern')return v==='none'?'<span class="empty-swatch">—</span>':v==='dots'?'<span class="dots-swatch"></span>':`<img class="option-art motif" src="assets/motif_${{flowers:'flower',hearts:'heart',stars:'star'}[v]}.webp" alt="">`;
- if(k==='strap'||k==='heel')return shoeCanvas({...defaults,color:design.color,[k]:v});
+ if(k==='heel')return `<canvas class="shoe2d-option" data-painted-heel="${v}" aria-hidden="true"></canvas>`;
+ if(k==='strap')return shoeCanvas({...defaults,color:design.color,[k]:v});
  const name=k==='decoration'?{small:'bow',big:'bow',drop:'pearl_drop',flower:'flower'}[v]:{pearl:'charm_pearl',crystal:'charm_crystal',mini:'charm_minibow'}[v];
  return name?`<img class="option-art ${v==='small'?'small-bow':''}" src="assets/${name}.webp" alt="">`:'<span class="empty-swatch">—</span>';
 }
@@ -102,8 +103,30 @@ function renderAtelierHud(){
 }
 function renderHeader(){$('brand').textContent=t('brand');$('tagline').textContent=t('tagline');$('coins').textContent=state.coins;renderAtelierHud();$('sound').textContent=state.sound?'♪':'♩';$('sound').setAttribute('aria-label',t('effects')+': '+t(state.sound?'on':'off'));$('pause').setAttribute('aria-label',t('pause'));$('sound').setAttribute('aria-pressed',String(state.sound));$('nav').setAttribute('aria-label',t('brand'));$('atelierScreen').setAttribute('aria-label',A.lang==='zh'?'工坊':'Merge Atelier');$('customer').setAttribute('aria-label',t('customer'));$('tabs').setAttribute('aria-label',t('custom'));$('coins').previousElementSibling?.setAttribute('alt',t('coins'));$('nav').innerHTML=['atelier','serve','free','collection','shop'].map((k,i)=>`<button data-nav="${k}" class="${(mode==='merge'&&i===0)||(mode==='order'&&i===1)||(mode==='free'&&i===2)?'active':''}">${icon(['material','heart','color','gift','coin'][i])}<span>${k==='atelier'?(A.lang==='zh'?'工坊':'Atelier'):(k==='shop'?(A.lang==='zh'?'精品店':'Boutique'):t(k)).replace(/^[^\p{L}]+/u,'')}</span></button>`).join('');$('eyebrow').textContent=t('eyebrow');$('workTitle').textContent=t(mode==='free'?'freeTitle':'workTitle');$('dayBadge').textContent=A.lang==='zh'?`第 ${state.day} 日`:`Day ${state.day}`;$('stageLabel').textContent=t('stageLabel');$('customTitle').textContent=t('custom');$('sampleNote').textContent=t('sampleNote');$('pack').innerHTML=icon('gift')+'<span>'+t(mode==='free'?'save':'pack').replace(/[↗♡]/g,'')+'</span>';$('inspire').innerHTML=icon('color')+'<span>'+t('inspire').replace('✧ ','')+'</span>';$('stageNote').textContent=t(mode==='free'?'freeHint':'stageNote');$('goal').innerHTML=icon('heart')+`${t('goal')} · ${Math.min(3,state.perfect)}/3 <span class="goal-progress"><i style="width:${Math.min(100,state.perfect/3*100)}%"></i></span>`;$('footerText').textContent=t('footer');document.documentElement.lang=A.lang==='zh'?'zh-CN':'en';document.title=t('brand');document.querySelectorAll('img[alt="Sweet Shoe Atelier"]').forEach(im=>im.alt=t('brand'));}
 let studioAngle='front34',studioCloseup=false;
-function renderPreview(bounce=false){A.Shoe3D?.unmount();$('preview').innerHTML=studioAngle==='side'?shoeCanvas(design):productCanvas(design);$('stage').classList.toggle('product-stage',studioAngle!=='side');if(!$('stage').querySelector('.studio-angles')){const row=document.createElement('div');row.className='studio-angles';$('stage').append(row);} $('stage').querySelector('.studio-angles').innerHTML=[['front34',A.lang==='zh'?'自然':'Front'],['side',A.lang==='zh'?'侧面':'Side detail']].map(([id,label])=>`<button class="secondary" data-studio-angle="${id}" aria-pressed="${studioAngle===id}">${label}</button>`).join('')+`<button class="secondary" data-studio-closeup aria-pressed="${studioCloseup}">${A.lang==='zh'?'放大细节':'Close-up'} +</button>`;$('stage').classList.toggle('glitter',design.material==='glitter');$('designLabel').textContent=option('color',design.color)[1]+' · '+option('material',design.material)[1];hydrateCanvases($('preview'));if(A.Shoe3D?.supported(design))A.Shoe3D.mount($('preview'),design,{angle:studioAngle,closeup:studioCloseup,fallback:()=>{if(mode==='merge')return;$('preview').innerHTML=studioAngle==='side'?shoeCanvas(design):productCanvas(design);hydrateCanvases($('preview'));}});if(bounce){$('preview').classList.remove('bounce');void $('preview').offsetWidth;$('preview').classList.add('bounce');const r=$('preview').getBoundingClientRect();particles(r.x+r.width/2,r.y+r.height*.6);}}
-function renderTabs(){$('tabs').innerHTML=Object.keys(categories).map(k=>`<button role="tab" aria-selected="${tab===k}" aria-controls="options" class="${tab===k?'active':''}" data-tab="${k}" aria-label="${t(k)}" title="${t(k)}">${icon(k)}<span>${t(k)}</span></button>`).join('');$('partTitle').textContent=t(tab);$('optionCount').textContent=opts[tab].length+' '+t('samples');$('options').innerHTML=opts[tab].map(o=>{const locked=!unlocked(state,tab,o[0]);return `<button class="option ${design[tab]===o[0]?'selected':''}" data-option="${o[0]}" aria-pressed="${design[tab]===o[0]}">${optionPreview(tab,o[0])}<span>${t(o[0])}</span>${locked?`<small><span aria-label="${t('unlock')}" class="lock-mark"></span>${A.CRAFT_UNLOCKS[tab+':'+o[0]]?'✧':icon('coin')+o[2]}</small>`:''}</button>`;}).join('');hydrateCanvases($('options'));}
+let studioPainted=null;
+function renderPreview(bounce=false){
+ A.Shoe3D?.unmount();
+ const host=$('preview'),stage=$('stage');
+ stage.classList.remove('product-stage','shoe3d-stage');
+ stage.classList.add('shoe2d-stage');
+ stage.querySelector('.studio-angles')?.remove();
+ stage.classList.toggle('glitter',design.material==='glitter');
+ $('designLabel').textContent=option('color',design.color)[1]+' · '+option('material',design.material)[1]+' · '+option('heel',design.heel)[1];
+ // Keep one canvas in place. Updates commit a complete frame only after assets
+ // are ready; rapid choices cannot expose a blank frame or an older selection.
+ if(!studioPainted||!host.contains(studioPainted.canvas)){
+  studioPainted?.dispose();
+  host.replaceChildren();
+  studioPainted=A.Shoe2D.mount(host,design);
+ }else studioPainted.update(design);
+ host.classList.remove('bounce');
+ // Feedback is outside the shoe so every selectable finish keeps fixed pixels.
+ if(bounce&&!reducedMotion){
+  const r=host.getBoundingClientRect();particles(r.x+r.width*.72,r.y+r.height*.42);
+ }
+}
+
+function renderTabs(){$('tabs').innerHTML=Object.keys(categories).map(k=>`<button role="tab" aria-selected="${tab===k}" aria-controls="options" class="${tab===k?'active':''}" data-tab="${k}" aria-label="${t(k)}" title="${t(k)}">${icon(k)}<span>${t(k)}</span></button>`).join('');$('partTitle').textContent=t(tab);$('optionCount').textContent=opts[tab].length+' '+t('samples');$('options').innerHTML=opts[tab].map(o=>{const locked=!unlocked(state,tab,o[0]);return `<button class="option ${design[tab]===o[0]?'selected':''}" data-option="${o[0]}" aria-pressed="${design[tab]===o[0]}">${optionPreview(tab,o[0])}<span>${t(o[0])}</span>${locked?`<small><span aria-label="${t('unlock')}" class="lock-mark"></span>${A.CRAFT_UNLOCKS[tab+':'+o[0]]?'✧':icon('coin')+o[2]}</small>`:''}</button>`;}).join('');hydrateCanvases($('options'));for(const canvas of $('options').querySelectorAll('[data-painted-heel]'))A.Shoe2D.render(canvas,{...design,heel:canvas.dataset.paintedHeel});}
 function newOrder(){$('customer').classList.remove('customer-enter');void $('customer').offsetWidth;$('customer').classList.add('customer-enter');state.order=generateOrder(state);state.remaining=state.order.duration;persist();}
 function renderCustomer(){
  const free=mode==='free';$('customer').classList.toggle('free-brief',free);
@@ -153,7 +176,10 @@ function buy(k,v){const o=option(k,v);if(unlocked(state,k,v))return true;if(A.CR
 function openGallery(selected=0){
  const index=Math.max(0,Math.min(state.gallery.length-1,selected)),artwork=state.gallery[index];
  modal('collection',`<div class="collection-heading"><button class="secondary collection-back" data-action="close">${t('close')}</button><span class="section-kicker">${t('brand')}</span><h2>${t('collection')}</h2><p>${state.gallery.length?state.gallery.length+' '+t('collectionCount'):t('empty')}</p></div>${artwork?`<div class="collection-layout"><div class="collection-stage">${productCanvas(artwork.design)}</div><aside class="collection-detail"><span class="section-kicker">${A.lang==='zh'?'第 '+artwork.day+' 天':t('day')+' '+artwork.day}</span><h3>${option('color',artwork.design.color)[1]} · ${option('material',artwork.design.material)[1]}</h3><div class="collection-rating">${artwork.stars?starIcons(artwork.stars):t('free').replace('✧ ','')}</div><button class="primary" data-try-on="${index}">${runwayText('Try on','试穿')} ↗</button><button class="secondary" data-reuse="${index}">${t('reuse')}</button></aside></div><div class="gallery collection-filmstrip" aria-label="${t('collection')}">${state.gallery.map((a,i)=>`<button class="gallery-item ${i===index?'selected':''}" data-gallery-select="${i}" aria-pressed="${i===index}" aria-label="${option('color',a.design.color)[1]} · ${A.lang==='zh'?'第 '+a.day+' 天':t('day')+' '+a.day}"><div class="collection-thumbnail">${productCanvas(a.design)}</div><span>${A.lang==='zh'?'第 '+a.day+' 天':t('day')+' '+a.day}</span></button>`).join('')}</div>`:`<div class="collection-empty">${icon('gift')}<p>${t('empty')}</p><button class="primary" data-nav="free">${t('free').replace('✧ ','')} ↗</button></div>`}`);
- if(artwork&&A.Shoe3D){
+ // During the painted-kit migration, keep Collection's complete painted
+ // fallback. Starting a cold WebGL renderer for seven snapshots here can
+ // block its close button after the studio stopped warming that renderer.
+ if(artwork&&A.Shoe3D&&!A.Shoe2D){
   A.Shoe3D.paintSnapshot($('modalRoot').querySelector('.collection-stage'),artwork.design,{width:960,height:640,worn:true});
   const filmstrip=$('modalRoot').querySelector('.collection-filmstrip');
   const savedDesigns=state.gallery.map(art=>({...art.design}));
@@ -266,7 +292,9 @@ async function boot(){
  A.lang=preferred||A.normalizeLanguage(navigator.language)||'en';localizeLoading();
  await initSDK();sdkCall('game','loadingStart');let locale;try{locale=sdk?.user?.systemInfo?.locale;}catch{}
  A.lang=preferred||A.normalizeLanguage(locale)||A.lang;localizeLoading();
+ const paintedReady=A.Shoe2D.preload();
  let loaded=0;await Promise.all(ASSET_NAMES.map(name=>new Promise(resolve=>{const im=new Image();let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timeout);if(ok)images.set(name,im);loaded++;$('loadFill').style.width=loaded/ASSET_NAMES.length*100+'%';$('loadProgress').textContent=Math.round(loaded/ASSET_NAMES.length*100)+'%';$('loadBar').setAttribute('aria-valuenow',Math.round(loaded/ASSET_NAMES.length*100));resolve();};const timeout=setTimeout(()=>finish(false),12000);im.onload=()=>{images.set(name,im);finish(true);scheduleCanvasResize();};im.onerror=()=>finish(false);im.src='assets/'+name+'.webp';})));
+ await paintedReady;
  state=await readSave();A.lang=state.lang||A.lang;design=cleanDesign(state.design);for(const k of Object.keys(opts))if(!unlocked(state,k,design[k]))design[k]=defaults[k];
  if(!state.order&&state.served<customersForDay(state.day))newOrder();persist();sdkCall('game','loadingStop');$('app').hidden=false;$('loading').hidden=true;modalKind='welcome';renderAll();openTitle();lastFrame=performance.now();requestAnimationFrame(frame);
 }
