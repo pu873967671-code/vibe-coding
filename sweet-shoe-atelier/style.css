@@ -750,7 +750,9 @@ header #nav button.active,.primary,.collection-detail .primary,.vn-name{backgrou
 .atelier-order.ready{background:linear-gradient(135deg,#f9fff8,#d9f4e6);box-shadow:inset 0 0 0 1px #a3d9c0}
 .atelier-order.ready .order-deliver{background:var(--action);border-color:#e76a9e;box-shadow:inset 0 1px 0 #ffbed6,0 3px 0 #e484a7,0 6px 14px #ce49752b;border-radius:24px;color:#fff}
 .order-deliver:disabled{background:#e1efe8;color:#586e63;border-color:#c8ded2;border-radius:24px}
-.request-check,.atelier-order.ready .request-check{background:#24664f;color:#fff;border-color:#fff}
+/* A tier number is still to be crafted; only a completed material earns green. */
+.requested-item .request-check{background:#fffdf8;color:#36574d;border-color:#a7cdbb}
+.requested-item.fulfilled .request-check{background:#24664f;color:#fff;border-color:#fff}
 .order-customer>img{object-fit:cover;object-position:50% 18%;background:#fffdfa;border:1px solid #b7dfcd;border-radius:50%;flex-shrink:0;filter:none}
 .board-rim{position:relative;flex-shrink:0;background:linear-gradient(145deg,#bfeedd,#8fd9c0);border:1px solid #7bbfa7;border-radius:22px;box-shadow:inset 0 2px 0 #effff9,0 10px 28px #34745e26}
 .board-rim:after{content:'';position:absolute;inset:3px;border:1px dashed #ec86ab;border-radius:18px;pointer-events:none}
@@ -1174,3 +1176,21 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 #options[data-category="heel"] canvas.shoe2d-option{height:62px}
 @media(orientation:portrait){#studioScreen #options[data-category="heel"]{height:135px;min-height:135px;flex:none}#options[data-category="heel"] .option{min-height:82px}#options[data-category="heel"] canvas.shoe2d-option{height:42px}}
 @media(max-height:560px) and (orientation:landscape){#options[data-category="heel"] .option{min-height:72px}#options[data-category="heel"] canvas.shoe2d-option{height:34px}}
+
+/* Saved styling stays within one quiet, touch-sized fitting dock row. */
+.runway-sock-panel{grid-column:1/-1;grid-row:2;display:flex;align-items:center;gap:10px;min-width:0;padding-top:2px}
+.runway-sock-styles{display:flex;gap:5px;min-width:0;flex:1;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+.runway-sock-styles::-webkit-scrollbar{display:none}
+.runway-sock-styles .sock-chip{flex:0 0 auto;min-width:48px;min-height:44px;padding:6px 11px;border:1px solid #c2e2d4;border-radius:15px;background:#f8fffb;color:#376452;font:600 12px var(--font-ui);box-shadow:none;white-space:nowrap;text-shadow:none}
+.runway-sock-styles .sock-chip[aria-pressed=true]{background:#ffe7f0;border-color:#ef8db2;color:#824661;box-shadow:inset 0 0 0 1px #ef8db233}
+.runway-sock-colors{display:flex;gap:2px;flex-shrink:0}.runway-sock-colors[hidden]{display:none}
+.runway-sock-colors .sock-color{display:grid;place-items:center;min-width:40px;width:40px;min-height:44px;padding:5px;border:0;border-radius:12px;background:transparent;box-shadow:none}
+/* Keep the first-fitting skip clear of Continue and its guiding hand. */
+body:has(.runway-scene) .guide-action .director-skip{position:fixed;top:80px;right:14px;bottom:auto}
+.sock-color>span{width:25px;height:25px;border-radius:50%;background:var(--sock-color);border:1px solid #a5c4b8;box-shadow:inset 0 1px 2px #ffffffa8}
+.sock-color[aria-pressed=true]>span{outline:2px solid #e877a3;outline-offset:3px}
+@media(orientation:portrait){.runway-sock-panel{grid-row:2;flex-wrap:wrap;gap:2px}.runway-sock-styles{flex-basis:100%}.runway-sock-styles .sock-chip{flex:1;padding:6px;font-size:11px;min-width:45px}.runway-sock-colors{width:100%;justify-content:center}.runway-dock .runway-actions{grid-row:3}}
+@media(max-height:560px) and (orientation:landscape){.runway-sock-panel{gap:5px;padding-top:0}.runway-sock-styles .sock-chip{padding:5px 9px;font-size:11px}.runway-sock-colors .sock-color{min-width:40px}}
+
+/* Thin pumps retain a single style card; height is a separate quiet choice. */
+.heel-height-choices{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-shrink:0;margin:0 0 7px;padding:5px;border:1px solid #c9e6d9;border-radius:12px;background:#f2faf5;font:11px sans-serif}.heel-height-choices[hidden]{display:none}.heel-height-choices>span{padding-left:3px;color:#4c685e}.heel-height-choices button{flex:1;min-height:44px;min-width:0;padding:5px 3px;border-radius:9px;white-space:nowrap;background:#fffdf8;border:1px solid #c5e4d7;font:inherit}.heel-height-choices button[aria-pressed="true"]{border-color:#d33671;background:#ffe8f1;color:#8e2650;box-shadow:inset 0 0 0 1px #d33671}
