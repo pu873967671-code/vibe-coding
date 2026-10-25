@@ -1,20 +1,20 @@
 Sweet Shoe Atelier — local SFX, CC0 1.0 public domain.
-Originals by Kenney (www.kenney.nl), Casino Audio 1.1 / Interface Sounds 1.0 / UI SFX Set.
+Originals by Kenney (www.kenney.nl), Interface Sounds 1.0.
 License: https://creativecommons.org/publicdomain/zero/1.0/
 Sources and original License.txt files: dev/sfx_src (not shipped).
-Processed with ffmpeg: mono 32 kHz, soft limiter, short fade, Vorbis + MP3 Safari fallback.
+Processed with ffmpeg: mono 32 kHz, warm 6.5 kHz lowpass, soft limiter, short fade, Vorbis + MP3 Safari fallback.
 
-tap.ogg / tap.mp3 <- kenney_ui-audio/Audio/click1.ogg
-spawn.ogg / spawn.mp3 <- kenney_interface-sounds/Audio/pluck_001.ogg
-merge.ogg / merge.mp3 <- kenney_interface-sounds/Audio/drop_002.ogg
-coin.ogg / coin.mp3 <- kenney_casino-audio/Audio/chips-collide-1.ogg
-switch.ogg / switch.mp3 <- kenney_interface-sounds/Audio/switch_001.ogg
-pick.ogg / pick.mp3 <- kenney_interface-sounds/Audio/select_002.ogg
-drop.ogg / drop.mp3 <- kenney_interface-sounds/Audio/drop_001.ogg
-box.ogg / box.mp3 <- kenney_casino-audio/Audio/card-place-2.ogg
-ribbon.ogg / ribbon.mp3 <- kenney_casino-audio/Audio/card-shove-1.ogg
-delivery.ogg / delivery.mp3 <- kenney_interface-sounds/Audio/confirmation_002.ogg
+tap.ogg / tap.mp3 <- kenney_interface-sounds/Audio/drop_003.ogg
+spawn.ogg / spawn.mp3 <- kenney_interface-sounds/Audio/maximize_008.ogg
+merge.ogg / merge.mp3 <- kenney_interface-sounds/Audio/maximize_006.ogg
+coin.ogg / coin.mp3 <- kenney_interface-sounds/Audio/glass_003.ogg
+switch.ogg / switch.mp3 <- kenney_interface-sounds/Audio/bong_001.ogg
+pick.ogg / pick.mp3 <- kenney_interface-sounds/Audio/drop_002.ogg
+drop.ogg / drop.mp3 <- kenney_interface-sounds/Audio/drop_004.ogg
+box.ogg / box.mp3 <- kenney_interface-sounds/Audio/minimize_006.ogg
+ribbon.ogg / ribbon.mp3 <- kenney_interface-sounds/Audio/question_002.ogg
+delivery.ogg / delivery.mp3 <- kenney_interface-sounds/Audio/confirmation_001.ogg
 level.ogg / level.mp3 <- kenney_interface-sounds/Audio/confirmation_004.ogg
-error.ogg / error.mp3 <- kenney_interface-sounds/Audio/error_006.ogg
-unlock.ogg / unlock.mp3 <- kenney_interface-sounds/Audio/maximize_003.ogg
-sparkle.ogg / sparkle.mp3 <- kenney_interface-sounds/Audio/glass_005.ogg
+error.ogg / error.mp3 <- kenney_interface-sounds/Audio/error_005.ogg
+unlock.ogg / unlock.mp3 <- kenney_interface-sounds/Audio/question_001.ogg
+sparkle.ogg / sparkle.mp3 <- kenney_interface-sounds/Audio/glass_006.ogg
