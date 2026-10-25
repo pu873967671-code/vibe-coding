@@ -1222,3 +1222,14 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 .texture-swatch.couture-rosebuds:after{content:'';position:absolute;width:8px;height:3px;border-radius:50%;background:#b8ddbc;right:6px;bottom:5px;transform:rotate(-38deg)}
 .texture-swatch.couture-diamonds{background:repeating-linear-gradient(45deg,transparent 0 10px,#fff6e7b5 10px 11px,transparent 11px 21px),repeating-linear-gradient(-45deg,transparent 0 10px,#fff6e7b5 10px 11px,transparent 11px 21px),#c48da5;background-blend-mode:normal}
 .texture-swatch.couture-gingham{background:repeating-linear-gradient(0deg,#fff8e985 0 6px,transparent 6px 12px),repeating-linear-gradient(90deg,#fff8e985 0 6px,transparent 6px 12px),#d58eab}
+
+/* Matte nap and raised damask samples mirror the upper-only cloth finishes. */
+.texture-swatch.couture-suede{background:repeating-linear-gradient(161deg,#fff5ec0f 0 1px,transparent 1px 3px),linear-gradient(128deg,#bf849e,#d7a3b8 45%,#b37b98);box-shadow:inset 0 0 8px #754c6c22;background-blend-mode:normal}
+.texture-swatch.couture-brocade{display:grid;place-items:center;background:repeating-linear-gradient(173deg,#fff4df1c 0 1px,transparent 1px 3px),#c990aa;color:#fff0d4;font:31px Georgia,serif;text-shadow:1px 1px #8e647c66;background-blend-mode:normal}
+
+/* Quiet sewn shells and curved woven stripes, distinct at sample size. */
+.texture-swatch.couture-scallops{background:radial-gradient(ellipse 13px 10px at 50% 0,transparent 8px,#fff5dfd9 8.5px 9.5px,transparent 10px) 0 2px/26px 16px,#c990aa;background-blend-mode:normal}
+.texture-swatch.couture-pinstripes{background:repeating-linear-gradient(105deg,transparent 0 8px,#fff7e4b0 8px 9px,transparent 9px 11px,#fff7e44a 11px 12px,transparent 12px 20px),#c990aa;background-blend-mode:normal}
+
+/* Faceted crystal seats; the dyed ground remains visible between stones. */
+.texture-swatch.couture-pave{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M8%201%2014%208%208%2015%202%208Z%22%20fill%3D%22%23e5e8f5%22%20stroke%3D%22%238f779d%22%20stroke-width%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M8%201%2014%208%2010%208%208%205Z%22%20fill%3D%22%23fffbed%22%2F%3E%3Cpath%20d%3D%22M14%208%208%2015%208%2011%2010%208Z%22%20fill%3D%22%23bea5d5%22%2F%3E%3Cpath%20d%3D%22M8%2015%202%208%206%208%208%2011Z%22%20fill%3D%22%23fff9e2%22%2F%3E%3Cpath%20d%3D%22M2%208%208%201%208%205%206%208Z%22%20fill%3D%22%23bdd7e4%22%2F%3E%3Cpath%20d%3D%22M8%205%2010%208%208%2011%206%208Z%22%20fill%3D%22%23fffdf6%22%2F%3E%3C%2Fsvg%3E") center/12px 12px #c990aa;box-shadow:inset 0 0 0 1px #bca5c8;background-blend-mode:normal}
