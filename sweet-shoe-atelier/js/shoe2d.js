@@ -75,8 +75,63 @@ function clip(p,upper){p.globalCompositeOperation='destination-in';p.drawImage(u
 // New couture finishes share one source-coordinate renderer between product
 // and worn cameras. The caller clips it to its own immutable upper mask.
 function drawRichMaterial(p,d,width,height){
- if(!['metallic','pearlescent'].includes(d.material))return;
+ if(!['metallic','pearlescent','suede','brocade','pave'].includes(d.material))return;
  p.save();
+ if(d.material==='pave'){
+  // Small individually set crystals, rather than glitter flecks. Staggered
+  // rows compress and bend over the vamp in each immutable source camera.
+  const point=(x,y)=>[x-y*.13+Math.sin(y/height*Math.PI)*14,y*.84+Math.cos(x/width*Math.PI)*9];
+  const polygon=(points,colour)=>{p.fillStyle=colour;p.beginPath();points.forEach(([x,y],i)=>i?p.lineTo(x,y):p.moveTo(x,y));p.closePath();p.fill();};
+  for(let row=-1;row<height/20+4;row++)for(let col=-2;col<width/23+9;col++){
+   const [x,y]=point((col+(row&1)*.5)*23,row*20);
+   const n=((row+3)*374761393^(col+3)*668265263)>>>0;
+   p.save();p.translate(x,y);p.rotate(-.18);p.scale(1.25,.96);
+   // Quiet metal seat and four opposed crown facets leave dyed cloth visible
+   // between stones. Their stable highlights do not flicker when choosing.
+   polygon([[0,-8.8],[7.4,0],[0,8.8],[-7.4,0]],'#705b7952');
+   polygon([[0,-7.1],[6,0],[0,7.1],[-6,0]],'#e5e8f599');
+   polygon([[0,-7.1],[6,0],[2.2,0],[0,-2.8]],'#fffbeded');
+   polygon([[6,0],[0,7.1],[0,2.8],[2.2,0]],'#c4a5d87a');
+   polygon([[0,7.1],[-6,0],[-2.2,0],[0,2.8]],'#fff9e2b8');
+   polygon([[-6,0],[0,-7.1],[0,-2.8],[-2.2,0]],'#b8d7e49c');
+   polygon([[0,-2.8],[2.2,0],[0,2.8],[-2.2,0]],'#fffdf6ed');
+   if(n%17===0){p.strokeStyle='#fffdf4db';p.lineWidth=.85;p.beginPath();p.moveTo(-2.5,-5.3);p.lineTo(2.5,-5.3);p.moveTo(0,-7.8);p.lineTo(0,-2.8);p.stroke();}
+   p.restore();
+  }
+  p.restore();return;
+ }
+ if(d.material==='suede'){
+  // Short brushed fibres absorb light. Stable, tiny dashes follow the vamp;
+  // they never turn into glitter points or a tiled photographic texture.
+  const shade=p.createLinearGradient(0,height*.15,width,height*.9);
+  for(const [at,c] of [[0,'#60465e14'],[.32,'#fff4e50a'],[.62,'#73536b0e'],[1,'#493e591d']])shade.addColorStop(at,c);
+  p.fillStyle=shade;p.fillRect(0,0,width,height);
+  p.lineWidth=.7;
+  for(let row=0;row<height/5;row++)for(let col=0;col<width/6;col++){
+   const n=((row+1)*374761393^(col+1)*668265263)>>>0;
+   const x=col*6+(n%31)/8,y=row*5+((n>>>8)%23)/8;
+   p.strokeStyle=n%3?'#fff4e717':'#57455c12';p.beginPath();p.moveTo(x,y);p.lineTo(x+1.8,y-.65);p.stroke();
+  }
+  p.restore();return;
+ }
+ if(d.material==='brocade'){
+  // Tone-on-tone damask: raised woven petals and paired leaves, with the
+  // same curved source projection in each camera and upper-only clipping.
+  const point=(x,y)=>[x-y*.12+Math.sin(y/height*Math.PI)*13,y*.86+Math.cos(x/width*Math.PI)*8];
+  p.fillStyle='#fff1d70b';p.fillRect(0,0,width,height);
+  p.lineCap='round';p.lineJoin='round';
+  for(let row=-1;row<height/58+2;row++)for(let col=-1;col<width/62+4;col++){
+   const [x,y]=point((col+(row%2)*.5)*62,row*58);
+   p.save();p.translate(x,y);p.rotate(-.28);p.scale(1,.78);
+   const flower=()=>{p.beginPath();for(let petal=0;petal<4;petal++){p.save();p.rotate(petal*Math.PI/2);p.moveTo(0,0);p.bezierCurveTo(-12,-11,-8,-25,0,-23);p.bezierCurveTo(8,-25,12,-11,0,0);p.restore();}p.moveTo(0,4);p.bezierCurveTo(-8,15,-13,16,-18,12);p.bezierCurveTo(-13,6,-5,7,0,4);p.moveTo(0,4);p.bezierCurveTo(8,15,13,16,18,12);p.bezierCurveTo(13,6,5,7,0,4);};
+   p.translate(.9,1.2);flower();p.strokeStyle='#62476724';p.lineWidth=2.4;p.stroke();p.translate(-.9,-1.2);
+   flower();p.fillStyle='#fff3dc30';p.fill();p.strokeStyle='#fff6dd7a';p.lineWidth=1.35;p.stroke();
+   p.beginPath();p.moveTo(0,2);p.quadraticCurveTo(-3,15,0,24);p.strokeStyle='#fff6dd56';p.lineWidth=1;p.stroke();p.restore();
+  }
+  p.strokeStyle='#fff4df10';p.lineWidth=.55;
+  for(let y=0;y<height;y+=3){p.beginPath();p.moveTo(0,y);p.lineTo(width,y-width*.12);p.stroke();}
+  p.restore();return;
+ }
  const g=p.createLinearGradient(width*.12,height*.86,width*.80,height*.15);
  if(d.material==='metallic'){
   for(const [at,colour] of [[0,'#3b284b40'],[.22,'#56415e20'],[.35,'#fff3cf28'],[.405,'#fffbea9c'],[.45,'#fffdf26e'],[.50,'#46334a38'],[.62,'#38263b25'],[.72,'#fff8df62'],[.76,'#fffdf293'],[.82,'#6e4d5b1c'],[1,'#3b284b30']])g.addColorStop(at,colour);
@@ -92,9 +147,28 @@ function drawRichMaterial(p,d,width,height){
  p.restore();
 }
 function drawRichPattern(p,d,width,height){
- if(!['rosebuds','diamonds','gingham'].includes(d.pattern))return;
+ if(!['rosebuds','diamonds','gingham','scallops','pinstripes'].includes(d.pattern))return;
  p.save();p.lineCap='round';p.lineJoin='round';
- if(d.pattern==='gingham'){
+ if(d.pattern==='scallops'){
+  // Fine shell embroidery follows the same soft vamp projection as the weave.
+  // Each shell is one continuous sewn arc, with quieter inset running stitches.
+  const step=52,point=(x,y)=>[x-y*.10+Math.sin(y/height*Math.PI)*12,y*.83+Math.cos(x/width*Math.PI)*9];
+  const arc=(x,y,inset)=>{p.beginPath();for(let i=0;i<=20;i++){const a=Math.PI-i*Math.PI/20,v=point(x+step*.5+Math.cos(a)*(step*.5-inset),y+Math.sin(a)*(17-inset*.38));if(!i)p.moveTo(...v);else p.lineTo(...v);}};
+  for(let row=-1;row<height/32+4;row++)for(let col=-3;col<width/step+5;col++){
+   const x=(col+(row&1)*.5)*step,y=row*32;
+   arc(x,y,0);p.strokeStyle='#674a651a';p.lineWidth=3.2;p.stroke();
+   arc(x,y,0);p.strokeStyle='#fff6dfba';p.lineWidth=1.5;p.stroke();
+   arc(x,y,6);p.strokeStyle='#fff6df73';p.lineWidth=.9;p.setLineDash([1.4,3.1]);p.stroke();p.setLineDash([]);
+  }
+ }else if(d.pattern==='pinstripes'){
+  // Paired woven threads curve over the vamp, rather than tiling flat bars.
+  const line=(offset,inset)=>{p.beginPath();for(let x=-48;x<=width+48;x+=16){const y=offset+x*.23+Math.sin(x/width*Math.PI)*15+inset;if(x===-48)p.moveTo(x,y);else p.lineTo(x,y);}};
+  for(let y=-width*.3-48;y<height+48;y+=24){
+   line(y,1.8);p.strokeStyle='#60465d1c';p.lineWidth=1;p.stroke();
+   line(y,0);p.strokeStyle='#fff7e4b0';p.lineWidth=1.4;p.stroke();
+   line(y,3.8);p.strokeStyle='#fff7e44a';p.lineWidth=.65;p.stroke();
+  }
+ }else if(d.pattern==='gingham'){
   // Interlaced cream warp/weft let the selected dye form the darker checks.
   // A single projected grid bends gently over the vamp without square tiles
   // escaping the camera-specific upper mask applied by the caller.
@@ -178,7 +252,7 @@ function materialLayer(design,upper){
 function patternLayer(design,upper){
  if(design.pattern==='none')return null;
  const out=canvas(),p=out.getContext('2d'),step=59,r=7;
- if(['rosebuds','diamonds','gingham'].includes(design.pattern)){drawRichPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;}
+ if(['rosebuds','diamonds','gingham','scallops','pinstripes'].includes(design.pattern)){drawRichPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;}
  p.fillStyle='rgba(255,253,242,.80)';
  for(let row=0;row<HEIGHT/step+1;row++)for(let col=-1;col<WIDTH/step+1;col++){
   p.save();p.translate((col+(row%2)*.5)*step,row*step);p.rotate(-.16);p.scale(1,.85);p.beginPath();
@@ -198,8 +272,8 @@ async function composite(input){
   const out=canvas(),p=out.getContext('2d'),tint=canvas(),q=tint.getContext('2d');
   if(!parts.upper){p.drawImage(parts.base,0,0);cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);return out;}
   q.drawImage(parts.upper,0,0);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[design.color]||COLORS.pink;q.fillRect(0,0,WIDTH,HEIGHT);
-  q.globalCompositeOperation='source-atop';q.globalAlpha=design.material==='velvet'?.80:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0);
-  q.globalAlpha=design.material==='velvet'?.16:design.material==='mesh'?.34:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0);q.globalAlpha=1;
+  q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(design.material)?.80:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0);
+  q.globalAlpha=design.material==='suede'?.08:design.material==='velvet'?.16:design.material==='mesh'?.34:design.material==='brocade'?.42:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0);q.globalAlpha=1;
   p.drawImage(parts.base,0,0);
   // source-atop preserves the original destination alpha exactly; fabrics and
   // motifs cannot grow the outline or paint into a cream footbed/sole.
