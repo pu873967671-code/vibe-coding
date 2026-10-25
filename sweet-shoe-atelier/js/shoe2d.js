@@ -151,7 +151,7 @@ async function composite(input){
   p.globalCompositeOperation='source-atop';p.drawImage(tint,0,0);p.drawImage(materialLayer(design,parts.upper),0,0);
   const pattern=patternLayer(design,parts.upper);if(pattern)p.drawImage(pattern,0,0);
   p.globalCompositeOperation='source-over';
-  drawAccessories(p,design,sprites,parts.base,parts.binding);
+  drawAccessories(p,design,sprites,parts.base,parts.binding,parts.upper);
   cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);
   return out;
  }).finally(()=>jobs.delete(id));
@@ -160,9 +160,10 @@ async function composite(input){
 // Every reviewed edit is extracted onto its original 1024×640 source frame.
 // Its perspective and contact shading are already painted: drawing it at the
 // origin keeps the base camera/silhouette exact through all finish changes.
-function drawAccessories(p,d,sprites,base,binding){
- for(const category of Object.keys(ACCESSORY_OPTIONS)){
+function drawAccessories(p,d,sprites,base,binding,upper){
+ for(const category of ['strap','decoration','charm']){
   const value=d[category];if(!value||value==='none')continue;
+  if(A.AccessoryRenderer?.handles(category,value)){A.AccessoryRenderer.drawOne(p,d,'product',category,upper);continue;}
   const accessoryHeel=A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel;
   const name=category+'_'+value,layer=sprites.layers?.[accessoryHeel]?.[name];
   if(layer){
