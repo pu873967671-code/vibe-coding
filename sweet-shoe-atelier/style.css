@@ -122,7 +122,7 @@ body.merge-active{background-image:url('assets/bg_merge.webp')}
 @media(max-height:560px) and (orientation:landscape){.boutique-scene{aspect-ratio:1.7}.boutique-chapter{position:relative;padding-bottom:8px}.boutique-chapter>.section-kicker{font-size:8px}.boutique-chapter h3{font-size:18px;margin:4px 0 8px}.boutique-chapter .story-link{float:right;margin:0 0 5px 8px;font-size:10px;min-height:40px}.boutique-chapter p{font-size:9px;margin:6px 0 0}.renovation-story{clear:both;padding:6px;gap:8px}.renovation-story>img{width:30px;height:40px}.renovation-story>p{font-size:11px;line-height:1.4}.renovation-task{padding:8px 0}.renovation-task>.section-kicker{display:none}.renovation-preview>img{width:50px;height:45px}.renovation-preview h3{font-size:16px}.renovate-button{min-height:40px;padding:7px 12px;margin-bottom:4px}.inspiration-reward{font-size:9px!important}.renovation-hint{font-size:9px!important;margin:5px 0}.boutique-scene-footer{margin-top:5px}}
 .generator-tapped>.merge-art{animation:generator-tap .28s ease-out}@keyframes generator-tap{35%{transform:scale(1.1,.88)}75%{transform:scale(.96,1.04)}}@media(prefers-reduced-motion:reduce){.generator-tapped>.merge-art{animation:none}}
 @media(max-height:560px) and (orientation:landscape){.chapter-modal{padding:14px 22px}.chapter-celebration>.chapter-portraits{height:62px;width:175px;margin:0 auto 8px;overflow:visible}.chapter-portraits img{height:62px;width:85px}.chapter-celebration>img{display:none}.chapter-celebration .section-kicker{font-size:8px}.chapter-celebration h2{font-size:22px;margin:5px 0}.chapter-celebration p{font-size:11px;line-height:1.4;margin:6px 0}.chapter-celebration .chapter-letter{font-size:12px;margin:8px 0}.chapter-celebration>.primary{margin-top:6px;min-height:40px;padding:8px 18px}.renovation-task>.secondary{position:sticky;bottom:0;background:#fff8ef;box-shadow:0 -4px 8px #f4e3df}}
-.journal-back{float:right;min-height:40px;margin:0 0 10px 10px;padding:7px 14px}
+.atelier-journal>.journal-back{float:right;min-height:44px;margin:0 48px 10px 10px;padding:7px 14px}
 /* Odette stays inside the current screen; lessons never cover the board or primary actions. */
 .journey-coach{display:flex;align-items:flex-start;gap:10px;text-align:left;color:var(--ink);padding:10px;border:1px solid #ddbc9b;border-radius:14px;background:linear-gradient(135deg,#fffaf0,#f7e8de);box-shadow:0 4px 15px #79504d0d}
 .journey-coach>img{width:48px;height:78px;object-fit:contain;object-position:bottom;flex:none}.journey-coach>div{flex:1;min-width:0}.journey-coach h3{font:700 19px/1.2 var(--font-ui);margin:5px 0}.journey-coach p{font:12px/1.55 sans-serif;margin:5px 0;color:#765461}.journey-coach .section-kicker{font-size:9px;letter-spacing:.5px}.journey-next{display:block;font:600 11px/1.45 sans-serif;color:#24664f;margin-top:7px}.journey-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.journey-actions button{min-height:40px;margin:0;font:11px/1.3 sans-serif;padding:6px 9px}.journey-actions .secondary{box-shadow:none;background:transparent;color:#546d65;border-color:#bddfcc}.journey-target{outline:3px solid #ed78a5!important;outline-offset:-2px;box-shadow:0 0 0 3px #fff0f699,0 0 17px #ed78a577!important;animation:guide-glow 1.8s ease-in-out infinite}.merge-detail:has(.journey-coach){padding:10px}.boutique-tasks>.journey-coach{margin-bottom:12px}.modal>.journey-coach{margin-bottom:14px}.speech:has(.journey-coach){padding:0;border:0;background:transparent}.speech:has(.journey-coach):before{display:none}.speech .journey-coach>img{display:none}.speech .journey-coach{padding:10px}.speech .journey-coach h3{font-size:17px}
@@ -1115,6 +1115,22 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 .result-shoes{min-height:0;overflow:hidden}.result-shoes .product-canvas{min-height:0;max-height:112px}
 @media(orientation:portrait){.commission-shoe .shoe-canvas{width:84px;height:52px}.result-shoes .product-canvas{max-height:90px}}
 @media(max-height:560px) and (orientation:landscape){.commission-shoe .shoe-canvas{width:68px;height:42px}.result-shoes .product-canvas{max-height:66px}}
+/* Keep the customer, finished shoe and both actions visible on short screens.
+   A single tall stack scrolled to its focused action and cut the artwork off. */
+@media(max-height:560px) and (orientation:landscape){
+ .modal[data-modal-kind=result]{display:grid;grid-template-columns:180px minmax(0,1fr);gap:6px 16px;padding:18px 22px;align-items:center}
+ .modal[data-modal-kind=result]>.eyebrow{display:none}
+ .modal[data-modal-kind=result]>.result-portrait{grid-area:1/1/3/2;justify-self:center;width:72px;height:72px}
+ .modal[data-modal-kind=result]>.result-shoes{grid-area:3/1/5/2;width:180px;height:72px;margin:0}
+ .modal[data-modal-kind=result]>h2{grid-area:1/2;max-width:none;margin:0 24px 0 0;font-size:21px;line-height:1.2}
+ .modal[data-modal-kind=result]>.stars{grid-area:2/2}
+ .modal[data-modal-kind=result]>.stars .ui-icon{width:28px;height:28px}
+ .modal[data-modal-kind=result]>.commission-reward{grid-area:3/2;margin:0 auto;padding:6px 10px}
+ .modal[data-modal-kind=result]>p:not(.commission-reward){grid-area:4/2;margin:0}
+ .modal[data-modal-kind=result]>.stats{grid-area:5/1/6/3;margin:2px 0;padding:8px}
+ .modal[data-modal-kind=result]>.secondary:not(.modal-dismiss){grid-area:6/1;margin:2px 0;min-height:44px}
+ .modal[data-modal-kind=result]>.primary{grid-area:6/2;margin:2px 0;min-height:44px}
+}
 .collection-stage>.product-canvas{position:absolute;inset:4%;width:92%;height:92%;max-height:none;min-height:0;min-width:0;object-fit:contain;mask-image:none;transform:none}
 .runway-painted-window>.product-canvas{position:absolute;inset:0;width:100%;height:100%;min-height:0;min-width:0;object-fit:contain}
 .collection-stage,.collection-detail{min-height:0}
@@ -1187,6 +1203,8 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 .runway-sock-colors .sock-color{display:grid;place-items:center;min-width:40px;width:40px;min-height:44px;padding:5px;border:0;border-radius:12px;background:transparent;box-shadow:none}
 /* Keep the first-fitting skip clear of Continue and its guiding hand. */
 body:has(.runway-scene) .guide-action .director-skip{position:fixed;top:80px;right:14px;bottom:auto}
+/* Keep fitting milestones readable above the pair and away from its actions. */
+body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100% - 24px))}
 .sock-color>span{width:25px;height:25px;border-radius:50%;background:var(--sock-color);border:1px solid #a5c4b8;box-shadow:inset 0 1px 2px #ffffffa8}
 .sock-color[aria-pressed=true]>span{outline:2px solid #e877a3;outline-offset:3px}
 @media(orientation:portrait){.runway-sock-panel{grid-row:2;flex-wrap:wrap;gap:2px}.runway-sock-styles{flex-basis:100%}.runway-sock-styles .sock-chip{flex:1;padding:6px;font-size:11px;min-width:45px}.runway-sock-colors{width:100%;justify-content:center}.runway-dock .runway-actions{grid-row:3}}
