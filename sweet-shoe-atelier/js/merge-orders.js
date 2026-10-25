@@ -22,6 +22,7 @@
     let seed = ((sequence + 1) * 2654435761 + slot * 1013904223) >>> 0;
     const random = () => ((seed = (Math.imul(seed,1664525) + 1013904223) >>> 0) / 4294967296);
     const cells = board?.cells || [], discovered = board?.discovered || [];
+    const energy=Number.isFinite(board?.energy)?Math.max(0,Math.floor(board.energy)):Infinity;
     const simple = slot === 0 || sequence < 6;
     const count = simple ? 1 : random() < .35 ? 3 : 2;
     const budget = simple ? 4 : Math.min(20,8 + Math.floor(sequence / 4) * 2);
@@ -39,7 +40,10 @@
           const ready=cells.some(c=>c?.kind==='item'&&c.chain===chain&&c.tier===tier);
           const generator=cells.find(c=>c?.kind==='generator'&&c.chain===chain);
           const committed=work(needs.filter(n=>n.chain===chain));
-          const supply=generator?(generator.charges||0)+Math.floor(((generator.draws||0)+(generator.charges||0))/4)*(generator.level===2?1:0):Infinity;
+          // A full basket still cannot supply a new wish without energy. Count
+          // only usable draws, retaining the exact next expert bonus drop.
+          const draws=generator?Math.min(generator.charges||0,energy):0;
+          const supply=generator?draws+Math.floor(((generator.draws||0)+draws)/4)*(generator.level===2?1:0):Infinity;
           candidates.push({chain,tier,merges:mergesNeeded(cells,chain,tier),charged:cost+committed<=mass+supply,weight:(ready?4:mass>=cost/2?2.5:1)*(tier===2?1.3:1)});
         }
       }
@@ -86,29 +90,63 @@
     const found=availability(board,order);
     return found.every(n=>n.ready)?found.flatMap(n=>n.indices):null;
   }
+  // Guide real work already available, rather than sending the player to the
+  // first resting basket while another part of the same wish can be crafted.
+  // Completed requirements stay reserved, including same-chain lower pieces.
+  function nextAction(board,order,now=Date.now()) {
+    if(!valid(order)||!Array.isArray(board?.cells))return null;
+    const status=availability(board,order),reserved=new Set(status.flatMap(n=>n.indices)),choices=[];
+    for(let n=0;n<order.needs.length;n++) {
+      if(status[n].ready)continue;
+      const need=order.needs[n];
+      let pair=[];
+      for(let tier=need.tier-1;tier>=1&&!pair.length;tier--) {
+        const matches=board.cells.map((c,i)=>!reserved.has(i)&&c?.kind==='item'&&c.chain===need.chain&&c.tier===tier?i:-1).filter(i=>i>=0);
+        if(matches.length>=2)pair=matches.slice(0,2);
+      }
+      if(pair.length){choices.push({need,indices:pair,kind:'merge',rank:0});continue;}
+      const index=board.cells.findIndex(c=>c?.kind==='generator'&&c.chain===need.chain);
+      if(index<0)continue;
+      const source=board.cells[index],charged=source.charges>0||(source.readyAt||0)<=now;
+      const room=A.Merge.adjacent(index).some(i=>board.cells[i]===null);
+      const usable=charged&&board.energy>0&&room;
+      choices.push({need,indices:[index],kind:usable?'gather':'wait',rank:usable?1:charged?2:3});
+    }
+    choices.sort((a,b)=>a.rank-b.rank);
+    if(!choices.length)return null;
+    const {rank,...action}=choices[0];return action;
+  }
   function reward(order,state) {
     const effort=work(order.needs);
     return {coins:Math.round((6+effort*3+(order.needs.length-1)*6)*(1+(state?A.Boutique.count(state):0)*.02)),stars:Math.min(3,Math.max(1,Math.ceil(effort/8))),xp:effort*2};
   }
   // Count actual pieces and the generator's saved expert-drop sequence. Higher
   // pieces cannot be split to satisfy a smaller request. This is read-only: an
-  // expired cooldown is treated just like the next normal board tick.
+  // expired cooldown is treated just like the next normal board tick. All
+  // chains share one energy budget, using only the draws each actually needs.
   function supplied(board, needs, now, maxDraws=Infinity) {
+    let spent=0;
     return [...new Set(needs.map(n=>n.chain))].every(chain=>{
       const counts=Array(8).fill(0),required=Array(8).fill(0);
       for(const cell of board.cells)if(cell?.kind==='item'&&cell.chain===chain)counts[cell.tier]++;
       for(const need of needs)if(need.chain===chain)required[need.tier]+=need.count;
       const source=board.cells.find(c=>c?.kind==='generator'&&c.chain===chain);
-      if(source) {
-        const charges=Math.min(maxDraws,source.charges||((source.readyAt||0)<=now?A.Merge.CHARGES:0));
-        for(let draw=1;draw<=charges;draw++)counts[source.level===2&&((source.draws||0)+draw)%4===0?2:1]++;
+      const enough=()=>{
+        const available=counts.slice();
+        for(let tier=1;tier<=7;tier++) {
+          available[tier]-=required[tier];
+          if(available[tier]<0)return false;
+          if(tier<7)available[tier+1]+=Math.floor(available[tier]/2);
+        }
+        return true;
+      };
+      const charges=source?Math.min(maxDraws-spent,source.charges||((source.readyAt||0)<=now?A.Merge.CHARGES:0)):0;
+      if(enough())return true;
+      for(let draw=1;draw<=charges;draw++) {
+        counts[source.level===2&&((source.draws||0)+draw)%4===0?2:1]++;
+        if(enough()){spent+=draw;return true;}
       }
-      for(let tier=1;tier<=7;tier++) {
-        counts[tier]-=required[tier];
-        if(counts[tier]<0)return false;
-        if(tier<7)counts[tier+1]+=Math.floor(counts[tier]/2);
-      }
-      return true;
+      return false;
     });
   }
   // Relief is an explicit choice, never an automatic reroll. Preview and commit
@@ -116,7 +154,8 @@
   function relief(board,order,now=Date.now()) {
     if(!valid(order)||!Array.isArray(board?.cells))return {available:false,reason:'invalid'};
     if(indices(board,order))return {available:false,reason:'ready'};
-    if(supplied(board,order.needs,now))return {available:false,reason:'supplied'};
+    const energy=Number.isFinite(board.energy)?Math.max(0,Math.floor(board.energy)):Infinity;
+    if(supplied(board,order.needs,now,energy))return {available:false,reason:'supplied'};
     const candidates=[];
     for(const chain of CHAINS) {
       if(!board.cells.some(c=>c?.kind==='generator'&&c.chain===chain))continue;
@@ -125,7 +164,6 @@
         const need={chain,tier,count:1};
         // An easier request must not exchange a cooldown wait for an energy
         // wait. Its single chain can use at most the energy already available.
-        const energy=Number.isFinite(board.energy)?Math.max(0,Math.floor(board.energy)):Infinity;
         if(supplied(board,[need],now,energy))candidates.push({need,merges:mergesNeeded(board.cells,chain,tier)});
       }
     }
@@ -159,5 +197,5 @@
     orders[slot]=next;
     return {ok:true,consumed,reward:payout,nextId:next.id};
   }
-  A.MergeOrders={make,ensure,availability,indices,reward,relief,replace,deliver};
+  A.MergeOrders={make,ensure,availability,indices,nextAction,reward,relief,replace,deliver};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
