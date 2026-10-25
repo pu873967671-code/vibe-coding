@@ -3,6 +3,9 @@
  A.createTutorialDirector=function(){
   const root=document.createElement('div');root.id='tutorialDirector';document.body.append(root);
   const seen=new Set(),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Once a gesture is learned, let the next highlighted action teach by doing.
+  // Repeating a modal between each move/merge made the first pair feel distant.
+  const practiceSteps=new Set(['guide-2','guide-3','guide-4','guide-5','journey-5']);
   let current,phase='',typed,timer,animation,raf;
   const copy=(en,zh)=>A.lang==='zh'?zh:en;
   function completeType(){if(!typed)return false;clearInterval(timer);typed.el.textContent=typed.text;typed=null;return true;}
@@ -29,7 +32,13 @@
   function show(config){
    const same=current?.key===config.key;current=config;if(same&&phase==='dialogue')return;
    clear();root.innerHTML=`<div class="guide-marker" ${config.marker||''}></div><div class="guide-action">${config.action||''}</div>`;
-   if(seen.has(config.key)){phase='spotlight';const skip=document.createElement('button');skip.className='secondary director-skip';skip.textContent=copy('Skip guide','跳过引导');skip.setAttribute(config.skip,'');root.querySelector('.guide-action').append(skip);position();return;}
+   if(seen.has(config.key)||practiceSteps.has(config.key)){
+    seen.add(config.key);phase='spotlight';
+    const skip=document.createElement('button');skip.className='secondary director-skip';skip.textContent=copy('Skip guide','跳过引导');skip.setAttribute(config.skip,'');root.querySelector('.guide-action').append(skip);
+    const instruction=document.createElement('span');instruction.setAttribute('role','status');instruction.textContent=config.body;
+    Object.assign(instruction.style,{position:'absolute',width:'1px',height:'1px',overflow:'hidden',clipPath:'inset(50%)'});root.append(instruction);
+    position();document.querySelector(config.target||'[data-no-target]')?.focus({preventScroll:true});return;
+   }
    phase='dialogue';document.body.classList.add('dialogue-active');
    root.insertAdjacentHTML('beforeend',`<div class="guide-dialogue" role="dialog" aria-modal="true" aria-labelledby="vnTitle"><img class="vn-mentor" src="assets/mentor/mentor_${config.key==='guide-0'?'wave':config.key==='guide-5'?'cheer':'point'}.webp" alt=""><div class="vn-box"><span class="vn-name">${copy('Mimi','米米')}</span><h2 id="vnTitle"></h2><p class="vn-text"></p><button class="vn-next" data-dialogue-next>${copy('Tap to continue','点击继续')} <span>▼</span></button><button class="secondary vn-skip" ${config.skip}>${copy('Skip','跳过')}</button></div></div>`);
    root.querySelector('h2').textContent=config.title;const text=root.querySelector('.vn-text');text.textContent=config.body;type(text);root.querySelector('[data-dialogue-next]').focus({preventScroll:true});
