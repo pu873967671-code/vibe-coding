@@ -17,6 +17,8 @@
   Object.assign(text.zh,{jewelry:'珠宝盒',ribbonDrawer:'丝带抽屉'});
   Object.assign(text.en,{ingredientReady:'Ready to deliver',ingredientMissing:'Still to craft',swapWish:'Swap wish · free',keepMaterials:'Keep all your materials',restingWish:'This basket needs a little rest.'});
   Object.assign(text.zh,{ingredientReady:'已备好，可以交付',ingredientMissing:'等待合成',swapWish:'选择新心愿 · 免费',keepMaterials:'保留全部材料',restingWish:'工具篮正在补充材料。'});
+  Object.assign(text.en,{sort:'Sort',sortHint:'Group matching materials · free',sorted:'Materials grouped by type and tier.',sortSame:'Everything is already in place.',pairHint:'Merge these two'});
+  Object.assign(text.zh,{sort:'归位',sortHint:'免费收好材料',sorted:'材料已收好。',sortSame:'材料已经全部收好。',pairHint:'合成这两个'});
   const tr = k => text[A.lang][k] || k;
   const name = cell => !cell ? tr('free') : cell.kind === 'chest' ? tr('chest') : cell.kind === 'crate' ? tr('crateName') : cell.kind === 'generator' ? tr({fab:'cotton',lea:'leather',spk:'jewelry',rib:'ribbonDrawer'}[cell.chain]) : names[A.lang][cell.chain][cell.tier - 1];
   A.materialName=name;
@@ -34,6 +36,7 @@
     function activity() {
       lastInput=performance.now();mentorHint=false;orderHelp=false;
       root.querySelectorAll('.idle-match').forEach(el=>el.classList.remove('idle-match'));
+      root.querySelector('.idle-pair-label')?.remove();
     }
     function generatorStatus(index, now=Date.now()) {
       const b=board(),cell=b.cells[index];
@@ -159,7 +162,7 @@
       if(!box)return;
       if(G.active(api.state())) {
         const step=api.state().mergeGuide;
-        box.innerHTML=`<div class="odette-guide" data-guide-step="${step}"><img src="assets/mentor_neutral.webp" alt="${tr('guideName')}"><div><span class="section-kicker">${tr('guideName')} · ${Math.min(5,step+1)} / 5</span><h3>${tr(step===5?'guideDone':'guide')}</h3><p>${tr('guide'+step)}</p>${step===5?`<p>${tr('guideReward')}</p><button class="primary" data-guide-finish>${tr('guideFinish')}</button>`:''}</div><button class="secondary guide-skip" data-guide-skip>${tr('guideSkip')}</button></div>`;
+        box.innerHTML=`<div class="odette-guide" data-guide-step="${step}"><img src="assets/mentor_neutral.webp" alt="${tr('guideName')}"><div><span class="section-kicker">${tr('guideName')} · ${Math.min(5,step+1)} / 5</span><h3>${tr(step===5?'guideDone':'guide')}</h3><p>${step===5&&api.state().introductionFlow===2?(A.lang==='zh'?'第一份心愿完成了！来制作你的第一双鞋。':'First wish delivered! Let’s make your first pair.') :tr('guide'+step)}</p>${step===5?`<p>${tr('guideReward')}</p><button class="primary" data-guide-finish>${api.state().introductionFlow===2?(A.lang==='zh'?'制作第一双鞋':'Make our first pair'):tr('guideFinish')}</button>`:''}</div><button class="secondary guide-skip" data-guide-skip>${tr('guideSkip')}</button></div>`;
         return;
       }
       if(cell?.kind==='chest') {
@@ -172,7 +175,7 @@
     function render() {
       A.Boutique.sync(api.state());
       const b=board(),crates=b.cells.filter(c=>c?.kind==='crate').length;
-      root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button></div></div><div class="atelier-orders">${orderCards()}</div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" data-chain="${cell?.chain||''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${A.lang==='en'&&b.merges===1?'piece crafted':tr('merges')}</span><i>·</i><span>${crates} ${A.lang==='en'&&crates===1?'space waiting to be opened':tr('room')}</span></p></div><div class="mentor-area"><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside><div class="atelier-mentor" aria-hidden="true"><img src="assets/mentor/mentor_${G.active(api.state())?(api.state().mergeGuide===0?'wave':'point'):'think'}.webp" alt=""></div><button class="mentor-bubble secondary" data-mentor-talk hidden>${G.active(api.state())?tr('guide'+Math.min(5,api.state().mergeGuide)):tr('idle')}</button></div>`;
+      root.innerHTML=`<aside class="merge-intro"><div class="merge-intro-copy"><span class="eyebrow">${A.lang==='zh'?'第 '+Math.min(3,A.Boutique.chapter(api.state())+1)+' 章':'Chapter '+Math.min(3,A.Boutique.chapter(api.state())+1)} · ${A.Boutique.tr('chapter')[A.Boutique.chapter(api.state())]}</span><h2>${tr('orders')}</h2><p>${tr('orderHint')}</p><div class="atelier-tools"><button class="secondary book-tool" data-book="fab" aria-label="${tr('bookOpen')}"><img src="assets/icon_material.webp" alt=""><span>${tr('collection')}<small>${b.discovered.length} / 28</small></span></button><button class="secondary chest-tool ${R.pending(b)?'gift-ready':''}" data-claim-chest ${R.pending(b)?'':'disabled'} aria-label="${tr(R.pending(b)?'claimGift':'giftProgress')}" title="${tr('giftProgress')}"><img src="assets/items/ui_chest.webp" alt=""><span>${tr(R.pending(b)?'claimGift':'nextGift')}<small>${R.pending(b)?'× '+R.pending(b):(b.orderSequence||0)%R.EVERY+' / '+R.EVERY}</small></span><i style="width:${R.pending(b)?100:((b.orderSequence||0)%R.EVERY)/R.EVERY*100}%"></i></button><button class="secondary board-sort" data-board-sort aria-label="${tr('sortHint')}" title="${tr('sortHint')}" ${G.active(api.state())?'disabled':''}><b aria-hidden="true">⇆</b><small>${tr('sort')}</small></button></div></div><div class="atelier-orders">${orderCards()}</div></aside><div class="merge-board-wrap"><div class="board-rim"><div class="merge-board" role="group" aria-label="${tr('atelier')}">${b.cells.map((cell,i)=>`<button class="merge-cell ${cell?.kind||'empty'} ${selected===i?'selected':''} ${cell?.kind==='generator'&&b.energy===100&&b.merges===0?'inviting':''} ${cell?.kind==='crate'&&M.adjacent(i).some(n=>b.cells[n]?.kind==='item')?'openable':''}" data-chain="${cell?.chain||''}" style="--land-col:${Math.floor(i/7)+1};--land-row:${7-i%7}" data-cell="${i}" aria-label="${name(cell)}${cell?.tier?', '+tr('tier')+' '+cell.tier:''}" aria-pressed="${selected===i}">${cell?art(cell):''}${cell?.kind==='chest'?`<span class="chest-drops">${cell.drops}</span>`:cell?.kind==='item'?`<span class="item-tier">${cell.tier}</span>`:cell?.kind==='generator'?`${cell.level===2?'<span class="generator-level" aria-label="'+A.Boutique.tr('upgraded')+'">Ⅱ</span>':''}<span class="generator-bolt">${resource('energy')}</span><span class="generator-charge" data-charge="${i}"></span>`:''}</button>`).join('')}</div></div><p class="board-caption"><span>${b.merges} ${A.lang==='en'&&b.merges===1?'piece crafted':tr('merges')}</span><i>·</i><span>${crates} ${A.lang==='en'&&crates===1?'space waiting to be opened':tr('room')}</span></p></div><div class="mentor-area"><aside class="merge-detail panel" id="mergeDetail" aria-live="polite"></aside><div class="atelier-mentor" aria-hidden="true"><img src="assets/mentor/mentor_${G.active(api.state())?(api.state().mergeGuide===0?'wave':'point'):'think'}.webp" alt=""></div><button class="mentor-bubble secondary" data-mentor-talk hidden>${G.active(api.state())?tr('guide'+Math.min(5,api.state().mergeGuide)):tr('idle')}</button></div>`;
       controls();detail();
       const guide=api.state().mergeGuide;
       if(guide<4){const cells=G.plans[guide].cells,i=cells[selected===cells[0]&&cells.length>1?1:0];root.querySelector(`[data-cell="${i}"]`)?.classList.add('guide-target');}
@@ -210,6 +213,10 @@
         }
       }
       target?.classList.add(result.type==='merge'?'just-merged':'just-spawned');
+      if(result.type==='merge'&&target){
+        const pop=document.createElement('span');pop.className='merge-tier-pop';pop.textContent=tr('tier')+' '+result.item.tier;pop.setAttribute('aria-hidden','true');target.append(pop);
+        setTimeout(()=>pop.remove(),850);
+      }
       if(result.type==='merge'||result.type==='gift') {
         api.sound(result.discovery?'discovery':'merge',result.item.tier);
         const r=target.getBoundingClientRect();api.particles(r.x+r.width/2,r.y+r.height/2,false,result.item.chain);
@@ -292,6 +299,15 @@
       const bubbleButton=e.target.closest('[data-bubble]');if(bubbleButton){openBubble(+bubbleButton.dataset.bubble);return;}
       const bookButton=e.target.closest('[data-book]');
       if(bookButton){openBook(bookButton.dataset.book);return;}
+      if(e.target.closest('[data-board-sort]')){
+        if(G.active(api.state()))return;
+        const changed=M.sort(board(),matchMedia('(orientation: landscape)').matches);
+        selected=-1;api.save();render();
+        if(changed.length){api.sound('drop');for(const i of changed)if(board().cells[i]?.kind==='item')root.querySelector(`[data-cell="${i}"]`)?.classList.add('just-sorted');}
+        api.toast(tr(changed.length?'sorted':'sortSame'));
+        root.querySelector('[data-board-sort]')?.focus({preventScroll:true});
+        return;
+      }
       if(e.target.closest('[data-claim-chest]')){commit(R.claim(board()));return;}
       const openChest=e.target.closest('[data-open-chest]');
       if(openChest){activate(+openChest.dataset.openChest);return;}
@@ -345,9 +361,19 @@
         document.querySelectorAll('[data-offer-expiry]').forEach(el=>{const remaining=+el.dataset.offerExpiry-Date.now();el.textContent=remaining>0?clock(remaining):tr('bubbleExpired');const buy=el.closest('.modal').querySelector('[data-bubble-buy]');if(buy)buy.disabled=remaining<=0;});
         const changed=M.tick(board())|B.ensure(board());if(changed){api.save();if(visible&&api.active()&&!pointer)render();else controls();}else controls();
         if(!visible||!api.active()||document.hidden||pointer){lastInput=now;return;}
-        if(orderHelp)return;
-        if(now-lastInput>=5000&&!mentorHint){mentorHint=true;mentorPose('think',tr('idle'));}
-        if(now-lastInput>=5000)for(const i of R.hint(board()))root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
+        if(orderHelp||G.active(api.state()))return;
+        const pair=now-lastInput>=5000?R.hint(board()):[];
+        if(pair.length===2){
+          if(!mentorHint){mentorHint=true;mentorPose('think',tr('idle'));}
+          for(const i of pair)root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
+          if(!root.querySelector('.idle-pair-label')){
+            const label=document.createElement('span');label.className='idle-pair-label';label.textContent=tr('pairHint');label.setAttribute('role','status');
+            const cell=root.querySelector(`[data-cell="${pair[0]}"]`);cell?.append(label);
+            const bounds=label.getBoundingClientRect();
+            if(bounds.left<8){label.style.left='0';label.style.translate='none';}
+            else if(bounds.right>innerWidth-8){label.style.left='auto';label.style.right='0';label.style.translate='none';}
+          }
+        }
       }
     };
   };
