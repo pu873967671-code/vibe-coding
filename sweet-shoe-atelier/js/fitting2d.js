@@ -13,13 +13,13 @@ function canvas(){const c=document.createElement('canvas');c.width=SIZE;c.height
 function image(path){return new Promise(resolve=>{const im=new Image();im.decoding='async';im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=path;});}
 function clean(d){return A.cleanDesign(d);}
 function fittingOptions(input){return A.cleanFittingOptions?A.cleanFittingOptions(input):{sock:['frill','lace','sheer','knee','thigh','blacksheer','pantyhose','opaque','fishnet'].includes(input?.sock)?input.sock:'none',color:['pink','mint','cream','white','black'].includes(input?.color)?input.color:'cream'};}
-function fittedKit(parts){return parts.legs&&parts.shoe&&parts.upper&&parts.occlusion;}
+function fittedKit(parts){return parts.legs&&parts.shoe&&parts.upper&&parts.occlusion&&parts.hosiery;}
 function source(heel){
  if(!sources.has(heel))sources.set(heel,Promise.all([
   // Skin and shoe are one camera-matched kit. Generic barefoot anatomy has a
   // different arch/toe pose and must never substitute for a missing heel leg.
   image('assets/fitting2d/'+heel+'_legs.webp').then(im=>['legs',im]),
-  ...['shoe','upper','shadow','highlight','occlusion'].map(async part=>[part,await image('assets/fitting2d/'+heel+'_'+part+'.webp')])
+  ...['shoe','upper','shadow','highlight','occlusion','hosiery'].map(async part=>[part,await image('assets/fitting2d/'+heel+'_'+part+'.webp')])
  ]).then(entries=>{
   const parts=Object.fromEntries(entries);
   // Collar/sole occlusion and the dye mask are part of the fitted kit. A
@@ -33,7 +33,13 @@ function clipped(ctx,mask){ctx.globalCompositeOperation='destination-in';ctx.dra
 function finish(d,mask){
  const out=canvas(),p=out.getContext('2d');p.lineCap='round';
  if(d.material==='satin'||d.material==='patent'){
-  const g=p.createLinearGradient(130,930,720,250);g.addColorStop(0,'#ffffff00');g.addColorStop(.36,'#ffffff00');g.addColorStop(.42,d.material==='patent'?'#ffffffa8':'#ffffff62');g.addColorStop(.49,'#ffffff00');g.addColorStop(1,'#ffffff00');p.fillStyle=g;p.fillRect(0,0,SIZE,SIZE);
+  const g=p.createLinearGradient(130,930,720,250);
+  // An open vamp has no fabric where a closed pump catches its reflection.
+  // Place the two patent glints on its forefoot and instep bands instead.
+  if(d.material==='patent'&&A.SHOE_STYLES[d.heel]?.openToe){
+   for(const [at,alpha] of [[0,0],[.18,0],[.25,.65],[.29,.12],[.34,0],[.55,0],[.62,.30],[.67,.10],[.72,0],[1,0]])g.addColorStop(at,'rgba(255,255,255,'+alpha+')');
+  }else{g.addColorStop(0,'#ffffff00');g.addColorStop(.36,'#ffffff00');g.addColorStop(.42,d.material==='patent'?'#ffffffa8':'#ffffff62');g.addColorStop(.49,'#ffffff00');g.addColorStop(1,'#ffffff00');}
+  p.fillStyle=g;p.fillRect(0,0,SIZE,SIZE);
  }else if(d.material==='velvet'){
   const g=p.createLinearGradient(0,400,SIZE,900);g.addColorStop(0,'#65417410');g.addColorStop(.62,'#65417406');g.addColorStop(1,'#fff5fb0c');p.fillStyle=g;p.fillRect(0,0,SIZE,SIZE);
  }else if(d.material==='mesh'){
@@ -49,7 +55,7 @@ function finish(d,mask){
   for(let row=0;row<120;row++)for(let col=0;col<120;col++){const n=((row+1)*374761393^(col+1)*668265263)>>>0,x=col*9+n%7,y=row*9+(n>>>8)%7;p.fillStyle='#fffcf2df';p.beginPath();p.arc(x,y,.7+n%4*.2,0,Math.PI*2);p.fill();}
  }
  A.CoutureFinish?.drawMaterial(p,d,SIZE,SIZE);
- if(!['none','rosebuds','diamonds','gingham'].includes(d.pattern)){
+ if(!['none','rosebuds','diamonds','gingham','scallops','pinstripes'].includes(d.pattern)){
   p.fillStyle='#fff9edcc';for(let row=0;row<20;row++)for(let col=0;col<20;col++){
    const x=col*58+(row%2)*29,y=row*58,r=6;p.beginPath();
    if(d.pattern==='hearts'){p.moveTo(x,y+r);p.bezierCurveTo(x-r*2,y-r,x-r,y-r*2,x,y-r*.5);p.bezierCurveTo(x+r,y-r*2,x+r*2,y-r,x,y+r);}
@@ -108,7 +114,7 @@ function hosierySurface(p,height,section=hosierySection){
   p.fillStyle=g;p.fillRect(0,y,SIZE,Math.min(4,height-y));
  }p.restore();
 }
-function hosieryTexture(p,o,height,section=hosierySection,offset=0){
+function hosieryTexture(p,o,height,section=hosierySection,offset=0,threadOnly=false){
  if(o.sock==='knee'){
   p.save();p.globalCompositeOperation='source-atop';p.lineJoin='round';p.lineCap='round';
   // A quiet recessed yarn with a soft lit edge stays readable on ivory as
@@ -123,14 +129,25 @@ function hosieryTexture(p,o,height,section=hosierySection,offset=0){
   }p.restore();return;
  }
  if(o.sock!=='fishnet')return;
- p.save();p.globalCompositeOperation='source-atop';p.strokeStyle=o.color==='black'?'#b6a6bf37':'#8b74825a';p.lineWidth=1.15;p.lineJoin='round';
+ p.save();p.globalCompositeOperation=threadOnly?'source-over':'source-atop';
+ // A fine opaque yarn remains readable after the sheer layer's 20% blend
+ // and the fitting camera's phone-scale downsample. Match the chosen colour;
+ // midnight knit must use dark thread, rather than a nearly invisible glint.
+ p.strokeStyle=({black:'#211c30',white:'#fffdfa',cream:'#fff1d6',pink:'#ca7f9c',mint:'#77ad95'}[o.color]||'#fff1d6');
+ p.lineWidth=2.6;p.lineJoin='round';p.lineCap='round';
  // Diagonal yarn is projected around the cylinder, compressing at its sides.
  for(const direction of [-1,1])for(let strand=-Math.ceil(height/80)-3;strand<=Math.ceil(height/80)+3;strand++){
   p.beginPath();let drawing=false;
   for(let y=0;y<=height;y+=8){const u=strand*.19+direction*(y+offset)*.0024;if(Math.abs(u)>1){drawing=false;continue;}const x=hosieryPoint(section,y,u);if(drawing)p.lineTo(x,y);else p.moveTo(x,y);drawing=true;}p.stroke();
  }p.restore();
 }
-function drawSocks(p,legs,input,heel){
+function fishnetYarn(p,mask,o,height,section=hosierySection,offset=0){
+ if(o.sock!=='fishnet')return;
+ const layer=document.createElement('canvas');layer.width=SIZE;layer.height=height;const q=layer.getContext('2d');
+ hosieryTexture(q,o,height,section,offset,true);q.globalCompositeOperation='destination-in';q.drawImage(mask,0,0);
+ p.save();p.globalAlpha=.45;p.drawImage(layer,0,0);p.restore();
+}
+function drawSocks(p,legs,input,heel,collarOnly=false){
  const o=fittingOptions(input);if(o.sock==='none'||!legs)return;
  const layer=canvas(),q=layer.getContext('2d'),top=heel==='bootie'&&['frill','lace'].includes(o.sock)?350:{frill:470,lace:450,knee:-30,sheer:-30,thigh:-30,blacksheer:-30,pantyhose:-30,opaque:-30,fishnet:-30}[o.sock];
  const openToe=A.SHOE_STYLES?.[heel]?.openToe;
@@ -165,7 +182,8 @@ function drawSocks(p,legs,input,heel){
  if(['sheer','blacksheer','pantyhose'].includes(o.sock)){
   const dense=canvas(),v=dense.getContext('2d');v.drawImage(layer,0,0);v.globalCompositeOperation='destination-in';const toe=v.createLinearGradient(0,740,0,960);toe.addColorStop(0,'#ffffff00');toe.addColorStop(.55,'#ffffff00');toe.addColorStop(1,'#ffffffa0');v.fillStyle=toe;v.fillRect(0,0,SIZE,SIZE);p.globalAlpha=.23;p.drawImage(dense,0,0);
  }p.restore();
- if(LONG_HOSIERY.has(o.sock))return;
+ fishnetYarn(p,layer,o,SIZE,openToe?y=>y>750?[190,800]:hosierySection(y):hosierySection);
+ if(collarOnly||LONG_HOSIERY.has(o.sock))return;
  p.save();p.lineCap='round';p.lineJoin='round';
  const curve=()=>{p.beginPath();p.moveTo(left+2,top+3);p.bezierCurveTo(left+57,top+28,right-52,top+27,right-1,top+4);};
  curve();p.strokeStyle='#b6a1af5c';p.lineWidth=11;p.stroke();curve();p.strokeStyle=cloth;p.lineWidth=8;p.stroke();
@@ -206,9 +224,19 @@ async function composite(input,options){
   p.drawImage(parts.shoe,0,0,SIZE,SIZE);
   if(parts.upper){
    const tint=canvas(),q=tint.getContext('2d');q.drawImage(parts.upper,0,0,SIZE,SIZE);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[d.color]||COLORS.pink;q.fillRect(0,0,SIZE,SIZE);
-   q.globalCompositeOperation='source-atop';q.globalAlpha=d.material==='velvet'?.8:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0,SIZE,SIZE);q.globalAlpha=d.material==='velvet'?.16:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0,SIZE,SIZE);q.globalAlpha=1;
-   p.drawImage(tint,0,0);p.drawImage(finish(d,parts.upper),0,0);
+   q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(d.material)?.8:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0,SIZE,SIZE);q.globalAlpha=d.material==='suede'?.08:d.material==='velvet'?.16:d.material==='brocade'?.42:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0,SIZE,SIZE);q.globalAlpha=1;
+   p.drawImage(tint,0,0);
+   // Finishes change colour and surface detail, never the antialiased shoe
+   // silhouette. Match the product compositor instead of accumulating alpha
+   // along soft upper edges differently for satin, crystals and woven cloth.
+   p.globalCompositeOperation='source-atop';p.drawImage(finish(d,parts.upper),0,0);p.globalCompositeOperation='source-over';
   }
+  // Some source paintings include a tiny skin-coloured ankle sliver inside
+  // the shoe extraction. Extend the same cloth through that camera-specific
+  // contact mask, over the embedded skin and under all exterior ornaments.
+  // The offline mask excludes piping, soles and dyed uppers; original source
+  // alpha, calf contours and every pair/platform transform stay untouched.
+  if(parts.hosiery.width>1){p.save();p.globalCompositeOperation='source-atop';drawSocks(p,parts.hosiery,o,d.heel,true);p.restore();}
   await drawOrnaments(p,d,parts.upper);
   return {canvas:out,fallback:false,legs:parts.legs};
  }).then(result=>{if(!result.fallback){cache.set(id,result);while(cache.size>LIMIT)cache.delete(cache.keys().next().value);}return result;}).finally(()=>pending.delete(id));pending.set(id,work);return work;
@@ -222,7 +250,7 @@ function pairedModel(source,options,extra=0,emergency=false){
  const o=fittingOptions(options);if(LONG_HOSIERY.has(o.sock)){
   const sheath=document.createElement('canvas');sheath.width=SIZE;sheath.height=300+extra;const q=sheath.getContext('2d');q.drawImage(leg,0,0);q.globalCompositeOperation='source-in';q.fillStyle=hosieryColour(o);q.fillRect(0,0,SIZE,sheath.height);
   const section=y=>{const t=Math.min(1,y/extension);return [547+25*(1-t)**2,843+31*(1-t)];};
-  hosierySurface(q,sheath.height,section);hosieryTexture(q,o,sheath.height,section,-extension);l.save();l.globalAlpha=hosieryOpacity(o);l.drawImage(sheath,0,0);l.restore();
+  hosierySurface(q,sheath.height,section);hosieryTexture(q,o,sheath.height,section,-extension);l.save();l.globalAlpha=hosieryOpacity(o);l.drawImage(sheath,0,0);l.restore();fishnetYarn(l,sheath,o,sheath.height,section,-extension);
  }
  l.drawImage(source,0,300+extra);
  // Author a separate rear calf, leaning out to the left above the shared
@@ -235,7 +263,7 @@ function pairedModel(source,options,extra=0,emergency=false){
    const sock=document.createElement('canvas');sock.width=SIZE;sock.height=rear.height;const z=sock.getContext('2d'),cloth=hosieryColour(o);z.drawImage(rear,0,0);z.globalCompositeOperation='source-in';z.fillStyle=cloth;z.fillRect(0,0,SIZE,rear.height);
    const section=y=>{const t=Math.min(1,y/join);return [460+66*t-17*t*t,747+18*t-46*t*t];};
    hosierySurface(z,rear.height,section);
-   hosieryTexture(z,o,rear.height,section,400-join);r.save();r.globalAlpha=hosieryOpacity(o);r.drawImage(sock,0,0);r.restore();
+   hosieryTexture(z,o,rear.height,section,400-join);r.save();r.globalAlpha=hosieryOpacity(o);r.drawImage(sock,0,0);r.restore();fishnetYarn(r,sock,o,rear.height,section,400-join);
   }
   // Join below the common source calf, above every short sock cuff.
   r.drawImage(source,0,400,SIZE,SIZE-400,0,join,SIZE,SIZE-400);
@@ -267,7 +295,7 @@ const CONTACTS={
  flat:[[361,969],[728,790]],ballet:[[361,969],[728,790]],maryjane:[[361,969],[728,790]],loafer:[[354,970],[728,793]],
  block:[[393,969],[736,875]],bootie:[[394,969],[735,876]],wedge:[[430,993],[705,928]],platform:[[419,999],[738,953]],
  kitten:[[373,964],[725,851]],slingback:[[373,964],[725,851]],bowsling:[[373,964],[725,851]],bowmule:[[373,964],[726,852]],
- stiletto6:[[382,964],[753,866]],stiletto9:[[370,964],[751,883]],pearlpump:[[382,964],[753,866]],crystalpump:[[382,964],[753,866]],studpump:[[382,964],[753,866]],pearlheel:[[382,964],[754,866]],luciteheel:[[382,964],[753,866]]
+ stiletto6:[[382,964],[753,866]],stiletto9:[[370,964],[751,883]],pearlpump:[[382,964],[753,866]],crystalpump:[[382,964],[753,866]],studpump:[[382,964],[753,866]],pearlheel:[[382,964],[754,866]],luciteheel:[[382,964],[753,866]],crystalsandal:[[382,964],[747,875]]
 };
 function soleShadow(p,contacts){
  // Contact follows the painted camera's toe-to-heel slope. Drawing in source
