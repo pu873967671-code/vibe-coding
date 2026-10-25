@@ -15,8 +15,8 @@
   Object.assign(text.zh,{bubble:'一份额外的小魔法',bubbleHint:'可选的材料副本。你合成的原材料已经在棋盘上。',bubbleExpired:'气泡已经飘走了。',bubbleGems:'完成入门引导即可获得宝石，更多宝石奖励将在后续章节开放。',bubbleDismiss:'免费放走气泡',bubbleBuy:'留下这份材料',bubbleOpen:'惊喜气泡',guideName:'米米',guideSkip:'跳过引导',guideDone:'小小工坊，等你创造',guideFinish:'下一份小小心愿',guideReward:'做得漂亮！获得5颗宝石。发现材料，就能解锁工作室的新细节。',guide0:'欢迎，亲爱的。点击发光的缝纫篮，收集一团棉花。',guide1:'依次点击两团发光的棉花，就能合成一枚线轴。',guide2:'先腾出更多空间：点击发光的线轴，再点击封存木箱旁的空位。',guide3:'点击另一枚发光的线轴，再点击木箱旁的线轴。合成就能打开木箱！',guide4:'第一份心愿准备好了！点击发光的交付按钮，把线轴送给小桃。',guide5:'第一位顾客很开心！再完成一份心愿，就能用星星装修小店。'});
   Object.assign(text.en,{jewelry:'Jewelry box',ribbonDrawer:'Ribbon drawer'});
   Object.assign(text.zh,{jewelry:'珠宝盒',ribbonDrawer:'丝带抽屉'});
-  Object.assign(text.en,{swapWish:'Swap wish · free',keepMaterials:'Keep all your materials',restingWish:'This basket needs a little rest.'});
-  Object.assign(text.zh,{swapWish:'选择新心愿 · 免费',keepMaterials:'保留全部材料',restingWish:'工具篮正在补充材料。'});
+  Object.assign(text.en,{ingredientReady:'Ready to deliver',ingredientMissing:'Still to craft',swapWish:'Swap wish · free',keepMaterials:'Keep all your materials',restingWish:'This basket needs a little rest.'});
+  Object.assign(text.zh,{ingredientReady:'已备好，可以交付',ingredientMissing:'等待合成',swapWish:'选择新心愿 · 免费',keepMaterials:'保留全部材料',restingWish:'工具篮正在补充材料。'});
   const tr = k => text[A.lang][k] || k;
   const name = cell => !cell ? tr('free') : cell.kind === 'chest' ? tr('chest') : cell.kind === 'crate' ? tr('crateName') : cell.kind === 'generator' ? tr({fab:'cotton',lea:'leather',spk:'jewelry',rib:'ribbonDrawer'}[cell.chain]) : names[A.lang][cell.chain][cell.tier - 1];
   A.materialName=name;
@@ -35,9 +35,18 @@
       lastInput=performance.now();mentorHint=false;orderHelp=false;
       root.querySelectorAll('.idle-match').forEach(el=>el.classList.remove('idle-match'));
     }
+    function generatorStatus(index, now=Date.now()) {
+      const b=board(),cell=b.cells[index];
+      if(cell?.kind!=='generator')return '';
+      if(!cell.charges&&cell.readyAt>now)return tr('cooldown')+' · '+tr('rest')+' '+clock(cell.readyAt-now);
+      if(b.energy<=0)return tr('emptyBody');
+      if(!M.adjacent(index).some(i=>b.cells[i]===null))return tr('space');
+      return tr('ready')+' · '+(cell.charges||M.CHARGES)+' '+tr('charges')+' · 1 '+tr('energy');
+    }
     function controls() {
       const b = board(), now = Date.now();
       root.querySelectorAll('[data-bubble-clock]').forEach(el=>el.textContent=clock((b.bubbles[0]?.expiresAt||now)-now));
+      root.querySelectorAll('[data-order-rest]').forEach(el=>el.textContent=clock(+el.dataset.orderRest-now));
       const meter = document.getElementById('energyCount');
       if (meter) meter.textContent = b.energy + ' / 100';
       const regen = document.getElementById('energyRegen');
@@ -45,7 +54,13 @@
       root.querySelectorAll('[data-charge]').forEach(el => {
         const cell=b.cells[+el.dataset.charge];
         el.textContent=cell.charges ? cell.charges : clock(cell.readyAt-now);
-        el.closest('button').classList.toggle('restocking',!cell.charges);
+        const button=el.closest('button'),label=name(cell)+' · '+generatorStatus(+el.dataset.charge,now);
+        button.classList.toggle('restocking',!cell.charges);
+        if(button.getAttribute('aria-label')!==label)button.setAttribute('aria-label',label);
+      });
+      root.querySelectorAll('[data-generator-status]').forEach(el=>{
+        const status=generatorStatus(+el.dataset.generatorStatus,now);
+        if(el.textContent!==status)el.textContent=status;
       });
     }
     const resource = id => `<img class="resource-icon" src="assets/${id==='energy'?'items/ui_energy':'icon_'+id}.webp" alt="" aria-hidden="true">`;
@@ -70,32 +85,30 @@
     }
     // Give an unfinished wish a useful next step without spending or opening a dialog.
     function helpOrder(order) {
-      const b=board(),status=O.availability(b,order),missing=order.needs.find((_,i)=>!status[i].ready);
-      if(!missing)return;
-      const reserved=new Set(status.flatMap(n=>n.indices));
-      let targets=[];
-      for(let tier=missing.tier-1;tier>=1&&!targets.length;tier--) {
-        const matches=b.cells.map((c,i)=>!reserved.has(i)&&c?.kind==='item'&&c.chain===missing.chain&&c.tier===tier?i:-1).filter(i=>i>=0);
-        if(matches.length>=2)targets=matches.slice(0,2);
-      }
-      const merging=targets.length===2;
-      if(!merging)targets=[b.cells.findIndex(c=>c?.kind==='generator'&&c.chain===missing.chain)].filter(i=>i>=0);
-      if(!targets.length)return;
+      const b=board(),action=O.nextAction(b,order);
+      if(!action)return;
+      const missing=action.need,targets=action.indices,merging=action.kind==='merge';
       selected=-1;orderHelp=true;
       root.querySelectorAll('.selected,.idle-match').forEach(el=>el.classList.remove('selected','idle-match'));
       root.querySelectorAll('[data-cell]').forEach(el=>el.setAttribute('aria-pressed','false'));
       for(const i of targets)root.querySelector(`[data-cell="${i}"]`)?.classList.add('idle-match');
       const target={kind:'item',chain:missing.chain,tier:missing.tier},source=b.cells[targets[0]];
-      const instruction=merging?tr('craftFrom')+' '+name(source):tr('gatherFrom')+' '+name(source)+(source.charges?'':' · '+tr('rest')+' '+clock(source.readyAt-Date.now()));
-      const relief=O.relief(b,order),alternative=relief.available?{kind:'item',...relief.next}:null;
-      root.querySelector('#mergeDetail').innerHTML=`<div class="detail-heading">${art(target)}<div><span class="section-kicker">${tr('orders')}</span><h3>${name(target)}</h3><p>${alternative?tr('restingWish'):instruction}</p></div></div>${alternative?`<button class="secondary order-relief" data-order-relief="${order.id}" data-relief-chain="${alternative.chain}" data-relief-tier="${alternative.tier}" aria-label="${tr('swapWish')} · ${name(alternative)} · ${tr('keepMaterials')}">${art(alternative)}<span><strong>${tr('swapWish')}</strong><small>${name(alternative)} · ${tr('keepMaterials')}</small></span><b aria-hidden="true">↻</b></button>`:chainPreview(target.chain,target.tier)+`<p class="detail-tip">${tr(merging?'step2':'tap')}</p>`}`;
+      const now=Date.now(),charged=source.charges>0||(source.readyAt||0)<=now;
+      const waiting=action.kind==='wait';
+      let instruction=merging?tr('craftFrom')+' '+name(source):tr('gatherFrom')+' '+name(source);
+      if(waiting) {
+        if(!charged)instruction=tr('restingWish')+' '+tr('rest')+' <span role="timer" aria-live="off" data-order-rest="'+source.readyAt+'">'+clock(source.readyAt-now)+'</span>';
+        else instruction=tr(b.energy<=0?'emptyBody':'space');
+      }
+      const relief=O.relief(b,order),alternative=action.kind==='wait'&&relief.available?{kind:'item',...relief.next}:null;
+      root.querySelector('#mergeDetail').innerHTML=`<div class="detail-heading">${art(target)}<div><span class="section-kicker">${tr('orders')}</span><h3>${name(target)}</h3><p>${instruction}</p></div></div>${alternative?`<button class="secondary order-relief" data-order-relief="${order.id}" data-relief-chain="${alternative.chain}" data-relief-tier="${alternative.tier}" aria-label="${tr('swapWish')} · ${name(alternative)} · ${tr('keepMaterials')}">${art(alternative)}<span><strong>${tr('swapWish')}</strong><small>${name(alternative)} · ${tr('keepMaterials')}</small></span><b aria-hidden="true">↻</b></button>`:chainPreview(target.chain,target.tier)+(waiting?'':`<p class="detail-tip">${tr(merging?'step2':'tap')}</p>`)}`;
       root.querySelector(alternative?'[data-order-relief]':`[data-cell="${targets[0]}"]`)?.focus({preventScroll:true});
     }
     function orderCards() {
       return O.ensure(board()).map(order=>{
         const status=O.availability(board(),order),ready=status.every(n=>n.ready),payout=O.reward(order,api.state());
         const person=A.themes[order.person].asset;
-        return `<article class="atelier-order ${ready?'ready':''}" data-order="${order.id}"><div class="order-customer"><span class="order-avatar" aria-hidden="true"><img src="assets/${person}_neutral.webp" alt=""></span><span>${A.t('name'+order.person)}</span><span class="order-reward">${resource('coin')}${payout.coins} ${resource('star')}${payout.stars}</span></div><div class="order-request" data-needs="${order.needs.length}">${order.needs.map((n,i)=>`<span class="requested-item ${status[i].ready?'fulfilled':''}" aria-label="${names[A.lang][n.chain][n.tier-1]} · ${status[i].ready?'✓':tr('gather')}" title="${names[A.lang][n.chain][n.tier-1]} · ${tr('tier')} ${n.tier}">${art({kind:'item',chain:n.chain,tier:n.tier})}<span class="request-name">${names[A.lang][n.chain][n.tier-1]}</span><b class="request-check">${status[i].ready?'✓':n.tier}</b></span>`).join('')}</div><button class="order-deliver ${ready?'primary':'secondary'}" data-deliver="${order.id}" ${!G.active(api.state())||(ready&&api.state().mergeGuide===4&&order.id===0)?'':'disabled'}>${ready?'✓ '+tr('deliver'):tr('gather')}</button></article>`;
+        return `<article class="atelier-order ${ready?'ready':''}" data-order="${order.id}"><div class="order-customer"><span class="order-avatar" aria-hidden="true"><img src="assets/${person}_neutral.webp" alt=""></span><span>${A.t('name'+order.person)}</span><span class="order-reward">${resource('coin')}${payout.coins} ${resource('star')}${payout.stars}</span></div><div class="order-request" data-needs="${order.needs.length}">${order.needs.map((n,i)=>`<span class="requested-item ${status[i].ready?'fulfilled':''}" role="img" aria-label="${names[A.lang][n.chain][n.tier-1]} · ${tr('tier')} ${n.tier} · ${tr(status[i].ready?'ingredientReady':'ingredientMissing')}" title="${names[A.lang][n.chain][n.tier-1]} · ${tr('tier')} ${n.tier}">${art({kind:'item',chain:n.chain,tier:n.tier})}<span class="request-name">${names[A.lang][n.chain][n.tier-1]}</span><b class="request-check" aria-hidden="true">${status[i].ready?'✓':n.tier}</b></span>`).join('')}</div><button class="order-deliver ${ready?'primary':'secondary'}" data-deliver="${order.id}" ${!G.active(api.state())||(ready&&api.state().mergeGuide===4&&order.id===0)?'':'disabled'}>${ready?'✓ '+tr('deliver'):tr('gather')}</button></article>`;
       }).join('');
     }
     // The transaction commits before animation; flights are disposable presentation only.
@@ -154,7 +167,7 @@
         return;
       }
       const preview=cell?.kind==='item'||cell?.kind==='generator'?cell:{kind:'item',chain:'fab',tier:1};
-      box.innerHTML=`<div class="detail-heading">${art(preview)}<div><span class="section-kicker">${tr(cell?.chain||'materials')}</span><h3>${cell?name(cell):tr('select')}</h3><p>${cell?.kind==='item'?tr('tier')+' '+cell.tier+' / 7':cell?.kind==='crate'?tr('crate'):cell?.kind==='generator'?tr('ready')+' · 1 '+resource('energy')+(cell.level===2?' · '+A.Boutique.tr('expertLabel'):''):tr('hint')}</p></div>${cell?.kind==='item'?`<button class="secondary merge-sell" data-merge-sell>${tr('sell')} ${resource('coin')}${cell.tier}</button>`:''}</div>${chainPreview(preview.chain,cell?.tier)}<p class="detail-tip">${cell?.kind==='item'?(cell.tier===7?tr('max'):tr('step2')):tr('step3')}</p>`;
+      box.innerHTML=`<div class="detail-heading">${art(preview)}<div><span class="section-kicker">${tr(cell?.chain||'materials')}</span><h3>${cell?name(cell):tr('select')}</h3><p>${cell?.kind==='item'?tr('tier')+' '+cell.tier+' / 7':cell?.kind==='crate'?tr('crate'):cell?.kind==='generator'?'<span data-generator-status="'+selected+'" aria-live="off">'+generatorStatus(selected)+'</span>'+(cell.level===2?' · '+A.Boutique.tr('expertLabel'):''):tr('hint')}</p></div>${cell?.kind==='item'?`<button class="secondary merge-sell" data-merge-sell>${tr('sell')} ${resource('coin')}${cell.tier}</button>`:''}</div>${chainPreview(preview.chain,cell?.tier)}${cell?.kind==='generator'?'':`<p class="detail-tip">${cell?.kind==='item'?(cell.tier===7?tr('max'):tr('step2')):tr('step3')}</p>`}`;
     }
     function render() {
       A.Boutique.sync(api.state());
@@ -216,7 +229,13 @@
       const b=board(), cell=b.cells[index];
       if(selected>=0 && selected!==index && b.cells[selected] && b.cells[selected].kind!=='crate' && (!cell || M.canMerge(b.cells[selected],cell))) {commit(M.move(b,selected,index));return;}
       selected=index;
-      if(cell?.kind==='generator')commit(M.generate(b,index));
+      if(cell?.kind==='generator') {
+        // A blocked basket still owns the selected detail; do not leave the
+        // previous material's instructions visible after an unsuccessful tap.
+        const result=M.generate(b,index);
+        if(!result.ok&&!G.active(api.state())){render();api.sound('whoosh');}
+        else if(!commit(result))render();
+      }
       else if(cell?.kind==='chest') {
         const result=R.open(b,index);commit(result);
         if(result.ok&&b.cells[index]?.kind==='chest'){selected=index;render();root.querySelector(`[data-cell="${result.to}"]`)?.classList.add('just-spawned');}
