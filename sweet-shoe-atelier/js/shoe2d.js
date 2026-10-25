@@ -92,9 +92,22 @@ function drawRichMaterial(p,d,width,height){
  p.restore();
 }
 function drawRichPattern(p,d,width,height){
- if(!['rosebuds','diamonds'].includes(d.pattern))return;
+ if(!['rosebuds','diamonds','gingham'].includes(d.pattern))return;
  p.save();p.lineCap='round';p.lineJoin='round';
- if(d.pattern==='diamonds'){
+ if(d.pattern==='gingham'){
+  // Interlaced cream warp/weft let the selected dye form the darker checks.
+  // A single projected grid bends gently over the vamp without square tiles
+  // escaping the camera-specific upper mask applied by the caller.
+  const step=36,point=(x,y)=>[x-y*.10+Math.sin(y/height*Math.PI)*12,y*.83+Math.cos(x/width*Math.PI)*9];
+  for(let row=-2;row<height/(step*.83)+3;row++)for(let col=-3;col<width/step+5;col++){
+   const warp=(col&1)===0,weft=(row&1)===0;if(!warp&&!weft)continue;
+   p.fillStyle=warp&&weft?'#fff8e99c':'#fff8e94a';p.beginPath();
+   for(const [dx,dy] of [[0,0],[1,0],[1,1],[0,1]]){const [x,y]=point((col+dx)*step,(row+dy)*step);if(dx===0&&dy===0)p.moveTo(x,y);else p.lineTo(x,y);}p.closePath();p.fill();
+  }
+  // Fine, quiet yarn makes the crossings read as cloth at native zoom.
+  p.lineWidth=.65;p.strokeStyle='#fff9ea15';
+  for(let y=-step;y<height/.83+step;y+=4){p.beginPath();for(let x=-step;x<width+height*.12+step;x+=24){const v=point(x,y);if(x===-step)p.moveTo(...v);else p.lineTo(...v);}p.stroke();}
+ }else if(d.pattern==='diamonds'){
   const step=54;p.strokeStyle='#fff8e9a6';p.lineWidth=1.15;p.setLineDash([3,3]);
   for(let x=-height;x<width+height;x+=step){p.beginPath();p.moveTo(x,0);p.lineTo(x+height*.7,height);p.moveTo(x,0);p.lineTo(x-height*.7,height);p.stroke();}
   p.setLineDash([]);
@@ -165,7 +178,7 @@ function materialLayer(design,upper){
 function patternLayer(design,upper){
  if(design.pattern==='none')return null;
  const out=canvas(),p=out.getContext('2d'),step=59,r=7;
- if(['rosebuds','diamonds'].includes(design.pattern)){drawRichPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;}
+ if(['rosebuds','diamonds','gingham'].includes(design.pattern)){drawRichPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;}
  p.fillStyle='rgba(255,253,242,.80)';
  for(let row=0;row<HEIGHT/step+1;row++)for(let col=-1;col<WIDTH/step+1;col++){
   p.save();p.translate((col+(row%2)*.5)*step,row*step);p.rotate(-.16);p.scale(1,.85);p.beginPath();
