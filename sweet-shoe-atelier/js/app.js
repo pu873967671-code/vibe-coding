@@ -16,6 +16,8 @@ new ResizeObserver(scheduleCanvasResize).observe($('app'));
 window.addEventListener('resize',scheduleCanvasResize);
 function optionPreview(k,v){
  if(k==='color')return `<span class="swatch" style="--swatch:${option(k,v)[3]}"></span>`;
+ if(k==='material'&&['metallic','pearlescent'].includes(v))return `<span class="texture-swatch couture-${v}"></span>`;
+ if(k==='pattern'&&['rosebuds','diamonds'].includes(v))return `<span class="texture-swatch couture-${v}" aria-hidden="true">${v==='rosebuds'?'❀':''}</span>`;
  if(k==='material'&&v==='patent')return '<span class="texture-swatch patent" style="background:linear-gradient(128deg,#925c83 0%,#f4a9d1 33%,#fffafc 38%,#e980b5 43%,#ba73a2 68%,#fff3fa 72%,#d785b4 78%)"></span>';
  if(k==='material')return `<span class="texture-swatch ${v}" style="background-image:url('assets/tex_${v}.webp')"></span>`;
  if(k==='pattern')return v==='none'?'<span class="empty-swatch">—</span>':v==='dots'?'<span class="dots-swatch"></span>':`<img class="option-art motif" src="assets/motif_${{flowers:'flower',hearts:'heart',stars:'star'}[v]}.webp" alt="">`;
@@ -223,8 +225,8 @@ function setRunwayProduct(scene,on){
 }
 function fittingOptionsMarkup(value){
  const selected=A.cleanFittingOptions(value),zh=A.lang==='zh';
- const styles=[['none','None','无袜'],['frill','Frill','荷叶边'],['lace','Lace','蕾丝'],['sheer','Sheer tights','薄丝袜'],['knee','Knee-high','及膝袜']];
- const colors=[['pink','Candy pink','糖果粉','#ffd1e0'],['mint','Mint','薄荷绿','#c4eadb'],['cream','Cream','奶油色','#fff0d2'],['white','White','白色','#ffffff']];
+ const styles=[['none','None','无袜'],['frill','Frill','荷叶边'],['lace','Lace','蕾丝'],['sheer','Sheer tights','薄丝袜'],['knee','Knee-high','及膝袜'],['thigh','Thigh-high','长筒袜'],['blacksheer','Black sheer','黑丝袜'],['pantyhose','Sheer pantyhose','薄连裤袜'],['opaque','Opaque tights','厚连裤袜'],['fishnet','Diamond knit','菱格袜']];
+ const colors=[['pink','Candy pink','糖果粉','#ffd1e0'],['mint','Mint','薄荷绿','#c4eadb'],['cream','Cream','奶油色','#fff0d2'],['white','White','白色','#ffffff'],['black','Midnight','午夜黑','#292735']];
  return `<div class="runway-sock-panel"><div class="runway-sock-styles" role="group" aria-label="${zh?'袜子搭配':'Sock pairing'}">${styles.map(([id,en,cn])=>`<button class="sock-chip" data-fitting-sock="${id}" aria-pressed="${selected.sock===id}">${zh?cn:en}</button>`).join('')}</div><div class="runway-sock-colors" role="group" aria-label="${zh?'袜子颜色':'Sock colour'}">${colors.map(([id,en,cn,color])=>`<button class="sock-color" data-fitting-color="${id}" ${selected.sock==='none'?'disabled':''} aria-disabled="${selected.sock==='none'}" aria-label="${zh?cn:en}" title="${zh?cn:en}" aria-pressed="${selected.color===id}" style="--sock-color:${color}"><span></span></button>`).join('')}</div></div>`;
 }
 function chooseFitting(key,value){
@@ -271,7 +273,7 @@ async function shareRunway(){
  const title=t('brand'),text=option('color',artwork.design.color)[1]+' · '+option('heel',artwork.design.heel)[1];
  try{
   const source=document.createElement('canvas');source.width=1440;source.height=900;
-  await A.Fitting2D.render(source,artwork.design,artwork.fitting);
+  await A.Fitting2D.render(source,artwork.design,artwork.fitting,artwork.scene||state.showcase.selected);
   const blob=source?await new Promise(resolve=>source.toBlob(resolve,'image/png')):null;
   const file=blob?new File([blob],'sweet-shoe-atelier.png',{type:'image/png'}):null;
   if(file&&navigator.canShare?.({files:[file]}))await navigator.share({title,text,files:[file]});
