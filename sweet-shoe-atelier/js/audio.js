@@ -7,10 +7,13 @@
   A.SFX_FILES=SAMPLES.flatMap(name=>['ogg','mp3'].map(ext=>'assets/sfx/'+name+'.'+ext));
   A.createAudioEngine=function(getState,blocked,getScene=()=> 'merge'){
     const engine={ctx:null,master:null,effects:null,music:null,tick:null,step:0,voices:new Set(),lastCue:new Map(),limit:32,
-      tracks:new Map(),failedTracks:new Set(),currentTrack:null,buffers:new Map(),sampleLoads:new Map(),
+      tracks:new Map(),failedTracks:new Set(),currentTrack:null,buffers:new Map(),sampleLoads:new Map(),sampleRetryAfter:new Map(),effectGeneration:0,
       loadSample(name){
         if(this.buffers.has(name))return Promise.resolve(this.buffers.get(name));
         if(this.sampleLoads.has(name))return this.sampleLoads.get(name);
+        // A temporary connection/decoder failure must not mute a cue until reload.
+        // Retry from a later gesture, with a short backoff for unavailable assets.
+        if(Date.now()<(this.sampleRetryAfter.get(name)||0))return Promise.resolve(null);
         if(typeof fetch!=='function'||!this.ctx?.decodeAudioData)return Promise.resolve(null);
         const load=(async()=>{
           for(const ext of ['ogg','mp3'])try{
@@ -18,11 +21,13 @@
             if(!response.ok)continue;
             const bytes=await response.arrayBuffer();
             const buffer=await new Promise((resolve,reject)=>this.ctx.decodeAudioData(bytes,resolve,reject));
-            this.buffers.set(name,buffer);return buffer;
+            this.buffers.set(name,buffer);this.sampleRetryAfter.delete(name);return buffer;
           }catch{}
-          return null;
+          this.sampleRetryAfter.set(name,Date.now()+1500);return null;
         })();
-        this.sampleLoads.set(name,load);return load;
+        this.sampleLoads.set(name,load);
+        load.then(()=>{if(this.sampleLoads.get(name)===load)this.sampleLoads.delete(name);});
+        return load;
       },
       preload(){for(const name of SAMPLES)this.loadSample(name);},
       sample(name,rate=1,volume=.45,offset=0){
@@ -42,7 +47,10 @@
       track(name){
         if(this.tracks.has(name))return this.tracks.get(name);
         const audio=new window.Audio();audio.preload='none';audio.loop=true;audio.playsInline=true;
-        audio.src='assets/audio/bgm_'+name+'.mp3';
+        // raw.githack (preview host) refuses large mp3s; stream preview BGM from jsDelivr (CORS *).
+        const preview=/githack\.com$/.test(location.hostname);
+        if(preview)audio.crossOrigin='anonymous';
+        audio.src=(preview?'https://cdn.jsdelivr.net/gh/pu873967671-code/vibe-coding@sweet-shoe-preview/sweet-shoe-atelier/':'')+'assets/audio/bgm_'+name+'.mp3';
         const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
         gain.gain.value=0;source.connect(gain);gain.connect(this.music);
         const track={audio,source,gain,stopTimer:null,primed:false};
@@ -121,6 +129,7 @@
       update(){
         if(!this.master)return;
         const now=this.ctx.currentTime,s=getState(),silent=blocked();
+        if(silent||!s.sound)this.effectGeneration++;
         this.master.gain.setTargetAtTime(silent?0:1,now,.035);
         this.effects.gain.setTargetAtTime(s.sound?1:0,now,.025);
         this.music.gain.setTargetAtTime(s.music?1:0,now,.08);
@@ -164,8 +173,9 @@
         this.lastCue.set(kind,now);
         const name=ALIASES[kind]||kind;
         if(!SAMPLES.includes(name))return;
+        const generation=this.effectGeneration;
         const play=()=>{
-          if(!getState().sound||blocked())return;
+          if(generation!==this.effectGeneration||!getState().sound||blocked())return;
           const variation=1+(Math.random()-.5)*.07;
           if(kind==='coin'){
             const count=Math.min(6,Math.max(1,Math.ceil(Math.sqrt(Math.max(1,tier)))));
