@@ -1,9 +1,71 @@
 'use strict';
 (function(A){
-  // Local, gesture-unlocked sound. Sleeping music owns no background clock.
+  // All action cues are local Kenney CC0 recordings; no oscillator substitutes.
+  const SAMPLES=['tap','spawn','merge','coin','switch','pick','drop','box','ribbon','delivery','level','error','unlock','sparkle'];
+  const ALIASES={click:'tap',generate:'spawn',pop:'spawn',navigation:'switch',whoosh:'switch',
+    discovery:'unlock',renovate:'level',renovation:'level',chapter:'level',guide:'sparkle',crate:'box',ding:'sparkle',tryon:'sparkle'};
+  A.SFX_FILES=SAMPLES.flatMap(name=>['ogg','mp3'].map(ext=>'assets/sfx/'+name+'.'+ext));
   A.createAudioEngine=function(getState,blocked,getScene=()=> 'merge'){
     const engine={ctx:null,master:null,effects:null,music:null,tick:null,step:0,voices:new Set(),lastCue:new Map(),limit:32,
-      tracks:new Map(),failedTracks:new Set(),currentTrack:null,
+      tracks:new Map(),failedTracks:new Set(),currentTrack:null,buffers:new Map(),sampleLoads:new Map(),
+      loadSample(name){
+        if(this.buffers.has(name))return Promise.resolve(this.buffers.get(name));
+        if(this.sampleLoads.has(name))return this.sampleLoads.get(name);
+        if(typeof fetch!=='function'||!this.ctx?.decodeAudioData)return Promise.resolve(null);
+        const load=(async()=>{
+          for(const ext of ['ogg','mp3'])try{
+            const response=await fetch('assets/sfx/'+name+'.'+ext);
+            if(!response.ok)continue;
+            const bytes=await response.arrayBuffer();
+            const buffer=await new Promise((resolve,reject)=>this.ctx.decodeAudioData(bytes,resolve,reject));
+            this.buffers.set(name,buffer);return buffer;
+          }catch{}
+          return null;
+        })();
+        this.sampleLoads.set(name,load);return load;
+      },
+      preload(){for(const name of SAMPLES)this.loadSample(name);},
+      sample(name,rate=1,volume=.45,offset=0){
+        const buffer=this.buffers.get(name);
+        if(!buffer||!this.ctx||!getState().sound||blocked())return;
+        try{
+          if(this.voices.size>=this.limit)this.voices.values().next().value.stop();
+          const source=this.ctx.createBufferSource(),gain=this.ctx.createGain();
+          let ended=false;
+          const cleanup=()=>{if(ended)return;ended=true;source.disconnect();gain.disconnect();this.voices.delete(voice);};
+          const voice={bus:this.effects,stop:()=>{try{source.stop();}catch{}cleanup();}};
+          source.buffer=buffer;source.playbackRate.value=rate;gain.gain.value=volume;
+          source.connect(gain);gain.connect(this.effects);source.onended=cleanup;
+          this.voices.add(voice);source.start(this.ctx.currentTime+offset);
+        }catch{}
+      },
+      track(name){
+        if(this.tracks.has(name))return this.tracks.get(name);
+        const audio=new window.Audio();audio.preload='none';audio.loop=true;audio.playsInline=true;
+        audio.src='assets/audio/bgm_'+name+'.mp3';
+        const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
+        gain.gain.value=0;source.connect(gain);gain.connect(this.music);
+        const track={audio,source,gain,stopTimer:null,primed:false};
+        this.tracks.set(name,track);audio.addEventListener('error',()=>this.mediaFailed(name));
+        return track;
+      },
+      primeMusic(){
+        if(!getState().music||!window.Audio||!this.ctx.createMediaElementSource)return;
+        // Safari grants playback per element. Warm both local scene tracks in
+        // the first gesture so an automatic post-pack scene change can play too.
+        for(const name of ['cozy','tea']){
+          if(this.failedTracks.has(name))continue;
+          const track=this.track(name);if(track.primed)continue;
+          track.primed=true;
+          try{
+            const result=track.audio.play();
+            if(result?.then)result.then(()=>{if(this.currentTrack!==name)track.audio.pause();}).catch(error=>{
+              track.primed=false;
+              if(error?.name!=='NotAllowedError'&&error?.name!=='AbortError')this.mediaFailed(name);
+            });
+          }catch{track.primed=false;}
+        }
+      },
       media(silent){
         if(silent||!getState().music){
           for(const track of this.tracks.values()){
@@ -14,16 +76,9 @@
         }
         const name=getScene()==='merge'?'cozy':'tea';
         if(this.failedTracks.has(name)||!window.Audio||!this.ctx.createMediaElementSource)return false;
-        if(this.currentTrack===name)return true;
+        if(this.currentTrack===name&&!this.tracks.get(name)?.audio.paused)return true;
         try{
-          let track=this.tracks.get(name);
-          if(!track){
-            const audio=new window.Audio();audio.preload='none';audio.loop=true;audio.src='assets/audio/bgm_'+name+'.mp3';
-            const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
-            gain.gain.value=0;source.connect(gain);gain.connect(this.music);
-            track={audio,source,gain,stopTimer:null};this.tracks.set(name,track);
-            audio.addEventListener('error',()=>this.mediaFailed(name));
-          }
+          const track=this.track(name);
           this.currentTrack=name;
           for(const [id,other] of this.tracks){
             clearTimeout(other.stopTimer);other.gain.gain.cancelScheduledValues(this.ctx.currentTime);
@@ -31,7 +86,14 @@
             if(id!==name)other.stopTimer=setTimeout(()=>{if(this.currentTrack!==id)other.audio.pause();},1500);
           }
           const play=track.audio.play();
-          if(play?.catch)play.catch(error=>{if(error?.name!=='AbortError')this.mediaFailed(name);});
+          if(play?.catch)play.catch(error=>{
+            // Browser activation policy is temporary: retry from the next gesture.
+            // Never poison the track or permanently fall back after autoplay denial.
+            if(error?.name==='NotAllowedError'||error?.name==='AbortError'){
+              if(this.currentTrack===name)this.currentTrack=null;return;
+            }
+            this.mediaFailed(name);
+          });
           return true;
         }catch{this.mediaFailed(name);return false;}
       },
@@ -49,7 +111,10 @@
             this.effects=this.ctx.createGain();this.effects.connect(this.master);
             this.music=this.ctx.createGain();this.music.connect(this.master);
           }
-          if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});
+          // Both calls stay synchronous in the click/touch/key gesture stack (Safari).
+          if(this.ctx.state==='suspended'||this.ctx.state==='interrupted')this.ctx.resume().catch(()=>{});
+          this.preload();
+          this.primeMusic();
           this.update();
         }catch{}
       },
@@ -97,19 +162,23 @@
         const now=this.ctx.currentTime,last=this.lastCue.get(kind);
         if(last!==undefined&&now-last<.035)return;
         this.lastCue.set(kind,now);
-        const play=(f,d,v=.04,offset=0,type='sine',end=f)=>this.voice(f,d,v,type,offset,this.effects,end);
-        if(kind==='click')play(620,.055,.014,0,'sine',500);
-        else if(kind==='generate'||kind==='pop')play(380,.13,.035,0,'sine',750);
-        else if(kind==='merge'){const f=440*Math.pow(1.12,Math.min(7,Math.max(1,tier)));play(f,.26,.035,0,'triangle');play(f*1.5,.32,.022,.055);}
-        else if(kind==='discovery'){[1,1.25,1.5,2].forEach((n,i)=>play(523.25*n,.5,.022,i*.085));}
-        else if(kind==='renovate'){[1,1.25,1.5,2].forEach((n,i)=>play(392*n,.6,.026,i*.11));}
-        else if(kind==='chapter'){[261.63,329.63,392,523.25,659.25,783.99].forEach((n,i)=>play(n,.85,.022,i*.09));}
-        else if(kind==='guide'||kind==='navigation'){play(523.25,.22,.018);play(659.25,.3,.015,.075);}
-        else if(kind==='crate'){play(170,.12,.018,0,'triangle',95);play(780,.2,.012,.06);}
-        else if(kind==='delivery'){play(523.25,.3,.025);play(659.25,.38,.02,.09);play(783.99,.48,.018,.18);}
-        else if(kind==='coin'){play(1046,.18,.026);play(1397,.28,.018,.07);}
-        else if(kind==='whoosh')play(340,.2,.018,0,'triangle',90);
-        else if(kind==='ding'){play(880,.4,.035);play(1320,.4,.022,.09);}
+        const name=ALIASES[kind]||kind;
+        if(!SAMPLES.includes(name))return;
+        const play=()=>{
+          if(!getState().sound||blocked())return;
+          const variation=1+(Math.random()-.5)*.07;
+          if(kind==='coin'){
+            const count=Math.min(6,Math.max(1,Math.ceil(Math.sqrt(Math.max(1,tier)))));
+            for(let i=0;i<count;i++)this.sample('coin',variation+i*.035,.34,i*.065);
+            this.sample('sparkle',variation*1.12,.14,.04);
+          }else if(kind==='merge')this.sample(name,variation*Math.pow(1.055,Math.min(7,Math.max(1,tier))-1),.55);
+          else this.sample(name,variation,name==='tap'?.24:name==='error'?.28:.48);
+        };
+        if(this.buffers.has(name))play();
+        else {
+          const requested=Date.now();
+          this.loadSample(name).then(buffer=>{if(buffer&&Date.now()-requested<300)play();});
+        }
       }
     };return engine;
   };
