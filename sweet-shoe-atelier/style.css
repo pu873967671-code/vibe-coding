@@ -1221,3 +1221,4 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 .texture-swatch.couture-rosebuds{display:grid;place-items:center;background:#c48da5;color:#fff3e2;font:27px Georgia,serif;text-shadow:1px 1px #b3658c;position:relative}
 .texture-swatch.couture-rosebuds:after{content:'';position:absolute;width:8px;height:3px;border-radius:50%;background:#b8ddbc;right:6px;bottom:5px;transform:rotate(-38deg)}
 .texture-swatch.couture-diamonds{background:repeating-linear-gradient(45deg,transparent 0 10px,#fff6e7b5 10px 11px,transparent 11px 21px),repeating-linear-gradient(-45deg,transparent 0 10px,#fff6e7b5 10px 11px,transparent 11px 21px),#c48da5;background-blend-mode:normal}
+.texture-swatch.couture-gingham{background:repeating-linear-gradient(0deg,#fff8e985 0 6px,transparent 6px 12px),repeating-linear-gradient(90deg,#fff8e985 0 6px,transparent 6px 12px),#d58eab}
