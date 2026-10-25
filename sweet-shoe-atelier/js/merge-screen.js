@@ -149,7 +149,7 @@
           const coins=document.getElementById('coins').getBoundingClientRect(),stars=document.getElementById('atelierStars').getBoundingClientRect();
           for(let i=0;i<5;i++)fly(resource('coin'),destination,center(coins),28,i*55,'reward-flight');
           for(let i=0;i<Math.min(3,reward.stars);i++)fly(resource('star'),destination,center(stars),28,90+i*75,'reward-flight');
-          setTimeout(()=>{if(visible&&api.active()&&card?.isConnected)api.sound('coin');},reduced?0:540);
+          setTimeout(()=>{if(visible&&api.active()&&card?.isConnected)api.sound('coin',reward.coins);},reduced?0:540);
           if(!reduced)for(const id of ['coins','atelierStars'])document.getElementById(id).animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}],{duration:350,delay:540});
         },delay);
       };
@@ -194,7 +194,7 @@
       root.querySelector('.merge-board-wrap')?.append(banner);setTimeout(()=>banner.remove(),3400);
     }
     function commit(result) {
-      if (!result.ok) {api.toast(tr(result.reason==='chestSpace'?'chestSpace':result.reason==='space'?'space':result.reason==='energy'?'emptyBody':result.reason==='crate'?'crate':result.reason==='cooldown'?'cooldown':'mismatch'));api.sound('whoosh');return false;}
+      if (!result.ok) {api.toast(tr(result.reason==='chestSpace'?'chestSpace':result.reason==='space'?'space':result.reason==='energy'?'emptyBody':result.reason==='crate'?'crate':result.reason==='cooldown'?'cooldown':'mismatch'));api.sound('error');return false;}
       const guided=G.advance(api.state(),result);
       if(result.type==='merge'&&!G.active(api.state()))B.offer(board(),result);
       selected=guided?-1:result.to; api.save();api.header();render();
@@ -216,7 +216,7 @@
         if(result.discovery)discovery(result.item);
         if(result.opened?.length)setTimeout(()=>{if(visible&&api.active())api.sound('crate');},120);
         for(const index of result.opened||[])root.querySelector(`[data-cell="${index}"]`)?.classList.add('just-opened');
-      } else {api.sound(result.discovery?'discovery':'pop');if(result.discovery)discovery(result.item);}
+      } else {api.sound(result.type==='move'?'drop':result.discovery?'discovery':'generate');if(result.discovery)discovery(result.item);}
       // The live detail panel announces the chest and its four gifts. Keep
       // its unpack action clear of duplicate speech and bottom toasts.
       if(result.type==='chest'){api.toast('');mentorPose('present');}
@@ -233,14 +233,14 @@
         // A blocked basket still owns the selected detail; do not leave the
         // previous material's instructions visible after an unsuccessful tap.
         const result=M.generate(b,index);
-        if(!result.ok&&!G.active(api.state())){render();api.sound('whoosh');}
+        if(!result.ok&&!G.active(api.state())){render();api.sound('error');}
         else if(!commit(result))render();
       }
       else if(cell?.kind==='chest') {
         const result=R.open(b,index);commit(result);
         if(result.ok&&b.cells[index]?.kind==='chest'){selected=index;render();root.querySelector(`[data-cell="${result.to}"]`)?.classList.add('just-spawned');}
       }
-      else {render(); if(cell?.kind==='crate')api.toast(tr('crate'));}
+      else {if(cell?.kind==='item')api.sound('pick');render(); if(cell?.kind==='crate'){api.sound('error');api.toast(tr('crate'));}}
     }
     function clearDrag() {
       ghost?.remove();ghost=null;
@@ -260,7 +260,7 @@
     root.addEventListener('pointermove',e=>{
       if(!pointer||pointer.id!==e.pointerId)return;
       if(!pointer.dragging && Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>7) {
-        pointer.dragging=true;pointer.button.classList.add('drag-source');
+        pointer.dragging=true;api.sound('pick');pointer.button.classList.add('drag-source');
         ghost=document.createElement('div');ghost.className='merge-drag-ghost';ghost.innerHTML=art(board().cells[pointer.index]);
         const r=pointer.button.getBoundingClientRect();ghost.style.width=r.width+'px';ghost.style.height=r.height+'px';document.body.append(ghost);
       }
@@ -312,13 +312,15 @@
         const order=O.ensure(board()).find(o=>o.id===+delivery.dataset.deliver),consumed=order&&O.indices(board(),order);
         if(!consumed){if(order&&!G.active(api.state()))helpOrder(order);return;}
         const rect=delivery.closest('[data-order]').getBoundingClientRect(),flight=deliveryFlight(consumed,rect,O.reward(order,api.state()),order);
+        const previousLevel=Math.floor(Math.sqrt(api.state().xp/40));
         const result=O.deliver(api.state(),order.id);
+        if(result.ok&&Math.floor(Math.sqrt(api.state().xp/40))>previousLevel)setTimeout(()=>{if(visible&&api.active())api.sound('level');},450);
         if(result.ok){G.advance(api.state(),{ok:true,type:'delivery'});A.Introduction.sync(api.state());selected=-1;api.save();api.header();render();flight(result.nextId);api.toast((R.pending(board())?tr('giftReady'):tr('delivered'))+' +'+result.reward.coins+' · +'+result.reward.stars+' ★');}
         return;
       }
       if(e.target.closest('[data-merge-sell]')) {
         const cell=board().cells[selected];if(cell?.kind!=='item')return;
-        api.state().coins+=cell.tier;board().cells[selected]=null;selected=-1;api.save();api.header();api.sound('coin');render();return;
+        api.state().coins+=cell.tier;board().cells[selected]=null;selected=-1;api.save();api.header();api.sound('coin',cell.tier);render();return;
       }
       const cell=e.target.closest('[data-cell]');if(cell)activate(+cell.dataset.cell);
     });
