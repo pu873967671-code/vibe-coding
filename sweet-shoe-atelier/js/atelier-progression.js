@@ -1,9 +1,10 @@
 'use strict';
 (function(A){
   const CRAFT_UNLOCKS={
-    'material:patent':'lea6','material:lace':'fab4','material:velvet':'fab5','material:glitter':'spk4',
+    'material:metallic':'lea5','material:pearlescent':'fab5','pattern:rosebuds':'rib4','pattern:diamonds':'fab4','material:patent':'lea6','material:lace':'fab4','material:velvet':'fab5','material:glitter':'spk4',
     'heel:luciteheel':'spk6','heel:pearlheel':'spk6','heel:bowmule':'rib6','heel:studpump':'lea7','heel:crystalpump':'spk6','heel:bowsling':'rib5','heel:pearlpump':'spk5','heel:bootie':'lea5','heel:platform':'lea6','heel:loafer':'lea4','heel:slingback':'lea4','heel:ballet':'rib3','heel:maryjane':'lea3','heel:kitten':'lea5','heel:stiletto6':'lea5','heel:stiletto9':'lea5','heel:wedge':'lea4','strap:cross':'lea3','strap:ribbon':'rib4',
     'decoration:big':'fab3','decoration:drop':'spk3','decoration:flower':'rib5',
+    'strap:crystalband':'spk4','strap:satinbraid':'rib3','decoration:camellia':'rib4','decoration:heelbow':'rib3','charm:butterfly':'spk4','charm:pearlcluster':'spk3',
     'strap:pearltrim':'spk3','strap:studs':'lea4','strap:heartbuckle':'spk3','strap:anklet':'spk4','decoration:puffy':'fab3','decoration:doublebow':'rib4','decoration:heelcrystal':'spk4','decoration:rosette':'rib4','charm:oval':'spk3','charm:heart':'spk3','charm:spray':'spk5','charm:toeglitter':'spk4',
     'charm:crystal':'spk4','charm:mini':'rib4','pattern:hearts':'fab3','pattern:dots':'fab3','pattern:stars':'spk3'
   };
