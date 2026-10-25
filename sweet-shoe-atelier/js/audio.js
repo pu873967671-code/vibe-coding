@@ -51,7 +51,7 @@
         // the same file from jsDelivr. Packaged builds keep the relative path.
         // Do not remove: without it previews fall back to silence.
         const githack=/(^|\.)githack\.com$/.test(location.hostname);
-        if(githack){audio.crossOrigin='anonymous';audio.src='https://cdn.jsdelivr.net/gh/pu873967671-code/vibe-coding@sweet-shoe-preview/sweet-shoe-atelier/assets/audio/bgm_'+name+'.mp3';}
+        if(githack){audio.crossOrigin='anonymous';const ref=(location.pathname.split('/')[3]||'sweet-shoe-preview');audio.src='https://cdn.jsdelivr.net/gh/pu873967671-code/vibe-coding@'+ref+'/sweet-shoe-atelier/assets/audio/bgm_'+name+'.mp3';}
         else audio.src='assets/audio/bgm_'+name+'.mp3';
         const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
         gain.gain.value=0;source.connect(gain);gain.connect(this.music);
