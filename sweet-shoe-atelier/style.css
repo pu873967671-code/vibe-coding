@@ -1209,8 +1209,15 @@ body:has(.runway-scene) .guide-action .director-skip{position:fixed;top:80px;rig
 body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100% - 24px))}
 .sock-color>span{width:25px;height:25px;border-radius:50%;background:var(--sock-color);border:1px solid #a5c4b8;box-shadow:inset 0 1px 2px #ffffffa8}
 .sock-color[aria-pressed=true]>span{outline:2px solid #e877a3;outline-offset:3px}
-@media(orientation:portrait){.runway-sock-panel{grid-row:2;flex-wrap:wrap;gap:2px}.runway-sock-styles{flex-basis:100%}.runway-sock-styles .sock-chip{flex:1;padding:6px;font-size:11px;min-width:45px}.runway-sock-colors{width:100%;justify-content:center}.runway-dock .runway-actions{grid-row:3}}
+@media(orientation:portrait){.runway-sock-panel{grid-row:2;flex-wrap:wrap;gap:2px}.runway-sock-styles{flex-basis:100%}.runway-sock-styles .sock-chip{flex:0 0 auto;padding:6px 10px;font-size:11px;min-width:48px}.runway-sock-colors{width:100%;justify-content:center}.runway-dock .runway-actions{grid-row:3}}
 @media(max-height:560px) and (orientation:landscape){.runway-sock-panel{gap:5px;padding-top:0}.runway-sock-styles .sock-chip{padding:5px 9px;font-size:11px}.runway-sock-colors .sock-color{min-width:40px}}
 
 /* Thin pumps retain a single style card; height is a separate quiet choice. */
 .heel-height-choices{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-shrink:0;margin:0 0 7px;padding:5px;border:1px solid #c9e6d9;border-radius:12px;background:#f2faf5;font:11px sans-serif}.heel-height-choices[hidden]{display:none}.heel-height-choices>span{padding-left:3px;color:#4c685e}.heel-height-choices button{flex:1;min-height:44px;min-width:0;padding:5px 3px;border-radius:9px;white-space:nowrap;background:#fffdf8;border:1px solid #c5e4d7;font:inherit}.heel-height-choices button[aria-pressed="true"]{border-color:#d33671;background:#ffe8f1;color:#8e2650;box-shadow:inset 0 0 0 1px #d33671}
+
+/* Couture finish samples: local CSS, matching the source-mask paint. */
+.texture-swatch.couture-metallic{background:linear-gradient(132deg,#9a768c 0%,#d5a6b9 28%,#fff6de 39%,#f7dac8 45%,#89697e 52%,#c58f9f 67%,#fff3d4 73%,#a88199 85%);background-blend-mode:normal}
+.texture-swatch.couture-pearlescent{background:linear-gradient(132deg,#d5c2ed 0%,#bde4dc 24%,#fff5da 38%,#fffcf7 49%,#f1c4df 60%,#c9d9f2 77%,#fff4dc 94%);background-blend-mode:normal}
+.texture-swatch.couture-rosebuds{display:grid;place-items:center;background:#c48da5;color:#fff3e2;font:27px Georgia,serif;text-shadow:1px 1px #b3658c;position:relative}
+.texture-swatch.couture-rosebuds:after{content:'';position:absolute;width:8px;height:3px;border-radius:50%;background:#b8ddbc;right:6px;bottom:5px;transform:rotate(-38deg)}
+.texture-swatch.couture-diamonds{background:repeating-linear-gradient(45deg,transparent 0 10px,#fff6e7b5 10px 11px,transparent 11px 21px),repeating-linear-gradient(-45deg,transparent 0 10px,#fff6e7b5 10px 11px,transparent 11px 21px),#c48da5;background-blend-mode:normal}
