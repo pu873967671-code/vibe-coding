@@ -1,5 +1,8 @@
 'use strict';
 (function(A){
+ const sockStyles=['none','frill','lace','sheer','knee'],sockColors=['pink','mint','cream','white'];
+ function cleanFittingOptions(value){return {sock:sockStyles.includes(value?.sock)?value.sock:'none',color:sockColors.includes(value?.color)?value.color:'cream'};}
+ A.cleanFittingOptions=cleanFittingOptions;
  const scenes=[
   {id:'salon',en:'Atelier salon',zh:'试穿沙龙',price:0,image:'bg_fitting'},
   {id:'mirror_lounge',en:'Mirror lounge',zh:'镜前客厅',price:120,image:'scenes/scene_mirror_lounge'},
