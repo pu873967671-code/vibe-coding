@@ -2,7 +2,7 @@
 (function(A){
 // A design is a finish applied to one immutable painting. Neither a colour nor
 // a fabric selection changes the source frame, silhouette, or camera.
-const WIDTH=1024,HEIGHT=640,HEELS=['flat','block','kitten','wedge'];
+const WIDTH=1024,HEIGHT=640,HEELS=A.opts.heel.map(o=>o[0]);
 // The binding mask restores the painted inner seam over the sewn strap tab.
 // Insole/sole pixels stay in the immutable base and need no extra bitmap decode.
 const PARTS=['base','upper','shadow','highlight','binding'];
@@ -17,14 +17,19 @@ let accessoryLoad;
 const ANCHORS={
  flat:{toe:[285,432],back:[854,294],strap:[576,352],lace:[350,405],strapAngle:.70},
  kitten:{toe:[285,445],back:[855,197],strap:[594,318],lace:[352,421],strapAngle:.90},
+ stiletto6:{toe:[285,460],back:[855,205],strap:[594,332],lace:[352,437],strapAngle:1.0},
+ stiletto9:{toe:[285,465],back:[855,195],strap:[594,332],lace:[352,441],strapAngle:1.12},
  block:{toe:[285,446],back:[854,197],strap:[595,319],lace:[352,423],strapAngle:.87},
  wedge:{toe:[285,426],back:[855,188],strap:[595,304],lace:[352,405],strapAngle:.87}
 };
 async function accessories(heel){
+ const ownStyle=A.SHOE_STYLES?.[heel];
+ const dedicated=!ownStyle?.accessoryBase||ownStyle.accessoryBase===heel;
+ heel=A.SHOE_STYLES?.[heel]?.accessoryBase||heel;
  const legacy=await (accessoryLoad||(accessoryLoad=Promise.all(Object.entries(ACCESSORIES).map(async([name,file])=>[name,await image('assets/shoe2d/accessories/'+file+'.webp')])).then(Object.fromEntries)));
  if(heel){
   if(!perspectiveLoads.has(heel)){
-   const variants=Object.entries(ACCESSORY_OPTIONS).flatMap(([category,values])=>values.map(value=>category+'_'+value));
+   const variants=Object.entries(ACCESSORY_OPTIONS).filter(([category])=>!dedicated||!(category==='strap'&&ownStyle?.builtInStrap)&&!(category==='decoration'&&(ownStyle?.openHeel||ownStyle?.noRearDecor))).flatMap(([category,values])=>values.map(value=>category+'_'+value));
    perspectiveLoads.set(heel,Promise.all(variants.map(async name=>{
     const prefix='assets/shoe2d/accessories/'+heel+'_'+name;
     const tintable=TINTABLE_ACCESSORIES.has(name);
@@ -56,7 +61,7 @@ function load(heel){
  })).then(async entries=>{
   const parts=Object.fromEntries(entries);
   if(!parts.base){
-   const original=await image('assets/shoe_'+heel+'_none.webp');
+   const original=await image('assets/shoe_'+(A.SHOE_STYLES?.[heel]?.fallbackHeel||A.SHOE_STYLES?.[heel]?.accessoryBase||heel)+'_none.webp');
    if(!original)throw new Error('Painted shoe artwork unavailable: '+heel);
    const normalized=canvas(),height=Math.min(480,832*original.naturalHeight/original.naturalWidth);
    normalized.getContext('2d').drawImage(original,96,540-height,832,height);parts.base=normalized;parts.upper=null;
@@ -72,7 +77,9 @@ function materialLayer(design,upper){
  p.lineCap='round';p.lineJoin='round';
  if(type==='satin'||type==='patent'){
   const g=p.createLinearGradient(130,530,730,80);
-  for(const [stop,alpha] of [[0,0],[.24,0],[.34,.12],[.39,.27],[.47,0],[.65,0],[.72,.09],[.79,0],[1,0]])g.addColorStop(stop,'rgba(255,255,251,'+alpha+')');
+  // Patent has sharper, brighter reflected light; satin keeps its soft ribbons.
+  const stops=type==='patent'?[[0,0],[.27,0],[.345,.10],[.365,.70],[.395,.55],[.455,0],[.65,0],[.705,.30],[.73,.10],[.77,0],[1,0]]:[[0,0],[.24,0],[.34,.12],[.39,.27],[.47,0],[.65,0],[.72,.09],[.79,0],[1,0]];
+  for(const [stop,alpha] of stops)g.addColorStop(stop,'rgba(255,255,251,'+alpha+')');
   p.fillStyle=g;p.fillRect(0,0,WIDTH,HEIGHT);
  }else if(type==='velvet'){
   p.fillStyle='rgba(62,31,88,.055)';p.fillRect(0,0,WIDTH,HEIGHT);
@@ -156,9 +163,10 @@ async function composite(input){
 function drawAccessories(p,d,sprites,base,binding){
  for(const category of Object.keys(ACCESSORY_OPTIONS)){
   const value=d[category];if(!value||value==='none')continue;
-  const name=category+'_'+value,layer=sprites.layers?.[d.heel]?.[name];
+  const accessoryHeel=A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel;
+  const name=category+'_'+value,layer=sprites.layers?.[accessoryHeel]?.[name];
   if(layer){
-   const mask=sprites.tints?.[d.heel]?.[name];
+   const mask=sprites.tints?.[accessoryHeel]?.[name];
    p.drawImage(mask?tintAccessory(layer,mask,COLORS[d.color]||COLORS.pink):layer,0,0);
   }
   else drawLegacyAccessories(p,{...d,strap:'none',decoration:'none',charm:'none',[category]:value},sprites,base,binding);
@@ -176,7 +184,7 @@ function tintAccessory(layer,mask,colour){
 }
 // Missing image fallback retains the last complete, playable ornament kit.
 function drawLegacyAccessories(p,d,sprites,base,binding){
- const a=ANCHORS[d.heel]||ANCHORS.flat,layer=canvas(),q=layer.getContext('2d');
+ const a=ANCHORS[d.heel]||ANCHORS[A.SHOE_STYLES?.[d.heel]?.fallbackHeel||A.SHOE_STYLES?.[d.heel]?.accessoryBase]||ANCHORS.flat,layer=canvas(),q=layer.getContext('2d');
  const bandStart=d.heel==='flat'?[-66,-53]:d.heel==='kitten'?[-84,-34]:[-85,d.heel==='wedge'?-38:-37];
  const sprite=(name,point,w,rotation=0,h)=>{const im=sprites[name];if(!im)return;q.save();q.translate(point[0],point[1]);q.rotate(rotation);const height=h||w*im.naturalHeight/im.naturalWidth;q.drawImage(im,-w/2,-height/2,w,height);q.restore();};
  const band=()=>{
