@@ -16,8 +16,8 @@ new ResizeObserver(scheduleCanvasResize).observe($('app'));
 window.addEventListener('resize',scheduleCanvasResize);
 function optionPreview(k,v){
  if(k==='color')return `<span class="swatch" style="--swatch:${option(k,v)[3]}"></span>`;
- if(k==='material'&&['metallic','pearlescent'].includes(v))return `<span class="texture-swatch couture-${v}"></span>`;
- if(k==='pattern'&&['rosebuds','diamonds','gingham'].includes(v))return `<span class="texture-swatch couture-${v}" aria-hidden="true">${v==='rosebuds'?'❀':''}</span>`;
+ if(k==='material'&&['metallic','pearlescent','suede','brocade','pave'].includes(v))return `<span class="texture-swatch couture-${v}" aria-hidden="true">${v==='brocade'?'❀':''}</span>`;
+ if(k==='pattern'&&['rosebuds','diamonds','gingham','scallops','pinstripes'].includes(v))return `<span class="texture-swatch couture-${v}" aria-hidden="true">${v==='rosebuds'?'❀':''}</span>`;
  if(k==='material'&&v==='patent')return '<span class="texture-swatch patent" style="background:linear-gradient(128deg,#925c83 0%,#f4a9d1 33%,#fffafc 38%,#e980b5 43%,#ba73a2 68%,#fff3fa 72%,#d785b4 78%)"></span>';
  if(k==='material')return `<span class="texture-swatch ${v}" style="background-image:url('assets/tex_${v}.webp')"></span>`;
  if(k==='pattern')return v==='none'?'<span class="empty-swatch">—</span>':v==='dots'?'<span class="dots-swatch"></span>':`<img class="option-art motif" src="assets/motif_${{flowers:'flower',hearts:'heart',stars:'star'}[v]}.webp" alt="">`;
