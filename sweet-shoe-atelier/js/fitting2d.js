@@ -49,7 +49,7 @@ function finish(d,mask){
   for(let row=0;row<120;row++)for(let col=0;col<120;col++){const n=((row+1)*374761393^(col+1)*668265263)>>>0,x=col*9+n%7,y=row*9+(n>>>8)%7;p.fillStyle='#fffcf2df';p.beginPath();p.arc(x,y,.7+n%4*.2,0,Math.PI*2);p.fill();}
  }
  A.CoutureFinish?.drawMaterial(p,d,SIZE,SIZE);
- if(!['none','rosebuds','diamonds'].includes(d.pattern)){
+ if(!['none','rosebuds','diamonds','gingham'].includes(d.pattern)){
   p.fillStyle='#fff9edcc';for(let row=0;row<20;row++)for(let col=0;col<20;col++){
    const x=col*58+(row%2)*29,y=row*58,r=6;p.beginPath();
    if(d.pattern==='hearts'){p.moveTo(x,y+r);p.bezierCurveTo(x-r*2,y-r,x-r,y-r*2,x,y-r*.5);p.bezierCurveTo(x+r,y-r*2,x+r*2,y-r,x,y+r);}
@@ -83,7 +83,9 @@ function calfVolume(p,left,right,height,rear=false){
 }
 // Cuffs follow an elliptical section around the sloping calf rather than a
 // horizontal rectangle. The shoe's collar occlusion is applied afterwards.
-const LONG_HOSIERY=new Set(['sheer','thigh','blacksheer','pantyhose','opaque','fishnet']);
+// All these styles continue beyond the visible frame on both calves. A
+// knee-high cuff belongs above this crop, never at the source ankle join.
+const LONG_HOSIERY=new Set(['knee','sheer','thigh','blacksheer','pantyhose','opaque','fishnet']);
 function hosieryColour(o){return o.sock==='blacksheer'?'#262430':({pink:'#ffd4e4',mint:'#d6f4e7',cream:'#fff1d6',white:'#fffdfa',black:'#292735'}[o.color]||'#fff1d6');}
 function hosieryOpacity(o){return ({sheer:.38,blacksheer:.48,pantyhose:.48,fishnet:.20,opaque:.98}[o.sock]??.94);}
 // Source-camera cross sections. The cloth light and stitches turn with the
@@ -107,6 +109,19 @@ function hosierySurface(p,height,section=hosierySection){
  }p.restore();
 }
 function hosieryTexture(p,o,height,section=hosierySection,offset=0){
+ if(o.sock==='knee'){
+  p.save();p.globalCompositeOperation='source-atop';p.lineJoin='round';p.lineCap='round';
+  // A quiet recessed yarn with a soft lit edge stays readable on ivory as
+  // well as midnight. Project every rib through the same calf cross sections
+  // as the matte light, including both full-height extensions.
+  for(const [shift,colour,width] of [[0,o.color==='black'?'#0b091726':'#8d7d8a24',1.7],[1.2,o.color==='black'?'#e4dbe926':'#ffffff78',1.4]]){
+   p.strokeStyle=colour;p.lineWidth=width;
+   for(let u=-.94;u<1;u+=.105){
+    p.beginPath();let started=false;
+    for(let y=0;y<=height;y+=6){const x=hosieryPoint(section,y,u)+shift;if(started)p.lineTo(x,y);else p.moveTo(x,y);started=true;}p.stroke();
+   }
+  }p.restore();return;
+ }
  if(o.sock!=='fishnet')return;
  p.save();p.globalCompositeOperation='source-atop';p.strokeStyle=o.color==='black'?'#b6a6bf37':'#8b74825a';p.lineWidth=1.15;p.lineJoin='round';
  // Diagonal yarn is projected around the cylinder, compressing at its sides.
@@ -117,7 +132,7 @@ function hosieryTexture(p,o,height,section=hosierySection,offset=0){
 }
 function drawSocks(p,legs,input,heel){
  const o=fittingOptions(input);if(o.sock==='none'||!legs)return;
- const layer=canvas(),q=layer.getContext('2d'),top=heel==='bootie'&&['frill','lace'].includes(o.sock)?350:{frill:470,lace:450,knee:170,sheer:-30,thigh:-30,blacksheer:-30,pantyhose:-30,opaque:-30,fishnet:-30}[o.sock];
+ const layer=canvas(),q=layer.getContext('2d'),top=heel==='bootie'&&['frill','lace'].includes(o.sock)?350:{frill:470,lace:450,knee:-30,sheer:-30,thigh:-30,blacksheer:-30,pantyhose:-30,opaque:-30,fishnet:-30}[o.sock];
  const openToe=A.SHOE_STYLES?.[heel]?.openToe;
  const cloth=hosieryColour(o),opacity=openToe&&!LONG_HOSIERY.has(o.sock)?1:hosieryOpacity(o);
  const left=openToe&&top>400?(top<465?485:481):top<200?536:top<400?516:top<465?495:489,right=openToe&&top>400?(top<465?750:754):top<200?786:top<400?730:719;
@@ -137,7 +152,7 @@ function drawSocks(p,legs,input,heel){
   q.globalCompositeOperation='multiply';q.globalAlpha=.78;q.drawImage(volume,0,0);q.globalAlpha=1;
   q.globalCompositeOperation='destination-in';q.drawImage(footprint,0,0);q.globalCompositeOperation='source-atop';
  }
- if(o.sock==='knee'||o.sock==='frill'){
+ if(o.sock==='frill'){
   q.strokeStyle=o.color==='black'?'#ffffff20':'#ffffff55';q.lineWidth=1.5;
   for(let u=-.94;u<1;u+=.105){q.beginPath();for(let y=top+9;y<=880;y+=8){const x=hosieryPoint(hosierySection,y,u);if(y===top+9)q.moveTo(x,y);else q.lineTo(x,y);}q.stroke();}
  }
@@ -216,15 +231,11 @@ function pairedModel(source,options,extra=0,emergency=false){
  const rear=document.createElement('canvas');rear.width=SIZE;rear.height=leg.height;const r=rear.getContext('2d');r.imageSmoothingQuality='high';
  if(emergency)r.drawImage(leg,0,0);else{
   const join=700+extra;r.fillStyle=calfPaint(r);r.beginPath();r.moveTo(460,-300);r.bezierCurveTo(419,join*.2,551,join-210,509,join);r.lineTo(719,join);r.bezierCurveTo(751,join-210,775,join*.23,747,-300);r.closePath();r.fill();calfVolume(r,462,747,join,true);
-  if(LONG_HOSIERY.has(o.sock)||o.sock==='knee'){
-   const sock=document.createElement('canvas');sock.width=SIZE;sock.height=rear.height;const z=sock.getContext('2d'),t=470+extra,cloth=hosieryColour(o);z.drawImage(rear,0,0);z.globalCompositeOperation='source-in';z.fillStyle=cloth;z.fillRect(0,0,SIZE,rear.height);
-   if(o.sock==='knee'){z.globalCompositeOperation='destination-in';z.beginPath();z.moveTo(0,t);z.lineTo(474,t);z.bezierCurveTo(535,t+24,683,t+24,742,t);z.lineTo(SIZE,t);z.lineTo(SIZE,rear.height);z.lineTo(0,rear.height);z.closePath();z.fill();}
+  if(LONG_HOSIERY.has(o.sock)){
+   const sock=document.createElement('canvas');sock.width=SIZE;sock.height=rear.height;const z=sock.getContext('2d'),cloth=hosieryColour(o);z.drawImage(rear,0,0);z.globalCompositeOperation='source-in';z.fillStyle=cloth;z.fillRect(0,0,SIZE,rear.height);
    const section=y=>{const t=Math.min(1,y/join);return [460+66*t-17*t*t,747+18*t-46*t*t];};
    hosierySurface(z,rear.height,section);
-   if(o.sock==='knee'){z.save();z.globalCompositeOperation='source-atop';z.strokeStyle=o.color==='black'?'#ffffff20':'#ffffff55';z.lineWidth=1.5;for(let u=-.94;u<1;u+=.105){z.beginPath();for(let y=t;y<=join;y+=8){const x=hosieryPoint(section,y,u);if(y===t)z.moveTo(x,y);else z.lineTo(x,y);}z.stroke();}z.restore();}
    hosieryTexture(z,o,rear.height,section,400-join);r.save();r.globalAlpha=hosieryOpacity(o);r.drawImage(sock,0,0);r.restore();
-   if(o.sock==='knee'){r.strokeStyle=cloth;r.lineWidth=7;r.beginPath();r.moveTo(476,t+2);r.bezierCurveTo(535,t+26,683,t+26,740,t+2);r.stroke();}
-
   }
   // Join below the common source calf, above every short sock cuff.
   r.drawImage(source,0,400,SIZE,SIZE-400,0,join,SIZE,SIZE-400);
