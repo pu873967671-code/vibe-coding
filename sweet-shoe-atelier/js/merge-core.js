@@ -108,5 +108,25 @@
     if (!source.charges) source.readyAt = now + COOLDOWN_MS;
     return {ok:true, type:'generate', to:target, from:index,item:board.cells[target],discovery};
   }
-  A.Merge = {COLS,ROWS,SIZE,MAX_ENERGY,REGEN_MS,CHARGES,COOLDOWN_MS,CHAINS,create,sanitize,tick,adjacent,canMerge,move,generate};
+  // Organize only movable materials. Tools, crates and gifts keep their exact
+  // cells; existing free capacity first gives each tool a place to produce.
+  function sort(board, landscape = false) {
+    const slots=[], pieces=[], old=board.cells.slice(), reserved=new Set();
+    let spaces=0;
+    old.forEach((cell,i)=>{if(!cell||cell.kind==='item'){slots.push(i);if(cell)pieces.push(cell);else spaces++;}});
+    old.forEach((cell,i)=>{
+      if(cell?.kind!=='generator'||reserved.size>=spaces)return;
+      const nearby=adjacent(i).filter(j=>!old[j]||old[j].kind==='item');
+      if(nearby.some(j=>reserved.has(j)))return;
+      const free=nearby[0];
+      if(free!==undefined)reserved.add(free);
+    });
+    const reading=i=>landscape?(COLS-1-i%COLS)*ROWS+Math.floor(i/COLS):i;
+    slots.sort((a,b)=>reading(a)-reading(b));
+    pieces.sort((a,b)=>CHAINS.indexOf(a.chain)-CHAINS.indexOf(b.chain)||a.tier-b.tier);
+    let next=0;
+    for(const i of slots)board.cells[i]=reserved.has(i)?null:pieces[next++]||null;
+    return slots.filter(i=>board.cells[i]?.chain!==old[i]?.chain||board.cells[i]?.tier!==old[i]?.tier);
+  }
+  A.Merge = {COLS,ROWS,SIZE,MAX_ENERGY,REGEN_MS,CHARGES,COOLDOWN_MS,CHAINS,create,sanitize,tick,adjacent,canMerge,move,generate,sort};
 })(globalThis.SweetShoe = globalThis.SweetShoe || {});
