@@ -37,6 +37,17 @@
    horizon:cy-(anchor.center[1]-room.horizon)/anchor.rx*rx,
    floor:cy+174*scale,top:room.top,edge:room.edge};
  }
+ // Reveal a saved choice when its strip is rebuilt or changes width. Leave
+ // deliberate browsing alone between those events; never scroll the page.
+ function revealChoice(picker,chip,value){
+  if(!picker||!chip||!picker.clientWidth)return;
+  const width=String(picker.clientWidth);
+  if(picker.dataset.revealedChoice===value&&picker.dataset.revealedWidth===width)return;
+  const p=picker.getBoundingClientRect(),c=chip.getBoundingClientRect();
+  if(c.right>p.right-2)picker.scrollLeft+=c.right-p.right+2;
+  else if(c.left<p.left+2)picker.scrollLeft-=p.left-c.left+2;
+  picker.dataset.revealedChoice=value;picker.dataset.revealedWidth=width;
+ }
  function frame(stage){
   if(!stage)return;const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
   const dock=stage.closest('.runway')?.querySelector('.runway-dock'),clearance=Math.max((dock?.offsetHeight||0)+36,dock?h-(dock.getBoundingClientRect().top-stage.getBoundingClientRect().top)+16:0);
@@ -60,12 +71,10 @@
   }
   // Buying a room rebuilds the dock. Keep the selected chip fully visible,
   // without scrolling the viewport or moving the separate Share actions.
-  const picker=stage.closest('.runway')?.querySelector('.showcase-picker'),chip=picker?.querySelector('.showcase-chip.selected');
-  if(picker&&chip&&(stage.dataset.revealedScene!==stage.dataset.showcaseScene||stage.dataset.revealedPickerWidth!==String(picker.clientWidth))){
-   const p=picker.getBoundingClientRect(),c=chip.getBoundingClientRect();
-   if(c.right>p.right-2)picker.scrollLeft+=c.right-p.right+2;else if(c.left<p.left+2)picker.scrollLeft-=p.left-c.left+2;
-   stage.dataset.revealedScene=stage.dataset.showcaseScene;stage.dataset.revealedPickerWidth=String(picker.clientWidth);
-  }
+  const root=stage.closest('.runway'),picker=root?.querySelector('.showcase-picker');
+  revealChoice(picker,picker?.querySelector('.showcase-chip.selected'),stage.dataset.showcaseScene);
+  const socks=root?.querySelector('.runway-sock-styles'),selected=socks?.querySelector('[aria-pressed="true"]');
+  revealChoice(socks,selected,selected?.dataset.fittingSock);
  }
  A.Showcase={scenes,find,sanitize,choose,picker,frame,framing,project};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
