@@ -1,8 +1,8 @@
 'use strict';
 (function(A){
   const CRAFT_UNLOCKS={
-    'material:lace':'fab4','material:velvet':'fab5','material:glitter':'spk4',
-    'heel:kitten':'lea5','heel:wedge':'lea4','strap:cross':'lea3','strap:ribbon':'rib4',
+    'material:patent':'lea6','material:lace':'fab4','material:velvet':'fab5','material:glitter':'spk4',
+    'heel:bowmule':'rib6','heel:studpump':'lea7','heel:crystalpump':'spk6','heel:bowsling':'rib5','heel:pearlpump':'spk5','heel:bootie':'lea5','heel:platform':'lea6','heel:loafer':'lea4','heel:slingback':'lea4','heel:ballet':'rib3','heel:maryjane':'lea3','heel:kitten':'lea5','heel:stiletto6':'lea5','heel:stiletto9':'lea5','heel:wedge':'lea4','strap:cross':'lea3','strap:ribbon':'rib4',
     'decoration:big':'fab3','decoration:drop':'spk3','decoration:flower':'rib5',
     'charm:crystal':'spk4','charm:mini':'rib4','pattern:hearts':'fab3','pattern:dots':'fab3','pattern:stars':'spk3'
   };
