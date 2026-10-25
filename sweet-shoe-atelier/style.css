@@ -956,6 +956,17 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 /* Supervisor 01:55: finish the mint salon across every pause/reward surface. */
 :root{--salon-wash:linear-gradient(125deg,#c9ffed30,#ffffff12 55%,#ffe4f12b);--surface-mint:#edfbf4;--surface-pink:#fff0f6}
 .boutique-room{background-image:var(--salon-wash),url('assets/bg_shop.webp')}
+/* Earned room details share the source painting's camera and cover crop. */
+.boutique-dressing{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+.room-dressing{transform-box:fill-box;transform-origin:center}
+.boutique-dressing .renovation-reveal{animation:room-detail-reveal .7s cubic-bezier(.2,.8,.2,1) both}
+.renovation-room-badge{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);padding:9px 17px;border-radius:22px;border:1px solid #fff5d8;background:#fffaf0ee;color:#5b6c53;box-shadow:0 4px 18px #68543a25;font:600 12px/1.4 var(--font-ui);white-space:nowrap;animation:room-badge-reveal .3s ease-out;pointer-events:none}
+.chapter-celebration>.chapter-room-preview{width:100%;height:135px;aspect-ratio:auto;margin:0 0 16px;border-radius:15px}
+.chapter-room-preview+.chapter-portraits{display:none}
+@keyframes room-detail-reveal{0%{opacity:0;scale:.92;filter:brightness(1.7)}65%{opacity:1;scale:1.025}100%{scale:1;filter:brightness(1)}}
+@keyframes room-badge-reveal{from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+@media(max-height:560px) and (orientation:landscape){.chapter-celebration>.chapter-room-preview{height:90px;margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){.boutique-dressing .renovation-reveal,.renovation-room-badge{animation:none}}
 .runway-scene,.runway-scene.has-fitting3d{background-image:var(--salon-wash),var(--scene-image);background-blend-mode:normal}
 .showcase-chip>img{filter:saturate(.88) brightness(1.04)}
 .showcase-chip.locked>img{filter:saturate(.65) brightness(1.04)}
@@ -1233,3 +1244,24 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 
 /* Faceted crystal seats; the dyed ground remains visible between stones. */
 .texture-swatch.couture-pave{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M8%201%2014%208%208%2015%202%208Z%22%20fill%3D%22%23e5e8f5%22%20stroke%3D%22%238f779d%22%20stroke-width%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M8%201%2014%208%2010%208%208%205Z%22%20fill%3D%22%23fffbed%22%2F%3E%3Cpath%20d%3D%22M14%208%208%2015%208%2011%2010%208Z%22%20fill%3D%22%23bea5d5%22%2F%3E%3Cpath%20d%3D%22M8%2015%202%208%206%208%208%2011Z%22%20fill%3D%22%23fff9e2%22%2F%3E%3Cpath%20d%3D%22M2%208%208%201%208%205%206%208Z%22%20fill%3D%22%23bdd7e4%22%2F%3E%3Cpath%20d%3D%22M8%205%2010%208%208%2011%206%208Z%22%20fill%3D%22%23fffdf6%22%2F%3E%3C%2Fsvg%3E") center/12px 12px #c990aa;box-shadow:inset 0 0 0 1px #bca5c8;background-blend-mode:normal}
+
+/* Supervisor 07:30: a light craft-table rhythm and a free organizing tool. */
+.atelier-tools .board-sort{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0;color:#356653;background:#f6fff9;border-color:#a4d2bc;min-width:44px;min-height:44px;padding:2px}
+.atelier-tools .board-sort b{font:25px/25px var(--font-ui);font-weight:600}
+.atelier-tools .board-sort small{display:block;font:9px/12px var(--font-ui);color:#356653}
+.merge-intro-copy{flex-basis:156px}
+.atelier-tools .board-sort:disabled{opacity:.4}
+.just-merged>.merge-art{transform-origin:50% 78%;animation:craft-squash .48s cubic-bezier(.2,.7,.3,1) both}
+@keyframes craft-squash{0%{transform:scale(.6,.45) translateY(5px)}28%{transform:scale(1.12,1.2) translateY(-4px)}55%{transform:scale(1.05,.94)}78%{transform:scale(.98,1.04)}100%{transform:none}}
+.merge-tier-pop{position:absolute;z-index:7;top:2px;left:50%;white-space:nowrap;pointer-events:none;font:700 11px/1.2 var(--font-ui);color:#356653;background:#fffdebf5;padding:3px 7px;border:1px solid #e6d38d;border-radius:12px;box-shadow:0 2px 5px #486b4925;animation:craft-tier-rise .85s ease-out both}
+@keyframes craft-tier-rise{0%{transform:translate(-50%,10px) scale(.6);opacity:0}18%{transform:translate(-50%,-8px) scale(1.08);opacity:1}65%{transform:translate(-50%,-16px);opacity:1}100%{transform:translate(-50%,-26px);opacity:0}}
+.merge-cell.idle-match{z-index:3;box-shadow:inset 0 0 0 2px #dc739b,0 0 0 2px #fffaf1,0 0 12px #e692b377}
+.idle-match>.merge-art{animation:craft-pair-nudge 2.8s ease-in-out infinite;transform-origin:50% 80%}
+.idle-pair-label{position:absolute;bottom:calc(100% + 6px);left:50%;translate:-50% 0;z-index:7;pointer-events:none;white-space:nowrap;padding:5px 8px;border-radius:9px;background:#fffdf5;color:#765166;border:1px solid #e1bacb;font:600 10px/1.3 var(--font-ui);box-shadow:0 3px 8px #73455b20}
+.idle-pair-label:after{content:'';position:absolute;top:100%;left:50%;margin-left:-4px;border:4px solid transparent;border-top-color:#e1bacb}
+@keyframes craft-pair-nudge{0%,68%,100%{transform:none}76%{transform:rotate(-7deg) scale(1.06)}84%{transform:rotate(7deg) scale(1.06)}92%{transform:rotate(-3deg)}}
+.just-sorted>.merge-art{animation:craft-sort-settle .32s ease-out both}
+@keyframes craft-sort-settle{from{transform:translateY(-7px) scale(.86);opacity:.5}to{transform:none;opacity:1}}
+@media(orientation:portrait){.merge-intro-copy{flex-basis:92px}.atelier-tools{display:grid;grid-template-columns:44px 44px;gap:4px}.atelier-tools button,.atelier-tools .chest-tool{width:44px;min-height:44px;height:44px}.atelier-tools .board-sort{grid-column:1/-1;width:92px;flex-direction:row;gap:7px}.atelier-tools .board-sort small{font-size:10px}.idle-pair-label{font-size:9px}}
+@media(max-height:560px) and (orientation:landscape){.merge-intro-copy{flex-basis:136px}.atelier-tools{gap:2px}.atelier-tools .board-sort{width:44px;min-height:44px;height:44px}.atelier-tools .board-sort b{font-size:21px;line-height:23px}.atelier-tools .board-sort small{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.just-merged>.merge-art,.idle-match>.merge-art,.just-sorted>.merge-art{animation:none}.merge-tier-pop{animation:none;transform:translate(-50%,-12px)}.idle-match{box-shadow:inset 0 0 0 2px #dc739b,0 0 0 2px #fffaf1}}
