@@ -72,6 +72,46 @@ function load(heel){
  loads.set(heel,promise);return promise;
 }
 function clip(p,upper){p.globalCompositeOperation='destination-in';p.drawImage(upper,0,0);p.globalCompositeOperation='source-over';}
+// New couture finishes share one source-coordinate renderer between product
+// and worn cameras. The caller clips it to its own immutable upper mask.
+function drawRichMaterial(p,d,width,height){
+ if(!['metallic','pearlescent'].includes(d.material))return;
+ p.save();
+ const g=p.createLinearGradient(width*.12,height*.86,width*.80,height*.15);
+ if(d.material==='metallic'){
+  for(const [at,colour] of [[0,'#3b284b40'],[.22,'#56415e20'],[.35,'#fff3cf28'],[.405,'#fffbea9c'],[.45,'#fffdf26e'],[.50,'#46334a38'],[.62,'#38263b25'],[.72,'#fff8df62'],[.76,'#fffdf293'],[.82,'#6e4d5b1c'],[1,'#3b284b30']])g.addColorStop(at,colour);
+ }else{
+  for(const [at,colour] of [[0,'#d4b8ed25'],[.22,'#a3e6db24'],[.38,'#fffbe56d'],[.48,'#fffdfb92'],[.57,'#efb5d832'],[.72,'#b7d3ef36'],[.83,'#fff8de55'],[1,'#d2b7e626']])g.addColorStop(at,colour);
+ }
+ p.fillStyle=g;p.fillRect(0,0,width,height);
+ // Quiet directional brushing, never glitter or polka-dot texture.
+ if(d.material==='metallic'){
+  p.lineWidth=.55;p.strokeStyle='#fff8e112';
+  for(let y=-height;y<height*2;y+=4){p.beginPath();p.moveTo(0,y);p.lineTo(width,y-width*.24);p.stroke();}
+ }
+ p.restore();
+}
+function drawRichPattern(p,d,width,height){
+ if(!['rosebuds','diamonds'].includes(d.pattern))return;
+ p.save();p.lineCap='round';p.lineJoin='round';
+ if(d.pattern==='diamonds'){
+  const step=54;p.strokeStyle='#fff8e9a6';p.lineWidth=1.15;p.setLineDash([3,3]);
+  for(let x=-height;x<width+height;x+=step){p.beginPath();p.moveTo(x,0);p.lineTo(x+height*.7,height);p.moveTo(x,0);p.lineTo(x-height*.7,height);p.stroke();}
+  p.setLineDash([]);
+ }else{
+  const step=76;
+  for(let row=0;row<height/step+1;row++)for(let col=-1;col<width/step+1;col++){
+   p.save();p.translate((col+(row%2)*.5)*step,row*step);p.rotate(-.24);p.scale(1,.82);
+   p.strokeStyle='#4b826d99';p.lineWidth=1.6;p.beginPath();p.moveTo(0,5);p.quadraticCurveTo(3,13,-1,20);p.stroke();
+   p.fillStyle='#a9d8b6c9';p.beginPath();p.ellipse(-4,12,5,2.2,.55,0,Math.PI*2);p.ellipse(4,17,5,2.2,-.55,0,Math.PI*2);p.fill();
+   p.fillStyle='#fff3e7e8';p.beginPath();p.ellipse(0,0,6.8,7.2,-.2,0,Math.PI*2);p.fill();
+   p.strokeStyle='#d678a1d9';p.lineWidth=1.35;p.beginPath();p.moveTo(-5,-1);p.bezierCurveTo(-2,5,5,4,4,-2);p.bezierCurveTo(3,-6,-3,-6,-3,-1);p.bezierCurveTo(-3,2,2,2,2,-1);p.stroke();
+   p.restore();
+  }
+ }
+ p.restore();
+}
+A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern:drawRichPattern});
 function materialLayer(design,upper){
  const out=canvas(),p=out.getContext('2d'),type=design.material;
  p.lineCap='round';p.lineJoin='round';
@@ -119,11 +159,13 @@ function materialLayer(design,upper){
    if(n%97===0){p.strokeStyle='rgba(255,255,255,.95)';p.lineWidth=1.0;p.beginPath();p.moveTo(x-3.3,y);p.lineTo(x+3.3,y);p.moveTo(x,y-3.3);p.lineTo(x,y+3.3);p.stroke();}
   }
  }
+ drawRichMaterial(p,design,WIDTH,HEIGHT);
  clip(p,upper);return out;
 }
 function patternLayer(design,upper){
  if(design.pattern==='none')return null;
  const out=canvas(),p=out.getContext('2d'),step=59,r=7;
+ if(['rosebuds','diamonds'].includes(design.pattern)){drawRichPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;}
  p.fillStyle='rgba(255,253,242,.80)';
  for(let row=0;row<HEIGHT/step+1;row++)for(let col=-1;col<WIDTH/step+1;col++){
   p.save();p.translate((col+(row%2)*.5)*step,row*step);p.rotate(-.16);p.scale(1,.85);p.beginPath();
