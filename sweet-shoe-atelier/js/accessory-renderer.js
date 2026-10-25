@@ -2,7 +2,7 @@
 (function(A){
 // Original code-native jewellery, authored in each immutable source camera.
 // Every control point belongs to the shoe/foot, never to the viewport.
-const OPTIONS={strap:['pearl','pearltrim','studs','heartbuckle','anklet'],decoration:['puffy','doublebow','heelcrystal','rosette'],charm:['oval','heart','spray','toeglitter']};
+const OPTIONS={strap:['pearl','pearltrim','studs','heartbuckle','anklet','crystalband','satinbraid'],decoration:['puffy','doublebow','heelcrystal','rosette','camellia','heelbow'],charm:['oval','heart','spray','toeglitter','butterfly','pearlcluster']};
 const PALETTE={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#696883'};
 // Far mounts sit four source pixels inside the painted collar silhouette;
 // near mounts are sewn into the outer upper, below its rolled binding. Newer
@@ -24,6 +24,20 @@ function handles(category,value){return !!OPTIONS[category]?.includes(value);}
 function anchor(d,camera){const set=camera==='product'?PRODUCT:WORN;return set[d.heel]||set[A.SHOE_STYLES?.[d.heel]?.accessoryBase]||set.flat;}
 function curve(a,t){const s=1-t;return [s*s*a[0]+2*s*t*a[2]+t*t*a[4],s*s*a[1]+2*s*t*a[3]+t*t*a[5]];}
 function strokeCurve(p,a,colour,width){p.beginPath();p.moveTo(a[0],a[1]);p.quadraticCurveTo(a[2],a[3],a[4],a[5]);p.strokeStyle=colour;p.lineWidth=width;p.stroke();}
+function tangent(a,t){return Math.atan2((1-t)*(a[3]-a[1])+t*(a[5]-a[3]),(1-t)*(a[2]-a[0])+t*(a[4]-a[2]));}
+function bridgeTabs(p,path,colour){
+ for(const t of [0,1]){const [x,y]=curve(path,t);p.save();p.translate(x,y);p.rotate(tangent(path,t));p.fillStyle=silkTone(colour,-.28);p.beginPath();p.roundRect(-8,-10,18,20,5);p.fill();p.strokeStyle=silkTone(colour,.55);p.lineWidth=1;p.stroke();p.fillStyle='#fff1c5';p.beginPath();p.arc(1,0,2.7,0,Math.PI*2);p.fill();p.restore();}
+}
+function braidedBand(p,path,colour){
+ strokeCurve(p,path,silkTone(colour,-.4),20);strokeCurve(p,path,colour,16);
+ // Three interlaced satin folds follow the camera's instep arc. A local
+ // curve normal keeps their woven width constant through the raised arch.
+ for(let strand=0;strand<3;strand++){
+  p.beginPath();for(let i=0;i<=120;i++){const t=i/120,[x,y]=curve(path,t),angle=tangent(path,t),wave=Math.sin(t*Math.PI*12+strand*Math.PI*2/3)*5.3;const px=x-Math.sin(angle)*wave,py=y+Math.cos(angle)*wave;i?p.lineTo(px,py):p.moveTo(px,py);}
+  p.strokeStyle=silkTone(colour,strand===0?.62:strand===1?.12:-.16);p.lineWidth=4;p.stroke();
+ }
+ bridgeTabs(p,path,colour);
+}
 function pearl(p,x,y,r){
  p.save();p.translate(x,y);p.scale(1,.92);p.shadowColor='#704b4d66';p.shadowBlur=3;p.shadowOffsetY=2;
  const g=p.createRadialGradient(-r*.32,-r*.38,r*.06,0,0,r);g.addColorStop(0,'#ffffff');g.addColorStop(.35,'#fff9ed');g.addColorStop(.72,'#ebdec9');g.addColorStop(1,'#ad9c8b');
@@ -89,6 +103,16 @@ function drawOne(p,d,camera,category,upper){
     p.fillStyle='#b28a52';p.beginPath();p.ellipse(x+4,y+11,10,9,.4,0,Math.PI*2);p.fill();
     p.shadowColor='transparent';p.strokeStyle='#ffe8ac';p.lineWidth=2;p.stroke();pearl(p,x+3,y+10,5);p.restore();
    }
+  }else if(value==='crystalband'){
+   const path=a.bridge;strokeCurve(p,path,'#76584277',14);strokeCurve(p,path,'#ddbf82',10);
+   bridgeTabs(p,path,colour);
+   // Facets grow toward the near mount instead of a flat row of identical
+   // stamps. Each stone rotates with the instep and has its own gold bezel.
+   let length=0,last=curve(path,0);for(let i=1;i<=60;i++){const pt=curve(path,i/60);length+=Math.hypot(pt[0]-last[0],pt[1]-last[1]);last=pt;}
+   const count=Math.max(10,Math.round(length/18));
+   for(let i=0;i<=count;i++){const t=i/count,[x,y]=curve(path,t),r=5.5+t*2.8;gem(p,x,y,r,r*.78,tangent(path,t),i%4===1?'rose':'ice');}
+  }else if(value==='satinbraid'){
+   braidedBand(p,a.bridge,colour);
   }else if(value==='heartbuckle'){
    strokeCurve(p,a.bridge,'#865365',22);strokeCurve(p,a.bridge,colour,18);const shine=a.bridge.map((v,i)=>i%2?v-4:v);strokeCurve(p,shine,'#fff5f6a8',3);
    const [x,y]=curve(a.bridge,.83);heart(p,x,y,17,'#b48a50');heart(p,x,y-1,12,'#fff0bd');heart(p,x,y-1,7,colour);
@@ -112,12 +136,31 @@ function drawOne(p,d,camera,category,upper){
   if(value==='puffy')bow(p,x+18,dy,80,colour,true);
   else if(value==='doublebow'){bow(p,x+16,dy,80,colour);bow(p,x+16,dy,53,'#fff0da');}
   else if(value==='heelcrystal'){const [bx,by]=a.rear;gem(p,bx,by+17,9,15,-.18);gem(p,bx-5,by+49,7,12,.16);}
+  else if(value==='heelbow'){
+   const [bx,by]=a.rear;p.save();p.translate(bx-5,by+21);p.rotate(.18);p.fillStyle=silkTone(colour,-.2);p.beginPath();p.ellipse(0,0,12,20,-.2,0,Math.PI*2);p.fill();bow(p,0,0,camera==='product'?32:29,colour);pearl(p,0,0,4.5);p.restore();
+  }else if(value==='camellia'){
+   p.save();p.translate(x+16,dy+4);p.rotate(-.2);p.scale(1,.74);
+   p.shadowColor='#76505c55';p.shadowBlur=4;p.shadowOffsetY=3;
+   for(let ring=0;ring<3;ring++){const count=ring===0?7:5,radius=39-ring*12;
+    for(let i=0;i<count;i++){p.save();p.rotate(i*Math.PI*2/count+ring*.55);const g=p.createLinearGradient(-10,-radius*1.4,12,4);g.addColorStop(0,silkTone(colour,.72));g.addColorStop(.5,colour);g.addColorStop(1,silkTone(colour,-.28));p.fillStyle=g;p.strokeStyle=silkTone(colour,-.15);p.lineWidth=1;p.beginPath();p.moveTo(-3,5);p.bezierCurveTo(-radius,-radius*.2,-radius*.68,-radius*1.48,0,-radius*1.45);p.bezierCurveTo(radius*.68,-radius*1.48,radius,-radius*.2,3,5);p.closePath();p.fill();p.stroke();p.shadowColor='transparent';p.restore();}
+   }
+   pearl(p,0,0,8);for(let i=0;i<5;i++){const angle=i*Math.PI*2/5;pearl(p,Math.cos(angle)*11,Math.sin(angle)*11,3.2);}p.restore();
+  }
   else{p.save();p.translate(x+16,dy+9);p.rotate(-.2);for(let i=0;i<7;i++){const an=i*Math.PI*2/7;p.save();p.rotate(an);const g=p.createLinearGradient(0,0,0,-35);g.addColorStop(0,colour);g.addColorStop(1,'#fff7fa');p.fillStyle=g;p.strokeStyle='#b87c9344';p.lineWidth=1;p.beginPath();p.ellipse(0,-20,17,28,0,0,Math.PI*2);p.fill();p.stroke();p.restore();}pearl(p,0,0,10);p.restore();}
  }else{
   const [x,y]=a.toe;
   if(value==='oval')gem(p,x,y,33,24,-.27);
   else if(value==='heart'){heart(p,x,y+2,34,'#a98750');heart(p,x,y,29,'#f2adc9');p.strokeStyle='#fff6f9';p.lineWidth=2;p.beginPath();p.moveTo(x-14,y-6);p.quadraticCurveTo(x-13,y-15,x-5,y-10);p.stroke();}
   else if(value==='spray'){for(let i=0;i<7;i++){const an=-Math.PI*.85+i*.28;p.strokeStyle='#c4a46d';p.lineWidth=1.6;p.beginPath();p.moveTo(x,y+9);p.lineTo(x+Math.cos(an)*47,y+Math.sin(an)*38);p.stroke();gem(p,x+Math.cos(an)*47,y+Math.sin(an)*38,8,14,an+.7);}gem(p,x,y+3,12,9,-.2);}
+  else if(value==='butterfly'){
+   p.save();p.translate(x,y);p.rotate(-.25);p.scale(1,.8);
+   gem(p,-18,-10,14,22,-.62,'rose');gem(p,18,-10,14,22,.62,'rose');gem(p,-14,15,10,14,.5);gem(p,14,15,10,14,-.5);
+   p.strokeStyle='#b58d55';p.lineWidth=2;p.beginPath();p.moveTo(-2,-17);p.quadraticCurveTo(-4,-27,-12,-28);p.moveTo(2,-17);p.quadraticCurveTo(4,-27,12,-28);p.stroke();pearl(p,-12,-28,2.5);pearl(p,12,-28,2.5);gem(p,0,0,5,18,0);p.restore();
+  }else if(value==='pearlcluster'){
+   p.save();p.translate(x,y);p.rotate(-.24);p.scale(1,.75);
+   for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;pearl(p,Math.cos(angle)*27,Math.sin(angle)*24,9+i*.2);}
+   gem(p,0,0,15,12,-.1,'rose');p.restore();
+  }
   else{p.save();p.translate(x-22,y+13);p.rotate(-.2);p.scale(1,.64);for(let i=0;i<110;i++){const t=i*2.399963229728653,r=Math.sqrt((i+.5)/110)*58,px=Math.cos(t)*r,py=Math.sin(t)*r*.60;p.fillStyle=i%3?'#fff7dd':'#c79c55';p.fillRect(px,py,i%7?2.5:4,i%7?2.5:4);}p.restore();}
  }
  p.restore();return true;
