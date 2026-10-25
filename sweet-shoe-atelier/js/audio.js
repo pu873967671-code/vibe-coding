@@ -7,7 +7,7 @@
   A.SFX_FILES=SAMPLES.flatMap(name=>['ogg','mp3'].map(ext=>'assets/sfx/'+name+'.'+ext));
   A.createAudioEngine=function(getState,blocked,getScene=()=> 'merge'){
     const engine={ctx:null,master:null,effects:null,music:null,tick:null,step:0,voices:new Set(),lastCue:new Map(),limit:32,
-      tracks:new Map(),failedTracks:new Set(),currentTrack:null,buffers:new Map(),sampleLoads:new Map(),sampleRetryAfter:new Map(),effectGeneration:0,
+      tracks:new Map(),failedTracks:new Set(),trackRetryAfter:new Map(),currentTrack:null,buffers:new Map(),sampleLoads:new Map(),sampleRetryAfter:new Map(),effectGeneration:0,
       loadSample(name){
         if(this.buffers.has(name))return Promise.resolve(this.buffers.get(name));
         if(this.sampleLoads.has(name))return this.sampleLoads.get(name);
@@ -47,10 +47,12 @@
       track(name){
         if(this.tracks.has(name))return this.tracks.get(name);
         const audio=new window.Audio();audio.preload='none';audio.loop=true;audio.playsInline=true;
-        // raw.githack (preview host) refuses large mp3s; stream preview BGM from jsDelivr (CORS *).
-        const preview=/githack\.com$/.test(location.hostname);
-        if(preview)audio.crossOrigin='anonymous';
-        audio.src=(preview?'https://cdn.jsdelivr.net/gh/pu873967671-code/vibe-coding@sweet-shoe-preview/sweet-shoe-atelier/':'')+'assets/audio/bgm_'+name+'.mp3';
+        // raw.githack refuses large MP3s (403/301), so commit-pinned previews stream
+        // the same file from jsDelivr. Packaged builds keep the relative path.
+        // Do not remove: without it previews fall back to silence.
+        const githack=/(^|\.)githack\.com$/.test(location.hostname);
+        if(githack){audio.crossOrigin='anonymous';audio.src='https://cdn.jsdelivr.net/gh/pu873967671-code/vibe-coding@sweet-shoe-preview/sweet-shoe-atelier/assets/audio/bgm_'+name+'.mp3';}
+        else audio.src='assets/audio/bgm_'+name+'.mp3';
         const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
         gain.gain.value=0;source.connect(gain);gain.connect(this.music);
         const track={audio,source,gain,stopTimer:null,primed:false};
@@ -72,6 +74,20 @@
               if(error?.name!=='NotAllowedError'&&error?.name!=='AbortError')this.mediaFailed(name);
             });
           }catch{track.primed=false;}
+        }
+      },
+      retryMusic(){
+        if(!getState().music)return;
+        // A dropped connection must not replace the recorded music for the
+        // entire visit. Retry only from ensure(), with the next interaction,
+        // so Safari's play() remains in the activation stack and absent files
+        // cannot cause an automatic fetch/fallback loop.
+        for(const name of [...this.failedTracks]){
+          if(Date.now()<(this.trackRetryAfter.get(name)||0))continue;
+          this.failedTracks.delete(name);this.trackRetryAfter.delete(name);
+          const track=this.tracks.get(name);if(!track)continue;
+          track.primed=false;
+          try{track.audio.load();}catch{this.mediaFailed(name);}
         }
       },
       media(silent){
@@ -106,7 +122,7 @@
         }catch{this.mediaFailed(name);return false;}
       },
       mediaFailed(name){
-        this.failedTracks.add(name);const track=this.tracks.get(name);
+        this.failedTracks.add(name);this.trackRetryAfter.set(name,Date.now()+1500);const track=this.tracks.get(name);
         if(track){clearTimeout(track.stopTimer);track.audio.pause();track.gain.gain.setValueAtTime(0,this.ctx.currentTime);}
         if(this.currentTrack===name){this.currentTrack=null;this.update();}
       },
@@ -122,6 +138,7 @@
           // Both calls stay synchronous in the click/touch/key gesture stack (Safari).
           if(this.ctx.state==='suspended'||this.ctx.state==='interrupted')this.ctx.resume().catch(()=>{});
           this.preload();
+          this.retryMusic();
           this.primeMusic();
           this.update();
         }catch{}
@@ -141,7 +158,7 @@
           if(streaming)for(const voice of this.voices)if(voice.bus===this.music)voice.stop();
           return;
         }
-        if(this.tick===null)this.tick=setInterval(()=>{
+        if(false&&this.tick===null)this.tick=setInterval(()=>{ // procedural fallback disabled 2026-10-26: user found it not cozy; silence beats beeps
           if(blocked()||!getState().music)return;
           const phrase=[261.63,329.63,392,0,440,392,329.63,0,261.63,349.23,440,0,493.88,392,293.66,0];
           const beat=this.step++%phrase.length,note=phrase[beat];
@@ -182,7 +199,7 @@
             for(let i=0;i<count;i++)this.sample('coin',variation+i*.035,.34,i*.065);
             this.sample('sparkle',variation*1.12,.14,.04);
           }else if(kind==='merge')this.sample(name,variation*Math.pow(1.055,Math.min(7,Math.max(1,tier))-1),.55);
-          else this.sample(name,variation,name==='tap'?.24:name==='error'?.28:.48);
+          else this.sample(name,variation,name==='tap'?.18:name==='error'?.28:.48);
         };
         if(this.buffers.has(name))play();
         else {
