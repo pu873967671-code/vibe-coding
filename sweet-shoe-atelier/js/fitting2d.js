@@ -190,7 +190,9 @@ function pairedModel(source,options,extra=0,emergency=false){
   r.drawImage(source,0,400,SIZE,SIZE-400,0,join,SIZE,SIZE-400);
  }
  const pair=document.createElement('canvas');pair.width=1000;pair.height=1300+extra;const p=pair.getContext('2d');p.imageSmoothingQuality='high';
- p.save();p.translate(-132,-166);p.translate(550,1160+extra);p.rotate(-.11);p.scale(.94,.94);p.translate(-550,-1160-extra);p.drawImage(rear,0,0);p.globalCompositeOperation='source-atop';p.fillStyle='#77564e23';p.fillRect(0,0,SIZE,1324+extra);p.restore();
+ // Both shoes share one physical size. Depth comes from the authored rear
+ // calf, its higher contact point and the front leg's real occlusion.
+ p.save();p.translate(-120,-135);p.translate(550,1160+extra);p.rotate(-.08);p.translate(-550,-1160-extra);p.drawImage(rear,0,0);p.globalCompositeOperation='source-atop';p.fillStyle='#77564e23';p.fillRect(0,0,SIZE,1324+extra);p.restore();
  // The nearer calf casts a soft, contour-following contact shadow onto the
  // rear calf. Keeping that shadow inside the existing rear alpha separates
  // the two legs without a painted stripe or a dark halo in the room.
@@ -204,14 +206,14 @@ async function render(target,input,options){
  // One transform covers skin, socks, shoe and every ornament. Slender fashion
  // proportions therefore cannot open a gap at a collar or move a fastening.
  // Keep long legs bleeding past the viewport while making feet more delicate.
- const slender=.80,scale=Math.min(target.width*.96/(1000*slender),target.height*1.01/1300),extra=Math.max(0,Math.ceil(target.height/scale-1250)),pair=pairedModel(result.canvas,o,extra,result.fallback),w=pair.width*scale*slender,h=pair.height*scale,x=(target.width-w)/2,y=target.height*.98-h;
+ const slender=.80,scale=Math.min(target.width*.96/(1000*slender),target.height*.97/1500),extra=Math.max(0,Math.ceil(target.height/scale-1250)),pair=pairedModel(result.canvas,o,extra,result.fallback),w=pair.width*scale*slender,h=pair.height*scale,x=(target.width-w)/2,y=target.height*.98-h;
  const floor=y+(1264+extra)*scale,cx=target.width*.50;
  p.save();p.translate(cx,floor);p.scale(1,.2);
  const halo=p.createRadialGradient(0,0,w*.12,0,0,w*.43);halo.addColorStop(0,'#527d6242');halo.addColorStop(1,'#527d6200');p.fillStyle=halo;p.beginPath();p.arc(0,0,w*.43,0,Math.PI*2);p.fill();p.restore();
  p.save();p.fillStyle='#cfeadf';p.beginPath();p.ellipse(cx,floor+1300*scale*.023,w*.43,1300*scale*.04,0,0,Math.PI*2);p.fill();
  const porcelain=p.createLinearGradient(0,floor-1300*scale*.025,0,floor+1300*scale*.035);porcelain.addColorStop(0,'#ffffff');porcelain.addColorStop(1,'#e5f6ed');p.fillStyle=porcelain;p.beginPath();p.ellipse(cx,floor+1300*scale*.008,w*.43,1300*scale*.037,0,0,Math.PI*2);p.fill();p.strokeStyle='#ffffffdb';p.lineWidth=Math.max(1,w*.002);p.stroke();p.restore();
  p.drawImage(pair,x,y,w,h);
- Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-132,-166,.94,-.11;front:-150,0,1;slender:.80',pairPose:'overlapped-reference-b',skinFinish:'soft-youthful'});return true;
+ Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-120,-135,1,-.08;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
 }
 function mount(host,input,options){
  const target=canvas();target.className='fitting2d-canvas';target.setAttribute('role','img');target.setAttribute('aria-label',A.lang==='zh'?'双脚穿着你的鞋款与袜子搭配':'Both feet wearing your shoes and chosen socks');host.replaceChildren(target);
