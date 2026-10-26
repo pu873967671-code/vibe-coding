@@ -7,6 +7,7 @@ function supportsStyleOption(heel,category,value){
  return !style?.fixedTrims&&!(category==='strap'&&style?.builtInStrap)&&!(category==='decoration'&&(style?.openHeel||style?.noRearDecor));
 }
 function cleanDesign(d){const result=Object.fromEntries(Object.keys(opts).map(k=>[k,opts[k].some(o=>o[0]===d?.[k])?d[k]:defaults[k]]));for(const category of ['strap','decoration','charm'])if(!supportsStyleOption(result.heel,category,result[category]))result[category]='none';return result;}
+function cleanRecentChoices(input){return Object.fromEntries(Object.keys(opts).map(k=>[k,[...new Set(Array.isArray(input?.[k])?input[k].filter(v=>opts[k].some(o=>o[0]===v)):[])].slice(0,3)]));}
 function unlocked(s,k,v){if(k==='heel'&&A.THIN_HEELS[v])return !!(s.unlocks.some(id=>Object.keys(A.THIN_HEELS).some(h=>id==='heel:'+h))||s.atelier?.discovered.includes(A.CRAFT_UNLOCKS['heel:kitten']));return !option(k,v)[2]||s.unlocks.includes(k+':'+v)||!!(A.CRAFT_UNLOCKS[k+':'+v]&&s.atelier?.discovered.includes(A.CRAFT_UNLOCKS[k+':'+v]));}
 function commissionDesign(order){const values=Object.assign({},defaults,...(order?.requirements||[]).filter(r=>r.key!=='noBows'&&r.key!=='heelHeight').map(r=>({[r.key]:r.value})));const height=order?.requirements?.find(r=>r.key==='heelHeight'),heel=height&&Object.keys(A.THIN_HEELS).find(h=>A.THIN_HEELS[h]===Number(height.value));if(heel)values.heel=heel;return cleanDesign(values);}
 function customersForDay(day){return Math.min(8,5+Math.floor(day/3));}
@@ -15,5 +16,5 @@ function matches(d,r){if(r.key==='heelHeight')return A.THIN_HEELS[d.heel]===Numb
 function scoreOrder(d,o,remaining,combo=0){const matched=o.requirements.filter(r=>matches(d,r)).length,stars=matched===o.requirements.length?3:matched/o.requirements.length>=.5?2:1;const style=Object.entries(themes[o.person].pref).filter(([k,v])=>d[k]===v&&!o.requirements.some(r=>r.key===k)).length*3;const speed=Math.ceil(Math.max(0,remaining)/10),streak=stars===3?combo+1:0,multiplier=1+Math.min(4,Math.floor(streak/3))*.25;return {matched,stars,style,speed,streak,multiplier,earned:Math.round((stars*10+style+speed)*multiplier*(o.vip?2:1))};}
 
 const commissionStars=result=>Math.max(0,Math.min(2,(result?.stars||1)-1));
-Object.assign(A,{commissionStars,commissionDesign,cleanDesign,supportsStyleOption,unlocked,customersForDay,generateOrder,matches,scoreOrder});
+Object.assign(A,{commissionStars,commissionDesign,cleanDesign,cleanRecentChoices,supportsStyleOption,unlocked,customersForDay,generateOrder,matches,scoreOrder});
 })(globalThis.SweetShoe = globalThis.SweetShoe || {});
