@@ -282,3 +282,26 @@ Crystal pavé is an original source-coordinate Canvas finish in `js/shoe2d.js`, 
 `fitting2d/<style>_hosiery.webp`: original offline semantic coverage maps for all20registered worn cameras, derived by `python3 dev/fitting-polish/build-hosiery-collars.py` from accepted shoe/upper/leg layers. Cover baked ankle-skin slivers under the shoe collar with the selected cloth after shoe shading and before ornaments. Skin-colour matching and existing upper masks preserve cream piping, gold hardware, integral trims and the open-toe shell; original source images remain byte-exact. Empty coverage uses a1×1transparent sentinel. Runtime uses draw-only source-atop compositing, retains source alpha and requires the map for complete fitted-kit recovery/packaging. Rebuild maps after registering a new camera.
 
 Supervisor 08:35 picker copy: local Noto Sans SC subset rebuilt to635runtime Chinese/full-width characters with the documented source/tool. New picker/celebration visuals use existing local artwork and CSS; no raster or audio added.
+
+## Fixed try-on framing — USER 2026-10-26 11:55
+
+`scenes/fixed_{salon,mirror_lounge,car,vanity,balcony}.webp` are original generated
+`gpt-image` room backdrops supplied on 2026-10-26. Each includes its own low-camera
+platform, rim and floor shadow. They replace the earlier `close_*` try-on camera;
+runtime draws only shoe contact shadows over the baked platform. The approved
+composition reference is `dev/refs/user_fixed_framing_1155.webp`.
+
+Measured top-surface ellipses in native image pixels (vertical rim and floor
+shadow excluded):
+
+| Scene | Image size | Centre | Radii | Rim depth |
+| --- | --- | --- | --- | --- |
+| Salon | 864 × 1222 | 433, 728 | 340, 74 | 30 |
+| Mirror lounge | 848 × 1264 | 424, 750 | 348, 74 | 34 |
+| City escape | 848 × 1264 | 424, 752 | 334, 72 | 31 |
+| Golden vanity | 848 × 1264 | 424, 752 | 349, 74 | 33 |
+| Rose balcony | 896 × 1200 | 448, 712 | 357, 73 | 30 |
+
+Backgrounds and fitted anatomy share a fixed composition and one uniform outer
+resize transform. The native baked ellipse is never stretched or re-squashed.
+No generated anatomy, external CDN or runtime image service is introduced.
