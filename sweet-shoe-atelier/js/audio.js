@@ -195,8 +195,8 @@
           if(generation!==this.effectGeneration||!getState().sound||blocked())return;
           const variation=1+(Math.random()-.5)*.07;
           if(kind==='coin'){
-            const count=Math.min(6,Math.max(1,Math.ceil(Math.sqrt(Math.max(1,tier)))));
-            for(let i=0;i<count;i++)this.sample('coin',variation+i*.035,.34,i*.065);
+            const count=Math.min(3,Math.max(1,Math.ceil(Math.sqrt(Math.max(1,tier))/1.5)));
+            for(let i=0;i<count;i++)this.sample('coin',variation*(1.06+i*.05),.5,i*.09);
             this.sample('sparkle',variation*1.12,.14,.04);
           }else if(kind==='merge')this.sample(name,variation*Math.pow(1.055,Math.min(7,Math.max(1,tier))-1),.55);
           else this.sample(name,variation,name==='tap'?.18:name==='error'?.28:.48);
