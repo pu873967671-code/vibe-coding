@@ -63,7 +63,7 @@
         if(!getState().music||!window.Audio||!this.ctx.createMediaElementSource)return;
         // Safari grants playback per element. Warm both local scene tracks in
         // the first gesture so an automatic post-pack scene change can play too.
-        for(const name of ['cozy','tea']){
+        for(const name of ['tea']){
           if(this.failedTracks.has(name))continue;
           const track=this.track(name);if(track.primed)continue;
           track.primed=true;
@@ -98,7 +98,7 @@
           }
           this.currentTrack=null;return false;
         }
-        const name=getScene()==='merge'?'cozy':'tea';
+        const name='tea'; // user 2026-10-26: the reception track fits everywhere, keep one soft track
         if(this.failedTracks.has(name)||!window.Audio||!this.ctx.createMediaElementSource)return false;
         if(this.currentTrack===name&&!this.tracks.get(name)?.audio.paused)return true;
         try{
