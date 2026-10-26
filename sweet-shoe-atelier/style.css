@@ -1395,3 +1395,56 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 @media(orientation:portrait){.earned-celebration{top:8px;gap:5px;padding-left:6px;min-height:68px}.earned-celebration-art{width:58px;height:52px}.earned-celebration-copy strong{font-size:15px}.earned-celebration-copy small{font-size:9px;letter-spacing:.3px}}
 @media(prefers-reduced-motion:reduce){.earned-celebration,.earned-celebration-glints i{animation:none}.earned-celebration-glints{display:none}.renovation-reveal .room-detail-glint{animation:none}}
 @media(max-height:560px) and (orientation:landscape){.picker-recent-label{display:none}#studioScreen #options{min-height:72px}#studioScreen #options .option{min-height:72px}}
+
+/* USER12:47: crop the fixed camera; let its larger dock meet the picture. */
+.runway-modal .runway-dock{width:min(1440px,calc(100% - 32px));bottom:max(14px,env(safe-area-inset-bottom));border-radius:0 0 24px 24px;padding:18px 22px;gap:16px 20px;align-content:space-evenly;grid-template-columns:minmax(0,1fr) auto;background:linear-gradient(135deg,#fbfffcf5,#e5f7edf5);box-shadow:0 14px 40px #32765e24}
+.runway-modal .runway-dock .showcase-strip,.runway-modal .runway-dock .showcase-picker{height:88px}
+.runway-modal .runway-dock .showcase-picker{gap:10px;padding:2px}
+.runway-modal .runway-dock .showcase-chip{flex:1 0 164px;min-height:80px;grid-template-columns:64px minmax(0,1fr);gap:0 10px;padding:8px;border-radius:16px}
+.runway-modal .runway-dock .showcase-chip>img{width:64px;height:64px;border-radius:10px;object-fit:cover}
+.runway-modal .runway-dock .showcase-chip>span{font-size:14px;line-height:1.3;white-space:normal;text-align:left}
+.runway-modal .runway-dock .showcase-chip small{font-size:12px;text-align:left}
+.runway-modal .runway-dock .runway-actions{gap:12px;grid-column:2;grid-row:1}
+.runway-modal .runway-dock .runway-actions button{min-height:56px;padding:10px 24px;font-size:15px;border-radius:20px}
+.runway-modal .runway-sock-panel{gap:16px;padding:0;grid-row:2;align-items:center}
+.runway-modal .runway-sock-styles{gap:7px}
+.runway-modal .runway-sock-styles .sock-chip{min-height:52px;padding:8px 14px;font-size:14px;border-radius:16px}
+.runway-modal .runway-sock-colors{gap:5px}
+.runway-modal .runway-sock-colors .sock-color{width:48px;min-width:48px;min-height:52px}
+.runway-modal .sock-color>span{width:30px;height:30px}
+@media(orientation:portrait){
+ .runway-modal .runway-dock{width:100%;bottom:max(0px,env(safe-area-inset-bottom));padding:12px 14px;gap:10px;grid-template-columns:1fr;border-radius:0;align-content:space-evenly}
+ .runway-modal .runway-dock .showcase-strip,.runway-modal .runway-dock .showcase-picker{height:76px}
+ .runway-modal .runway-dock .showcase-chip{flex:0 0 156px;min-height:70px;grid-template-columns:54px minmax(0,1fr);gap:0 8px;padding:6px}
+ .runway-modal .runway-dock .showcase-chip>img{width:54px;height:54px}
+ .runway-modal .runway-sock-panel{flex-wrap:wrap;gap:10px;grid-row:2}
+ .runway-modal .runway-sock-styles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;overflow:visible;flex-basis:100%}
+ .runway-modal .runway-sock-styles .sock-chip{min-width:0;min-height:48px;padding:5px 4px;font-size:13px;white-space:normal;line-height:1.2}
+ .runway-modal .runway-sock-colors{width:100%;justify-content:center;gap:12px}
+ .runway-modal .runway-dock .runway-actions{grid-column:1;grid-row:3;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+ .runway-modal .runway-dock .runway-actions button{min-height:52px;padding:8px 16px;font-size:15px}
+}
+@media(max-width:600px) and (orientation:portrait){
+ .runway-modal .runway-dock{padding:8px 10px;gap:8px}
+ .runway-modal .runway-dock .showcase-strip,.runway-modal .runway-dock .showcase-picker{height:68px}
+ .runway-modal .runway-dock .showcase-chip{min-height:62px;flex-basis:164px;grid-template-columns:48px minmax(0,1fr)}
+ .runway-modal .runway-dock .showcase-chip>img{width:48px;height:48px}
+ .runway-modal .runway-dock .showcase-chip>span{font-size:13px}
+ .runway-modal .runway-sock-styles{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ .runway-modal .runway-sock-styles .sock-chip{min-height:44px;font-size:12px}
+ .runway-modal .runway-sock-panel{gap:6px}
+ .runway-modal .runway-sock-colors .sock-color{min-height:44px}
+ .runway-modal .runway-dock .runway-actions button{min-height:48px}
+}
+@media(max-height:560px) and (orientation:landscape){
+ .runway-modal .runway-dock{bottom:4px;width:calc(100% - 16px);padding:8px 10px;gap:6px 10px;grid-template-columns:minmax(0,1fr) auto;border-radius:0 0 16px 16px}
+ .runway-modal .runway-dock .showcase-strip,.runway-modal .runway-dock .showcase-picker{height:60px}
+ .runway-modal .runway-dock .showcase-chip{flex:1 0 154px;min-height:54px;grid-template-columns:44px minmax(0,1fr);gap:0 6px;padding:4px}
+ .runway-modal .runway-dock .showcase-chip>img{width:44px;height:44px}
+ .runway-modal .runway-dock .showcase-chip>span{font-size:12px}.runway-modal .runway-dock .showcase-chip small{font-size:12px;margin-top:1px}
+ .runway-modal .runway-dock .runway-actions button{min-height:44px;padding:6px 12px;font-size:13px}
+ .runway-modal .runway-sock-panel{gap:8px}.runway-modal .runway-sock-styles{gap:5px}
+ .runway-modal .runway-sock-styles .sock-chip{min-height:44px;font-size:12px;padding:5px 9px}
+ .runway-modal .runway-sock-colors{gap:0}.runway-modal .runway-sock-colors .sock-color{width:40px;min-width:40px;min-height:44px}
+ .runway-modal .sock-color>span{width:26px;height:26px}
+}
