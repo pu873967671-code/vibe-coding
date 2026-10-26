@@ -1,4 +1,16 @@
 # Asset manifest (all WebP, transparent unless noted). Some files may still be arriving; code must tolerate missing art with a tasteful fallback.
+
+Runtime packaging (Supervisor 2026-10-26 08:35): the sixteen legacy
+`shoe_{flat|block|kitten|wedge}_{thin|ribbon|cross|pearl}.webp` paintings remain
+source-only. The four `_none` paintings still ship for emergency product
+fallbacks. Product-camera `shoe2d/*_insole.webp` and `*_sole.webp` are also
+source-only: their fixed pixels already reside in each immutable `_base`
+painting, and the active compositor never requests the separate layers.
+Packaging still validates complete registered source kits before pruning;
+missing source layers and unregistered camera artwork remain release failures.
+Both music recordings, all soft 07:02 cues/codecs, licenses and preview routing
+remain intact.
+
 ## Merge items — assets/items/ (256×256)
 Chains (tier 1→7): fab = cotton ball, thread spool, yarn skein, folded fabric, printed fabric roll, satin bolt, silk bolt
 lea = leather scrap, leather strip, insole, outsole, heel block, wooden shoe last, finished blush pump
@@ -26,7 +38,7 @@ mentor_neutral (Madame Odette, guide, waist-up portrait, transparent). Existing 
 
 Font subset rebuild: `python3 dev/subset-font.py /path/to/NotoSansSC-VF.ttf` (requires fontTools). The helper collects all Chinese/full-width characters from local HTML/JS and verifies source coverage before replacing the font. Current subset: 634 characters, covering all current runtime Chinese/full-width copy, including scene Share/Buy labels and the extended introduction. Rebuilt for Supervisor 18:05 after actual screenshots exposed missing 分享 glyphs.
 ## Music — assets/audio/ (CC0 public domain, no attribution required; credits optional)
-bgm_cozy.mp3 — "Music Box: Cute Tune" by Aureolus_Omicron, CC0, loopable, 137 s (https://opengameart.org/content/4-music-box-tracks) → Atelier/merge board.
+bgm_cozy.mp3 — "Florist" by TAD, CC0, lofi (https://opengameart.org/content/lofi-compilation) → Atelier/merge board (user rejected procedural beeps and music box, 2026-10-26).
 bgm_tea.mp3 — "A cup of tea" by TAD, CC0, lofi, 169 s (https://opengameart.org/content/lofi-compilation) → use for Boutique/Studio/Try-on.
 Stream with HTMLAudioElement/MediaElementSource (lazy-load after first gesture, never block loading), loop, ~35% default volume, 1.5 s crossfade on screen change; procedural music only as fallback.
 - assets/scenes/: scene_mirror_lounge, scene_car, scene_vanity, scene_balcony (1536x1024 webp + _thumb 240x160), gpt-image-2, 2026-10-23, fitting showcase scenes (no people).
@@ -268,3 +280,5 @@ Crystal pavé is an original source-coordinate Canvas finish in `js/shoe2d.js`, 
 
 ## Heel-counter hosiery coverage — REVIEW 2026-10-26 07:00
 `fitting2d/<style>_hosiery.webp`: original offline semantic coverage maps for all20registered worn cameras, derived by `python3 dev/fitting-polish/build-hosiery-collars.py` from accepted shoe/upper/leg layers. Cover baked ankle-skin slivers under the shoe collar with the selected cloth after shoe shading and before ornaments. Skin-colour matching and existing upper masks preserve cream piping, gold hardware, integral trims and the open-toe shell; original source images remain byte-exact. Empty coverage uses a1×1transparent sentinel. Runtime uses draw-only source-atop compositing, retains source alpha and requires the map for complete fitted-kit recovery/packaging. Rebuild maps after registering a new camera.
+
+Supervisor 08:35 picker copy: local Noto Sans SC subset rebuilt to635runtime Chinese/full-width characters with the documented source/tool. New picker/celebration visuals use existing local artwork and CSS; no raster or audio added.
