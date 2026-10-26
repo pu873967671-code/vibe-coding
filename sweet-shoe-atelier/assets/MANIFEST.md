@@ -38,7 +38,7 @@ mentor_neutral (Madame Odette, guide, waist-up portrait, transparent). Existing 
 
 Font subset rebuild: `python3 dev/subset-font.py /path/to/NotoSansSC-VF.ttf` (requires fontTools). The helper collects all Chinese/full-width characters from local HTML/JS and verifies source coverage before replacing the font. Current subset: 634 characters, covering all current runtime Chinese/full-width copy, including scene Share/Buy labels and the extended introduction. Rebuilt for Supervisor 18:05 after actual screenshots exposed missing 分享 glyphs.
 ## Music — assets/audio/ (CC0 public domain, no attribution required; credits optional)
-bgm_cozy.mp3 — "Cozy Puzzle In-Game 2" by MintoDog, CC0, loopable, 90 bpm (https://opengameart.org/content/cozy-puzzle-in-game-2) → Atelier/merge board. User rejected procedural beeps, music box and piano lofi (2026-10-26): wants light, game-like.
+bgm_cozy.mp3 — "Heavenly Loop" (OGA, CC0, https://opengameart.org/content/heavenly-loop), soft ambient, 34 s loop → Atelier. User 2026-10-26: wants very soft light music; rejected beeps, music box, piano lofi, upbeat game track.
 bgm_tea.mp3 — "A cup of tea" by TAD, CC0, lofi, 169 s (https://opengameart.org/content/lofi-compilation) → use for Boutique/Studio/Try-on.
 Stream with HTMLAudioElement/MediaElementSource (lazy-load after first gesture, never block loading), loop, ~35% default volume, 1.5 s crossfade on screen change; procedural music only as fallback.
 - assets/scenes/: scene_mirror_lounge, scene_car, scene_vanity, scene_balcony (1536x1024 webp + _thumb 240x160), gpt-image-2, 2026-10-23, fitting showcase scenes (no people).
