@@ -17,8 +17,8 @@
  function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.thumbnail}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+(zh?'解锁 ':'Buy ')+s.price}</small></button>`;}).join('')}</div>`;}
  // Fixed camera authored against user_fixed_framing_1155.webp. These are
  // measured source pixels on the BAKED top surface, excluding the front rim.
- // Every room is cropped once into the same 610 x 620 presentation; resizing
- // can only multiply this composition by one scale factor.
+ // Every room shares the same 610 x 620 camera. USER12:47 reveals only its
+ // y100..600 crop; resizing still uses the original camera's uniform scale.
  const framing={
   salon:{size:[864,1222],horizon:550/1222,platform:{center:[433,728],rx:340,ry:74,depth:30}},
   mirror_lounge:{size:[848,1264],horizon:560/1264,platform:{center:[424,750],rx:348,ry:74,depth:34}},
@@ -26,16 +26,17 @@
   vanity:{size:[848,1264],horizon:560/1264,platform:{center:[424,752],rx:349,ry:74,depth:33}},
   balcony:{size:[896,1200],horizon:520/1200,platform:{center:[448,712],rx:357,ry:73,depth:30}}
  };
- const composition=Object.freeze({width:610,height:620,cx:305,cy:490,ry:59,footScale:.33,floor:542,extra:650});
- function project(id,w,h){
+ const composition=Object.freeze({width:610,height:620,cx:305,cy:490,ry:59,footScale:.33,floor:542,extra:650,crop:Object.freeze({x:0,y:100,width:610,height:500})});
+ function project(id,w,h,cropped=false){
   const room=framing[id]||framing.salon,anchor=room.platform,c=composition;
-  const uniform=Math.min(w/c.width,h/c.height),ox=(w-c.width*uniform)/2,oy=(h-c.height*uniform)/2;
+  const view=cropped===true?c.crop:{x:0,y:0,width:c.width,height:c.height};
+  const uniform=Math.min(w/view.width,h/view.height),ox=(w-view.width*uniform)/2-view.x*uniform,oy=(h-view.height*uniform)/2-view.y*uniform;
   const imageScale=c.ry/anchor.ry*uniform,[iw,ih]=room.size;
   const cx=ox+c.cx*uniform,cy=oy+c.cy*uniform;
   const background={x:cx-anchor.center[0]*imageScale,y:cy-anchor.center[1]*imageScale,width:iw*imageScale,height:ih*imageScale};
   return {scene:framing[id]?id:'salon',cx,cy,rx:anchor.rx*imageScale,ry:anchor.ry*imageScale,ratio:anchor.ry/anchor.rx,depth:anchor.depth*imageScale,
    scale:c.footScale*uniform,uniform,ox,oy,floor:oy+c.floor*uniform,extra:c.extra,
-   horizon:background.y+ih*room.horizon*imageScale,background,baked:true,composition:[c.width,c.height]};
+   horizon:background.y+ih*room.horizon*imageScale,background,baked:true,composition:[view.width,view.height],crop:cropped===true?c.crop:null};
  }
  // Reveal a saved choice when its strip is rebuilt or changes width. Leave
  // deliberate browsing alone between those events; never scroll the page.
@@ -56,19 +57,24 @@
   const root=stage.closest('.runway'),dock=root?.querySelector('.runway-dock');
   const heading=root?.querySelector('.runway-heading'),stageBox=stage.getBoundingClientRect();
   const top=heading?heading.getBoundingClientRect().bottom-stageBox.top:0;
-  const bottom=dock?dock.getBoundingClientRect().top-stageBox.top-12:h;
-  const clearance=h-bottom;stage.style.setProperty('--dock-clearance',clearance+'px');
   const host=stage.querySelector('.runway-worn-window');
   if(host){
-   const available=Math.max(1,bottom-top),uniform=Math.min(w/composition.width,available/composition.height);
-   const width=composition.width*uniform,height=composition.height*uniform;
+   // Keep the approved full-camera scale, then CUT its upper/lower extent.
+   // Fitting the shorter crop to the available height would enlarge the feet.
+   const legacyClearance=w<h?248:160;
+   const available=Math.max(1,h-top-legacyClearance),uniform=Math.min(w/composition.width,available/composition.height);
+   const width=composition.crop.width*uniform,height=composition.crop.height*uniform;
    const x=(w-width)/2,y=top;
    Object.assign(host.style,{left:x+'px',top:y+'px',width:width+'px',height:height+'px',right:'auto',bottom:'auto'});
-   const projected=project(stage.dataset.showcaseScene,width,height),bg=projected.background;
+   // The dock starts on the picture's lower edge at every aspect ratio. Its
+   // enlarged surface consumes the released space rather than exposing blur.
+   if(dock)dock.style.top=(top+height)+'px';
+   stage.style.setProperty('--dock-clearance',(h-top-height)+'px');
+   const projected=project(stage.dataset.showcaseScene,width,height,true),bg=projected.background;
    host.style.backgroundImage='var(--scene-image)';host.style.backgroundRepeat='no-repeat';
    host.style.backgroundSize=`${bg.width}px ${bg.height}px`;host.style.backgroundPosition=`${bg.x}px ${bg.y}px`;
    stage.dataset.floorProjection=JSON.stringify({...projected,frame:{x,y,width,height}});
-   stage.dataset.fixedFraming='610x620';stage.dataset.zoomEnabled='false';
+   stage.dataset.fixedFraming='610x500';stage.dataset.zoomEnabled='false';
   }
   // Buying a room rebuilds the dock. Keep the selected chip fully visible,
   // without scrolling the viewport or moving the separate Share actions.
