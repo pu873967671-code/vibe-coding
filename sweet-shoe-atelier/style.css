@@ -1195,6 +1195,13 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 .runway-scene>.runway-worn-window{top:0;left:0;right:0;border:0;border-radius:0;background:none;box-shadow:none;mask-image:none}
 .runway-worn-window:before{display:none}
 .runway-worn-window:after{display:none;animation:none}
+/* The approved fitting picture is one fixed camera. Only its outer frame
+   resizes. Soft room colour fills the unused space around the sharp crop. */
+.runway-scene:has(.runway-worn-window){background:#e9e5dc;isolation:isolate}
+.runway-scene:has(.runway-worn-window):before{content:'';display:block;position:absolute;inset:-24px;height:auto;background-image:linear-gradient(#f6fff742,#f5eee64d),var(--scene-image);background-size:cover;background-position:center 50%;filter:blur(20px);opacity:.7;pointer-events:none;z-index:0}
+.runway-scene>.runway-worn-window{overflow:hidden;z-index:3;max-width:none;max-height:none}
+.runway-scene:has(.runway-worn-window) .scene-atmosphere,.runway-scene:has(.runway-worn-window) .runway-spark{display:none}
+.runway-scene:has(.runway-worn-window) .runway-product-detail{display:none!important}
 .runway-scene:has(.runway-worn-window)>.runway-contact,.runway-scene:has(.runway-worn-window)>.runway-light,.runway-scene:has(.runway-worn-window)>.runway-mirror{display:none}
 
 .runway-scene:has(.runway-worn-window) .runway-spark{animation:showcase-soft-glint 6.8s ease-in-out infinite;pointer-events:none}
