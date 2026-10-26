@@ -7,7 +7,7 @@ Processed with ffmpeg: mono 32 kHz, warm 6.5 kHz lowpass, soft limiter, short fa
 tap.ogg / tap.mp3 <- kenney_interface-sounds/Audio/drop_003.ogg
 spawn.ogg / spawn.mp3 <- kenney_interface-sounds/Audio/maximize_008.ogg
 merge.ogg / merge.mp3 <- kenney_interface-sounds/Audio/maximize_006.ogg
-coin.ogg / coin.mp3 <- kenney_interface-sounds/Audio/glass_003.ogg
+coin.ogg / coin.mp3 <- kenney_rpg-audio/Audio/handleCoins2.ogg
 switch.ogg / switch.mp3 <- kenney_interface-sounds/Audio/bong_001.ogg
 pick.ogg / pick.mp3 <- kenney_interface-sounds/Audio/drop_002.ogg
 drop.ogg / drop.mp3 <- kenney_interface-sounds/Audio/drop_004.ogg
