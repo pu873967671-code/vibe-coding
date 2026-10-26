@@ -116,6 +116,24 @@
     if(!choices.length)return null;
     const {rank,...action}=choices[0];return action;
   }
+  // A resting wish need not stop the session. Inspect both customers without
+  // changing their requests; the studio remains a free productive destination
+  // when no wish can advance with the materials and tools currently available.
+  function activity(board,now=Date.now()) {
+    const orders=Array.isArray(board?.orders)?board.orders:[];
+    for(const order of orders)if(valid(order)&&indices(board,order))return {kind:'delivery',orderId:order.id};
+    const choices=orders.map(order=>({order,action:nextAction(board,order,now)}));
+    for(const kind of ['merge','gather']) {
+      const choice=choices.find(c=>c.action?.kind===kind);
+      if(choice)return {...choice.action,orderId:choice.order.id};
+    }
+    for(const order of orders)if(relief(board,order,now).available)return {kind:'relief',orderId:order.id};
+    const chest=board.cells.findIndex(c=>c?.kind==='chest'&&(c.drops===1||board.cells.includes(null)));
+    if(chest>=0)return {kind:'chest',indices:[chest]};
+    if(Math.floor((board.orderSequence||0)/(A.MergeRewards?.EVERY||5))>(board.chestsClaimed||0)&&board.cells.includes(null))return {kind:'gift'};
+    const free=board.cells.includes(null),energy=board.energy>0;
+    return {kind:'studio',reason:!energy?'energy':!free?'space':'cooldown'};
+  }
   function reward(order,state) {
     const effort=work(order.needs);
     return {coins:Math.round((6+effort*3+(order.needs.length-1)*6)*(1+(state?A.Boutique.count(state):0)*.02)),stars:Math.min(3,Math.max(1,Math.ceil(effort/8))),xp:effort*2};
@@ -197,5 +215,5 @@
     orders[slot]=next;
     return {ok:true,consumed,reward:payout,nextId:next.id};
   }
-  A.MergeOrders={make,ensure,availability,indices,nextAction,reward,relief,replace,deliver};
+  A.MergeOrders={make,ensure,availability,indices,nextAction,activity,reward,relief,replace,deliver};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
