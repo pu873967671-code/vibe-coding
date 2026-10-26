@@ -276,11 +276,11 @@ async function shareRunway(){
  const title=t('brand'),text=option('color',artwork.design.color)[1]+' · '+option('heel',artwork.design.heel)[1];
  try{
   const sceneId=artwork.scene||state.showcase.selected;
-  const source=document.createElement('canvas');source.width=1220;source.height=1240;
+  const source=document.createElement('canvas');source.width=1220;source.height=1000;
   const fitted=document.createElement('canvas');fitted.width=source.width;fitted.height=source.height;
-  await A.Fitting2D.render(fitted,artwork.design,artwork.fitting,sceneId);
+  await A.Fitting2D.render(fitted,artwork.design,artwork.fitting,sceneId,true);
   const backdrop=new Image();backdrop.src='assets/'+A.Showcase.find(sceneId).closeImage+'.webp';await backdrop.decode();
-  const {background:bg}=A.Showcase.project(sceneId,source.width,source.height),picture=source.getContext('2d');
+  const {background:bg}=A.Showcase.project(sceneId,source.width,source.height,true),picture=source.getContext('2d');
   picture.drawImage(backdrop,bg.x,bg.y,bg.width,bg.height);picture.drawImage(fitted,0,0);
   const blob=source?await new Promise(resolve=>source.toBlob(resolve,'image/png')):null;
   const file=blob?new File([blob],'sweet-shoe-atelier.png',{type:'image/png'}):null;
