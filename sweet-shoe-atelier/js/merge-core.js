@@ -21,7 +21,7 @@
     });
     cells[16] = generator('fab'); cells[18] = generator('lea');
     for (const [i, chain, tier] of [[23,'fab',1],[24,'fab',1],[25,'lea',1],[30,'fab',2],[31,'fab',2],[32,'lea',1],[37,'lea',2],[38,'lea',2]]) cells[i] = item(chain, tier);
-    return {cells, energy: MAX_ENERGY, energyAt: now, merges: 0, discovered: ['fab1','lea1','fab2','lea2']};
+    return {cells, storage:null, energy: MAX_ENERGY, energyAt: now, merges: 0, discovered: ['fab1','lea1','fab2','lea2']};
   }
   function tick(board, now = Date.now()) {
     let changed = false;
