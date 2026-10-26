@@ -10,32 +10,32 @@
   {id:'vanity',en:'Golden vanity',zh:'梳妆台卧室',price:360,image:'scenes/scene_vanity'},
   {id:'balcony',en:'Rose balcony',zh:'花园阳台',price:500,image:'scenes/scene_balcony'}
  ];
- scenes.forEach(s=>s.closeImage='scenes/close_'+s.id);
- scenes[0].closeImage='bg_fitting';
+ scenes.forEach(s=>{s.closeImage='scenes/fixed_'+s.id;s.thumbnail=s.closeImage;});
  const find=id=>scenes.find(x=>x.id===id);
  function sanitize(value){const owned=['salon',...new Set((Array.isArray(value?.owned)?value.owned:[]).filter(id=>id!=='salon'&&find(id)))];return {version:1,owned,selected:owned.includes(value?.selected)?value.selected:'salon'};}
  function choose(state,id,artwork){const scene=find(id);if(!scene)return {ok:false,reason:'scene'};const room=state.showcase||(state.showcase=sanitize());const unlocked=!room.owned.includes(id);if(unlocked){if(!Number.isFinite(state.coins)||state.coins<scene.price)return {ok:false,reason:'coins'};state.coins-=scene.price;room.owned.push(id);}room.selected=id;if(artwork)artwork.scene=id;return {ok:true,unlocked,scene};}
- function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.image}${s.id==='salon'?'':'_thumb'}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+(zh?'解锁 ':'Buy ')+s.price}</small></button>`;}).join('')}</div>`;}
- // One low camera for the immutable worn paintings. Backgrounds contain no
- // stage: this floor-plane calibration owns the only platform in each room.
- // Normalized anchors describe the room, not the cropped viewport.
+ function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.thumbnail}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+(zh?'解锁 ':'Buy ')+s.price}</small></button>`;}).join('')}</div>`;}
+ // Fixed camera authored against user_fixed_framing_1155.webp. These are
+ // measured source pixels on the BAKED top surface, excluding the front rim.
+ // Every room is cropped once into the same 610 x 620 presentation; resizing
+ // can only multiply this composition by one scale factor.
  const framing={
-  salon:{size:[1536,1024],horizon:.40,platform:{center:[.50,.80],rx:.52,ry:.156},top:'#f2fff8',edge:'#acd7c4'},
-  mirror_lounge:{size:[1536,1024],horizon:.40,platform:{center:[.50,.80],rx:.52,ry:.156},top:'#f6fff9',edge:'#b7d8c8'},
-  car:{size:[1536,1024],horizon:.40,platform:{center:[.50,.80],rx:.52,ry:.156},top:'#f1faf5',edge:'#b0ccbf'},
-  vanity:{size:[1536,1024],horizon:.40,platform:{center:[.50,.80],rx:.52,ry:.156},top:'#fffaf2',edge:'#dcc8ac'},
-  balcony:{size:[1536,1024],horizon:.40,platform:{center:[.50,.80],rx:.52,ry:.156},top:'#fff9f2',edge:'#d5c4b7'}
+  salon:{size:[864,1222],horizon:550/1222,platform:{center:[433,728],rx:340,ry:74,depth:30}},
+  mirror_lounge:{size:[848,1264],horizon:560/1264,platform:{center:[424,750],rx:348,ry:74,depth:34}},
+  car:{size:[848,1264],horizon:550/1264,platform:{center:[424,752],rx:334,ry:72,depth:31}},
+  vanity:{size:[848,1264],horizon:560/1264,platform:{center:[424,752],rx:349,ry:74,depth:33}},
+  balcony:{size:[896,1200],horizon:520/1200,platform:{center:[448,712],rx:357,ry:73,depth:30}}
  };
- function project(id,w,h,header=60,unit=1){
-  const room=framing[id]||framing.salon,anchor=room.platform;
-  // Width and visible shoe height constrain the whole camera together. The
-  // ellipse ratio never changes when the dock grows or the device rotates.
-  const scale=Math.max(.01,Math.min(w*.44/(230/.30),Math.max(40,h-header)*.90/800));
-  const rx=230/.30*scale,ratio=anchor.ry/anchor.rx,ry=rx*ratio,depth=14*scale;
-  const cx=w*anchor.center[0],cy=h-ry-depth-12*unit;
-  return {scene:framing[id]?id:'salon',cx,cy,rx,ry,ratio,depth,scale,
-   horizon:cy-(anchor.center[1]-room.horizon)/anchor.rx*rx,
-   floor:cy+174*scale,top:room.top,edge:room.edge};
+ const composition=Object.freeze({width:610,height:620,cx:305,cy:490,ry:59,footScale:.33,floor:542,extra:650});
+ function project(id,w,h){
+  const room=framing[id]||framing.salon,anchor=room.platform,c=composition;
+  const uniform=Math.min(w/c.width,h/c.height),ox=(w-c.width*uniform)/2,oy=(h-c.height*uniform)/2;
+  const imageScale=c.ry/anchor.ry*uniform,[iw,ih]=room.size;
+  const cx=ox+c.cx*uniform,cy=oy+c.cy*uniform;
+  const background={x:cx-anchor.center[0]*imageScale,y:cy-anchor.center[1]*imageScale,width:iw*imageScale,height:ih*imageScale};
+  return {scene:framing[id]?id:'salon',cx,cy,rx:anchor.rx*imageScale,ry:anchor.ry*imageScale,ratio:anchor.ry/anchor.rx,depth:anchor.depth*imageScale,
+   scale:c.footScale*uniform,uniform,ox,oy,floor:oy+c.floor*uniform,extra:c.extra,
+   horizon:background.y+ih*room.horizon*imageScale,background,baked:true,composition:[c.width,c.height]};
  }
  // Reveal a saved choice when its strip is rebuilt or changes width. Leave
  // deliberate browsing alone between those events; never scroll the page.
@@ -50,31 +50,32 @@
  }
  function frame(stage){
   if(!stage)return;const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
-  const dock=stage.closest('.runway')?.querySelector('.runway-dock'),clearance=Math.max((dock?.offsetHeight||0)+36,dock?h-(dock.getBoundingClientRect().top-stage.getBoundingClientRect().top)+16:0);
-  const detail=stage.dataset.runwayAngle==='side'&&stage.dataset.showcaseScene!=='car';
-  const art=stage.querySelector('.runway-angle-art'),ratio=parseFloat(art?.style.getPropertyValue('--foot-aspect'))||1.2;
-  const available=Math.max(80,h-clearance-80),zoom=stage.classList.contains('zoomed')?1.08:1;
-  const fitHeight=Math.min(Math.min(available*(detail?.84:.94)*zoom,available*(detail?.87:1)),(w-40)/(detail?1.35:ratio));
-  for(const [key,value] of Object.entries({'dock-clearance':clearance,'fit-height':fitHeight,'fit-left':w*.5,'fit-bottom':clearance+Math.max(0,(available-fitHeight)*.12)}))stage.style.setProperty('--'+key,value+'px');
-  const host=stage.querySelector('.runway-worn-window'),room=framing[stage.dataset.showcaseScene]||framing.salon;
+  // The dock and header frame the picture. They never change its camera or
+  // stretch the calves. Portrait and landscape share the same immutable crop.
+  stage.classList.remove('zoomed');stage.classList.remove('show-product-detail');
+  const root=stage.closest('.runway'),dock=root?.querySelector('.runway-dock');
+  const heading=root?.querySelector('.runway-heading'),stageBox=stage.getBoundingClientRect();
+  const top=heading?heading.getBoundingClientRect().bottom-stageBox.top:0;
+  const bottom=dock?dock.getBoundingClientRect().top-stageBox.top-12:h;
+  const clearance=h-bottom;stage.style.setProperty('--dock-clearance',clearance+'px');
+  const host=stage.querySelector('.runway-worn-window');
   if(host){
-   const stageBox=stage.getBoundingClientRect(),box=host.getBoundingClientRect();
-   const projected=project(stage.dataset.showcaseScene,box.width,box.height,stage.closest('.runway')?.querySelector('.runway-heading')?.offsetHeight||60);
-   const horizon=projected.horizon+box.top-stageBox.top,[iw,ih]=room.size;
-   // Cover the viewport while pinning the painted vanishing line to exactly
-   // the same horizon as the platform. Portrait crops never tilt the floor.
-   const imageScale=Math.max(w/iw,horizon/(ih*room.horizon),(h-horizon)/(ih*(1-room.horizon)));
-   const background={width:iw*imageScale,height:ih*imageScale,x:(w-iw*imageScale)/2,y:horizon-ih*room.horizon*imageScale};
-   stage.style.backgroundSize=`100% 100%, ${background.width}px ${background.height}px`;
-   stage.style.backgroundPosition=`0 0, ${background.x}px ${background.y}px`;
-   stage.dataset.floorProjection=JSON.stringify({...projected,background});
+   const available=Math.max(1,bottom-top),uniform=Math.min(w/composition.width,available/composition.height);
+   const width=composition.width*uniform,height=composition.height*uniform;
+   const x=(w-width)/2,y=top;
+   Object.assign(host.style,{left:x+'px',top:y+'px',width:width+'px',height:height+'px',right:'auto',bottom:'auto'});
+   const projected=project(stage.dataset.showcaseScene,width,height),bg=projected.background;
+   host.style.backgroundImage='var(--scene-image)';host.style.backgroundRepeat='no-repeat';
+   host.style.backgroundSize=`${bg.width}px ${bg.height}px`;host.style.backgroundPosition=`${bg.x}px ${bg.y}px`;
+   stage.dataset.floorProjection=JSON.stringify({...projected,frame:{x,y,width,height}});
+   stage.dataset.fixedFraming='610x620';stage.dataset.zoomEnabled='false';
   }
   // Buying a room rebuilds the dock. Keep the selected chip fully visible,
   // without scrolling the viewport or moving the separate Share actions.
-  const root=stage.closest('.runway'),picker=root?.querySelector('.showcase-picker');
+  const picker=root?.querySelector('.showcase-picker');
   revealChoice(picker,picker?.querySelector('.showcase-chip.selected'),stage.dataset.showcaseScene);
   const socks=root?.querySelector('.runway-sock-styles'),selected=socks?.querySelector('[aria-pressed="true"]');
   revealChoice(socks,selected,selected?.dataset.fittingSock);
  }
- A.Showcase={scenes,find,sanitize,choose,picker,frame,framing,project};
+ A.Showcase={scenes,find,sanitize,choose,picker,frame,framing,project,composition};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
