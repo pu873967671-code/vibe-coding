@@ -350,3 +350,7 @@ async function boot(){
 boot().catch(error=>{console.error('Atelier startup failed',error);$('loading').hidden=true;$('app').hidden=false;renderAll();});
 
 })(globalThis.SweetShoe = globalThis.SweetShoe || {});
+// Title screen: try to start the music as soon as the game opens. Browsers that
+// block autoplay start it on the very first press anywhere (pointerdown beats click).
+document.addEventListener('pointerdown',()=>audio.ensure(),{passive:true,capture:true});
+window.addEventListener('load',()=>{try{audio.ensure();}catch{}},{once:true});
