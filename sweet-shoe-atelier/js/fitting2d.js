@@ -253,27 +253,14 @@ async function composite(input,options){
 // left while the front calf continues right, matching the reference stance.
 function cubicValue(a,b,c,d,t){const s=1-t;return s*s*s*a+3*s*s*t*b+3*s*t*t*c+t*t*t*d;}
 function calfSection(height,rear=false){
- // Retain the approved silhouette above the last160source pixels. Only the
- // splice approaches the measured native alpha edge with its actual tangent.
- // Both the cloth projection and skin outline use this same cross section.
- const originalHeight=rear?height+50:height;
- const curves=rear?[[[460,-300],[419,originalHeight*.2],[551,originalHeight-210],[509,originalHeight]],[[747,-300],[775,originalHeight*.23],[751,originalHeight-210],[719,originalHeight]]]:
-  [[[602,-300],[552,height*.18],[555,height*.58],[547,height]],[[852,-300],[886,height*.20],[885,height*.59],[843,height]]];
- const ends=rear?[518.198,728.892]:[546.388,842.437],slopes=rear?[-.1647,-.2369]:[-.04948,-.28606],blend=160,memo=new Map();
- const edge=(curve,y)=>{
-  let lo=0,hi=1;for(let i=0;i<22;i++){const t=(lo+hi)/2;if(cubicValue(...curve.map(p=>p[1]),t)<y)lo=t;else hi=t;}
-  const t=(lo+hi)/2,s=1-t,dx=3*s*s*(curve[1][0]-curve[0][0])+6*s*t*(curve[2][0]-curve[1][0])+3*t*t*(curve[3][0]-curve[2][0]),dy=3*s*s*(curve[1][1]-curve[0][1])+6*s*t*(curve[2][1]-curve[1][1])+3*t*t*(curve[3][1]-curve[2][1]);
-  return [cubicValue(...curve.map(p=>p[0]),t),dx/dy];
- };
- const starts=curves.map(c=>edge(c,height-blend));
- return y=>{
-  if(memo.has(y))return memo.get(y);
-  const result=curves.map((c,i)=>{
-   if(y<=height-blend)return edge(c,y)[0];
-   const t=Math.min(1,(y-height+blend)/blend),s=1-t,[x,m]=starts[i];
-   return (1+2*t)*s*s*x+t*s*s*blend*m+t*t*(3-2*t)*ends[i]+t*t*(t-1)*blend*slopes[i];
-  });memo.set(y,result);return result;
- };
+ // One cubic covers the whole calf, from the knee taper above the crop,
+ // through its soft swell to the shared y250/y350 ankle approach. A short splice
+ // left most of the old outline almost straight and merely hid its corner.
+ // Linear y controls make this an exact smooth x(y), shared by skin and yarn.
+ const span=height+300,ends=rear?[518.198,728.892]:[530.848,759.607],slopes=rear?[-.1647,-.2369]:[-.09359,-.35146];
+ const starts=rear?[460,747]:[602,845],initial=rear?[-.038,.08]:[-.06,.12];
+ const controls=starts.map((x,i)=>[x,x+initial[i]*span/3,ends[i]-slopes[i]*span/3,ends[i]]);
+ return y=>{const t=Math.max(0,Math.min(1,(y+300)/span));return controls.map(c=>cubicValue(...c,t));};
 }
 function paintCalf(p,height,section){
  p.fillStyle=calfPaint(p);p.beginPath();const rows=hosieryRows(height+300,4).map(y=>y-300);
@@ -282,14 +269,14 @@ function paintCalf(p,height,section){
 }
 function pairedModel(source,options,extra=0,emergency=false){
  const leg=document.createElement('canvas');leg.width=SIZE;leg.height=1324+extra;const l=leg.getContext('2d');l.imageSmoothingQuality='high';
- const left=emergency?575:547,right=emergency?755:843,extension=300+extra,frontSection=calfSection(extension);
+ const left=emergency?575:547,right=emergency?755:843,extension=(emergency?300:550)+extra,frontSection=calfSection(extension);
  if(emergency){l.fillStyle=calfPaint(l);l.beginPath();l.moveTo(left+55,-300);l.bezierCurveTo(left+5,extension*.18,left+8,extension*.58,left,extension);l.lineTo(right,extension);l.bezierCurveTo(right+42,extension*.59,right+43,extension*.20,right+9,-300);l.closePath();l.fill();}else paintCalf(l,extension,frontSection);calfVolume(l,left,right,extension);
  const o=fittingOptions(options);if(LONG_HOSIERY.has(o.sock)){
-  const sheath=document.createElement('canvas');sheath.width=SIZE;sheath.height=300+extra;const q=sheath.getContext('2d');q.drawImage(leg,0,0);q.globalCompositeOperation='source-in';q.fillStyle=hosieryColour(o);q.fillRect(0,0,SIZE,sheath.height);
+  const sheath=document.createElement('canvas');sheath.width=SIZE;sheath.height=extension;const q=sheath.getContext('2d');q.drawImage(leg,0,0);q.globalCompositeOperation='source-in';q.fillStyle=hosieryColour(o);q.fillRect(0,0,SIZE,sheath.height);
   const section=frontSection;
-  hosierySurface(q,sheath.height,section);hosieryTexture(q,o,sheath.height,section,-extension);l.save();l.globalAlpha=hosieryOpacity(o);l.drawImage(sheath,0,0);l.restore();fishnetYarn(l,sheath,o,sheath.height,section,-extension);
+  hosierySurface(q,sheath.height,section);hosieryTexture(q,o,sheath.height,section,250-extension);l.save();l.globalAlpha=hosieryOpacity(o);l.drawImage(sheath,0,0);l.restore();fishnetYarn(l,sheath,o,sheath.height,section,250-extension);
  }
- l.drawImage(source,0,300+extra);
+ if(emergency)l.drawImage(source,0,300+extra);else l.drawImage(source,0,250,SIZE,SIZE-250,0,extension,SIZE,SIZE-250);
  // Author a separate rear calf, leaning out to the left above the shared
  // camera-matched ankle. Only the ankle/foot painting is reused: a second
  // full-height copy would merge into one oversized calf at this close pose.
@@ -334,14 +321,14 @@ function soleShadow(p,contacts){
   p.save();p.translate(x,y);p.rotate(-.12);p.scale(1,ry/rx);const g=p.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,'#4b5e5070');g.addColorStop(.55,'#4b5e503c');g.addColorStop(1,'#4b5e5000');p.fillStyle=g;p.beginPath();p.arc(0,0,rx,0,Math.PI*2);p.fill();p.restore();
  }
 }
-async function render(target,input,options,sceneId){
+async function render(target,input,options,sceneId,cropped=false){
  const token={};tokens.set(target,token);target.dataset.fitting2dReady='false';const d=clean(input),o=fittingOptions(options),result=await composite(d,o);if(tokens.get(target)!==token)return false;
  const p=target.getContext('2d');p.clearRect(0,0,target.width,target.height);p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';
  // One transform covers skin, socks, shoe and every ornament. Slender fashion
  // proportions therefore cannot open a gap at a collar or move a fastening.
  // Keep long legs bleeding past the viewport while making feet more delicate.
- const stage=target.closest?.('.runway-scene'),host=target.parentElement,unit=host?.clientWidth?target.width/host.clientWidth:1,header=stage?.closest('.runway')?.querySelector('.runway-heading')?.offsetHeight||60;
- const geometry=A.Showcase.project(sceneId||stage?.dataset.showcaseScene||'salon',target.width,target.height,header*unit,unit);
+ const stage=target.closest?.('.runway-scene');
+ const geometry=A.Showcase.project(sceneId||stage?.dataset.showcaseScene||'salon',target.width,target.height,!!stage||cropped);
  // Fixed source-camera registration: taller sole paintings keep the same
  // toe contact as the approved pump, without resizing the shoe or calf.
  geometry.floor+=({wedge:(964-993)*.33,platform:(964-999)*.33}[d.heel]||0)*geometry.uniform;
@@ -350,7 +337,7 @@ async function render(target,input,options,sceneId){
  p.save();p.translate(-100,-200);p.translate(550,1160+extra);p.rotate(-.08);p.translate(-550,-1160-extra);p.translate(0,300+extra);soleShadow(p,shadowContacts);p.restore();
  p.translate(-150,300+extra);soleShadow(p,shadowContacts);p.restore();
  p.drawImage(pair,x,y,w,h);
- Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-100,-200,1,-.08;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[-100,-200,-.08],front:[-150,0],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:'610x620',shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
+ Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-100,-200,1,-.08;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[-100,-200,-.08],front:[-150,0],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
 }
 function mount(host,input,options){
  const target=canvas();target.className='fitting2d-canvas';target.setAttribute('role','img');target.setAttribute('aria-label',A.lang==='zh'?'双脚穿着你的鞋款与袜子搭配':'Both feet wearing your shoes and chosen socks');host.replaceChildren(target);
