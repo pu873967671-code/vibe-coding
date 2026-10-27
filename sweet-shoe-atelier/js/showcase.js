@@ -66,13 +66,18 @@
    const width=composition.crop.width*uniform,height=composition.crop.height*uniform;
    const x=(w-width)/2,y=top;
    Object.assign(host.style,{left:x+'px',top:y+'px',width:width+'px',height:height+'px',right:'auto',bottom:'auto'});
+   root?.style.setProperty('--fitting-picture-width',width+'px');
    // The dock starts on the picture's lower edge at every aspect ratio. Its
    // enlarged surface consumes the released space rather than exposing blur.
    if(dock)dock.style.top=(top+height)+'px';
    stage.style.setProperty('--dock-clearance',(h-top-height)+'px');
    const projected=project(stage.dataset.showcaseScene,width,height,true),bg=projected.background;
-   host.style.backgroundImage='var(--scene-image)';host.style.backgroundRepeat='no-repeat';
-   host.style.backgroundSize=`${bg.width}px ${bg.height}px`;host.style.backgroundPosition=`${bg.x}px ${bg.y}px`;
+   // Project the same room beyond the picture without moving the feet.
+   host.style.backgroundImage='none';
+   stage.style.setProperty('--room-background-size',`${bg.width}px ${bg.height}px`);
+   stage.style.setProperty('--room-background-position',`${x+bg.x}px ${y+bg.y}px`);
+   stage.style.setProperty('--room-left',`${x+bg.x}px`);
+   stage.style.setProperty('--room-right',`${x+bg.x+bg.width}px`);
    stage.dataset.floorProjection=JSON.stringify({...projected,frame:{x,y,width,height}});
    stage.dataset.fixedFraming='610x500';stage.dataset.zoomEnabled='false';
   }
