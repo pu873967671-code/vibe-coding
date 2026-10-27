@@ -1532,3 +1532,8 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 }
 
 @media(orientation:landscape) and (max-height:560px){#studioScreen .options-heading{display:none}}
+
+#saveNotice{position:fixed;z-index:110;top:12px;right:12px;pointer-events:none;padding:8px 14px;border:1px solid #b2dec9;border-radius:20px;background:#f4fff9;color:#315d4e;box-shadow:0 4px 16px #32765e25;font:700 12px/1.3 var(--font-ui);opacity:0;transition:opacity .15s}
+#saveNotice.show{opacity:1}
+.design-undo{min-height:44px;padding:0 12px;border-radius:16px;background:#f4e4ec;color:#624451;font:700 12px var(--font-ui)}
+.design-undo:disabled{opacity:.42}
