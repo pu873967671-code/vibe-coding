@@ -217,6 +217,35 @@ function bow(p,x,y,size,colour,puffy=false){
  }
  p.shadowColor='transparent';p.fillStyle=g;p.beginPath();p.roundRect(-10,-14,20,29,7);p.fill();p.strokeStyle=silkTone(colour,-.24);p.lineWidth=1.2;p.stroke();p.strokeStyle='#ffffffa8';p.lineWidth=2;p.beginPath();p.moveTo(-5,-8);p.quadraticCurveTo(-7,0,-4,9);p.stroke();p.restore();
 }
+function puffyBow(p,x,y,size,colour){
+ p.save();p.translate(x,y);p.rotate(-.22);p.scale(1,.84);
+ p.fillStyle='#56363d44';p.filter='blur(7px)';p.beginPath();p.ellipse(0,14,size*.89,size*.37,0,0,Math.PI*2);p.fill();p.filter='none';
+ for(const side of [-1,1]){
+  p.save();p.scale(side*(side<0?.88:1),1);
+  const tail=p.createLinearGradient(0,0,size*.5,size*.7);tail.addColorStop(0,silkTone(colour,-.32));tail.addColorStop(.48,colour);tail.addColorStop(1,silkTone(colour,-.25));
+  p.fillStyle=tail;p.beginPath();p.moveTo(0,4);p.bezierCurveTo(size*.18,size*.17,size*.31,size*.43,size*.48,size*.72);p.lineTo(size*.28,size*.61);p.lineTo(size*.19,size*.76);p.bezierCurveTo(size*.12,size*.48,size*.08,size*.25,-2,12);p.closePath();p.fill();
+  const loop=p.createLinearGradient(size*.35,-size*.55,size*.52,size*.48);loop.addColorStop(0,silkTone(colour,-.12));loop.addColorStop(.18,silkTone(colour,.48));loop.addColorStop(.37,silkTone(colour,.16));loop.addColorStop(.57,colour);loop.addColorStop(.78,silkTone(colour,-.08));loop.addColorStop(1,silkTone(colour,-.35));
+  p.fillStyle=loop;p.strokeStyle=silkTone(colour,-.27);p.lineWidth=1.2;p.beginPath();p.moveTo(3,-5);p.bezierCurveTo(size*.28,-size*.31,size*.7,-size*.62,size*.91,-size*.42);p.bezierCurveTo(size*1.08,-size*.26,size*1.02,size*.18,size*.91,size*.28);p.bezierCurveTo(size*.69,size*.44,size*.29,size*.22,3,8);p.closePath();p.fill();p.stroke();
+  p.save();p.globalAlpha=.19;p.fillStyle=silkTone(colour,-.42);p.beginPath();p.moveTo(5,1);p.bezierCurveTo(size*.26,-size*.08,size*.51,-size*.17,size*.79,-size*.17);p.bezierCurveTo(size*.55,-size*.06,size*.29,size*.04,5,8);p.closePath();p.fill();p.restore();
+  p.strokeStyle=silkTone(colour,.6);p.globalAlpha=.6;p.lineWidth=3;p.beginPath();p.moveTo(size*.18,-size*.15);p.bezierCurveTo(size*.43,-size*.36,size*.7,-size*.43,size*.84,-size*.32);p.stroke();
+  p.globalAlpha=.28;p.lineWidth=1.5;p.beginPath();p.moveTo(size*.15,size*.1);p.quadraticCurveTo(size*.47,size*.27,size*.77,size*.23);p.stroke();p.restore();
+ }
+ const knot=p.createLinearGradient(-12,-12,12,12);knot.addColorStop(0,silkTone(colour,-.2));knot.addColorStop(.3,silkTone(colour,.55));knot.addColorStop(.62,colour);knot.addColorStop(1,silkTone(colour,-.3));
+ p.fillStyle=knot;p.strokeStyle=silkTone(colour,-.24);p.lineWidth=1.2;p.beginPath();p.roundRect(-10,-13,20,27,7);p.fill();p.stroke();p.globalAlpha=.48;p.strokeStyle=silkTone(colour,.72);p.lineWidth=2;p.beginPath();p.moveTo(-4,-9);p.quadraticCurveTo(-6,0,-3,9);p.stroke();p.restore();
+}
+let puffyImage, puffyLoad;
+const puffyColours=new Map();
+function loadPuffy(){
+ if(!puffyLoad)puffyLoad=new Promise(resolve=>{const image=new Image();image.onload=()=>{puffyImage=image;resolve();};image.onerror=()=>resolve();image.src='assets/ornaments/puffy_satin.webp';});
+ return puffyLoad;
+}
+function paintedPuffy(p,d,camera,a,colour){
+ if(!puffyImage){puffyBow(p,a.vamp[0]+18,a.vamp[1]+(camera==='product'?24:32),80,colour);return;}
+ let image=puffyColours.get(colour);
+ if(!image){image=document.createElement('canvas');image.width=puffyImage.naturalWidth;image.height=puffyImage.naturalHeight;const context=image.getContext('2d');context.drawImage(puffyImage,0,0);const pixels=context.getImageData(0,0,image.width,image.height);for(let index=0;index<pixels.data.length;index+=4){const luminance=Math.round(.2126*pixels.data[index]+.7152*pixels.data[index+1]+.0722*pixels.data[index+2]);pixels.data[index]=pixels.data[index+1]=pixels.data[index+2]=luminance;}context.putImageData(pixels,0,0);context.globalCompositeOperation='multiply';context.fillStyle=silkTone(colour,.3);context.fillRect(0,0,image.width,image.height);context.globalCompositeOperation='destination-in';context.drawImage(puffyImage,0,0);puffyColours.set(colour,image);}
+ const x=a.vamp[0]+32,y=a.vamp[1]-(camera==='product'?34:22),width=camera==='product'?150:145,height=width*image.height/image.width*.77;
+ p.save();p.translate(x,y);p.rotate(camera==='product'?.20:.12);p.shadowColor='#67434b88';p.shadowBlur=6;p.shadowOffsetY=4;p.drawImage(image,-width/2,-height*.42,width,height);p.restore();
+}
 function drawOne(p,d,camera,category,upper){
  if(category==='charm'&&d.charm==='toeglitter'&&upper){const c=document.createElement('canvas');c.width=p.canvas.width;c.height=p.canvas.height;const q=c.getContext('2d');drawOne(q,d,camera,category);q.globalCompositeOperation='destination-in';q.drawImage(upper,0,0,c.width,c.height);p.drawImage(c,0,0);return true;}
  const value=d[category];if(!handles(category,value,camera))return false;const a=anchor(d,camera),colour=PALETTE[d.color]||PALETTE.pink;
@@ -228,7 +257,10 @@ function drawOne(p,d,camera,category,upper){
    // Product straps rise above the empty opening in the Mary-Jane plane.
    // The two camera-specific ends are sewn into the far binding and near
    // upper, rather than terminating along the insole or halfway into space.
-   const product=camera==='product',path=a.bridge;
+   const product=camera==='product',rows=laceCamera(d,camera).rows,far=rows[0][0],near=rows[0][1];
+   const start=product?[far[0]+6,far[1]+(d.heel==='stiletto9'?15:0)]:[far[0]+3,far[1]-20];
+   const end=product?[near[0]+20,near[1]-65]:[near[0]+100,near[1]-85];
+   const path=[...start,(start[0]+end[0])/2-15,product?Math.min(start[1],end[1])-100:(start[1]+end[1])/2-80,...end];
    strokeCurve(p,path,'#79564566',product?13:6);
    strokeCurve(p,path,'#f4e5c8',product?9:2.5);
    for(const t of [0,1]){
@@ -248,10 +280,10 @@ function drawOne(p,d,camera,category,upper){
     const blend=(target-previous.length)/(sample.length-previous.length||1),t=previous.t+(sample.t-previous.t)*blend,[x,y]=curve(path,t);
     pearl(p,x,y,product?6.8+fraction*4.5:7.5+fraction*5.2);
    }
-   if(product){
-    const [x,y]=curve(path,1);p.save();p.shadowColor='#80584666';p.shadowBlur=3;p.shadowOffsetY=2;
-    p.fillStyle='#b28a52';p.beginPath();p.ellipse(x+4,y+11,10,9,.4,0,Math.PI*2);p.fill();
-    p.shadowColor='transparent';p.strokeStyle='#ffe8ac';p.lineWidth=2;p.stroke();pearl(p,x+3,y+10,5);p.restore();
+   for(const t of [0,1]){
+    const [x,y]=curve(path,t),angle=tangent(path,t);
+    p.save();p.translate(x,y);p.rotate(angle);p.fillStyle='#b58a4f';p.beginPath();p.roundRect(-4,-6,8,12,3);p.fill();
+    p.strokeStyle='#ffe9aa';p.lineWidth=1.5;p.stroke();p.restore();
    }
   }else if(value==='crystalband'){
    const path=a.bridge;strokeCurve(p,path,'#76584277',14);strokeCurve(p,path,'#ddbf82',10);
@@ -283,11 +315,11 @@ function drawOne(p,d,camera,category,upper){
   // Taller slim-pump arches leave less fabric above the pinned outsole.
   const clearance=camera==='product'&&['stiletto6','stiletto9'].includes(A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel)?14:camera!=='product'&&d.heel==='kitten'&&value==='rosette'?8:0;
   const dy=y+(camera==='product'?24:32)-clearance;
-  if(value==='puffy')bow(p,x+18,dy,80,colour,true);
+  if(value==='puffy')paintedPuffy(p,d,camera,a,colour);
   else if(value==='doublebow'){bow(p,x+16,dy,80,colour);bow(p,x+16,dy,53,'#fff0da');}
   else if(value==='heelcrystal'){const [bx,by]=a.rear;gem(p,bx,by+17,9,15,-.18);gem(p,bx-5,by+49,7,12,.16);}
   else if(value==='heelbow'){
-   const [bx,by]=a.rear;p.save();p.translate(bx-5,by+21);p.rotate(.18);p.fillStyle=silkTone(colour,-.2);p.beginPath();p.ellipse(0,0,12,20,-.2,0,Math.PI*2);p.fill();bow(p,0,0,camera==='product'?32:29,colour);pearl(p,0,0,4.5);p.restore();
+   const [bx,by]=a.rear;p.save();p.translate(bx-5,by+21);p.rotate(.18);p.fillStyle=silkTone(colour,-.2);p.beginPath();p.ellipse(0,0,12,20,-.2,0,Math.PI*2);p.fill();bow(p,0,0,camera==='product'?32:(d.heel==='flat'?39:29),colour);pearl(p,0,0,4.5);p.restore();
   }else if(value==='camellia'){
    p.save();p.translate(x+16,dy+4);p.rotate(-.2);p.scale(1,.74);
    p.shadowColor='#76505c55';p.shadowBlur=4;p.shadowOffsetY=3;
@@ -316,5 +348,5 @@ function drawOne(p,d,camera,category,upper){
  p.restore();return true;
 }
 function draw(p,d,camera){for(const category of Object.keys(OPTIONS))drawOne(p,d,camera,category);}
-A.AccessoryRenderer=Object.freeze({handles,draw,drawOne,options:OPTIONS,anchors:Object.freeze({product:PRODUCT,worn:WORN}),laceCamera,laceStrands,laceRibbonPoints});
+A.AccessoryRenderer=Object.freeze({handles,draw,drawOne,loadPuffy,options:OPTIONS,anchors:Object.freeze({product:PRODUCT,worn:WORN}),laceCamera,laceStrands,laceRibbonPoints});
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
