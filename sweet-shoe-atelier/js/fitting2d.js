@@ -7,8 +7,142 @@ const SIZE=1024,LIMIT=8;
 const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#696883'};
 const sources=new Map(),cache=new Map(),pending=new Map(),tokens=new WeakMap();
 const ornaments=new Map();
-async function ornament(heel,name){heel=A.SHOE_STYLES?.[heel]?.accessoryBase||heel;const id=heel+'_'+name;if(!ornaments.has(id))ornaments.set(id,Promise.all([image('assets/fitting2d/accessories/'+id+'.webp'),['strap_thin','strap_ribbon','strap_cross','decoration_small','decoration_big','charm_mini'].includes(name)?image('assets/fitting2d/accessories/'+id+'_tint.webp'):Promise.resolve(null)]));return ornaments.get(id);}
-async function drawOrnaments(p,d,upper){for(const category of ['strap','decoration','charm']){if(d[category]==='none')continue;if(A.AccessoryRenderer?.handles(category,d[category])){A.AccessoryRenderer.drawOne(p,d,'worn',category,upper);continue;}const [im,mask]=await ornament(d.heel,category+'_'+d[category]);if(!im)continue;if(!mask){p.drawImage(im,0,0,SIZE,SIZE);continue;}const layer=canvas(),q=layer.getContext('2d');q.drawImage(im,0,0,SIZE,SIZE);q.globalCompositeOperation='multiply';q.fillStyle=COLORS[d.color]||COLORS.pink;q.fillRect(0,0,SIZE,SIZE);q.globalCompositeOperation='destination-in';q.drawImage(mask,0,0,SIZE,SIZE);p.drawImage(im,0,0,SIZE,SIZE);p.drawImage(layer,0,0);}}
+// The showcase's layered lilac rosette is the same physical ornament when
+// worn. These measured source rectangles project its painted petals/metal
+// onto each existing counter mount; no anatomy or viewport transform changes.
+const FLOWER_PROJECTIONS={
+ flat:{source:[832,186,125,182],target:[724,510,115,139]},
+ kitten:{source:[830,80,128,184],target:[732,507,117,142]},
+ block:{source:[829,75,128,175],target:[724,502,116,147]},
+ wedge:{source:[827,67,132,190],target:[723,487,98,147]},
+ stiletto6:{source:[830,73,128,186],target:[732,419,117,142]},
+ stiletto9:{source:[830,78,128,185],target:[732,407,117,145]},
+ platform:{source:[829,75,128,175],target:[729,462,116,147]}
+};
+// The crystal toe brooch is the same lilac, gold-set stone in both cameras.
+// Keep the existing toe mount, its painted facet proportions and fixed metal
+// colours. Camera-local scale is independent of viewport/finish/hosiery.
+const CRYSTAL_PROJECTIONS={
+ flat:[249,388,87,51,278.5,848,.72],
+ block:[249,395,98,58,252,863.5,.67],
+ kitten:[269,380,93,70,304,830.5,.67],
+ wedge:[240,343,101,80,305,842.5,.58],
+ stiletto6:[269,394,93,71,304,827.5,.67],
+ stiletto9:[269,399,93,71,304,827.5,.67],
+ platform:[249,345,98,56,257,823.5,.67]
+};
+// The nacre cabochon and its braided gold bezel retain the product painting,
+// rather than substituting the former small plain bead in the worn camera.
+const PEARL_PROJECTIONS={
+ flat:[252,369,64,58,282.5,857,.72],
+ block:[288,374,69,54,289,859,.68],
+ kitten:[281,381,66,61,304,851,.70],
+ wedge:[249,348,82,58,305,837,.60],
+ stiletto6:[281,395,66,62,304,848,.70],
+ stiletto9:[281,400,66,62,304,848,.70],
+ platform:[288,323,69,56,294,819,.68]
+};
+// Pin the same folded satin knot to the outside counter. The far loop passes
+// behind the calf; the near loop and long tails keep their original painting.
+const GRAND_MOUNTS={
+ flat:[915,211,738,500,.80],block:[877,103,735,482,.65],
+ kitten:[897,91,738,499,.68],wedge:[890,106,739,463,.65],
+ stiletto6:[897,106,767,425,.68],stiletto9:[897,111,739,415,.68],
+ platform:[877,79,735,443,.65]
+};
+function projectGrandBow(p,d,painting,mask,mount){
+ const dyed=document.createElement('canvas');dyed.width=1024;dyed.height=640;
+ const tint=document.createElement('canvas');tint.width=1024;tint.height=640;
+ const t=tint.getContext('2d');t.drawImage(painting,0,0);
+ t.globalCompositeOperation='multiply';t.fillStyle=COLORS[d.color]||COLORS.pink;t.fillRect(0,0,1024,640);
+ t.globalCompositeOperation='destination-in';t.drawImage(mask,0,0);
+ const f=dyed.getContext('2d');f.drawImage(painting,0,0);f.globalCompositeOperation='source-atop';f.drawImage(tint,0,0);
+ const [sx,sy,tx,ty,scale]=mount,layer=canvas(),q=layer.getContext('2d');
+ q.imageSmoothingEnabled=true;q.imageSmoothingQuality='high';
+ q.setTransform(scale,0,0,scale,tx-sx*scale,ty-sy*scale);q.drawImage(dyed,0,0);q.resetTransform();
+ // Occlude only the far half against the complete skin/sock/shoe silhouette.
+ // The sewn knot straddles the contour, so it stays visibly attached even
+ // when knee socks replace skin. No pixel reads are needed for this mask.
+ q.save();q.beginPath();q.rect(0,0,tx-5,SIZE);q.clip();
+ q.globalCompositeOperation='destination-out';q.drawImage(p.canvas,0,0);q.restore();
+ p.drawImage(layer,0,0);
+}
+function projectToeOrnament(p,painting,mount){
+ const [x,y,w,h,cx,cy,scale]=mount;
+ p.save();p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';
+ p.drawImage(painting,x,y,w,h,cx-w*scale/2,cy-h*scale/2,w*scale,h*scale);
+ p.restore();
+}
+// The wide folded band, knot and asymmetric tails are one physical ribbon.
+// Project the retained showcase painting between independently measured far
+// collar / outer knot mounts. Normal scale preserves its broad satin face.
+const RIBBON_MOUNTS={
+ flat:{from:[366,342,701,377],to:[420,626,650,727],normal:.76},
+ kitten:{from:[420,333,692,347],to:[431,613,670,686],normal:.72},
+ block:{from:[483,294,729,295],to:[423,626,652,690],normal:.72},
+ wedge:{from:[366,344,674,323],to:[440,590,677,640],normal:.63},
+ stiletto6:{from:[420,348,692,357],to:[431,598,683,643],normal:.72},
+ stiletto9:{from:[420,348,692,357],to:[431,595,675,640],normal:.72},
+ platform:{from:[483,270,729,270],to:[445,587,677,650],normal:.72}
+};
+// Match the showcase's real buckle, stitched tab and punched holes. Mount the
+// buckle at the collar itself; the former painted strip ended on bare skin.
+const THIN_MOUNTS={
+ flat:{from:[485,286,653,376],to:[414,642,654,713],normal:.78},
+ block:{from:[548,247,704,292],to:[429,607,664,658],normal:.78},
+ kitten:{from:[532,258,711,306],to:[406,660,652,719],normal:.78},
+ wedge:{from:[502,234,670,271],to:[423,621,668,657],normal:.78},
+ stiletto6:{from:[556,256,710,309],to:[406,647,671,671],normal:.78},
+ stiletto9:{from:[582,267,710,310],to:[406,647,667,657],normal:.78},
+ platform:{from:[546,220,700,272],to:[454,559,696,618],normal:.78}
+};
+async function ornament(heel,name){heel=A.SHOE_STYLES?.[heel]?.accessoryBase||heel;const id=heel+'_'+name,product=name==='decoration_big'&&GRAND_MOUNTS[heel]||name==='charm_pearl'&&PEARL_PROJECTIONS[heel]||name==='charm_crystal'&&CRYSTAL_PROJECTIONS[heel]||name==='decoration_flower'&&FLOWER_PROJECTIONS[heel]||name==='strap_ribbon'&&RIBBON_MOUNTS[heel]||name==='strap_thin'&&THIN_MOUNTS[heel];if(!ornaments.has(id))ornaments.set(id,Promise.all([image('assets/fitting2d/accessories/'+id+'.webp'),['strap_thin','strap_ribbon','strap_cross','decoration_small','decoration_big','charm_mini'].includes(name)?image('assets/fitting2d/accessories/'+id+'_tint.webp'):Promise.resolve(null),product?image('assets/shoe2d/accessories/'+id+'.webp'):Promise.resolve(null),['strap_ribbon','strap_thin','decoration_big'].includes(name)&&product?image('assets/shoe2d/accessories/'+id+'_tint.webp'):Promise.resolve(null)]));return ornaments.get(id);}
+function drawRibbon(p,d,painting,mask,mount){
+ const fabric=document.createElement('canvas');fabric.width=1024;fabric.height=640;const f=fabric.getContext('2d');
+ f.drawImage(painting,0,0);f.globalCompositeOperation='multiply';f.fillStyle=COLORS[d.color]||COLORS.pink;f.fillRect(0,0,1024,640);f.globalCompositeOperation='destination-in';f.drawImage(mask,0,0);
+ // Match the product compositor exactly, including partial tint at silk edges.
+ const dyed=document.createElement('canvas');dyed.width=1024;dyed.height=640;const z=dyed.getContext('2d');z.drawImage(painting,0,0);z.globalCompositeOperation='source-atop';z.drawImage(fabric,0,0);
+ // The wedge's returning far tab fastens behind the fitted ankle. Its empty
+ // product-camera loop must not become a pointed free end on bare skin.
+ if(d.strap==='ribbon'&&(A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel)==='wedge'){z.globalCompositeOperation='destination-out';z.beginPath();z.moveTo(650,290);z.lineTo(724,140);z.lineTo(810,190);z.lineTo(708,320);z.closePath();z.fillStyle='#fff';z.fill();}
+ const [sx,sy,ex,ey]=mount.from,[tx,ty,nx,ny]=mount.to,dx=ex-sx,dy=ey-sy,length=Math.hypot(dx,dy),ux=dx/length,uy=dy/length,vx=(nx-tx)/length,vy=(ny-ty)/length,angle=Math.atan2(ny-ty,nx-tx),px=-Math.sin(angle)*mount.normal,py=Math.cos(angle)*mount.normal;
+ const a=vx*ux-px*uy,b=vy*ux-py*uy,c=vx*uy+px*ux,e=vy*uy+py*ux;
+ let projected=canvas();let q=projected.getContext('2d');q.imageSmoothingEnabled=true;q.imageSmoothingQuality='high';q.setTransform(a,b,c,e,tx-a*sx-c*sy,ty-b*sx-e*sy);q.drawImage(dyed,0,0);q.resetTransform();
+ if(d.strap==='thin'){
+  // Stretch only the unfastened band across the wider fitted instep. The
+  // buckle and sewn near tab keep the showcase's own proportions and metal
+  // width; a single affine stretch made that hardware unnaturally wide.
+  const strip=document.createElement('canvas');strip.width=1400;strip.height=500;const s=strip.getContext('2d');s.imageSmoothingQuality='high';s.translate(900,250);s.rotate(-Math.atan2(dy,dx));s.translate(-ex,-ey);s.drawImage(dyed,0,0);
+  const curved=canvas(),c=curved.getContext('2d'),span=Math.hypot(nx-tx,ny-ty),fixed=35,scale=mount.normal,stretch=(span-fixed*scale)/(length-fixed),map=t=>t< -fixed?-fixed*scale+(t+fixed)*stretch:t*scale;
+  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.translate(nx,ny);c.rotate(angle);
+  for(let t=-700;t<250;t++){
+   const x=map(t),width=map(t+1)-x,progress=Math.max(0,Math.min(1,1+x/span)),lift=-16*Math.sin(Math.PI*progress);
+   c.save();c.beginPath();c.rect(x,-1000,width,2000);c.clip();
+   c.transform(width,0,0,scale,x-width*(t+900),-250*scale+lift);
+   c.drawImage(strip,0,0);c.restore();
+  }
+  c.resetTransform();projected=curved;q=c;
+ }
+ // Only the far tab disappears behind the existing foot/sock silhouette.
+ // Keep the hanging bow's original soft alpha outside the outer upper.
+ const visibility=canvas(),v=visibility.getContext('2d');v.drawImage(p.canvas,0,0);if(d.strap==='ribbon'){v.fillStyle='#fff';v.fillRect(tx+36,0,SIZE,SIZE);}q.globalCompositeOperation='destination-in';q.drawImage(visibility,0,0);p.drawImage(projected,0,0);
+}
+async function drawOrnaments(p,d,upper){for(const category of ['strap','decoration','charm']){if(d[category]==='none')continue;if(A.AccessoryRenderer?.handles(category,d[category],'worn')){A.AccessoryRenderer.drawOne(p,d,'worn',category,upper);continue;}const [im,mask,product,productMask]=await ornament(d.heel,category+'_'+d[category]);const family=A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel,projection=FLOWER_PROJECTIONS[family];if(category==='decoration'&&d.decoration==='big'&&product?.naturalWidth===1024&&product.naturalHeight===640&&productMask?.naturalWidth===1024&&productMask.naturalHeight===640&&GRAND_MOUNTS[family]){projectGrandBow(p,d,product,productMask,GRAND_MOUNTS[family]);continue;}if(category==='charm'&&['crystal','pearl'].includes(d.charm)&&product?.naturalWidth===1024&&product.naturalHeight===640){const mount=(d.charm==='pearl'?PEARL_PROJECTIONS:CRYSTAL_PROJECTIONS)[family];if(mount){projectToeOrnament(p,product,mount);continue;}}if(category==='decoration'&&d.decoration==='flower'&&product?.naturalWidth===1024&&product.naturalHeight===640&&projection){p.save();p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';p.drawImage(product,...projection.source,...projection.target);p.restore();continue;}if(category==='strap'&&['thin','ribbon'].includes(d.strap)&&product?.naturalWidth===1024&&product.naturalHeight===640&&productMask?.naturalWidth===1024&&productMask.naturalHeight===640){const mount=(d.strap==='thin'?THIN_MOUNTS:RIBBON_MOUNTS)[family];if(mount){drawRibbon(p,d,product,productMask,mount);continue;}}if(!im)continue;if(!mask){p.drawImage(im,0,0,SIZE,SIZE);continue;}const layer=canvas(),q=layer.getContext('2d');q.drawImage(im,0,0,SIZE,SIZE);q.globalCompositeOperation='multiply';q.fillStyle=COLORS[d.color]||COLORS.pink;q.fillRect(0,0,SIZE,SIZE);q.globalCompositeOperation='destination-in';q.drawImage(mask,0,0,SIZE,SIZE);p.drawImage(im,0,0,SIZE,SIZE);p.drawImage(layer,0,0);if(category==='strap'&&d.strap==='thin')drawThinBuckle(p,d);}}
+// The retained Mary-Jane band paintings omitted the product camera's buckle.
+// These measured source-local mounts lie within each original satin strip;
+// hardware is painted after tint so every palette keeps the same warm metal.
+const THIN_BUCKLES={flat:[606,713,.719],kitten:[602,719,.753],block:[619,657.5,.559],wedge:[620,657,.644],stiletto6:[625,671,.512],stiletto9:[624,656.5,.303],platform:[627,618,.602]};
+function drawThinBuckle(p,d){
+ const key=A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel,a=THIN_BUCKLES[key];if(!a)return;
+ p.save();p.translate(a[0],a[1]);p.rotate(a[2]);p.scale(1.35,1.35);p.lineJoin='round';
+ // Hollow frame leaves the selected satin visible through its opening.
+ p.shadowColor='#66473366';p.shadowBlur=2;p.shadowOffsetY=1.3;
+ p.strokeStyle='#805f38';p.lineWidth=5.5;p.beginPath();p.roundRect(-13,-15,26,30,5);p.stroke();p.shadowColor='transparent';
+ const metal=p.createLinearGradient(-14,-16,14,16);metal.addColorStop(0,'#fff5c8');metal.addColorStop(.24,'#dabc79');metal.addColorStop(.55,'#a68148');metal.addColorStop(.78,'#f5dfa3');metal.addColorStop(1,'#c19b58');
+ p.strokeStyle=metal;p.lineWidth=3.5;p.stroke();
+ p.lineWidth=2.5;p.beginPath();p.moveTo(-12,0);p.lineTo(11,0);p.stroke();
+ p.strokeStyle='#fff5cf';p.lineWidth=1;p.beginPath();p.moveTo(-9,-13);p.lineTo(8,-13);p.moveTo(-11,-10);p.lineTo(-11,-4);p.stroke();p.restore();
+}
 function canvas(){const c=document.createElement('canvas');c.width=SIZE;c.height=SIZE;return c;}
 function image(path){return new Promise(resolve=>{const im=new Image();im.decoding='async';im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=path;});}
 function clean(d){return A.cleanDesign(d);}
@@ -24,47 +158,22 @@ function source(heel){
   const parts=Object.fromEntries(entries);
   // Collar/sole occlusion and the dye mask are part of the fitted kit. A
   // transient failure can recover on the next choice or reopening the room.
-  if(!fittedKit(parts))sources.delete(heel);
-  return parts;
+  if(!fittedKit(parts)){sources.delete(heel);return parts;}
+  return A.WornBodyFidelity?.prepare(heel,parts)||parts;
  }));
  return sources.get(heel);
 }
 function clipped(ctx,mask){ctx.globalCompositeOperation='destination-in';ctx.drawImage(mask,0,0,SIZE,SIZE);ctx.globalCompositeOperation='source-over';}
 function finish(d,mask){
  const out=canvas(),p=out.getContext('2d');p.lineCap='round';
- if(d.material==='satin'||d.material==='patent'){
+ if(d.material==='patent'&&A.SHOE_STYLES[d.heel]?.openToe){
   const g=p.createLinearGradient(130,930,720,250);
   // An open vamp has no fabric where a closed pump catches its reflection.
   // Place the two patent glints on its forefoot and instep bands instead.
-  if(d.material==='patent'&&A.SHOE_STYLES[d.heel]?.openToe){
-   for(const [at,alpha] of [[0,0],[.18,0],[.25,.65],[.29,.12],[.34,0],[.55,0],[.62,.30],[.67,.10],[.72,0],[1,0]])g.addColorStop(at,'rgba(255,255,255,'+alpha+')');
-  }else{g.addColorStop(0,'#ffffff00');g.addColorStop(.36,'#ffffff00');g.addColorStop(.42,d.material==='patent'?'#ffffffa8':'#ffffff62');g.addColorStop(.49,'#ffffff00');g.addColorStop(1,'#ffffff00');}
+  for(const [at,alpha] of [[0,0],[.18,0],[.25,.65],[.29,.12],[.34,0],[.55,0],[.62,.30],[.67,.10],[.72,0],[1,0]])g.addColorStop(at,'rgba(255,255,255,'+alpha+')');
   p.fillStyle=g;p.fillRect(0,0,SIZE,SIZE);
- }else if(d.material==='velvet'){
-  const g=p.createLinearGradient(0,400,SIZE,900);g.addColorStop(0,'#65417410');g.addColorStop(.62,'#65417406');g.addColorStop(1,'#fff5fb0c');p.fillStyle=g;p.fillRect(0,0,SIZE,SIZE);
- }else if(d.material==='mesh'){
-  for(let row=0;row<100;row++)for(let col=0;col<100;col++){p.fillStyle='#62546d55';p.beginPath();p.ellipse(col*11+(row%2)*5.5,row*11,2,2.7,-.2,0,Math.PI*2);p.fill();}
- }else if(d.material==='lace'){
-  p.strokeStyle='#fff9efdc';p.lineWidth=1.8;
-  for(let row=0;row<24;row++)for(let col=0;col<24;col++){
-   const x=col*49+(row%2)*24.5,y=row*49;p.beginPath();
-   for(let i=0;i<5;i++){const a=i*Math.PI*2/5;p.moveTo(x,y);p.bezierCurveTo(x+Math.cos(a-.4)*24,y+Math.sin(a-.4)*24,x+Math.cos(a+.4)*24,y+Math.sin(a+.4)*24,x,y);}
-   p.moveTo(x+10,y+10);p.quadraticCurveTo(x+18,y+28,x+25,y+40);p.stroke();
-  }
- }else if(d.material==='glitter'){
-  for(let row=0;row<120;row++)for(let col=0;col<120;col++){const n=((row+1)*374761393^(col+1)*668265263)>>>0,x=col*9+n%7,y=row*9+(n>>>8)%7;p.fillStyle='#fffcf2df';p.beginPath();p.arc(x,y,.7+n%4*.2,0,Math.PI*2);p.fill();}
- }
- A.CoutureFinish?.drawMaterial(p,d,SIZE,SIZE);
- if(!['none','rosebuds','diamonds','gingham','scallops','pinstripes'].includes(d.pattern)){
-  p.fillStyle='#fff9edcc';for(let row=0;row<20;row++)for(let col=0;col<20;col++){
-   const x=col*58+(row%2)*29,y=row*58,r=6;p.beginPath();
-   if(d.pattern==='hearts'){p.moveTo(x,y+r);p.bezierCurveTo(x-r*2,y-r,x-r,y-r*2,x,y-r*.5);p.bezierCurveTo(x+r,y-r*2,x+r*2,y-r,x,y+r);}
-   else if(d.pattern==='stars'){for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;p.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);}p.closePath();}
-   else if(d.pattern==='flowers'){for(let i=0;i<5;i++){const a=i*Math.PI*2/5;p.moveTo(x,y);p.ellipse(x+Math.cos(a)*5,y+Math.sin(a)*5,4,2.5,a,0,Math.PI*2);}}
-   else p.arc(x,y,3,0,Math.PI*2);p.fill();
-  }
- }
- A.CoutureFinish?.drawPattern(p,d,SIZE,SIZE);
+ }else A.CoutureFinish?.drawFinish(p,d,SIZE,SIZE,'worn');
+ A.CoutureFinish?.drawPattern(p,d,SIZE,SIZE,'worn');
  clipped(p,mask);return out;
 }
 // Soft, youthful skin: broad light planes only. The offline skin layers have
@@ -77,6 +186,69 @@ function skinGlow(p,x,y,rx,ry,colour,opacity=1){
 }
 function cleanLegs(original){
  const out=canvas();out.getContext('2d').drawImage(original,0,0,SIZE,SIZE);return out;
+}
+// Turn the complete fitted foot toward the product's longer side camera.
+// Work after socks/ornaments so their mounts cannot separate from the shoe.
+// The common calf above y350 is exact; a cubic transition bends the ankle
+// gently into the side-profile last. Its moderate width and retained depth
+// keep the toe box full instead of stretching it into a paper-thin point.
+// Each integer destination row samples
+// the complete source, so bilinear filtering can use its neighbouring pixels.
+// Cropping fractional source rows first clamps the filter at each crop edge
+// and turns smooth skin/cloth into visible horizontal streaks in Canvas.
+const SIDE_CAMERA={
+ wedge:[1.20,.92,993],kitten:[1.17,.92,964],flat:[1.15,.90,969],ballet:[1.15,.90,969],
+ maryjane:[1.15,.90,969],loafer:[1.15,.92,970],block:[1.17,.92,969],bootie:[1.13,.90,969],
+ platform:[1.15,.93,999],crystalsandal:[1.13,.94,964]
+};
+// Premultiplied bilinear inverse sampling writes every destination pixel once.
+// In particular it never clamps interpolation to a one-pixel source strip.
+function sideCameraPixels(input,wide,depth,floor,size=SIZE){
+ const data=input.data||input,out=new Uint8ClampedArray(size*size*4),cutoff=350,pivot=450;
+ out.set(data.subarray(0,size*cutoff*4));
+ const ease=y=>{const t=Math.max(0,Math.min(1,(y-cutoff)/350));return t*t*t*(10+t*(-15+6*t));};
+ const vertical=y=>y+(floor-y)*(1-depth)*ease(y);
+ for(let y=cutoff;y<size;y++){
+  let lo=cutoff,hi=size;for(let n=0;n<22;n++){const mid=(lo+hi)/2;if(vertical(mid)<y+.5)lo=mid;else hi=mid;}
+  const sourceY=(lo+hi)/2-.5;if(sourceY>=size-1)continue;
+  const y0=Math.floor(sourceY),fy=sourceY-y0,scale=1+(wide-1)*ease(sourceY+.5);
+  for(let x=0;x<size;x++){
+   const sx=pivot+(x+.5-pivot)/scale-.5,x0=Math.floor(sx);if(x0<0||x0>=size-1)continue;
+   const fx=sx-x0,a=(y0*size+x0)*4,b=a+4,c=a+size*4,d=c+4;
+   const wa=(1-fx)*(1-fy)*data[a+3],wb=fx*(1-fy)*data[b+3],wc=(1-fx)*fy*data[c+3],wd=fx*fy*data[d+3],alpha=wa+wb+wc+wd,i=(y*size+x)*4;
+   if(!alpha)continue;out[i+3]=alpha;
+   for(let channel=0;channel<3;channel++)out[i+channel]=(data[a+channel]*wa+data[b+channel]*wb+data[c+channel]*wc+data[d+channel]*wd)/alpha;
+  }
+ }
+ return out;
+}
+function sideCamera(source,heel){
+ const [wide,depth,floor]=SIDE_CAMERA[heel]||[1.15,.93,964],out=canvas(),p=out.getContext('2d');
+ const easing=y=>{const t=Math.max(0,Math.min(1,(y-350)/350));return t*t*t*(10+t*(-15+6*t));};
+ const vertical=y=>y+(floor-y)*(1-depth)*easing(y);
+ // The offline Canvas recorder records this operation symbolically, then
+ // replays this exact pixel sampler; no pixel arrays are written to JSON.
+ let sampled=false;
+ if(typeof p.sideCamera==='function'){p.sideCamera(source,wide,depth,floor);sampled=true;}
+ else try{
+  const pixels=source.getContext('2d').getImageData(0,0,SIZE,SIZE),result=p.createImageData(SIZE,SIZE);
+  result.data.set(sideCameraPixels(pixels,wide,depth,floor));p.putImageData(result,0,0);sampled=true;
+ }catch(error){
+  // A redirected non-CORS image can taint Canvas. Keep the complete artwork
+  // visible in that case using the read-free geometric projection below.
+  if(error?.name!=='SecurityError'&&error?.name!=='NotSupportedError')throw error;
+ }
+ if(!sampled){
+  p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';p.drawImage(source,0,0,SIZE,350,0,0,SIZE,350);
+  const inverse=y=>{let lo=350,hi=SIZE;for(let n=0;n<20;n++){const mid=(lo+hi)/2;if(vertical(mid)<y)lo=mid;else hi=mid;}return (lo+hi)/2;};
+  for(let y=350;y<Math.ceil(vertical(SIZE));y++){
+   const top=inverse(y),bottom=inverse(y+1),scale=1+(wide-1)*easing((top+bottom)/2);
+   p.save();p.beginPath();p.rect(0,y,SIZE,1);p.clip();const sy=1/(bottom-top);
+   p.setTransform(scale,0,0,sy,450*(1-scale),y-top*sy);p.drawImage(source,0,0);p.restore();
+  }
+ }
+ A.WornBodyFidelity?.postProjection?.(out,source,heel,(x,y)=>[450+(x-450)*(1+(wide-1)*easing(y)),vertical(y)]);
+ return out;
 }
 function calfVolume(p,left,right,height,rear=false){
  p.save();p.globalCompositeOperation='source-atop';
@@ -226,12 +398,13 @@ async function composite(input,options){
  const o=fittingOptions(options),d=clean(input),id=A.designKey(d)+'|'+o.sock+'|'+o.color;if(cache.has(id)){const hit=cache.get(id);cache.delete(id);cache.set(id,hit);return hit;}if(pending.has(id))return pending.get(id);
  const work=source(d.heel).then(async parts=>{
   if(!fittedKit(parts))return {canvas:await fallback(d),fallback:true};
+  parts=A.WornBodyFidelity?.lacedVamp(parts,d)||parts;
   const out=canvas(),p=out.getContext('2d');p.imageSmoothingQuality='high';const skin=cleanLegs(parts.legs);p.drawImage(skin,0,0);drawSocks(p,skin,o,d.heel);
   if(parts.occlusion){p.globalCompositeOperation='destination-out';p.drawImage(parts.occlusion,0,0,SIZE,SIZE);p.globalCompositeOperation='source-over';}
   p.drawImage(parts.shoe,0,0,SIZE,SIZE);
   if(parts.upper){
    const tint=canvas(),q=tint.getContext('2d');q.drawImage(parts.upper,0,0,SIZE,SIZE);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[d.color]||COLORS.pink;q.fillRect(0,0,SIZE,SIZE);
-   q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(d.material)?.8:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0,SIZE,SIZE);q.globalAlpha=d.material==='suede'?.08:d.material==='velvet'?.16:d.material==='brocade'?.42:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0,SIZE,SIZE);q.globalAlpha=1;
+   q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(d.material)?.8:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0,SIZE,SIZE);q.globalAlpha=d.material==='suede'?.08:d.material==='velvet'?.16:d.material==='mesh'?.34:d.material==='brocade'?.42:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0,SIZE,SIZE);q.globalAlpha=1;
    p.drawImage(tint,0,0);
    // Finishes change colour and surface detail, never the antialiased shoe
    // silhouette. Match the product compositor instead of accumulating alpha
@@ -243,9 +416,9 @@ async function composite(input,options){
   // contact mask, over the embedded skin and under all exterior ornaments.
   // The offline mask excludes piping, soles and dyed uppers; original source
   // alpha, calf contours and every pair/platform transform stay untouched.
-  if(parts.hosiery.width>1){p.save();p.globalCompositeOperation='source-atop';drawSocks(p,parts.hosiery,o,d.heel,true);p.restore();}
+  if(d.heel!=='ballet'&&parts.hosiery.width>1){p.save();p.globalCompositeOperation='source-atop';drawSocks(p,parts.hosiery,o,d.heel,true);p.restore();}
   await drawOrnaments(p,d,parts.upper);
-  return {canvas:out,fallback:false,legs:parts.legs};
+  return {canvas:sideCamera(out,d.heel),fallback:false,legs:parts.legs};
  }).then(result=>{if(!result.fallback){cache.set(id,result);while(cache.size>LIMIT)cache.delete(cache.keys().next().value);}return result;}).finally(()=>pending.delete(id));pending.set(id,work);return work;
 }
 // Two independently authored transforms share each fixed painted camera.
@@ -294,15 +467,17 @@ function pairedModel(source,options,extra=0,emergency=false){
   // Join below the common source calf, above every short sock cuff.
   r.drawImage(source,0,350,SIZE,SIZE-350,0,join,SIZE,SIZE-350);
  }
- const pair=document.createElement('canvas');pair.width=1120;pair.height=1300+extra;const p=pair.getContext('2d');p.imageSmoothingQuality='high';
+ // The side-camera toe extends left of the old near-frontal pair frame.
+ // Preserve those pixels with transparent padding, removed at presentation.
+ const pair=document.createElement('canvas');pair.width=1280;pair.height=1300+extra;const p=pair.getContext('2d');p.imageSmoothingQuality='high';p.translate(160,0);
  // Both shoes share one physical size. Depth comes from the authored rear
  // calf, its higher contact point and the front leg's real occlusion.
- p.save();p.translate(-100,-200);p.translate(550,1160+extra);p.rotate(-.08);p.translate(-550,-1160-extra);p.drawImage(rear,0,0);p.globalCompositeOperation='source-atop';p.fillStyle='#77564e23';p.fillRect(0,0,SIZE,1324+extra);p.restore();
+ p.save();p.translate(-160,-200);p.translate(550,1160+extra);p.rotate(-.04);p.translate(-550,-1160-extra);p.drawImage(rear,0,0);p.globalCompositeOperation='source-atop';p.fillStyle='#77564e23';p.fillRect(0,0,SIZE,1324+extra);p.restore();
  // The nearer calf casts a soft, contour-following contact shadow onto the
  // rear calf. Keeping that shadow inside the existing rear alpha separates
  // the two legs without a painted stripe or a dark halo in the room.
- const contact=document.createElement('canvas');contact.width=pair.width;contact.height=pair.height;const q=contact.getContext('2d');
- q.shadowColor='#77516338';q.shadowBlur=35;q.shadowOffsetX=-8;q.drawImage(leg,-150,0);q.shadowColor='transparent';q.globalCompositeOperation='destination-out';q.drawImage(leg,-150,0);q.globalCompositeOperation='destination-in';q.drawImage(pair,0,0);p.drawImage(contact,0,0);
+ const contact=document.createElement('canvas');contact.width=pair.width;contact.height=pair.height;const q=contact.getContext('2d');q.translate(160,0);
+ q.shadowColor='#77516338';q.shadowBlur=35;q.shadowOffsetX=-8;q.drawImage(leg,-150,0);q.shadowColor='transparent';q.globalCompositeOperation='destination-out';q.drawImage(leg,-150,0);q.resetTransform();q.globalCompositeOperation='destination-in';q.drawImage(pair,0,0);p.save();p.resetTransform();p.drawImage(contact,0,0);p.restore();
  p.drawImage(leg,-150,0);return pair;
 }
 // Offline-reviewed outsole contacts in each immutable worn camera. A tall
@@ -311,7 +486,7 @@ const CONTACTS={
  flat:[[361,969],[728,790]],ballet:[[361,969],[728,790]],maryjane:[[361,969],[728,790]],loafer:[[354,970],[728,793]],
  block:[[393,969],[736,875]],bootie:[[394,969],[735,876]],wedge:[[430,993],[705,928]],platform:[[419,999],[738,953]],
  kitten:[[373,964],[725,851]],slingback:[[373,964],[725,851]],bowsling:[[373,964],[725,851]],bowmule:[[373,964],[726,852]],
- stiletto6:[[382,964],[753,866]],stiletto9:[[370,964],[751,883]],pearlpump:[[382,964],[753,866]],crystalpump:[[382,964],[753,866]],studpump:[[382,964],[753,866]],pearlheel:[[382,964],[754,866]],luciteheel:[[382,964],[753,866]],crystalsandal:[[382,964],[747,875]]
+ stiletto6:[[382,964],[753,866]],stiletto9:[[370,964],[751,883]],pearlpump:[[382,964],[753,866]],crystalpump:[[382,964],[753,866]],studpump:[[382,964],[753,866]],pearlheel:[[382,964],[754,891]],luciteheel:[[382,964],[753,866]],crystalsandal:[[382,964],[747,875]]
 };
 function soleShadow(p,contacts){
  // Contact follows the painted camera's toe-to-heel slope. Drawing in source
@@ -332,12 +507,12 @@ async function render(target,input,options,sceneId,cropped=false){
  // Fixed source-camera registration: taller sole paintings keep the same
  // toe contact as the approved pump, without resizing the shoe or calf.
  geometry.floor+=({wedge:(964-993)*.33,platform:(964-999)*.33}[d.heel]||0)*geometry.uniform;
- const slender=.80,{scale,floor}=geometry,extra=geometry.extra,pair=pairedModel(result.canvas,o,extra,result.fallback),w=pair.width*scale*slender,h=pair.height*scale,x=geometry.cx-315*scale,y=floor-(1264+extra)*scale,shadowContacts=result.fallback?[[350,963],[675,963]]:CONTACTS[d.heel]||CONTACTS.kitten;
+ const slender=.80,{scale,floor}=geometry,extra=geometry.extra,pair=pairedModel(result.canvas,o,extra,result.fallback),w=pair.width*scale*slender,h=pair.height*scale,x=geometry.cx-315*scale,y=floor-(1264+extra)*scale,originalContacts=result.fallback?[[350,963],[675,963]]:CONTACTS[d.heel]||CONTACTS.kitten,shadowContacts=result.fallback?originalContacts:originalContacts.map(([cx,cy])=>{const [wide,depth,ground]=SIDE_CAMERA[d.heel]||[1.15,.93,964];return [450+(cx-450)*wide,cy+(ground-cy)*(1-depth)];});
  p.save();p.translate(x,y);p.scale(scale*slender,scale);
- p.save();p.translate(-100,-200);p.translate(550,1160+extra);p.rotate(-.08);p.translate(-550,-1160-extra);p.translate(0,300+extra);soleShadow(p,shadowContacts);p.restore();
+ p.save();p.translate(-160,-200);p.translate(550,1160+extra);p.rotate(-.04);p.translate(-550,-1160-extra);p.translate(0,300+extra);soleShadow(p,shadowContacts);p.restore();
  p.translate(-150,300+extra);soleShadow(p,shadowContacts);p.restore();
- p.drawImage(pair,x,y,w,h);
- Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-100,-200,1,-.08;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[-100,-200,-.08],front:[-150,0],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
+ p.drawImage(pair,x-160*scale*slender,y,w,h);
+ Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-160,-200,1,-.04;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[-160,-200,-.04],front:[-150,0],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
 }
 function mount(host,input,options){
  const target=canvas();target.className='fitting2d-canvas';target.setAttribute('role','img');target.setAttribute('aria-label',A.lang==='zh'?'双脚穿着你的鞋款与袜子搭配':'Both feet wearing your shoes and chosen socks');host.replaceChildren(target);
@@ -349,5 +524,5 @@ function mount(host,input,options){
   target.width=width;target.height=height;return true;
  };fit();let observer;const controller={canvas:target,ready:null,update(next,nextOptions=fitting){if(disposed)return Promise.resolve(false);design=clean(next);fitting=fittingOptions(nextOptions);controller.ready=render(target,design,fitting);return controller.ready;},dispose(){disposed=true;observer?.disconnect();tokens.set(target,{});target.remove();},debug(){return {renderer:'painted-fitting',ready:target.dataset.fitting2dReady==='true',fallback:target.dataset.fallback,design:{...design},fitting:{...fitting},feet:2,frame:[0,0,SIZE,SIZE],cacheEntries:cache.size,cacheLimit:LIMIT};}};controller.update(design);observer=new ResizeObserver(()=>{if(disposed||!fit())return;controller.update(design);});observer.observe(host);return controller;
 }
-A.Fitting2D={mount,render,composite,frame:Object.freeze({width:SIZE,height:SIZE}),info:()=>({cacheEntries:cache.size,cacheLimit:LIMIT,loadedHeels:[...sources.keys()],pendingComposites:pending.size})};
+A.Fitting2D={mount,render,composite,sideCameraPixels,frame:Object.freeze({width:SIZE,height:SIZE}),info:()=>({cacheEntries:cache.size,cacheLimit:LIMIT,loadedHeels:[...sources.keys()],pendingComposites:pending.size})};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
