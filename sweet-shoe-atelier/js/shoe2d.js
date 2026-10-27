@@ -13,7 +13,8 @@ const ACCESSORIES={bow:'bow',pearls:'pearls',laces:'laces',maryjane:'maryjane',d
 const ACCESSORY_OPTIONS=Object.freeze({strap:['thin','ribbon','cross','pearl'],decoration:['small','big','flower','drop'],charm:['mini','pearl','crystal']});
 const TINTABLE_ACCESSORIES=new Set(['strap_thin','strap_ribbon','strap_cross','decoration_small','decoration_big','charm_mini']);
 const perspectiveLayers=Object.create(null),perspectiveTints=Object.create(null),perspectiveLoads=new Map(),accessoryFallbacks=new Map(),tintFallbacks=new Map();
-let accessoryLoad;
+let accessoryLoad,laceLoad,laceTile;
+function loadLace(){return laceLoad||(laceLoad=image('assets/materials/lace_seamless.webp').then(im=>{laceTile=im;if(!im)laceLoad=null;return im;}));}
 const ANCHORS={
  flat:{toe:[285,432],back:[854,294],strap:[576,352],lace:[350,405],strapAngle:.70},
  kitten:{toe:[285,445],back:[855,197],strap:[594,318],lace:[352,421],strapAngle:.90},
@@ -29,7 +30,10 @@ async function accessories(heel){
  const legacy=await (accessoryLoad||(accessoryLoad=Promise.all(Object.entries(ACCESSORIES).map(async([name,file])=>[name,await image('assets/shoe2d/accessories/'+file+'.webp')])).then(Object.fromEntries)));
  if(heel){
   if(!perspectiveLoads.has(heel)){
-   const variants=Object.entries(ACCESSORY_OPTIONS).filter(([category])=>!dedicated||!(category==='strap'&&ownStyle?.builtInStrap)&&!(category==='decoration'&&(ownStyle?.openHeel||ownStyle?.noRearDecor))).flatMap(([category,values])=>values.map(value=>category+'_'+value));
+   // Cross lacing is drawn procedurally in both cameras. Its retired source
+   // paintings are intentionally absent from the upload, so do not fetch them
+   // or report a false legacy fallback when that renderer is available.
+   const variants=Object.entries(ACCESSORY_OPTIONS).filter(([category])=>!dedicated||!(category==='strap'&&ownStyle?.builtInStrap)&&!(category==='decoration'&&(ownStyle?.openHeel||ownStyle?.noRearDecor))).flatMap(([category,values])=>values.filter(value=>!(category==='strap'&&value==='cross'&&A.AccessoryRenderer?.handles(category,value,'product'))).map(value=>category+'_'+value));
    perspectiveLoads.set(heel,Promise.all(variants.map(async name=>{
     const prefix='assets/shoe2d/accessories/'+heel+'_'+name;
     const tintable=TINTABLE_ACCESSORIES.has(name);
@@ -224,29 +228,15 @@ function drawTextile(p,d,width,height,camera='product'){
  // Translation keeps every repeat continuous through the visible upper.
  if(camera==='worn')[width,height]=repeatExtent(p,width,height);
  if(d.material==='mesh'){
-  const step=12;
-  for(let row=0;row<height/step+1;row++)for(let col=-1;col<width/step+1;col++){
-   const x=(col+(row%2)*.5)*step,y=row*step;
-   p.beginPath();p.ellipse(x,y,2.4,3.0,-.22,0,Math.PI*2);p.fillStyle='rgba(69,47,87,.28)';p.fill();
-   p.strokeStyle='rgba(255,255,247,.42)';p.lineWidth=1;p.stroke();
-  }
- }else{
-  // Connected floral guipure: large open petals, leaf sprigs and fine diamond
-  // netting. Every stitch is fixed in source coordinates, never random dots.
-  p.strokeStyle='rgba(255,252,239,.32)';p.lineWidth=.65;
-  for(let x=-height;x<width+height;x+=16){p.beginPath();p.moveTo(x,0);p.lineTo(x+height,height);p.moveTo(x,0);p.lineTo(x-height,height);p.stroke();}
-  const step=68;
-  for(let row=-1;row<height/step+1;row++)for(let col=-1;col<width/step+1;col++){
-   const x=(col+(row%2)*.5)*step,y=row*step;
-   p.save();p.translate(x,y);p.rotate(-.22);
-   p.strokeStyle='rgba(111,77,115,.15)';p.lineWidth=3.8;
-   const petals=()=>{p.beginPath();for(let i=0;i<6;i++){const a=i*Math.PI/3;p.moveTo(Math.cos(a)*3,Math.sin(a)*3);p.bezierCurveTo(Math.cos(a-.38)*24,Math.sin(a-.38)*24,Math.cos(a+.38)*24,Math.sin(a+.38)*24,Math.cos(a)*3,Math.sin(a)*3);}p.stroke();};
-   petals();p.strokeStyle='rgba(255,253,239,.93)';p.lineWidth=2;petals();
-   p.beginPath();p.arc(0,0,3,0,Math.PI*2);p.stroke();
-   p.lineWidth=1.4;p.beginPath();p.moveTo(15,13);p.bezierCurveTo(30,18,24,42,34,57);p.stroke();
-   for(let j=0;j<3;j++){const sy=23+j*9,sx=25+j*2;p.beginPath();p.ellipse(sx+(j%2?-5:5),sy,7,2.8,j%2?.6:-.6,0,Math.PI*2);p.stroke();}
-   p.restore();
-  }
+  const colour=COLORS[d.color]||COLORS.pink;const channels=[1,3,5].map(offset=>Math.min(255,parseInt(colour.slice(offset,offset+2),16)+38));
+  p.strokeStyle='rgba('+channels.join(',')+',.6)';p.lineWidth=1;
+  for(let x=-height;x<width+height;x+=5){p.beginPath();p.moveTo(x,0);p.lineTo(x+height,height);p.moveTo(x,0);p.lineTo(x-height,height);p.stroke();}
+ }else if(laceTile){
+  const tile=camera==='worn'?420:280,pattern=p.createPattern(laceTile,'repeat');
+  pattern.setTransform(new DOMMatrix().scale(tile/laceTile.naturalWidth));
+  p.fillStyle=pattern;p.shadowColor='rgba(67,40,52,.36)';p.shadowOffsetY=1;p.shadowBlur=1;
+  p.fillRect(0,0,width,height);
+
  }
  p.restore();
 }
@@ -287,25 +277,143 @@ function drawFinish(p,design,width,height,camera='product'){
   for(const [stop,alpha] of stops)g.addColorStop(stop,'rgba(255,255,251,'+alpha+')');
   p.fillStyle=g;p.fillRect(left,top,right-left,bottom-top);
  }else if(type==='velvet'){
-  p.fillStyle='rgba(62,31,88,.055)';p.fillRect(left,top,right-left,bottom-top);
-  p.strokeStyle='rgba(255,252,255,.14)';p.lineWidth=.65;
-  for(let y=projected?Math.floor((top+left*85/WIDTH)/3.5)*3.5:0;y<(projected?bottom+right*85/WIDTH:HEIGHT);y+=3.5){p.beginPath();p.moveTo(left,y-left*85/WIDTH);p.lineTo(right,y-right*85/WIDTH);p.stroke();}
- }else if(type==='glitter'){
-  // Fixed integer hashes keep every fleck at the same source pixel on update.
-  for(let row=projected?Math.floor(top/9)-1:0;row<(projected?bottom/9+1:73);row++)for(let col=projected?Math.floor(left/9)-1:0;col<(projected?right/9+1:118);col++){
-   const n=((row+1)*374761393^(col+1)*668265263)>>>0;
-   const x=col*9+(n%73)/9,y=row*9+((n>>>8)%73)/9,r=.45+(n%5)*.17;
-   p.fillStyle=n%5?'rgba(255,255,249,.78)':'rgba(255,232,186,.75)';
-   p.beginPath();p.arc(x,y,r,0,Math.PI*2);p.fill();
-   if(n%97===0){p.strokeStyle='rgba(255,255,255,.95)';p.lineWidth=1.0;p.beginPath();p.moveTo(x-3.3,y);p.lineTo(x+3.3,y);p.moveTo(x,y-3.3);p.lineTo(x,y+3.3);p.stroke();}
+  p.fillStyle='rgba(35,16,36,.32)';p.fillRect(left,top,right-left,bottom-top);
+  const nap=p.createLinearGradient(100,180,380,560);
+  for(const [at,alpha] of [[0,0],[.24,0],[.34,.10],[.44,0],[.63,0],[.73,.075],[.84,0],[1,0]])nap.addColorStop(at,'rgba(255,238,245,'+alpha+')');
+  p.fillStyle=nap;p.fillRect(left,top,right-left,bottom-top);
+  for(let row=Math.floor(top/5);row<bottom/5;row++)for(let col=Math.floor(left/7);col<right/7;col++){
+   let hash=Math.imul(row,374761393)^Math.imul(col,668265263);hash=Math.imul(hash^(hash>>>13),1274126177)>>>0;
+   const x=col*7+(hash%70)/10,y=row*5+((hash>>>8)%50)/10;
+   p.strokeStyle=hash&1?'rgba(255,235,244,.075)':'rgba(43,19,42,.075)';p.lineWidth=.65;
+   p.beginPath();p.moveTo(x,y);p.lineTo(x+1.5+(hash%20)/10,y-.6);p.stroke();
   }
+ }else if(type==='glitter'){
+  for(let row=Math.floor(top/5);row<bottom/5;row++)for(let col=Math.floor(left/5);col<right/5;col++){
+   let hash=Math.imul(row,374761393)^Math.imul(col,668265263);hash=Math.imul(hash^(hash>>>13),1274126177)>>>0;
+   const x=col*5+(hash%50)/10,y=row*5+((hash>>>8)%50)/10,r=1.5+((hash>>>16)%13)/10;
+   p.fillStyle=['rgba(76,35,61,.40)','rgba(155,85,104,.30)','rgba(255,223,218,.38)','rgba(255,245,231,.58)'][(hash>>>22)%4];
+   p.beginPath();p.ellipse(x,y,r,r*(.65+((hash>>>20)%25)/100),-.3,0,Math.PI*2);p.fill();
+   p.strokeStyle='rgba(255,255,244,.48)';p.lineWidth=.6;p.beginPath();p.arc(x,y,r*.72,3.5,5.5);p.stroke();
+   if(hash%47===0){p.fillStyle='rgba(255,255,248,.95)';p.beginPath();p.arc(x-.5,y-.5,.85,0,Math.PI*2);p.fill();}
+  }
+
  }
  drawRichMaterial(p,design,WIDTH,HEIGHT,[left,top,right,bottom]);p.restore();
 }
-A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern,drawTextile,drawFinish});
+function velvetRim(p,mask,width,height){
+ const inner=document.createElement('canvas');inner.width=width;inner.height=height;const i=inner.getContext('2d');
+ i.drawImage(mask,0,0,width,height);i.globalCompositeOperation='destination-in';
+ for(const [dx,dy] of [[-11,0],[11,0],[0,-11],[0,11],[-8,-8],[8,-8],[-8,8],[8,8]])i.drawImage(mask,dx,dy,width,height);
+ const rim=document.createElement('canvas');rim.width=width;rim.height=height;const q=rim.getContext('2d');
+ q.drawImage(mask,0,0,width,height);q.globalCompositeOperation='destination-out';q.drawImage(inner,0,0);
+ q.globalCompositeOperation='source-in';q.fillStyle='rgba(255,239,246,.26)';q.fillRect(0,0,width,height);
+ const soft=document.createElement('canvas');soft.width=width;soft.height=height;const s=soft.getContext('2d');
+ s.filter='blur(3px)';s.drawImage(rim,0,0);s.filter='none';s.globalCompositeOperation='destination-in';s.drawImage(mask,0,0,width,height);
+ p.drawImage(soft,0,0);
+}
+function meshPanel(design,upper,width,height,camera='product',underlay='#e8d1b8',shadow=null,highlight=null){
+ const make=()=>{const layer=document.createElement('canvas');layer.width=width;layer.height=height;return layer;};
+ const mask=make(),m=mask.getContext('2d');m.drawImage(upper,0,0,width,height);
+ for(const [dx,dy] of [[-8,0],[8,0],[0,-8],[0,8]]){m.globalCompositeOperation='destination-in';m.drawImage(upper,dx,dy,width,height);}
+ m.globalCompositeOperation='destination-out';m.fillStyle='#fff';m.beginPath();
+ if(camera==='worn'){m.moveTo(0,0);m.lineTo(240,0);m.bezierCurveTo(225,650,205,860,235,1024);}else{m.moveTo(0,0);m.lineTo(150,0);m.bezierCurveTo(160,300,135,460,155,640);}
+ m.lineTo(0,height);m.closePath();m.fill();
+ if(design.heel==='kitten'){
+  m.beginPath();
+  if(camera==='worn'){m.moveTo(694,754);m.lineTo(762,754);m.lineTo(762,860);m.lineTo(694,860);}
+  else{m.moveTo(806,324);m.lineTo(855,324);m.lineTo(855,440);m.lineTo(806,440);}
+  m.closePath();m.fill();
+ }
+ if(['block','platform','stiletto6','stiletto9'].includes(design.heel)){
+  m.beginPath();
+  if(camera==='worn'){m.moveTo(670,790);m.lineTo(810,710);m.lineTo(810,900);m.lineTo(670,900);}
+  else{m.moveTo(740,395);m.lineTo(940,300);m.lineTo(940,520);m.lineTo(740,520);}
+  m.closePath();m.fill();
+ }
+ if(design.heel==='bootie'){
+  m.beginPath();
+  if(camera==='worn'){
+   m.moveTo(0,0);m.lineTo(width,0);m.lineTo(width,710);m.bezierCurveTo(730,710,650,680,570,700);m.bezierCurveTo(490,720,420,770,360,800);m.lineTo(0,800);
+  }else{
+   m.moveTo(0,0);m.lineTo(width,0);m.lineTo(width,345);m.bezierCurveTo(790,345,690,315,610,335);m.bezierCurveTo(520,355,455,400,390,420);m.lineTo(0,420);
+  }
+  m.closePath();m.fill();
+  m.beginPath();
+  if(camera==='worn'){m.moveTo(660,780);m.lineTo(810,680);m.lineTo(810,900);m.lineTo(660,900);}
+  else{m.moveTo(740,405);m.lineTo(940,300);m.lineTo(940,520);m.lineTo(740,520);}
+  m.closePath();m.fill();
+ }
+ if(design.heel==='loafer'){
+  m.beginPath();
+  if(camera==='worn'){m.moveTo(319,775);m.quadraticCurveTo(345,735,369,718);m.bezierCurveTo(431,719,511,764,568,819);m.lineTo(514,860);m.bezierCurveTo(459,815,384,777,319,775);}
+  else{m.moveTo(305,349);m.lineTo(370,290);m.bezierCurveTo(435,310,505,367,547,421);m.lineTo(443,460);m.bezierCurveTo(404,411,352,365,305,349);}
+  m.closePath();m.fill();
+ }
+ const layer=make(),p=layer.getContext('2d');p.fillStyle=underlay;p.fillRect(0,0,width,height);
+ const shade=p.createLinearGradient(0,camera==='worn'?650:300,0,camera==='worn'?960:540);
+ shade.addColorStop(0,'rgba(58,34,38,.22)');shade.addColorStop(.38,'rgba(255,244,224,.12)');shade.addColorStop(1,'rgba(52,31,38,.28)');p.fillStyle=shade;p.fillRect(0,0,width,height);
+ if(camera==='worn'){
+  for(let index=0;index<4;index++){
+   const x=250+index*32,y=900-index*10,g=p.createRadialGradient(x,y,0,x,y,24);
+   g.addColorStop(0,'rgba(255,245,226,.15)');g.addColorStop(1,'rgba(255,245,226,0)');p.fillStyle=g;p.fillRect(x-24,y-24,48,48);
+  }
+ }
+ const bareMesh=camera==='worn'&&underlay==='#f2c7b0';
+ if(bareMesh){
+  // A warm, softly modelled instep reads through the mesh. The long highlight
+  // follows the foot rather than the rectangular bounds of the upper mask.
+  const form=p.createRadialGradient(425,825,20,425,825,260);form.addColorStop(0,'rgba(255,245,225,.32)');form.addColorStop(1,'rgba(100,51,47,.22)');p.fillStyle=form;p.fillRect(0,0,width,height);
+  p.save();p.translate(465,805);p.rotate(-.27);p.scale(1,.34);
+  const instep=p.createRadialGradient(0,0,8,0,0,190);instep.addColorStop(0,'rgba(255,244,222,.43)');instep.addColorStop(.55,'rgba(255,235,213,.20)');instep.addColorStop(1,'rgba(255,235,213,0)');p.fillStyle=instep;p.fillRect(-190,-190,380,380);p.restore();
+ }
+ // Reduce the shoe-colour veil by one third so the warm underlay reads more
+ // clearly while retaining the chosen colour and the separate opaque trim.
+ p.globalAlpha=bareMesh?.20:.4;p.fillStyle=COLORS[design.color]||COLORS.pink;p.fillRect(0,0,width,height);p.globalAlpha=1;
+ if(shadow){p.globalAlpha=bareMesh?.65:.8;p.drawImage(shadow,0,0,width,height);p.globalAlpha=1;}
+ if(highlight){p.globalAlpha=bareMesh?.42:.55;p.drawImage(highlight,0,0,width,height);p.globalAlpha=1;}
+ drawTextile(p,design,width,height,camera);p.globalCompositeOperation='destination-in';p.drawImage(mask,0,0);
+ if(design.heel==='bootie'){
+  const trim=make(),t=trim.getContext('2d');t.beginPath();
+  if(camera==='worn'){t.moveTo(360,800);t.bezierCurveTo(420,770,490,720,570,700);t.bezierCurveTo(650,680,730,710,width,710);}
+  else{t.moveTo(390,420);t.bezierCurveTo(455,400,520,355,610,335);t.bezierCurveTo(690,315,790,345,width,345);}
+  t.lineCap='round';t.lineJoin='round';t.strokeStyle='rgba(74,38,47,.65)';t.lineWidth=5;t.stroke();
+  t.strokeStyle=COLORS[design.color]||COLORS.pink;t.lineWidth=3;t.stroke();
+  t.globalCompositeOperation='destination-in';t.drawImage(upper,0,0,width,height);p.globalCompositeOperation='source-over';p.drawImage(trim,0,0);
+ }
+ return layer;
+}
+function laceTrim(p,mask,design,width,height,camera='product'){
+ if(design.material!=='lace'||!['kitten','loafer'].includes(design.heel))return;
+ const probe=document.createElement('canvas');probe.width=width;probe.height=height;
+ const q=probe.getContext('2d',{willReadFrequently:true});q.drawImage(mask,0,0,width,height);
+ const data=q.getImageData(0,0,width,height).data;
+ const bounds=camera==='product'?(design.heel==='kitten'?[310,860]:[540,885]):(design.heel==='kitten'?[320,735]:[550,735]);
+ p.save();p.lineWidth=1.5;p.strokeStyle='rgba(255,250,231,.9)';p.lineCap='round';
+ for(let x=bounds[0];x<bounds[1];x+=8){
+  let y=0;while(y<height&&data[(y*width+x)*4+3]<180)y++;
+  if(y>=height)continue;
+  p.beginPath();p.arc(x,y+3,3,0,Math.PI);p.stroke();
+ }
+ p.restore();
+}
+function loaferLaceSaddle(p,design,camera='product'){
+ if(design.heel!=='loafer'||design.material!=='lace')return;
+ p.save();p.lineCap='round';p.lineJoin='round';p.strokeStyle='rgba(71,39,42,.46)';p.lineWidth=1.5;
+ p.shadowColor='rgba(51,28,30,.30)';p.shadowBlur=3;p.shadowOffsetY=2;
+ p.beginPath();
+ if(camera==='worn'){
+  p.moveTo(319,775);p.bezierCurveTo(384,777,459,815,514,860);p.lineTo(568,819);
+  p.moveTo(369,718);p.bezierCurveTo(431,719,511,764,568,819);
+ }else{
+  p.moveTo(305,349);p.bezierCurveTo(352,365,404,411,443,460);p.lineTo(547,421);
+  p.moveTo(370,290);p.bezierCurveTo(435,310,505,367,547,421);
+ }
+ p.stroke();p.restore();
+}
+A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern,drawTextile,drawFinish,velvetRim,meshPanel,loadLace,laceTrim,loaferLaceSaddle});
 function materialLayer(design,upper){
  const out=canvas(),p=out.getContext('2d');drawFinish(p,design,WIDTH,HEIGHT);
- clip(p,upper);return out;
+ clip(p,upper);laceTrim(p,upper,design,WIDTH,HEIGHT);loaferLaceSaddle(p,design);if(design.material==='velvet')velvetRim(p,upper,WIDTH,HEIGHT);return out;
 }
 function patternLayer(design,upper){
  if(design.pattern==='none')return null;
@@ -317,7 +425,7 @@ async function composite(input){
  const design=clean(input),id=key(design);
  if(cache.has(id)){const hit=cache.get(id);cache.delete(id);cache.set(id,hit);return hit;}
  if(jobs.has(id))return jobs.get(id);
- const job=Promise.all([load(design.heel),accessories(design.heel)]).then(([parts,sprites])=>{
+ const job=Promise.all([load(design.heel),accessories(design.heel),design.decoration==='puffy'?A.AccessoryRenderer?.loadPuffy():null,design.material==='lace'?loadLace():null]).then(([parts,sprites])=>{
   const out=canvas(),p=out.getContext('2d'),tint=canvas(),q=tint.getContext('2d');
   if(!parts.upper){p.drawImage(parts.base,0,0);cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);return out;}
   q.drawImage(parts.upper,0,0);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[design.color]||COLORS.pink;q.fillRect(0,0,WIDTH,HEIGHT);
@@ -326,9 +434,28 @@ async function composite(input){
   p.drawImage(parts.base,0,0);
   // source-atop preserves the original destination alpha exactly; fabrics and
   // motifs cannot grow the outline or paint into a cream footbed/sole.
-  p.globalCompositeOperation='source-atop';p.drawImage(tint,0,0);p.drawImage(materialLayer(design,parts.upper),0,0);
+  p.globalCompositeOperation='source-atop';p.drawImage(tint,0,0);if(design.material==='mesh')p.drawImage(meshPanel(design,parts.upper,WIDTH,HEIGHT,'product','#e8d1b8',parts.shadow,parts.highlight),0,0);else p.drawImage(materialLayer(design,parts.upper),0,0);
   const pattern=patternLayer(design,parts.upper);if(pattern)p.drawImage(pattern,0,0);
   p.globalCompositeOperation='source-over';
+  if(design.heel==='loafer'){
+   // Fill the narrow exposed base-colour fringe between the tinted upper
+   // and the welt with adjacent shaded upper pixels; preserve the sole edge.
+   const repair=canvas(),rp=repair.getContext('2d');rp.drawImage(out,0,0);
+   p.save();p.beginPath();p.moveTo(750,440);p.lineTo(780,429);p.lineTo(800,422);p.lineTo(830,416);p.lineTo(860,409);p.lineTo(890,400);p.lineTo(915,389);p.lineTo(915,394);p.lineTo(890,405);p.lineTo(860,415);p.lineTo(830,423);p.lineTo(800,430);p.lineTo(780,435);p.lineTo(750,443);p.closePath();p.clip();p.drawImage(repair,0,9);p.restore();
+   p.save();p.lineCap='round';p.lineJoin='round';
+   if(design.material==='satin'){
+    // The painted saddle is recoloured with the upper; its lower edge used to
+    // dissolve into a translucent blur. Restore a continuous, opaque seam in
+    // a shade of the chosen leather, with a separate restrained contact shadow.
+    const saddleEdge=()=>{p.beginPath();p.moveTo(314,348);p.bezierCurveTo(354,343,415,405,443,460);p.quadraticCurveTo(447,461,451,459);p.lineTo(544,435);};
+    p.save();p.shadowColor='rgba(57,27,30,.35)';p.shadowBlur=2;p.shadowOffsetY=2;
+    p.strokeStyle='rgba(57,27,30,.28)';p.lineWidth=2;saddleEdge();p.stroke();p.restore();
+    const colour=COLORS[design.color]||COLORS.pink;
+    const rgb=colour.match(/[a-f\d]{2}/gi).map(v=>Math.round(parseInt(v,16)*.60));
+    p.strokeStyle=`rgb(${rgb.join(',')})`;p.lineWidth=1.5;saddleEdge();p.stroke();
+   }
+   p.restore();
+  }
   drawAccessories(p,design,sprites,parts.base,parts.binding,parts.upper);
   cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);
   return out;
