@@ -1,5 +1,67 @@
 # Asset manifest (all WebP, transparent unless noted). Some files may still be arriving; code must tolerate missing art with a tasteful fallback.
 
+## Integral satin bows — display / worn fidelity (2026-10-27)
+
+`python3 dev/fitting-polish/repair-integral-bows.py` replaces the compact worn
+bow on `bowsling` and `bowmule` with each style's own original product folds.
+It restores the retained clean slingback forefoot first, then projects the
+paint and complete dye/shadow/highlight coverage around the original vamp
+knot, compensating for the accepted side camera. Premultiplied interpolation
+keeps the satin outline soft. Eight existing worn WebPs are replaced; product,
+skin, hosiery, occlusion, heel, pair and room sources remain exact. Immutable
+pre-repair inputs are under `dev/fitting-polish/integral-bow-source/`; rerun
+after either original integral-bow builder. No additional runtime asset or CDN.
+
+## Grand satin display / worn identity (2026-10-27)
+
+`js/fitting2d.js` reuses the existing repaired product `decoration_big` painting
+and tint at seven knot-pinned uniform worn-camera mounts. The far loop is
+occluded against existing skin/hosiery/shoe alpha; near folds and asymmetric
+tails keep their source identity. Source WebPs and framing are unchanged;
+missing product art or tint retains the former complete worn bow. Tiny source
+contour scraps remain a documented polish follow-up.
+
+## Crystal brooch display / worn identity (2026-10-27)
+
+`js/fitting2d.js` reuses the existing product-camera `charm_crystal` painting
+for the worn toe brooch: identical lilac facets and fixed gold claws, with
+seven measured camera-local crops, toe centres and uniform scales. Inherited
+styles resolve through their existing accessory family. No source WebP is
+modified or added; missing product artwork retains the complete worn gem.
+The original Grand-bow sources still need extraction cleanup before shared
+projection; their silhouette mismatch remains an explicit art follow-up.
+
+## USER19:50 camera continuation (2026-10-26)
+
+`js/fitting2d.js` projects the complete composed lower foot toward the longer
+product side camera, with a smooth transition below source y350. Original
+skin/shoe/hosiery/accessory WebPs remain unchanged. Inverse row sampling avoids
+fractional strip seams; transparent pair padding preserves the extended toes.
+Rear-foot placement exposes more instep while retaining the .80 slim calves.
+Cross laces in `js/accessory-renderer.js` attach to the original low vamp;
+the temporary raised-vamp extension has been removed. This is local Canvas
+geometry, not newly generated anatomy or an independently painted camera.
+Diagnostic actual-runtime Cairo comparisons: `qa/angle-1950/`; remaining
+style-specific artistic differences are recorded in newest `dev/PROGRESS.md`.
+
+## USER13:27 product / worn fidelity continuation (2026-10-26)
+
+The retained genuine reference edit in `dev/flat-fidelity-source/candidate.png`
+supplies only the worn flat's pointed toe and the flat/ballet/maryjane low heel.
+`python3 dev/build-flat-fidelity.py` blends camera-local satin/sole regions and
+smooths the heel displacement before cubic resampling. Original collars,
+calves, hosiery and contact mounts remain protected; prompts, input paintings
+and provenance remain beside the edit. `python3 qa/flat-heel-edge-test.py`
+checks smooth native alpha against a reconstructed rejected jagged warp.
+
+Cross-laces now use local Canvas artwork in `js/accessory-renderer.js` for
+both cameras: three eyelet pairs, alternating satin crossings and a folded
+side bow, with independent product/worn coordinates and untinted gold metal.
+The prior painted cross layers remain validated source/fallback artwork.
+Worn thin bands retain their source painting plus a camera-mounted hollow
+gold buckle authored in `js/fitting2d.js`; hardware is drawn after tinting.
+No new raster asset, download or CDN is required by these details.
+
 Runtime packaging (Supervisor 2026-10-26 08:35): the sixteen legacy
 `shoe_{flat|block|kitten|wedge}_{thin|ribbon|cross|pearl}.webp` paintings remain
 source-only. The four `_none` paintings still ship for emergency product
@@ -305,3 +367,15 @@ shadow excluded):
 Backgrounds and fitted anatomy share a fixed composition and one uniform outer
 resize transform. The native baked ellipse is never stretched or re-squashed.
 No generated anatomy, external CDN or runtime image service is introduced.
+
+
+## Supervisor20:18 continuation — 2026-10-26
+Ballet worn ribbon layers are deterministic Pillow derivatives of the retained approved product ribbon semantic mask, via `dev/build-ballet-ribbon-fidelity.py`; no new generated painting. Ribbon-only coverage excludes product lining/skin, and complete knot/tails fit the source frame. `js/fitting2d.js` uses premultiplied bilinear source-local camera sampling; `WornBodyFidelity.postProjection` preserves pearlheel orb aspect. Evidence and limitations: newest dev/PROGRESS.md.
+
+## User-repaired Mimi think animation (2026-10-27)
+`mentor/think_anim/think_01.webp` through `think_40.webp`: exact user-approved hand-repaired848×1072RGBA frames (eye corner and shoulder/tape corrected),40frames at8fps. Do not re-key, recolour or regenerate. Runtime `js/mentor-animation.js` fetches the original bytes lazily only when a think pose is visible, keeps compressed local frame blobs with a rolling two-image decode, and maps them into the static800×1000camera (head y20/soles y980). Static `mentor_think.webp` remains the reduced-motion/loading/failure fallback. Canvas smoothing stays high; page hiding removes animation and pauses its clock. No CDN/dependency.
+
+
+## 2026-10-27 — original Pearl nacre / Grand satin fidelity
+Seven product Pearl toe cabochons now restore their original painted nacre opacity within camera-specific semantic ellipses. Braided gold/negative chain spaces and all pixels outside those ellipses retain the original extraction; complete asset bounds stay fixed. `dev/fitting-polish/repair-product-pearl-nacre.py` uses retained aligned original product edits; immutable before inputs are in `dev/fitting-polish/pearl-nacre-source/`, native light/dark/hashes in `qa/pearl-nacre/`. Fitting projects that same original nacre/bezel through seven source-local toe mounts, retaining the complete prior worn bead on missing product art.
+Seven product Grand bow paintings/tints restore continuous original neutral satin through enclosed extraction holes via `dev/fitting-polish/clean-grand-bow.py`; original exterior alpha/camera bounds stay exact, with source backups in `dev/fitting-polish/grand-bow-source/`. Worn Grand identity and tiny inherited exterior scraps remain follow-ups. Original paintings, no new generation/download/CDN/runtime dependency.
