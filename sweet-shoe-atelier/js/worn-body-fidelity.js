@@ -132,7 +132,7 @@ function wedgeCounter(source){
 function flatCounter(source,part,heel){
  if(!source)return source;
  const out=canvas(),p=out.getContext('2d');p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';
- if(part==='shoe'){
+ if(part==='shoe'&&heel!=='flat'){
   const wood=p.createLinearGradient(690,762,790,798);wood.addColorStop(0,'#be9470');wood.addColorStop(.55,'#a77d58');wood.addColorStop(1,'#846044');
   p.fillStyle=wood;p.beginPath();p.moveTo(684,773);p.bezierCurveTo(716,770,761,754,793,743);
   p.lineTo(790,769);p.bezierCurveTo(769,780,736,794,714,801);p.lineTo(685,790);p.closePath();p.fill();
