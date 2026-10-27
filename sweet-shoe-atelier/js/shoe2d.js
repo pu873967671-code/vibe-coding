@@ -74,15 +74,16 @@ function load(heel){
 function clip(p,upper){p.globalCompositeOperation='destination-in';p.drawImage(upper,0,0);p.globalCompositeOperation='source-over';}
 // New couture finishes share one source-coordinate renderer between product
 // and worn cameras. The caller clips it to its own immutable upper mask.
-function drawRichMaterial(p,d,width,height){
+function drawRichMaterial(p,d,width,height,bounds=[0,0,width,height]){
  if(!['metallic','pearlescent','suede','brocade','pave'].includes(d.material))return;
+ const [left,top,right,bottom]=bounds,projected=left!==0||top!==0||right!==width||bottom!==height;
  p.save();
  if(d.material==='pave'){
   // Small individually set crystals, rather than glitter flecks. Staggered
   // rows compress and bend over the vamp in each immutable source camera.
   const point=(x,y)=>[x-y*.13+Math.sin(y/height*Math.PI)*14,y*.84+Math.cos(x/width*Math.PI)*9];
   const polygon=(points,colour)=>{p.fillStyle=colour;p.beginPath();points.forEach(([x,y],i)=>i?p.lineTo(x,y):p.moveTo(x,y));p.closePath();p.fill();};
-  for(let row=-1;row<height/20+4;row++)for(let col=-2;col<width/23+9;col++){
+  for(let row=projected?Math.floor(top/.84/20)-3:-1;row<(projected?bottom/.84/20+4:height/20+4);row++)for(let col=projected?Math.floor((left+Math.min(top,bottom)*.16)/23)-4:-2;col<(projected?(right+Math.max(top,bottom)*.16)/23+9:width/23+9);col++){
    const [x,y]=point((col+(row&1)*.5)*23,row*20);
    const n=((row+3)*374761393^(col+3)*668265263)>>>0;
    p.save();p.translate(x,y);p.rotate(-.18);p.scale(1.25,.96);
@@ -105,9 +106,9 @@ function drawRichMaterial(p,d,width,height){
   // they never turn into glitter points or a tiled photographic texture.
   const shade=p.createLinearGradient(0,height*.15,width,height*.9);
   for(const [at,c] of [[0,'#60465e14'],[.32,'#fff4e50a'],[.62,'#73536b0e'],[1,'#493e591d']])shade.addColorStop(at,c);
-  p.fillStyle=shade;p.fillRect(0,0,width,height);
+  p.fillStyle=shade;p.fillRect(left,top,right-left,bottom-top);
   p.lineWidth=.7;
-  for(let row=0;row<height/5;row++)for(let col=0;col<width/6;col++){
+  for(let row=projected?Math.floor(top/5)-1:0;row<(projected?bottom/5+1:height/5);row++)for(let col=projected?Math.floor(left/6)-1:0;col<(projected?right/6+1:width/6);col++){
    const n=((row+1)*374761393^(col+1)*668265263)>>>0;
    const x=col*6+(n%31)/8,y=row*5+((n>>>8)%23)/8;
    p.strokeStyle=n%3?'#fff4e717':'#57455c12';p.beginPath();p.moveTo(x,y);p.lineTo(x+1.8,y-.65);p.stroke();
@@ -118,9 +119,9 @@ function drawRichMaterial(p,d,width,height){
   // Tone-on-tone damask: raised woven petals and paired leaves, with the
   // same curved source projection in each camera and upper-only clipping.
   const point=(x,y)=>[x-y*.12+Math.sin(y/height*Math.PI)*13,y*.86+Math.cos(x/width*Math.PI)*8];
-  p.fillStyle='#fff1d70b';p.fillRect(0,0,width,height);
+  p.fillStyle='#fff1d70b';p.fillRect(left,top,right-left,bottom-top);
   p.lineCap='round';p.lineJoin='round';
-  for(let row=-1;row<height/58+2;row++)for(let col=-1;col<width/62+4;col++){
+  for(let row=projected?Math.floor(top/.86/58)-2:-1;row<(projected?bottom/.86/58+3:height/58+2);row++)for(let col=projected?Math.floor((left+Math.min(top,bottom)*.15)/62)-3:-1;col<(projected?(right+Math.max(top,bottom)*.15)/62+4:width/62+4);col++){
    const [x,y]=point((col+(row%2)*.5)*62,row*58);
    p.save();p.translate(x,y);p.rotate(-.28);p.scale(1,.78);
    const flower=()=>{p.beginPath();for(let petal=0;petal<4;petal++){p.save();p.rotate(petal*Math.PI/2);p.moveTo(0,0);p.bezierCurveTo(-12,-11,-8,-25,0,-23);p.bezierCurveTo(8,-25,12,-11,0,0);p.restore();}p.moveTo(0,4);p.bezierCurveTo(-8,15,-13,16,-18,12);p.bezierCurveTo(-13,6,-5,7,0,4);p.moveTo(0,4);p.bezierCurveTo(8,15,13,16,18,12);p.bezierCurveTo(13,6,5,7,0,4);};
@@ -129,7 +130,7 @@ function drawRichMaterial(p,d,width,height){
    p.beginPath();p.moveTo(0,2);p.quadraticCurveTo(-3,15,0,24);p.strokeStyle='#fff6dd56';p.lineWidth=1;p.stroke();p.restore();
   }
   p.strokeStyle='#fff4df10';p.lineWidth=.55;
-  for(let y=0;y<height;y+=3){p.beginPath();p.moveTo(0,y);p.lineTo(width,y-width*.12);p.stroke();}
+  for(let y=projected?Math.floor((top+left*.12)/3)*3:0;y<(projected?bottom+right*.12:height);y+=3){p.beginPath();p.moveTo(left,y-left*.12);p.lineTo(right,y-right*.12);p.stroke();}
   p.restore();return;
  }
  const g=p.createLinearGradient(width*.12,height*.86,width*.80,height*.15);
@@ -138,11 +139,11 @@ function drawRichMaterial(p,d,width,height){
  }else{
   for(const [at,colour] of [[0,'#d4b8ed25'],[.22,'#a3e6db24'],[.38,'#fffbe56d'],[.48,'#fffdfb92'],[.57,'#efb5d832'],[.72,'#b7d3ef36'],[.83,'#fff8de55'],[1,'#d2b7e626']])g.addColorStop(at,colour);
  }
- p.fillStyle=g;p.fillRect(0,0,width,height);
+ p.fillStyle=g;p.fillRect(left,top,right-left,bottom-top);
  // Quiet directional brushing, never glitter or polka-dot texture.
  if(d.material==='metallic'){
   p.lineWidth=.55;p.strokeStyle='#fff8e112';
-  for(let y=-height;y<height*2;y+=4){p.beginPath();p.moveTo(0,y);p.lineTo(width,y-width*.24);p.stroke();}
+  for(let y=projected?Math.floor((top+left*.24)/4)*4:-height;y<(projected?bottom+right*.24:height*2);y+=4){p.beginPath();p.moveTo(left,y-left*.24);p.lineTo(right,y-right*.24);p.stroke();}
  }
  p.restore();
 }
@@ -198,34 +199,44 @@ function drawRichPattern(p,d,width,height){
  }
  p.restore();
 }
-A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern:drawRichPattern});
-function materialLayer(design,upper){
- const out=canvas(),p=out.getContext('2d'),type=design.material;
- p.lineCap='round';p.lineJoin='round';
- if(type==='satin'||type==='patent'){
-  const g=p.createLinearGradient(130,530,730,80);
-  // Patent has sharper, brighter reflected light; satin keeps its soft ribbons.
-  const stops=type==='patent'?[[0,0],[.27,0],[.345,.10],[.365,.70],[.395,.55],[.455,0],[.65,0],[.705,.30],[.73,.10],[.77,0],[1,0]]:[[0,0],[.24,0],[.34,.12],[.39,.27],[.47,0],[.65,0],[.72,.09],[.79,0],[1,0]];
-  for(const [stop,alpha] of stops)g.addColorStop(stop,'rgba(255,255,251,'+alpha+')');
-  p.fillStyle=g;p.fillRect(0,0,WIDTH,HEIGHT);
- }else if(type==='velvet'){
-  p.fillStyle='rgba(62,31,88,.055)';p.fillRect(0,0,WIDTH,HEIGHT);
-  p.strokeStyle='rgba(255,252,255,.14)';p.lineWidth=.65;
-  for(let y=0;y<HEIGHT;y+=3.5){p.beginPath();p.moveTo(0,y);p.lineTo(WIDTH,y-85);p.stroke();}
- }else if(type==='mesh'){
+// A textile has one stitch recipe in both cameras. Worn cloth uses an
+// authored vamp-plane transform around the toe, independent of viewport size.
+function textilePlane(p,camera){
+ if(camera!=='worn')return;
+ p.translate(344,884);p.rotate(-.48);p.scale(.76,.76);p.translate(-285,-432);
+}
+// Bound repeated art in inverse source coordinates instead of painting a
+// 3072-square field. Padding retains whole petals/strokes at every edge.
+function repeatExtent(p,width,height){
+ const inverse=p.getTransform().inverse(),points=[[0,0],[width,0],[0,height],[width,height]].map(([x,y])=>inverse.transformPoint({x,y}));
+ const left=Math.floor((Math.min(...points.map(v=>v.x))-80)/128)*128,top=Math.floor((Math.min(...points.map(v=>v.y))-80)/128)*128;
+ const right=Math.max(...points.map(v=>v.x))+80,bottom=Math.max(...points.map(v=>v.y))+80;
+ p.translate(left,top);return [Math.ceil(right-left),Math.ceil(bottom-top)];
+}
+function surfaceBounds(p,width,height){
+ const inverse=p.getTransform().inverse(),corners=[[0,0],[width,0],[0,height],[width,height]].map(([x,y])=>inverse.transformPoint({x,y}));
+ return [Math.floor(Math.min(...corners.map(v=>v.x))-80),Math.floor(Math.min(...corners.map(v=>v.y))-80),Math.ceil(Math.max(...corners.map(v=>v.x))+80),Math.ceil(Math.max(...corners.map(v=>v.y))+80)];
+}
+function drawTextile(p,d,width,height,camera='product'){
+ if(!['lace','mesh'].includes(d.material))return;
+ p.save();textilePlane(p,camera);
+ // The rotated worn canvas needs extra source extent, including negative rows.
+ // Translation keeps every repeat continuous through the visible upper.
+ if(camera==='worn')[width,height]=repeatExtent(p,width,height);
+ if(d.material==='mesh'){
   const step=12;
-  for(let row=0;row<HEIGHT/step+1;row++)for(let col=-1;col<WIDTH/step+1;col++){
+  for(let row=0;row<height/step+1;row++)for(let col=-1;col<width/step+1;col++){
    const x=(col+(row%2)*.5)*step,y=row*step;
    p.beginPath();p.ellipse(x,y,2.4,3.0,-.22,0,Math.PI*2);p.fillStyle='rgba(69,47,87,.28)';p.fill();
    p.strokeStyle='rgba(255,255,247,.42)';p.lineWidth=1;p.stroke();
   }
- }else if(type==='lace'){
+ }else{
   // Connected floral guipure: large open petals, leaf sprigs and fine diamond
   // netting. Every stitch is fixed in source coordinates, never random dots.
   p.strokeStyle='rgba(255,252,239,.32)';p.lineWidth=.65;
-  for(let x=-HEIGHT;x<WIDTH+HEIGHT;x+=16){p.beginPath();p.moveTo(x,0);p.lineTo(x+HEIGHT,HEIGHT);p.moveTo(x,0);p.lineTo(x-HEIGHT,HEIGHT);p.stroke();}
+  for(let x=-height;x<width+height;x+=16){p.beginPath();p.moveTo(x,0);p.lineTo(x+height,height);p.moveTo(x,0);p.lineTo(x-height,height);p.stroke();}
   const step=68;
-  for(let row=-1;row<HEIGHT/step+1;row++)for(let col=-1;col<WIDTH/step+1;col++){
+  for(let row=-1;row<height/step+1;row++)for(let col=-1;col<width/step+1;col++){
    const x=(col+(row%2)*.5)*step,y=row*step;
    p.save();p.translate(x,y);p.rotate(-.22);
    p.strokeStyle='rgba(111,77,115,.15)';p.lineWidth=3.8;
@@ -236,9 +247,52 @@ function materialLayer(design,upper){
    for(let j=0;j<3;j++){const sy=23+j*9,sx=25+j*2;p.beginPath();p.ellipse(sx+(j%2?-5:5),sy,7,2.8,j%2?.6:-.6,0,Math.PI*2);p.stroke();}
    p.restore();
   }
+ }
+ p.restore();
+}
+// Motifs retain the product camera's exact silhouette, opacity and repeat.
+// A worn upper spans roughly 630 source pixels against the product's 832;
+// the source-plane ratio prevents the same design becoming oversized checks.
+function drawMotifs(p,d,width,height){
+ const step=59,r=7;p.fillStyle='rgba(255,253,242,.80)';
+ for(let row=0;row<height/step+1;row++)for(let col=-1;col<width/step+1;col++){
+  p.save();p.translate((col+(row%2)*.5)*step,row*step);p.rotate(-.16);p.scale(1,.85);p.beginPath();
+  if(d.pattern==='dots')p.arc(0,0,r*.65,0,Math.PI*2);
+  else if(d.pattern==='hearts'){p.moveTo(0,r);p.bezierCurveTo(-r*2,-r*.4,-r,-r*1.7,0,-r*.4);p.bezierCurveTo(r,-r*1.7,r*2,-r*.4,0,r);}
+  else if(d.pattern==='stars'){for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rad=i%2?r*.45:r;p.lineTo(Math.cos(a)*rad,Math.sin(a)*rad);}p.closePath();}
+  else {for(let i=0;i<5;i++){const a=i*Math.PI*2/5;p.moveTo(Math.cos(a)*r*.45,Math.sin(a)*r*.45);p.ellipse(Math.cos(a)*r*.6,Math.sin(a)*r*.6,r*.55,r*.34,a,0,Math.PI*2);}}
+  p.fill();p.restore();
+ }
+}
+function drawPattern(p,d,width,height,camera='product'){
+ if(d.pattern==='none')return;
+ p.save();textilePlane(p,camera);
+ if(camera==='worn')[width,height]=repeatExtent(p,width,height);
+ if(['rosebuds','diamonds','gingham','scallops','pinstripes'].includes(d.pattern))drawRichPattern(p,d,width,height);
+ else drawMotifs(p,d,width,height);
+ p.restore();
+}
+// Both cameras show the same fabric: reflectance, fibre/glitter size and
+// crystal spacing come from this one recipe. Only the fitted vamp plane turns.
+function drawFinish(p,design,width,height,camera='product'){
+ const type=design.material;
+ if(type==='mesh'||type==='lace'){drawTextile(p,design,width,height,camera);return;}
+ p.save();textilePlane(p,camera);
+ const [left,top,right,bottom]=camera==='worn'?surfaceBounds(p,width,height):[0,0,width,height],projected=camera==='worn';
+ p.lineCap='round';p.lineJoin='round';
+ if(type==='satin'||type==='patent'){
+  const g=p.createLinearGradient(130,530,730,80);
+  // Patent has sharper, brighter reflected light; satin keeps its soft ribbons.
+  const stops=type==='patent'?[[0,0],[.27,0],[.345,.10],[.365,.70],[.395,.55],[.455,0],[.65,0],[.705,.30],[.73,.10],[.77,0],[1,0]]:[[0,0],[.24,0],[.34,.12],[.39,.27],[.47,0],[.65,0],[.72,.09],[.79,0],[1,0]];
+  for(const [stop,alpha] of stops)g.addColorStop(stop,'rgba(255,255,251,'+alpha+')');
+  p.fillStyle=g;p.fillRect(left,top,right-left,bottom-top);
+ }else if(type==='velvet'){
+  p.fillStyle='rgba(62,31,88,.055)';p.fillRect(left,top,right-left,bottom-top);
+  p.strokeStyle='rgba(255,252,255,.14)';p.lineWidth=.65;
+  for(let y=projected?Math.floor((top+left*85/WIDTH)/3.5)*3.5:0;y<(projected?bottom+right*85/WIDTH:HEIGHT);y+=3.5){p.beginPath();p.moveTo(left,y-left*85/WIDTH);p.lineTo(right,y-right*85/WIDTH);p.stroke();}
  }else if(type==='glitter'){
   // Fixed integer hashes keep every fleck at the same source pixel on update.
-  for(let row=0;row<73;row++)for(let col=0;col<118;col++){
+  for(let row=projected?Math.floor(top/9)-1:0;row<(projected?bottom/9+1:73);row++)for(let col=projected?Math.floor(left/9)-1:0;col<(projected?right/9+1:118);col++){
    const n=((row+1)*374761393^(col+1)*668265263)>>>0;
    const x=col*9+(n%73)/9,y=row*9+((n>>>8)%73)/9,r=.45+(n%5)*.17;
    p.fillStyle=n%5?'rgba(255,255,249,.78)':'rgba(255,232,186,.75)';
@@ -246,24 +300,19 @@ function materialLayer(design,upper){
    if(n%97===0){p.strokeStyle='rgba(255,255,255,.95)';p.lineWidth=1.0;p.beginPath();p.moveTo(x-3.3,y);p.lineTo(x+3.3,y);p.moveTo(x,y-3.3);p.lineTo(x,y+3.3);p.stroke();}
   }
  }
- drawRichMaterial(p,design,WIDTH,HEIGHT);
+ drawRichMaterial(p,design,WIDTH,HEIGHT,[left,top,right,bottom]);p.restore();
+}
+A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern,drawTextile,drawFinish});
+function materialLayer(design,upper){
+ const out=canvas(),p=out.getContext('2d');drawFinish(p,design,WIDTH,HEIGHT);
  clip(p,upper);return out;
 }
 function patternLayer(design,upper){
  if(design.pattern==='none')return null;
- const out=canvas(),p=out.getContext('2d'),step=59,r=7;
- if(['rosebuds','diamonds','gingham','scallops','pinstripes'].includes(design.pattern)){drawRichPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;}
- p.fillStyle='rgba(255,253,242,.80)';
- for(let row=0;row<HEIGHT/step+1;row++)for(let col=-1;col<WIDTH/step+1;col++){
-  p.save();p.translate((col+(row%2)*.5)*step,row*step);p.rotate(-.16);p.scale(1,.85);p.beginPath();
-  if(design.pattern==='dots')p.arc(0,0,r*.65,0,Math.PI*2);
-  else if(design.pattern==='hearts'){p.moveTo(0,r);p.bezierCurveTo(-r*2,-r*.4,-r,-r*1.7,0,-r*.4);p.bezierCurveTo(r,-r*1.7,r*2,-r*.4,0,r);}
-  else if(design.pattern==='stars'){for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rad=i%2?r*.45:r;p.lineTo(Math.cos(a)*rad,Math.sin(a)*rad);}p.closePath();}
-  else {for(let i=0;i<5;i++){const a=i*Math.PI*2/5;p.moveTo(Math.cos(a)*r*.45,Math.sin(a)*r*.45);p.ellipse(Math.cos(a)*r*.6,Math.sin(a)*r*.6,r*.55,r*.34,a,0,Math.PI*2);}}
-  p.fill();p.restore();
- }
- clip(p,upper);return out;
+ const out=canvas(),p=out.getContext('2d');
+ drawPattern(p,design,WIDTH,HEIGHT);clip(p,upper);return out;
 }
+
 async function composite(input){
  const design=clean(input),id=key(design);
  if(cache.has(id)){const hit=cache.get(id);cache.delete(id);cache.set(id,hit);return hit;}
