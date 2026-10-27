@@ -39,12 +39,12 @@ async function readSave(){
  cloudDataAvailable=sdkActive&&['crazygames','local'].includes(sdk.environment);
  // Prefer the current local save over legacy cloud data; never let an old v2 overwrite v3.
  for(const key of ['sweet-shoe-v3','sweet-shoe-v2']){
-  const candidates=[];
+  let cloud=null,local=null;
   // A stalled cloud read must neither block play nor authorize overwriting unread cloud data.
-  try{if(cloudDataAvailable)candidates.push(await withDeadline(sdk.data.getItem(key),2000));}catch{cloudDataAvailable=false;}
-  try{candidates.push(localStorage.getItem(key));}catch{}
-  const parsedCandidates=[];for(const value of candidates)if(value)try{const parsed=JSON.parse(value);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))parsedCandidates.push(parsed);}catch{}
-  if(parsedCandidates.length)return sanitizeSave(parsedCandidates.sort((a,b)=>(Number(b.savedAt)||0)-(Number(a.savedAt)||0))[0]);
+  try{if(cloudDataAvailable)cloud=await withDeadline(sdk.data.getItem(key),2000);}catch{cloudDataAvailable=false;}
+  try{local=localStorage.getItem(key);}catch{}
+  const selected=A.selectSaveCandidate(local,cloud);
+  if(selected)return sanitizeSave(selected);
  }
  return freshSave();
 }
