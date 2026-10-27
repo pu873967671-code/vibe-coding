@@ -45,10 +45,10 @@ const PEARL_PROJECTIONS={
 // Pin the same folded satin knot to the outside counter. The far loop passes
 // behind the calf; the near loop and long tails keep their original painting.
 const GRAND_MOUNTS={
- flat:[915,211,738,500,.80],block:[877,103,735,482,.65],
- kitten:[897,91,738,499,.68],wedge:[890,106,739,463,.65],
- stiletto6:[897,106,767,425,.68],stiletto9:[897,111,739,415,.68],
- platform:[877,79,735,443,.65]
+ flat:[915,211,756,560,.55],block:[877,103,753,545,.50],
+ kitten:[897,91,756,545,.50],wedge:[890,106,756,530,.48],
+ stiletto6:[897,106,770,485,.50],stiletto9:[897,111,760,485,.50],
+ platform:[877,79,756,523,.50]
 };
 function projectGrandBow(p,d,painting,mask,mount){
  const dyed=document.createElement('canvas');dyed.width=1024;dyed.height=640;
@@ -450,33 +450,15 @@ function pairedModel(source,options,extra=0,emergency=false){
   hosierySurface(q,sheath.height,section);hosieryTexture(q,o,sheath.height,section,250-extension);l.save();l.globalAlpha=hosieryOpacity(o);l.drawImage(sheath,0,0);l.restore();fishnetYarn(l,sheath,o,sheath.height,section,250-extension);
  }
  if(emergency)l.drawImage(source,0,300+extra);else l.drawImage(source,0,250,SIZE,SIZE-250,0,extension,SIZE,SIZE-250);
- // Author a separate rear calf, leaning out to the left above the shared
- // camera-matched ankle. Only the ankle/foot painting is reused: a second
- // full-height copy would merge into one oversized calf at this close pose.
- const rear=document.createElement('canvas');rear.width=SIZE;rear.height=leg.height;const r=rear.getContext('2d');r.imageSmoothingQuality='high';
- if(emergency)r.drawImage(leg,0,0);else{
-  // y350 is the last calf contour shared by every heel, before independent
-  // ankle paintings diverge. Moving the splice leaves source mounts fixed.
-  const join=650+extra,rearSection=calfSection(join,true);paintCalf(r,join,rearSection);calfVolume(r,462,747,join,true);
-  if(LONG_HOSIERY.has(o.sock)){
-   const sock=document.createElement('canvas');sock.width=SIZE;sock.height=rear.height;const z=sock.getContext('2d'),cloth=hosieryColour(o);z.drawImage(rear,0,0);z.globalCompositeOperation='source-in';z.fillStyle=cloth;z.fillRect(0,0,SIZE,rear.height);
-   const section=rearSection;
-   hosierySurface(z,rear.height,section);
-   hosieryTexture(z,o,join,section,350-join);r.save();r.globalAlpha=hosieryOpacity(o);r.drawImage(sock,0,0);r.restore();fishnetYarn(r,sock,o,join,section,350-join);
-  }
-  // Join below the common source calf, above every short sock cuff.
-  r.drawImage(source,0,350,SIZE,SIZE-350,0,join,SIZE,SIZE-350);
- }
  // The side-camera toe extends left of the old near-frontal pair frame.
  // Preserve those pixels with transparent padding, removed at presentation.
- const pair=document.createElement('canvas');pair.width=1280;pair.height=1300+extra;const p=pair.getContext('2d');p.imageSmoothingQuality='high';p.translate(160,0);
- // Both shoes share one physical size. Depth comes from the authored rear
- // calf, its higher contact point and the front leg's real occlusion.
- p.save();p.translate(-160,-200);p.translate(550,1160+extra);p.rotate(-.04);p.translate(-550,-1160-extra);p.drawImage(rear,0,0);p.globalCompositeOperation='source-atop';p.fillStyle='#77564e23';p.fillRect(0,0,SIZE,1324+extra);p.restore();
+ const pair=document.createElement('canvas');pair.width=1420;pair.height=1300+extra;const p=pair.getContext('2d');p.imageSmoothingQuality='high';p.translate(300,0);
+ // The complete near leg is reused behind the foreground leg.
+ p.save();p.translate(-300,-200);p.translate(550,1160+extra);p.rotate(-.04);p.scale(.96,.96);p.translate(-550,-1160-extra);p.drawImage(leg,0,0);p.globalCompositeOperation='source-atop';p.fillStyle='#77564e23';p.fillRect(0,0,SIZE,1324+extra);p.restore();
  // The nearer calf casts a soft, contour-following contact shadow onto the
  // rear calf. Keeping that shadow inside the existing rear alpha separates
  // the two legs without a painted stripe or a dark halo in the room.
- const contact=document.createElement('canvas');contact.width=pair.width;contact.height=pair.height;const q=contact.getContext('2d');q.translate(160,0);
+ const contact=document.createElement('canvas');contact.width=pair.width;contact.height=pair.height;const q=contact.getContext('2d');q.translate(300,0);
  q.shadowColor='#77516338';q.shadowBlur=35;q.shadowOffsetX=-8;q.drawImage(leg,-150,0);q.shadowColor='transparent';q.globalCompositeOperation='destination-out';q.drawImage(leg,-150,0);q.resetTransform();q.globalCompositeOperation='destination-in';q.drawImage(pair,0,0);p.save();p.resetTransform();p.drawImage(contact,0,0);p.restore();
  p.drawImage(leg,-150,0);return pair;
 }
@@ -509,10 +491,10 @@ async function render(target,input,options,sceneId,cropped=false){
  geometry.floor+=({wedge:(964-993)*.33,platform:(964-999)*.33}[d.heel]||0)*geometry.uniform;
  const slender=.80,{scale,floor}=geometry,extra=geometry.extra,pair=pairedModel(result.canvas,o,extra,result.fallback),w=pair.width*scale*slender,h=pair.height*scale,x=geometry.cx-315*scale,y=floor-(1264+extra)*scale,originalContacts=result.fallback?[[350,963],[675,963]]:CONTACTS[d.heel]||CONTACTS.kitten,shadowContacts=result.fallback?originalContacts:originalContacts.map(([cx,cy])=>{const [wide,depth,ground]=SIDE_CAMERA[d.heel]||[1.15,.93,964];return [450+(cx-450)*wide,cy+(ground-cy)*(1-depth)];});
  p.save();p.translate(x,y);p.scale(scale*slender,scale);
- p.save();p.translate(-160,-200);p.translate(550,1160+extra);p.rotate(-.04);p.translate(-550,-1160-extra);p.translate(0,300+extra);soleShadow(p,shadowContacts);p.restore();
+ p.save();p.translate(-300,-200);p.translate(550,1160+extra);p.rotate(-.04);p.scale(.96,.96);p.translate(-550,-1160-extra);p.translate(0,300+extra);soleShadow(p,shadowContacts);p.restore();
  p.translate(-150,300+extra);soleShadow(p,shadowContacts);p.restore();
- p.drawImage(pair,x-160*scale*slender,y,w,h);
- Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-160,-200,1,-.04;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[-160,-200,-.04],front:[-150,0],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
+ p.drawImage(pair,x-300*scale*slender,y,w,h);
+ Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:'back:-300,-200,.96,-.04;front:-150,0,1;slender:.80',pairPose:'overlapped-full-height',pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[-300,-200,-.04,.96],front:[-150,0],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
 }
 function mount(host,input,options){
  const target=canvas();target.className='fitting2d-canvas';target.setAttribute('role','img');target.setAttribute('aria-label',A.lang==='zh'?'双脚穿着你的鞋款与袜子搭配':'Both feet wearing your shoes and chosen socks');host.replaceChildren(target);
