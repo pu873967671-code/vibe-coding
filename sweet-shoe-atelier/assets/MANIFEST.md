@@ -1,5 +1,20 @@
 # Asset manifest (all WebP, transparent unless noted). Some files may still be arriving; code must tolerate missing art with a tasteful fallback.
 
+
+## 05:19 fitting polish
+
+The bootie worn shoe, upper, shadow and highlight layers share a small local
+shaft-to-instep edge smoothing and one-pixel feather. Rebuild this retouch
+with `python3 dev/fitting-polish/smooth-bootie-edge.py` from its retained
+pre-polish source kit; the collar, toe and fitting mounts remain unchanged.
+Mary Jane's fitted sewn tab and bare-skin mesh are refined in the canvas
+compositor; no new runtime assets or remote resources are required.
+
+
+## 02:17 bow colour and tails
+
+Puffy satin is neutralized in the shared canvas renderer before shoe-colour tinting. Kitten and stiletto6/9 product Grand paintings and tint masks have shortened, V-cut main tails; fitting projects the same assets. Regenerating the original Grand sources requires reapplying this edit.
+
 ## Integral satin bows — display / worn fidelity (2026-10-27)
 
 `python3 dev/fitting-polish/repair-integral-bows.py` replaces the compact worn
@@ -70,8 +85,9 @@ source-only: their fixed pixels already reside in each immutable `_base`
 painting, and the active compositor never requests the separate layers.
 Packaging still validates complete registered source kits before pruning;
 missing source layers and unregistered camera artwork remain release failures.
-Both music recordings, all soft 07:02 cues/codecs, licenses and preview routing
-remain intact.
+Both music recordings, all soft 07:02 cues/codecs and licenses remain intact.
+Music uses relative local paths on every host; file:// previews silently skip sound
+effects because browsers block local fetches.
 
 ## Merge items — assets/items/ (256×256)
 Chains (tier 1→7): fab = cotton ball, thread spool, yarn skein, folded fabric, printed fabric roll, satin bolt, silk bolt
@@ -379,3 +395,43 @@ Ballet worn ribbon layers are deterministic Pillow derivatives of the retained a
 ## 2026-10-27 — original Pearl nacre / Grand satin fidelity
 Seven product Pearl toe cabochons now restore their original painted nacre opacity within camera-specific semantic ellipses. Braided gold/negative chain spaces and all pixels outside those ellipses retain the original extraction; complete asset bounds stay fixed. `dev/fitting-polish/repair-product-pearl-nacre.py` uses retained aligned original product edits; immutable before inputs are in `dev/fitting-polish/pearl-nacre-source/`, native light/dark/hashes in `qa/pearl-nacre/`. Fitting projects that same original nacre/bezel through seven source-local toe mounts, retaining the complete prior worn bead on missing product art.
 Seven product Grand bow paintings/tints restore continuous original neutral satin through enclosed extraction holes via `dev/fitting-polish/clean-grand-bow.py`; original exterior alpha/camera bounds stay exact, with source backups in `dev/fitting-polish/grand-bow-source/`. Worn Grand identity and tiny inherited exterior scraps remain follow-ups. Original paintings, no new generation/download/CDN/runtime dependency.
+
+## 2026-10-27 — Puffy satin bow
+`ornaments/puffy_satin.webp` is a locally keyed gpt-image-2 satin painting shared by product and worn cameras. Runtime multiplies the painted folds by a lightened selected shoe colour and supplies a soft contact shadow. The raw generated source is retained outside the runtime package.
+
+## 2026-10-27 — Chantilly lace
+`materials/lace_tile.webp` is the source-only supervisor-supplied white transparent Chantilly artwork. `materials/lace_seamless.webp` is its quality-80 half-offset, 64-pixel feathered derivative, reproducible with `python3 dev/build-lace-tile.py`; the shared product/worn renderer tiles it over the dyed upper. Kitten and loafer use camera-specific scalloped collar trim.
+
+## 2026-10-28 — package headroom: reviewed shoe paintings
+
+Eight product bases and two worn shoes were encoded from the exact pre-optimization
+`555dc73` originals using Pillow 13.0.0 / libwebp 1.6.0 (lossy WebP quality 95,
+method 4, exact=True). Quality 82 softened fine grain in 3× source comparisons;
+quality 95 was chosen to preserve detail better. All ten retain their original
+dimensions and exact per-pixel alpha, with no masks, positions, animation frames,
+or Crystal sandal camera assets changed. Encoding changes RGB, not geometry.
+
+Rebuild from pristine source assets, never from already encoded output:
+
+```sh
+mkdir -p /tmp/shoe-pkg-source /tmp/shoe-pkg-output
+git archive 555dc73 assets/shoe2d assets/fitting2d | tar -x -C /tmp/shoe-pkg-source
+python3 dev/optimize-package-art.py --source /tmp/shoe-pkg-source/assets --output /tmp/shoe-pkg-output
+```
+
+The helper writes to a separate tree and verifies dimensions and alpha. The
+source and encoded SHA-256 hashes below identify the exact reviewed files;
+codec versions can affect reproducibility.
+
+| Relative path under assets | Original SHA-256 | Encoded SHA-256 |
+| --- | --- | --- |
+| `fitting2d/bootie_shoe.webp` | `dc8917472e1f00d91fde91a409609488bba2e683c6ec0583991f57dfed96ecaf` | `8baa35d0dba60d027cafe3fe05f363bda85aa64b070bef547f6e30e0d866d689` |
+| `fitting2d/bowmule_shoe.webp` | `6f60ce875ad1fa3adeec091d29f6c6a00aa3cb3ef44bb19ee6ac4f133d03aa62` | `6cbaedbf2ec25cb0170e7b3345c0a290fb8583205202c34b95a1e0ec3100b0ee` |
+| `shoe2d/ballet_base.webp` | `fdaa60f83223d919524fa9e287e04018ff73c02ee19bb098d5655f21e534190c` | `96c6ef533be6e527999487f5415685ffab95c4ed6a1be3f92770588d1f59c2c0` |
+| `shoe2d/bootie_base.webp` | `a8112f87f579db523319d193411ab8991ac90e95ada2b32d0e95b07b6e7302c7` | `db8bac63e959b2ebaed78af412aa99121c696a6ab09fb40df86709872d6a1b7a` |
+| `shoe2d/bowsling_base.webp` | `d851b9b3143a70b204174cb5d49424c6bac22ed966ecf2f4326c0945594dd212` | `d39b9863366b681e3e3a36a110deca21f289a8e21a991791880cc221569224f3` |
+| `shoe2d/crystalpump_base.webp` | `dac850fadb7f4d201a67f967bc38419d1794947474f5c1e42905cfc2e483e458` | `37fe0e19b7ad209891fa48c71510727c4bc07f571e87c5b0138853a3e17b6c56` |
+| `shoe2d/loafer_base.webp` | `cf6ab7e8514bae4380cba5eba797b604c9c740d0b80f16ad664ca9359e25f16c` | `55a195bceb44187ead4e50ae8b7db681bdabc912ba2e12a0b851577c37dc8b13` |
+| `shoe2d/maryjane_base.webp` | `b4b930bff220a543196be2c6762a955eb69a2348be3ddfc90822898a175aedc0` | `e24461c54661c72faedbecc506857ea394b2a08c5bd701314c3dac8fb9b7ff35` |
+| `shoe2d/platform_base.webp` | `9d46984364b0060adb742f7cc108686d1b17152772d7b7aeb1ae62d04ddec9b3` | `4ceb027f552d124378dd0a2e9c4466c6043a98eb2eccc9f86bfdcc57dad43b0a` |
+| `shoe2d/studpump_base.webp` | `0bedd0e8d96b656633ff2e5a51d62069fbb2095088e588ce8c46701ab8f8b8fc` | `cc3d05998864ac452dad75e8282eaa8af218cd93af4af29bb22f40fc54abf2fa` |
