@@ -960,6 +960,10 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
 .boutique-dressing{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
 .room-dressing{transform-box:fill-box;transform-origin:center}
 .boutique-dressing .renovation-reveal{animation:room-detail-reveal .7s cubic-bezier(.2,.8,.2,1) both}
+/* Native room lighting must fade in without shifting its painted camera. */
+.boutique-dressing .room-restoration.renovation-reveal{animation:room-restoration-reveal .7s ease-out both}
+@keyframes room-restoration-reveal{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.boutique-dressing .room-restoration.renovation-reveal{animation:none}}
 .renovation-room-badge{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);padding:9px 17px;border-radius:22px;border:1px solid #fff5d8;background:#fffaf0ee;color:#5b6c53;box-shadow:0 4px 18px #68543a25;font:600 12px/1.4 var(--font-ui);white-space:nowrap;animation:room-badge-reveal .3s ease-out;pointer-events:none}
 .chapter-celebration>.chapter-room-preview{width:100%;height:135px;aspect-ratio:auto;margin:0 0 16px;border-radius:15px}
 .chapter-room-preview+.chapter-portraits{display:none}
@@ -1083,6 +1087,25 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
  .vn-mentor{left:calc(34vw - 28.8dvh)}
  .vn-story .opening-character{left:calc(34vw - 30dvh)}
 }
+/* Wide dialogue uses its own content width, independent of the viewport.
+   Mimi's feet sit above the gutter rather than being cropped through the soles. */
+.vn-mentor,.vn-story .opening-character{clip-path:none;bottom:48px}
+.vn-box .vn-skip,.guide-action .director-skip{color:#315d4e!important;background:#fffdf4!important;border:1px solid #83b69e!important;font-size:13px!important;font-weight:600!important;min-height:44px;min-width:76px}
+@media(orientation:landscape){
+ .vn-box,.vn-story .opening-copy.vn-box{left:50%;right:auto;translate:-50% 0;width:min(1000px,calc(100% - 48px));padding:32px 36px 52px}
+ .vn-box .vn-name{left:34px}
+ .vn-story .opening-character{left:max(0px,calc((100vw - 1760px)/2));height:calc(91% - 48px)}
+}
+@media(max-height:560px) and (orientation:landscape){
+ .vn-box,.vn-story .opening-copy.vn-box{width:calc(100% - 32px);padding:20px 26px 44px}
+ .vn-box .vn-name{left:24px}
+ .vn-mentor,.vn-story .opening-character{bottom:24px}
+}
+@media(orientation:portrait){.vn-mentor{bottom:12vh}.vn-story .opening-character{bottom:12%}}
+@media (min-aspect-ratio: 2/1) and (min-width: 1600px){
+ .vn-story .opening-copy.vn-box{left:calc(50% + 180px)}
+}
+.runway-monogram{right:max(32px,env(safe-area-inset-right))}
 /* Painted shoe kit: one authored camera, one stable source-pixel frame. */
 #studioScreen .stage.shoe2d-stage{overflow:hidden;border-radius:24px;background:radial-gradient(ellipse at 48% 25%,#fffefd 10%,#fff5f8 65%,#eef8f3);border:1px solid #f5dce6}
 #studioScreen .shoe2d-stage:before{inset:0;border-radius:inherit;background:radial-gradient(ellipse at 50% 84%,#e2ece55c,transparent 58%)}
@@ -1199,7 +1222,10 @@ body :is(h1,h2,h3,button,.panel-heading){font-family:var(--font-ui)!important}
    resizes. Soft room colour fills the unused space around the sharp crop. */
 .runway-scene:has(.runway-worn-window){background:#e9e5dc;isolation:isolate}
 .runway-scene:has(.runway-worn-window):before{content:'';display:block;position:absolute;inset:-24px;height:auto;background-image:linear-gradient(#f6fff742,#f5eee64d),var(--scene-image);background-size:cover;background-position:center 50%;filter:blur(20px);opacity:.7;pointer-events:none;z-index:0}
+.runway-scene:has(.runway-worn-window):after{content:'';display:block;position:absolute;inset:0;clip-path:none;background-image:var(--scene-image);background-repeat:no-repeat;background-size:var(--room-background-size);background-position:var(--room-background-position);mask-image:linear-gradient(to right,transparent var(--room-left),#000 calc(var(--room-left) + 80px),#000 calc(var(--room-right) - 80px),transparent var(--room-right));pointer-events:none;z-index:1}
 .runway-scene>.runway-worn-window{overflow:hidden;z-index:3;max-width:none;max-height:none}
+.runway-scene>.runway-worn-window:before{display:none}
+.runway-scene:has(.runway-worn-window) .runway-monogram{display:none}
 .runway-scene:has(.runway-worn-window) .scene-atmosphere,.runway-scene:has(.runway-worn-window) .runway-spark{display:none}
 .runway-scene:has(.runway-worn-window) .runway-product-detail{display:none!important}
 .runway-scene:has(.runway-worn-window)>.runway-contact,.runway-scene:has(.runway-worn-window)>.runway-light,.runway-scene:has(.runway-worn-window)>.runway-mirror{display:none}
@@ -1397,7 +1423,7 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 @media(max-height:560px) and (orientation:landscape){.picker-recent-label{display:none}#studioScreen #options{min-height:72px}#studioScreen #options .option{min-height:72px}}
 
 /* USER12:47: crop the fixed camera; let its larger dock meet the picture. */
-.runway-modal .runway-dock{width:min(1440px,calc(100% - 32px));bottom:max(14px,env(safe-area-inset-bottom));border-radius:0 0 24px 24px;padding:18px 22px;gap:16px 20px;align-content:space-evenly;grid-template-columns:minmax(0,1fr) auto;background:linear-gradient(135deg,#fbfffcf5,#e5f7edf5);box-shadow:0 14px 40px #32765e24}
+.runway-modal .runway-dock{width:min(calc(100% - 32px),max(740px,var(--fitting-picture-width,940px)));bottom:max(14px,env(safe-area-inset-bottom));border-radius:22px 22px 24px 24px;padding:18px 22px;gap:16px 20px;align-content:space-evenly;grid-template-columns:minmax(0,1fr) auto;background:linear-gradient(135deg,#fbfffcf5,#e5f7edf5);box-shadow:0 -8px 20px #eaf7ed44,0 14px 40px #32765e24}
 .runway-modal .runway-dock .showcase-strip,.runway-modal .runway-dock .showcase-picker{height:88px}
 .runway-modal .runway-dock .showcase-picker{gap:10px;padding:2px}
 .runway-modal .runway-dock .showcase-chip{flex:1 0 164px;min-height:80px;grid-template-columns:64px minmax(0,1fr);gap:0 10px;padding:8px;border-radius:16px}
@@ -1448,3 +1474,61 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
  .runway-modal .runway-sock-colors{gap:0}.runway-modal .runway-sock-colors .sock-color{width:40px;min-width:40px;min-height:44px}
  .runway-modal .sock-color>span{width:26px;height:26px}
 }
+
+
+/* REVIEW22:30: keep the brief small enough to design, with complete sample rows. */
+.nav-label-short{display:none}
+#studioScreen .section-kicker{display:block;white-space:nowrap;line-height:1.4}
+.studio-summary{display:none}
+@media(orientation:landscape) and (min-height:850px){
+ #studioScreen .custom{padding:24px clamp(18px,2vw,32px);justify-content:center}
+ #studioScreen #options:not([data-category="heel"]){flex:none;max-height:320px;overflow-y:auto}
+ #studioScreen #options .option{min-height:96px}
+ .studio-summary{display:block;margin-top:24px;padding-top:0;color:var(--ink)}
+ .studio-summary h3{font:600 14px/1.4 var(--font-ui);padding-bottom:10px;border-bottom:1px solid var(--line)}
+ .studio-summary dl{margin:8px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
+ .studio-summary dl>div{min-width:0;padding:7px 0;border-bottom:1px solid #dcece466}
+ .studio-summary dt{display:flex;align-items:center;gap:5px;font:11px/1.4 var(--font-ui);color:var(--muted)}
+ .studio-summary dt .ui-icon{width:19px;height:19px}
+ .studio-summary dd{margin:3px 0 0 24px;font:600 12px/1.4 var(--font-ui);overflow-wrap:anywhere}
+}
+@media(orientation:portrait){
+ #studioScreen .customer{min-height:0;grid-template-columns:72px minmax(0,1fr);padding:10px 12px;gap:4px 10px}
+ #studioScreen .commission-identity{grid-column:1;grid-row:1/3;align-items:center;justify-content:center}
+ #studioScreen .customer .portrait-wrap{width:48px;height:58px;flex:0 0 58px}
+ #studioScreen .customer-name{font-size:15px;margin:2px 0;text-align:center}
+ #studioScreen .theme{text-align:center;font-size:9px;line-height:1.25}
+ #studioScreen .section-kicker{font-size:8px;letter-spacing:.2px;text-align:center}
+ #studioScreen .commission-brief{grid-column:2;grid-row:1}
+ #studioScreen .commission-shoe{display:none}
+ #studioScreen .speech{font-size:11px;line-height:1.35;margin-bottom:6px}
+ #studioScreen .requirements{gap:4px}
+ #studioScreen .req{min-height:24px;font-size:10px}
+ #studioScreen .commission-status{grid-column:2;grid-row:2}
+ #studioScreen .timer-row{font-size:9px;line-height:1.2}
+ #studioScreen .timer-row .ui-icon{width:14px;height:14px}
+ #studioScreen .timer-track{margin:3px 0 0;height:3px}
+ #studioScreen .commission-status>.customer-top{height:44px}
+ #studioScreen .time-ad{min-height:44px;font-size:9px;padding:0 4px}
+ #studioScreen .work-area{min-height:210px}
+ #studioScreen .custom{padding:6px 12px 10px}
+ #studioScreen #options,#studioScreen #options[data-category="heel"]{height:162px;min-height:162px;max-height:162px;flex:none;gap:6px;scroll-padding:4px}
+ #studioScreen #options:not([data-category="heel"]) .option{height:78px;min-height:78px}
+ #studioScreen #options[data-category="heel"] .option{height:78px;min-height:78px}
+ #studioScreen .free-brief .commission-identity{grid-row:1}
+}
+@media(orientation:portrait) and (max-width:500px){
+ #nav [data-nav="serve"] .nav-label{display:none}
+ #nav [data-nav="serve"] .nav-label-short{display:block}
+ #nav [data-nav="serve"]{padding-left:8px;padding-right:8px}
+}
+@media(orientation:portrait){
+ #studioScreen .work-area{min-height:224px}
+ #studioScreen .work-actions button{min-height:44px}
+ #studioScreen .picker-recent{display:flex;align-items:center;gap:6px}
+ #studioScreen .picker-recent[hidden]{display:none}
+ #studioScreen .picker-recent-label{width:48px;flex:none;margin:0;font-size:9px}
+ #studioScreen .picker-recent>div{flex:1;min-width:0}
+}
+
+@media(orientation:landscape) and (max-height:560px){#studioScreen .options-heading{display:none}}
