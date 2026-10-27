@@ -9,6 +9,9 @@
     const engine={ctx:null,master:null,effects:null,music:null,tick:null,step:0,voices:new Set(),lastCue:new Map(),limit:32,
       tracks:new Map(),failedTracks:new Set(),trackRetryAfter:new Map(),currentTrack:null,buffers:new Map(),sampleLoads:new Map(),sampleRetryAfter:new Map(),effectGeneration:0,
       loadSample(name){
+        // Browsers block fetch() for local file URLs as cross-origin requests.
+        // Keep local previews quiet instead of issuing a failing request per cue.
+        if(location.protocol==='file:')return Promise.resolve(null);
         if(this.buffers.has(name))return Promise.resolve(this.buffers.get(name));
         if(this.sampleLoads.has(name))return this.sampleLoads.get(name);
         // A temporary connection/decoder failure must not mute a cue until reload.
