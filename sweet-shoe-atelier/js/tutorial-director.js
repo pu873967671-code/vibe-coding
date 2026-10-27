@@ -24,7 +24,17 @@
    const group=document.createElement('div');group.className='guide-focus';group.setAttribute('aria-hidden','true');
    group.innerHTML=`<svg class="guide-shade" width="100%" height="100%"><path fill="#2f233f80" fill-rule="evenodd" d="M0 0H${innerWidth}V${innerHeight}H0Z ${hole(r)} ${dest?hole(dest):''}"/>${dest?`<path class="guide-drag-path" d="M${dest.x+dest.width/2} ${dest.y+dest.height/2} Q${(dest.x+dest.width/2+cx)/2} ${Math.min(dest.y,cy)-30} ${cx} ${cy}"/>`:''}</svg><i class="guide-ring"></i><img class="guide-hand" src="assets/ui/tutorial_hand.svg" alt=""><span class="guide-label"></span>`;
    root.append(group);Object.assign(group.querySelector('.guide-ring').style,{left:r.x-pad+'px',top:r.y-pad+'px',width:r.width+pad*2+'px',height:r.height+pad*2+'px'});
-   const hand=group.querySelector('.guide-hand'),hx=Math.min(innerWidth-82,Math.max(0,cx-22)),hy=Math.min(innerHeight-100,cy+6);Object.assign(hand.style,{left:hx+'px',top:hy+'px'});
+   const hand=group.querySelector('.guide-hand');
+   let hx=Math.min(innerWidth-82,Math.max(0,cx-22)),hy=Math.min(innerHeight-100,cy+6),turn=0;
+   // Keep the fingertip outside action labels. Board gestures still point at
+   // the item centre, while buttons are indicated from their nearest free edge.
+   if(!dest&&target.matches('button:not([data-cell])')){
+    if(r.bottom+110<=innerHeight){hx=cx-22;hy=r.bottom+6;}
+    else if(r.right+110<=innerWidth){hx=r.right-14;hy=cy-6;turn=-90;}
+    else if(r.left>=110){hx=r.left-30;hy=cy-6;turn=90;}
+    else{hx=cx-22;hy=r.top-18;turn=180;}
+   }
+   Object.assign(hand.style,{left:hx+'px',top:hy+'px',transform:`rotate(${turn}deg)`});
    if(dest&&!reduced){const dx=dest.x+dest.width/2-cx,dy=dest.y+dest.height/2-cy;animation=hand.animate([{transform:`translate(${dx}px,${dy}px)`,opacity:.2},{transform:`translate(${dx}px,${dy}px)`,opacity:1,offset:.15},{transform:'translate(0,0)',opacity:1,offset:.8},{transform:'translate(0,0)',opacity:0}],{duration:1800,iterations:Infinity,easing:'ease-in-out'});}
    const label=group.querySelector('.guide-label');label.textContent=current.label||'';Object.assign(label.style,{maxWidth:'260px',left:Math.max(12,Math.min(innerWidth-272,cx-130))+'px',top:(dest?Math.max(8,Math.min(dest.y,r.y)-76):r.top>80?r.top-48:Math.min(innerHeight-48,r.bottom+90))+'px'});
   }
