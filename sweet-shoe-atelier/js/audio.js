@@ -34,11 +34,12 @@
         const buffer=this.buffers.get(name);
         if(!buffer||!this.ctx||!getState().sound||blocked())return;
         try{
+          if([...this.voices].filter(voice=>voice.name===name).length>=3)return;
           if(this.voices.size>=this.limit)this.voices.values().next().value.stop();
           const source=this.ctx.createBufferSource(),gain=this.ctx.createGain();
           let ended=false;
           const cleanup=()=>{if(ended)return;ended=true;source.disconnect();gain.disconnect();this.voices.delete(voice);};
-          const voice={bus:this.effects,stop:()=>{try{source.stop();}catch{}cleanup();}};
+          const voice={name,bus:this.effects,stop:()=>{try{source.stop();}catch{}cleanup();}};
           source.buffer=buffer;source.playbackRate.value=rate;gain.gain.value=volume;
           source.connect(gain);gain.connect(this.effects);source.onended=cleanup;
           this.voices.add(voice);source.start(this.ctx.currentTime+offset);
@@ -185,11 +186,11 @@
       sfx(kind,tier=1){
         if(!getState().sound||blocked()||!this.ctx)return;
         // One meaningful cue per action even when nested controls bubble clicks.
-        const now=this.ctx.currentTime,last=this.lastCue.get(kind);
-        if(last!==undefined&&now-last<.035)return;
-        this.lastCue.set(kind,now);
         const name=ALIASES[kind]||kind;
         if(!SAMPLES.includes(name))return;
+        const now=this.ctx.currentTime,last=this.lastCue.get(name);
+        if(last!==undefined&&now-last<.06)return;
+        this.lastCue.set(name,now);
         const generation=this.effectGeneration;
         const play=()=>{
           if(generation!==this.effectGeneration||!getState().sound||blocked())return;
