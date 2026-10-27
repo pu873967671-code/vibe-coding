@@ -59,17 +59,23 @@
   const top=heading?heading.getBoundingClientRect().bottom-stageBox.top:0;
   const host=stage.querySelector('.runway-worn-window');
   if(host){
-   // Keep the approved full-camera scale, then CUT its upper/lower extent.
-   // Fitting the shorter crop to the available height would enlarge the feet.
+   // Ordinary screens keep the approved full-camera scale and crop; very
+   // wide screens enlarge that same crop uniformly beside the controls.
+   const ultrawide=window.matchMedia('(min-width: 2200px) and (orientation: landscape)').matches;
    const legacyClearance=w<h?248:160;
-   const available=Math.max(1,h-top-legacyClearance),uniform=Math.min(w/composition.width,available/composition.height);
+   // On very wide displays the controls have their own side rail, leaving the
+   // fixed camera room to use the full available height. Keep its projection
+   // uniform and reserve enough horizontal space for the rail.
+   const available=Math.max(1,h-top-(ultrawide?16:legacyClearance));
+   const pictureSpace=ultrawide?Math.max(1,w-500):w;
+   const uniform=ultrawide?Math.min(pictureSpace/composition.crop.width,available/composition.crop.height):Math.min(w/composition.width,available/composition.height);
    const width=composition.crop.width*uniform,height=composition.crop.height*uniform;
-   const x=(w-width)/2,y=top;
+   const x=(pictureSpace-width)/2,y=top;
    Object.assign(host.style,{left:x+'px',top:y+'px',width:width+'px',height:height+'px',right:'auto',bottom:'auto'});
    root?.style.setProperty('--fitting-picture-width',width+'px');
-   // The dock starts on the picture's lower edge at every aspect ratio. Its
-   // enlarged surface consumes the released space rather than exposing blur.
-   if(dock)dock.style.top=(top+height)+'px';
+   // The regular dock meets the picture; the wide side rail is centered in
+   // the space below the heading and may scroll within a short viewport.
+   if(dock)dock.style.top=ultrawide?(top+Math.max(0,(h-top-dock.offsetHeight)/2))+'px':(top+height)+'px';
    stage.style.setProperty('--dock-clearance',(h-top-height)+'px');
    const projected=project(stage.dataset.showcaseScene,width,height,true),bg=projected.background;
    // Project the same room beyond the picture without moving the feet.
