@@ -263,13 +263,14 @@ function drawOne(p,d,camera,category,upper,clipBand=true){
   if(value==='cross'){
    crossLaces(p,d,colour,camera,upper);
   }else if(value==='pearl'){
-   // Product straps rise above the empty opening in the Mary-Jane plane.
+   // The product strap spans the opening along the instep plane. Its shallow
+   // curve suggests the foot beneath it without making a floating loop.
    // The two camera-specific ends are sewn into the far binding and near
    // upper, rather than terminating along the insole or halfway into space.
    const product=camera==='product',rows=laceCamera(d,camera).rows,far=rows[0][0],near=rows[0][1];
    const start=product?[far[0]+6,far[1]+(d.heel==='stiletto9'?15:0)]:[far[0]+3,far[1]-20];
    const end=product?[near[0]+20,near[1]-65]:[near[0]+100,near[1]-85];
-   const path=[...start,(start[0]+end[0])/2-15,product?Math.min(start[1],end[1])-100:(start[1]+end[1])/2-80,...end];
+   const path=[...start,(start[0]+end[0])/2-15,(start[1]+end[1])/2-(product?26:80),...end];
    strokeCurve(p,path,'#79564566',product?13:6);
    strokeCurve(p,path,'#f4e5c8',product?9:2.5);
    for(const t of [0,1]){
