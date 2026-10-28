@@ -582,7 +582,7 @@ function drawLegacyAccessories(p,d,sprites,base,binding){
 function draw(source,target,options){
  const p=target.getContext('2d');p.clearRect(0,0,target.width,target.height);p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';
  const scale=Math.min(target.width/WIDTH,target.height/HEIGHT),w=WIDTH*scale,h=HEIGHT*scale,x=(target.width-w)/2,y=(target.height-h)/2;
- if(options.pair){p.save();p.globalAlpha=.94;p.drawImage(source,x+w*.10,y-h*.02,w*.87,h*.87);p.restore();p.drawImage(source,x-w*.06,y+h*.035,w,h);}
+ if(options.pair){p.drawImage(source,x+w*.10,y-h*.02,w*.87,h*.87);p.drawImage(source,x-w*.06,y+h*.035,w,h);}
  else p.drawImage(source,x,y,w,h);
 }
 async function render(target,input,options={}){
