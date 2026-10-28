@@ -165,6 +165,57 @@ function loaferHeel(source,upper){
 // The accessory camera now places all three eyelet pairs on this original
 // cloth, so the retained neckline and its skin/hosiery boundary stay intact.
 function lacedVamp(parts){return parts;}
+// Lower the front of the studded pump's topline while keeping the original
+// painted binding and each integral stud attached to the cloth. The shoe is
+// compressed toward its unchanged sole, while the underlying foot extends
+// into the new opening; both use the same smooth, tapered local displacement.
+function lowerStudThroat(parts){
+ const collar=x=>{
+  const points=COLLAR.stiletto6;
+  for(let i=0;i<points.length-1;i++)if(x>=points[i][0]&&x<=points[i+1][0]){
+   const a=points[i],b=points[i+1],t=(x-a[0])/(b[0]-a[0]);return a[1]+(b[1]-a[1])*t;
+  }
+  return 804;
+ };
+ function warp(source,binding=false){
+  if(!source)return source;
+  if(binding){
+   const painted=canvas(),b=painted.getContext('2d');b.drawImage(source,0,0);
+   // A narrow ivory rolled edge belongs to the shoe, under the metal studs.
+   // The dye mask already leaves this seam clear in both camera renderers.
+   b.globalCompositeOperation='source-atop';b.strokeStyle='#f8e9d4';b.lineWidth=8;b.lineCap='round';b.lineJoin='round';b.beginPath();
+   const points=[...COLLAR.stiletto6,[760,418]];b.moveTo(...points[0]);
+   for(let i=0;i<points.length-1;i++){
+    const a=points[Math.max(0,i-1)],v=points[i],c=points[i+1],d=points[Math.min(points.length-1,i+2)];
+    b.bezierCurveTo(v[0]+(c[0]-a[0])/6,v[1]+(c[1]-a[1])/6,c[0]-(d[0]-v[0])/6,c[1]-(d[1]-v[1])/6,...c);
+   }
+   b.stroke();
+   source=painted;
+  }
+  const out=canvas(),p=out.getContext('2d');p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';p.drawImage(source,0,0);
+  const top=700,bottom=964,left=320,right=610;
+  p.clearRect(left,top,right-left,bottom-top);
+  for(let x=left;x<right;x++){
+   const drop=37*smooth((x-left)/65)*smooth((right-x)/95),edge=collar(x);
+   const scale=1-drop/(bottom-edge),pivot=bottom;
+   p.save();p.beginPath();p.rect(x,top,1,bottom-top);p.clip();
+   p.setTransform(1,0,0,scale,0,pivot*(1-scale));p.drawImage(source,0,0);p.restore();
+  }
+  return out;
+ }
+ const leg=canvas(),l=leg.getContext('2d');l.drawImage(parts.legs,0,0);
+ const cut=canvas(),c=cut.getContext('2d');c.drawImage(parts.occlusion,0,0);
+ for(let x=320;x<610;x++){
+  const drop=37*smooth((x-320)/65)*smooth((610-x)/95),edge=collar(x);
+  // Sample just inside the existing skin so its painted colour continues
+  // across the newly exposed sliver, without altering the ankle outline.
+  l.drawImage(parts.legs,x,edge-12,1,1,x,edge-12,1,drop+15);
+  c.clearRect(x,edge-20,1,drop+23);
+ }
+ const result={...parts,legs:leg,occlusion:cut};
+ for(const key of ['shoe','upper','shadow','highlight'])result[key]=warp(parts[key],key==='shoe');
+ return result;
+}
 function balletSeat(source){
  const out=canvas(),p=out.getContext('2d');p.drawImage(source,0,0);
  // A restrained contact shade seats the foot below the enclosing vamp.
@@ -190,7 +241,7 @@ function prepare(heel,parts){
   if(heel==='wedge')source=wedgeCounter(wedgeRope(source,key));
   result[key]=toe(source,heel);
  }
- return result;
+ return heel==='studpump'?lowerStudThroat(result):result;
 }
 // The pearl orb is a round solid object, not part of the flattened shoe last.
 // Its isolated transparent source region lets us restore the retained painted
