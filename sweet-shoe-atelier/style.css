@@ -1638,3 +1638,8 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
  #studioScreen:has(.free-brief) .custom:has(#options[data-category="heel"]) #tabs{grid-template-columns:repeat(7,minmax(0,1fr))}
  #studioScreen:has(.free-brief) .custom:has(#options[data-category="heel"]) .sample-note{display:none}
 }
+
+/* On tall desktop screens, let the native 1024×640 artwork fill the studio. */
+@media (orientation:landscape) and (min-width:1201px) and (min-height:850px){
+ #studioScreen:has(.free-brief) .stage{width:min(1024px,calc(100% - 48px),calc((100dvh - 300px)*1.6))}
+}
