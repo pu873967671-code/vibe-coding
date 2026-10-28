@@ -445,3 +445,12 @@ hand-traced contour intersects the original alpha to remove extraction slivers
 and the pale tail fringe, while nearby opaque satin supplies clean edge colour.
 The repair affects the flat-family product bow layer and its colour mask; the
 shoe body, sole and fitting-camera artwork are unchanged.
+
+### Grand satin tail finish (2026-10-28)
+
+The flat, block, wedge and platform product Grand bow paintings use shorter,
+anti-aliased fishtail contours. Their tint masks have the same coverage; the
+worn renderer projects these same paintings. The other three shared Grand
+families retain their existing short tails. Rebuild the four derivatives from
+retained pre-trim paintings with `python3 dev/fitting-polish/shorten-grand-tails.py`
+after any earlier Grand extraction repair. No shoe body or camera mount changes.
