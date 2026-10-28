@@ -277,7 +277,11 @@ function drawFinish(p,design,width,height,camera='product'){
   for(const [stop,alpha] of stops)g.addColorStop(stop,'rgba(255,255,251,'+alpha+')');
   p.fillStyle=g;p.fillRect(left,top,right-left,bottom-top);
  }else if(type==='velvet'){
-  p.fillStyle='rgba(35,16,36,.32)';p.fillRect(left,top,right-left,bottom-top);
+  // Pale velvet should retain its dye instead of taking on a grey-brown
+  // cast. Dark velvet keeps the deeper nap; the same palette-aware recipe
+  // is used by both cameras so a fitting still matches its display shoe.
+  const velvetShade=design.color==='black'?.32:design.color==='rose'?.20:.08;
+  p.fillStyle=`rgba(35,16,36,${velvetShade})`;p.fillRect(left,top,right-left,bottom-top);
   const nap=p.createLinearGradient(100,180,380,560);
   for(const [at,alpha] of [[0,0],[.24,0],[.34,.10],[.44,0],[.63,0],[.73,.075],[.84,0],[1,0]])nap.addColorStop(at,'rgba(255,238,245,'+alpha+')');
   p.fillStyle=nap;p.fillRect(left,top,right-left,bottom-top);
@@ -286,6 +290,14 @@ function drawFinish(p,design,width,height,camera='product'){
    const x=col*7+(hash%70)/10,y=row*5+((hash>>>8)%50)/10;
    p.strokeStyle=hash&1?'rgba(255,235,244,.075)':'rgba(43,19,42,.075)';p.lineWidth=.65;
    p.beginPath();p.moveTo(x,y);p.lineTo(x+1.5+(hash%20)/10,y-.6);p.stroke();
+  }
+  if(camera==='worn'){
+   // These cameras have differently painted light maps from the display
+   // view. Balance only the affected velvet dyes, preserving fabric detail.
+   const dark=design.color==='black'?({flat:.15,kitten:.08,wedge:.37,maryjane:.12}[design.heel]||0):design.heel==='wedge'&&design.color==='pink'?.07:0;
+   const light=design.heel==='platform'&&['pink','cream'].includes(design.color)?.09:0;
+   if(dark){p.fillStyle=`rgba(35,16,36,${dark})`;p.fillRect(left,top,right-left,bottom-top);}
+   if(light){p.fillStyle=`rgba(255,248,245,${light})`;p.fillRect(left,top,right-left,bottom-top);}
   }
  }else if(type==='glitter'){
   for(let row=Math.floor(top/5);row<bottom/5;row++)for(let col=Math.floor(left/5);col<right/5;col++){
