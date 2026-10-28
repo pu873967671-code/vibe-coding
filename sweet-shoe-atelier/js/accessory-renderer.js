@@ -239,12 +239,21 @@ function loadPuffy(){
  if(!puffyLoad)puffyLoad=new Promise(resolve=>{const image=new Image();image.onload=()=>{puffyImage=image;resolve();};image.onerror=()=>resolve();image.src='assets/ornaments/puffy_satin.webp';});
  return puffyLoad;
 }
-function paintedPuffy(p,d,camera,a,colour){
- if(!puffyImage){puffyBow(p,a.vamp[0]+18,a.vamp[1]+(camera==='product'?24:32),80,colour);return;}
+function paintedPuffy(p,d,camera,a,colour,upper){
+ if(!puffyImage){puffyBow(p,a.vamp[0]+18,a.vamp[1]+(camera==='product'?36:44),80,colour);return;}
  let image=puffyColours.get(colour);
- if(!image){image=document.createElement('canvas');image.width=puffyImage.naturalWidth;image.height=puffyImage.naturalHeight;const context=image.getContext('2d');context.drawImage(puffyImage,0,0);const pixels=context.getImageData(0,0,image.width,image.height);for(let index=0;index<pixels.data.length;index+=4){const luminance=Math.round(.2126*pixels.data[index]+.7152*pixels.data[index+1]+.0722*pixels.data[index+2]);pixels.data[index]=pixels.data[index+1]=pixels.data[index+2]=luminance;}context.putImageData(pixels,0,0);context.globalCompositeOperation='multiply';context.fillStyle=silkTone(colour,.3);context.fillRect(0,0,image.width,image.height);context.globalCompositeOperation='destination-in';context.drawImage(puffyImage,0,0);puffyColours.set(colour,image);}
- const x=a.vamp[0]+32,y=a.vamp[1]-(camera==='product'?34:22),width=camera==='product'?150:145,height=width*image.height/image.width*.77;
- p.save();p.translate(x,y);p.rotate(camera==='product'?.20:.12);p.shadowColor='#67434b88';p.shadowBlur=6;p.shadowOffsetY=4;p.drawImage(image,-width/2,-height*.42,width,height);p.restore();
+ if(!image){image=document.createElement('canvas');image.width=puffyImage.naturalWidth;image.height=puffyImage.naturalHeight;const context=image.getContext('2d');context.drawImage(puffyImage,0,0);const pixels=context.getImageData(0,0,image.width,image.height);for(let index=0;index<pixels.data.length;index+=4){const luminance=Math.round(32+.875*(.2126*pixels.data[index]+.7152*pixels.data[index+1]+.0722*pixels.data[index+2]));pixels.data[index]=pixels.data[index+1]=pixels.data[index+2]=luminance;}context.putImageData(pixels,0,0);context.globalCompositeOperation='multiply';context.fillStyle=silkTone(colour,d.color==='black'?.23:.3);context.fillRect(0,0,image.width,image.height);context.globalCompositeOperation='destination-in';context.drawImage(puffyImage,0,0);puffyColours.set(colour,image);}
+ // Lower the knot onto the front binding in both cameras. A separate soft
+ // contact shadow is clipped to the actual upper, so it never floats over
+ // the exposed foot or the empty interior of the product shoe.
+ const x=a.vamp[0]+32,y=a.vamp[1]-(camera==='product'?22:10),width=camera==='product'?150:145,height=width*image.height/image.width*.77;
+ if(upper){
+  const layer=document.createElement('canvas');layer.width=p.canvas.width;layer.height=p.canvas.height;const q=layer.getContext('2d');
+  q.save();q.translate(x,y+height*.24);q.rotate(camera==='product'?.20:.12);q.scale(1,.42);
+  const shadow=q.createRadialGradient(0,0,4,0,0,width*.53);shadow.addColorStop(0,'#573a4870');shadow.addColorStop(.55,'#573a4835');shadow.addColorStop(1,'#573a4800');q.fillStyle=shadow;q.beginPath();q.arc(0,0,width*.53,0,Math.PI*2);q.fill();q.restore();
+  q.globalCompositeOperation='destination-in';q.drawImage(upper,0,0,layer.width,layer.height);p.drawImage(layer,0,0);
+ }
+ p.save();p.translate(x,y);p.rotate(camera==='product'?.20:.12);p.shadowColor='#67434b55';p.shadowBlur=3;p.shadowOffsetY=2;p.drawImage(image,-width/2,-height*.42,width,height);p.restore();
 }
 function drawOne(p,d,camera,category,upper,clipBand=true){
  // The worn band wraps the existing foot. Draw it separately so its ends
@@ -325,7 +334,7 @@ function drawOne(p,d,camera,category,upper,clipBand=true){
   // Taller slim-pump arches leave less fabric above the pinned outsole.
   const clearance=camera==='product'&&['stiletto6','stiletto9'].includes(A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel)?14:camera!=='product'&&d.heel==='kitten'&&value==='rosette'?8:0;
   const dy=y+(camera==='product'?24:32)-clearance;
-  if(value==='puffy')paintedPuffy(p,d,camera,a,colour);
+  if(value==='puffy')paintedPuffy(p,d,camera,a,colour,upper);
   else if(value==='doublebow'){bow(p,x+16,dy,80,colour);bow(p,x+16,dy,53,'#fff0da');}
   else if(value==='heelcrystal'){const [bx,by]=a.rear;gem(p,bx,by+17,9,15,-.18);gem(p,bx-5,by+49,7,12,.16);}
   else if(value==='heelbow'){
