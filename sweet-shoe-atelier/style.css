@@ -1615,3 +1615,26 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
  .runway-modal .runway-sock-colors .sock-color{min-height:44px}
  .runway-modal .runway-dock .runway-actions button{min-height:44px;padding:6px 10px}
 }
+
+/* Keep the design workspace and saved artwork at a readable, native-art scale. */
+@media (orientation:landscape) and (min-width:1201px) and (min-height:561px){
+ #studioScreen:has(.free-brief) .customer{grid-template-columns:260px minmax(0,1fr);padding:6px 24px;gap:12px}
+ #studioScreen:has(.free-brief) .free-brief .portrait-wrap{height:52px;min-height:0;margin:0}
+ #studioScreen:has(.free-brief) .customer-name{font-size:17px;line-height:1.15;margin:2px 0;white-space:nowrap}
+ #studioScreen:has(.free-brief) .theme{font-size:11px;line-height:1.2;margin:0;white-space:nowrap}
+ #studioScreen:has(.free-brief) .speech{margin:0}
+ .collection-layout{width:min(1160px,calc(100% - 48px));grid-template-columns:minmax(0,min(760px,calc((100dvh - 250px)*1.6))) minmax(260px,1fr)}
+ .collection-filmstrip{width:min(1160px,calc(100% - 48px))}
+}
+@media (orientation:landscape) and (min-width:1201px) and (min-height:561px){
+ .collection-stage{width:100%;max-width:100%;height:auto;min-width:0}
+ #studioScreen:has(.free-brief) #options[data-category="heel"]{grid-template-columns:repeat(4,minmax(0,1fr));flex:1;align-content:start;gap:5px}
+ #studioScreen:has(.free-brief) #options[data-category="heel"] .option{min-height:62px;padding:3px 2px;gap:1px}
+ #studioScreen:has(.free-brief) #options[data-category="heel"] canvas.shoe2d-option{height:32px;min-height:32px}
+ #studioScreen:has(.free-brief) .custom:has(#options[data-category="heel"]) .studio-summary{display:none}
+}
+@media (orientation:landscape) and (min-width:1201px) and (min-height:561px){
+ #studioScreen:has(.free-brief) .custom:has(#options[data-category="heel"]){padding-top:12px;padding-bottom:12px}
+ #studioScreen:has(.free-brief) .custom:has(#options[data-category="heel"]) #tabs{grid-template-columns:repeat(7,minmax(0,1fr))}
+ #studioScreen:has(.free-brief) .custom:has(#options[data-category="heel"]) .sample-note{display:none}
+}
