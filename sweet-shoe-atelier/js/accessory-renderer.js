@@ -246,7 +246,16 @@ function paintedPuffy(p,d,camera,a,colour){
  const x=a.vamp[0]+32,y=a.vamp[1]-(camera==='product'?34:22),width=camera==='product'?150:145,height=width*image.height/image.width*.77;
  p.save();p.translate(x,y);p.rotate(camera==='product'?.20:.12);p.shadowColor='#67434b88';p.shadowBlur=6;p.shadowOffsetY=4;p.drawImage(image,-width/2,-height*.42,width,height);p.restore();
 }
-function drawOne(p,d,camera,category,upper){
+function drawOne(p,d,camera,category,upper,clipBand=true){
+ // The worn band wraps the existing foot. Draw it separately so its ends
+ // disappear exactly at the skin/sock/shoe contour, including on the rear
+ // foot after the pair transform. The product view has an open shoe and
+ // intentionally retains its free-standing bridge.
+ if(clipBand&&camera==='worn'&&category==='strap'&&['pearl','crystalband','satinbraid','heartbuckle','anklet'].includes(d.strap)){
+  const layer=document.createElement('canvas');layer.width=p.canvas.width;layer.height=p.canvas.height;
+  const q=layer.getContext('2d');drawOne(q,d,camera,category,upper,false);
+  q.globalCompositeOperation='destination-in';q.drawImage(p.canvas,0,0);p.drawImage(layer,0,0);return true;
+ }
  if(category==='charm'&&d.charm==='toeglitter'&&upper){const c=document.createElement('canvas');c.width=p.canvas.width;c.height=p.canvas.height;const q=c.getContext('2d');drawOne(q,d,camera,category);q.globalCompositeOperation='destination-in';q.drawImage(upper,0,0,c.width,c.height);p.drawImage(c,0,0);return true;}
  const value=d[category];if(!handles(category,value,camera))return false;const a=anchor(d,camera),colour=PALETTE[d.color]||PALETTE.pink;
  p.save();p.lineCap='round';p.lineJoin='round';
