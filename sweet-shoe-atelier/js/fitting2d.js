@@ -517,12 +517,12 @@ async function composite(input,options){
  }).then(result=>{if(!result.fallback){cache.set(id,result);while(cache.size>LIMIT)cache.delete(cache.keys().next().value);}return result;}).finally(()=>pending.delete(id));pending.set(id,work);return work;
 }
 const POSE_SETS=Object.freeze({
- flat:{heels:['flat','ballet','loafer','maryjane'],x:320,y:-150,scale:.92},
- low:{heels:['kitten','block','bowmule'],x:330,y:-154,scale:.92},
- mid:{heels:['stiletto6','pearlpump','crystalpump','studpump','slingback','bowsling','pearlheel','luciteheel'],x:340,y:-157,scale:.92},
- high:{heels:['stiletto9','platform','wedge'],x:345,y:-160,scale:.92},
- boot:{heels:['bootie'],x:335,y:-154,scale:.92},
- sandal:{heels:['crystalsandal'],x:340,y:-157,scale:.92}
+ flat:{heels:['flat','ballet','loafer','maryjane'],x:250,y:-30,scale:.92},
+ low:{heels:['kitten','block','bowmule'],x:255,y:-34,scale:.92},
+ mid:{heels:['stiletto6','pearlpump','crystalpump','studpump','slingback','bowsling','pearlheel','luciteheel'],x:265,y:-37,scale:.92},
+ high:{heels:['stiletto9','platform','wedge'],x:270,y:-40,scale:.92},
+ boot:{heels:['bootie'],x:260,y:-34,scale:.92},
+ sandal:{heels:['crystalsandal'],x:265,y:-37,scale:.92}
 });
 function poseFor(heel){return Object.entries(POSE_SETS).find(([,pose])=>pose.heels.includes(heel))||['low',POSE_SETS.low];}
 function cubicValue(a,b,c,d,t){const s=1-t;return s*s*s*a+3*s*s*t*b+3*s*t*t*c+t*t*t*d;}
@@ -551,7 +551,7 @@ function drawUprightLeg(p,leg,ankle,shear){
  p.save();p.beginPath();p.rect(-500,ankle,2500,leg.height-ankle);p.clip();p.drawImage(leg,0,0);p.restore();
 }
 function rearTransform(p,pose,extra){
- p.translate(pose.x,pose.y);p.translate(550,1160+extra);p.rotate(1.5*Math.PI/180);p.scale(pose.scale,pose.scale);p.translate(-550,-1160-extra);
+ p.translate(pose.x,pose.y);p.translate(550,1160+extra);p.scale(pose.scale,pose.scale);p.translate(-550,-1160-extra);
 }
 // A modest horizontal perspective turn is blended through the ankle. The
 // sole's vertical contacts stay fixed; rotating a side-view painting in the
@@ -562,10 +562,14 @@ function drawFrontLeg(p,leg,extra){
  const start=650+extra,end=900+extra;
  p.drawImage(upright,0,0,leg.width,start,0,0,leg.width,start);
  for(let y=start;y<end;y++){
-  const t=Math.min(1,(y-start)/(end-start)),ease=t*t*(3-2*t),scale=1-.10*ease;
+  const t=Math.min(1,(y-start)/(end-start)),ease=t*t*(3-2*t),perspective=1-.10*ease;
+  // Taper the front of the ankle gently toward its rear edge. The taper
+  // returns to zero at both ends, so the calf and the shoe stay registered.
+  const ankle=1-.05*Math.sin(Math.PI*t),scale=perspective*ankle;
+  const offset=800*(1-ankle)+650*(1-perspective)*ankle;
   // Source and destination rows are integral and have identical height, so
   // no vertical interpolation crosses a crop edge. Only the width changes.
-  p.drawImage(upright,0,y,leg.width,1,650*(1-scale),y,leg.width*scale,1);
+  p.drawImage(upright,0,y,leg.width,1,offset,y,leg.width*scale,1);
  }
  p.save();p.translate(650,0);p.scale(.90,1);p.translate(-650,0);
  p.drawImage(upright,0,end,leg.width,leg.height-end,0,end,leg.width,leg.height-end);p.restore();
@@ -625,7 +629,7 @@ async function render(target,input,options,sceneId,cropped=false){
  p.save();rearTransform(p,pose,extra);p.translate(0,300+extra);soleShadow(p,shadowContacts);p.restore();
  p.translate(-150,0);p.translate(650,0);p.scale(.90,1);p.translate(-650,300+extra);soleShadow(p,shadowContacts);p.restore();
  p.drawImage(pair,x-300*scale*slender,y,w,h);
- Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:`back:${pose.x},${pose.y},${pose.scale},1.5;front:-150,0,.90;slender:.80`,pairPose:poseName,pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[pose.x,pose.y,1.5*Math.PI/180,pose.scale],front:[-150,0,.90],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
+ Object.assign(target.dataset,{renderer:'painted-fitting',fitting2dReady:'true',heel:d.heel,color:d.color,material:d.material,fallback:String(result.fallback),legFrame:'0,0,1024,1024',feet:'2',sock:o.sock,sockColor:o.color,footAnchors:`back:${pose.x},${pose.y},${pose.scale},0;front:-150,0,.90;slender:.80`,pairPose:poseName,pairLayout:JSON.stringify({scale,x,y,extra,slender,rear:[pose.x,pose.y,0,pose.scale],front:[-150,0,.90],floor}),platformLayout:JSON.stringify(geometry),platformCount:'0',platformBaked:'true',fixedFraming:geometry.composition.join('x'),shadowContacts:JSON.stringify(shadowContacts),legContinuation:'opaque-past-frame',skinFinish:'soft-youthful'});return true;
 }
 function mount(host,input,options){
  const target=canvas();target.className='fitting2d-canvas';target.setAttribute('role','img');target.setAttribute('aria-label',A.lang==='zh'?'双脚穿着你的鞋款与袜子搭配':'Both feet wearing your shoes and chosen socks');host.replaceChildren(target);
