@@ -435,3 +435,13 @@ codec versions can affect reproducibility.
 | `shoe2d/maryjane_base.webp` | `b4b930bff220a543196be2c6762a955eb69a2348be3ddfc90822898a175aedc0` | `e24461c54661c72faedbecc506857ea394b2a08c5bd701314c3dac8fb9b7ff35` |
 | `shoe2d/platform_base.webp` | `9d46984364b0060adb742f7cc108686d1b17152772d7b7aeb1ae62d04ddec9b3` | `4ceb027f552d124378dd0a2e9c4466c6043a98eb2eccc9f86bfdcc57dad43b0a` |
 | `shoe2d/studpump_base.webp` | `0bedd0e8d96b656633ff2e5a51d62069fbb2095088e588ce8c46701ab8f8b8fc` | `cc3d05998864ac452dad75e8282eaa8af218cd93af4af29bb22f40fc54abf2fa` |
+
+### Flat Grand bow product edge repair (2026-10-28)
+
+`shoe2d/accessories/flat_decoration_big.webp` and its `_tint.webp` mask retain
+the existing painted satin from `dev/heelbow-source/flat_decoration_big-original.webp`.
+Rebuild both with `python3 dev/repair-flat-grand-bow.py`: a supersampled,
+hand-traced contour intersects the original alpha to remove extraction slivers
+and the pale tail fringe, while nearby opaque satin supplies clean edge colour.
+The repair affects the flat-family product bow layer and its colour mask; the
+shoe body, sole and fitting-camera artwork are unchanged.
