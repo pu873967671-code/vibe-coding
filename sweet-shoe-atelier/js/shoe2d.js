@@ -294,7 +294,7 @@ function drawFinish(p,design,width,height,camera='product'){
   if(camera==='worn'){
    // These cameras have differently painted light maps from the display
    // view. Balance only the affected velvet dyes, preserving fabric detail.
-   const dark=design.color==='black'?({flat:.15,kitten:.08,wedge:.37,maryjane:.12}[design.heel]||0):design.heel==='wedge'&&design.color==='pink'?.07:0;
+   const dark=design.color==='black'?({flat:.15,kitten:.08,wedge:.44,maryjane:.12}[design.heel]||0):design.heel==='wedge'&&design.color==='pink'?.07:0;
    const light=design.heel==='platform'&&['pink','cream'].includes(design.color)?.09:0;
    if(dark){p.fillStyle=`rgba(35,16,36,${dark})`;p.fillRect(left,top,right-left,bottom-top);}
    if(light){p.fillStyle=`rgba(255,248,245,${light})`;p.fillRect(left,top,right-left,bottom-top);}
