@@ -51,12 +51,8 @@
       track(name){
         if(this.tracks.has(name))return this.tracks.get(name);
         const audio=new window.Audio();audio.preload='none';audio.loop=true;audio.playsInline=true;
-        // raw.githack refuses large MP3s (403/301), so commit-pinned previews stream
-        // the same file from jsDelivr. Packaged builds keep the relative path.
-        // Do not remove: without it previews fall back to silence.
-        const githack=/(^|\.)githack\.com$/.test(location.hostname);
-        if(githack){audio.crossOrigin='anonymous';const ref=(location.pathname.split('/')[3]||'sweet-shoe-preview');audio.src='https://cdn.jsdelivr.net/gh/pu873967671-code/vibe-coding@'+ref+'/sweet-shoe-atelier/assets/audio/bgm_'+name+'.mp3';}
-        else audio.src='assets/audio/bgm_'+name+'.mp3';
+        // Use the bundled track on every host, including commit previews.
+        audio.src='assets/audio/bgm_'+name+'.mp3';
         const source=this.ctx.createMediaElementSource(audio),gain=this.ctx.createGain();
         gain.gain.value=0;source.connect(gain);gain.connect(this.music);
         const track={audio,source,gain,stopTimer:null,primed:false};
