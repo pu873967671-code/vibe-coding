@@ -129,7 +129,7 @@
     const d=daily(s,now);if(d.key!==key||d.claimed||d.delivered<5)return false;
     d.claimed=true;A.Merge.tick(s.atelier,now);s.atelier.energy=Math.min(100,s.atelier.energy+20);s.coins+=50;s.gems++;return true;
   }
-  function customers(s){return count(s)>=10?[0,1,2,3,4,5]:count(s)>=4?[0,1,2,3,4]:[0,1,2];}
+  function customers(s){const regular=count(s)>=10?[0,1,2,3,4,5]:count(s)>=4?[0,1,2,3,4]:[0,1,2];return chapter(s)>=1&&s.sceneCustomerDay!==s.day&&!(s.order?.person>=6)?regular.concat([6,7,8]):regular;}
   function customerPool(board){return board?.cells.some(c=>c?.kind==='generator'&&c.chain==='rib')?[0,1,2,3,4,5]:board?.cells.some(c=>c?.kind==='generator'&&c.chain==='spk')?[0,1,2,3,4]:[0,1,2];}
   function storyMarkup(s){const ch=chapter(s);return `<div class="atelier-journal"><button class="secondary journal-back" data-boutique-return>${tr('back')}</button><span class="section-kicker">${tr('journal')}</span><h2>${tr('chapter')[ch]}</h2><p>${tr('chapterStory')[ch]}</p>${tr('story').slice(0,count(s)).map((line,i)=>`<article><span>${i+1} · ${tr('task')[i]}</span><p>${line}</p></article>`).join('')}</div>`;}
   function dailyMarkup(s){const d=daily(s);return `<div class="daily-wishes"><span class="section-kicker">${tr('daily')} · ${d.key}</span><h3>${d.delivered} / 5</h3><p>${tr('dailyHint')}</p><p>${tr('dailyReward')}</p><button class="primary" data-daily-claim="${d.key}" ${d.delivered<5||d.claimed?'disabled':''}>${tr(d.claimed?'claimed':'claim')}</button></div>`;}
