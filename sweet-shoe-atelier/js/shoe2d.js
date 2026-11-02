@@ -33,11 +33,12 @@ async function accessories(heel){
    // Cross lacing is drawn procedurally in both cameras. Its retired source
    // paintings are intentionally absent from the upload, so do not fetch them
    // or report a false legacy fallback when that renderer is available.
-   const variants=Object.entries(ACCESSORY_OPTIONS).filter(([category])=>!dedicated||!(category==='strap'&&ownStyle?.builtInStrap)&&!(category==='decoration'&&(ownStyle?.openHeel||ownStyle?.noRearDecor))).flatMap(([category,values])=>values.filter(value=>!(category==='strap'&&value==='cross'&&A.AccessoryRenderer?.handles(category,value,'product'))).map(value=>category+'_'+value));
+   const variants=Object.entries(ACCESSORY_OPTIONS).filter(([category])=>!dedicated||!(category==='strap'&&ownStyle?.builtInStrap)&&!(category==='decoration'&&(ownStyle?.openHeel||ownStyle?.noRearDecor))).flatMap(([category,values])=>values.map(value=>category+'_'+value));
    perspectiveLoads.set(heel,Promise.all(variants.map(async name=>{
     const prefix='assets/shoe2d/accessories/'+heel+'_'+name;
     const tintable=TINTABLE_ACCESSORIES.has(name);
-    const [im,mask]=await Promise.all([image(prefix+'.webp'),tintable?image(prefix+'_tint.webp'):null]);
+    const v=name==='strap_pearl'||name==='strap_cross'?'?v=20261103a':'';
+    const [im,mask]=await Promise.all([image(prefix+'.webp'+v),tintable?image(prefix+'_tint.webp'+v):null]);
     const valid=im?.naturalWidth===WIDTH&&im?.naturalHeight===HEIGHT;
     const tintValid=mask?.naturalWidth===WIDTH&&mask?.naturalHeight===HEIGHT;
     if(!valid)accessoryFallbacks.set(heel+'_'+name,'perspective layer unavailable; legacy ornament');
@@ -516,9 +517,12 @@ async function openingAccessories(input){
 function drawAccessories(p,d,sprites,base,binding,upper){
  for(const category of ['strap','decoration','charm']){
   const value=d[category];if(!value||value==='none')continue;
-  if(A.AccessoryRenderer?.handles(category,value)){A.AccessoryRenderer.drawOne(p,d,'product',category,upper);continue;}
   const accessoryHeel=A.SHOE_STYLES?.[d.heel]?.accessoryBase||d.heel;
   const name=category+'_'+value,layer=sprites.layers?.[accessoryHeel]?.[name];
+  // Pearl and cross straps are painted layers generated per accessory base
+  // (assets/shoe2d/accessories/<base>_strap_{pearl,cross}); code-drawn only as fallback.
+  const painted=category==='strap'&&['pearl','cross'].includes(value)&&layer;
+  if(!painted&&A.AccessoryRenderer?.handles(category,value)){A.AccessoryRenderer.drawOne(p,d,'product',category,upper);continue;}
   if(layer){
    const mask=sprites.tints?.[accessoryHeel]?.[name];
    p.drawImage(mask?tintAccessory(layer,mask,COLORS[d.color]||COLORS.pink):layer,0,0);
