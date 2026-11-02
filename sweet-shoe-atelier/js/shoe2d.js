@@ -6,7 +6,7 @@ const WIDTH=1024,HEIGHT=640,HEELS=A.opts.heel.map(o=>o[0]);
 // The binding mask restores the painted inner seam over the sewn strap tab.
 // Insole/sole pixels stay in the immutable base and need no extra bitmap decode.
 const PARTS=['base','upper','shadow','highlight','binding'];
-const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#696883'};
+const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#555158'};
 const loads=new Map(),cache=new Map(),jobs=new Map(),paintTokens=new WeakMap(),fallbacks=new Map();
 const CACHE_LIMIT=8;
 const ACCESSORIES={bow:'bow',pearls:'pearls',laces:'laces',maryjane:'maryjane',drop:'drop',crystal:'crystal',flower:'flower',pearl:'pearl'};
@@ -141,13 +141,25 @@ function drawRichMaterial(p,d,width,height,bounds=[0,0,width,height]){
  if(d.material==='metallic'){
   for(const [at,colour] of [[0,'#3b284b40'],[.22,'#56415e20'],[.35,'#fff3cf28'],[.405,'#fffbea9c'],[.45,'#fffdf26e'],[.50,'#46334a38'],[.62,'#38263b25'],[.72,'#fff8df62'],[.76,'#fffdf293'],[.82,'#6e4d5b1c'],[1,'#3b284b30']])g.addColorStop(at,colour);
  }else{
-  for(const [at,colour] of [[0,'#d4b8ed25'],[.22,'#a3e6db24'],[.38,'#fffbe56d'],[.48,'#fffdfb92'],[.57,'#efb5d832'],[.72,'#b7d3ef36'],[.83,'#fff8de55'],[1,'#d2b7e626']])g.addColorStop(at,colour);
+  // A pearl sheen is a restrained play of colour across the weave, with
+  // narrow specular threads rather than large milky patches. The two glints
+  // share the product/worn textile plane so they stay directional in both.
+  for(const [at,colour] of [[0,'#e7dbf008'],[.25,'#d9f1ee0a'],[.385,'#fff9ee0e'],[.400,'#fffdf018'],[.405,'#fffef64a'],[.409,'#fffdf422'],[.417,'#fff9ee0c'],[.57,'#eed7e808'],[.704,'#fffaf00c'],[.714,'#fffef038'],[.718,'#fffaf015'],[.73,'#fffaf008'],[1,'#e5d9ec08']])g.addColorStop(at,colour);
  }
  p.fillStyle=g;p.fillRect(left,top,right-left,bottom-top);
  // Quiet directional brushing, never glitter or polka-dot texture.
  if(d.material==='metallic'){
   p.lineWidth=.55;p.strokeStyle='#fff8e112';
   for(let y=projected?Math.floor((top+left*.24)/4)*4:-height;y<(projected?bottom+right*.24:height*2);y+=4){p.beginPath();p.moveTo(left,y-left*.24);p.lineTo(right,y-right*.24);p.stroke();}
+ }else{
+  // Fine directional filament catches light on the woven surface. Tiny,
+  // deterministic broken threads preserve the dyed colour at screen size.
+  p.lineWidth=.55;
+  for(let row=Math.floor(top/5);row<bottom/5;row++)for(let col=Math.floor(left/9);col<right/9;col++){
+   let hash=Math.imul(row,374761393)^Math.imul(col,668265263);hash=Math.imul(hash^(hash>>>13),1274126177)>>>0;
+   const x=col*9+(hash%70)/10,y=row*5+((hash>>>8)%45)/10;
+   p.strokeStyle=hash&1?'#fffdf42b':'#a88b9e10';p.beginPath();p.moveTo(x,y);p.lineTo(x+2.8+(hash%18)/10,y-.65);p.stroke();
+  }
  }
  p.restore();
 }
@@ -422,7 +434,35 @@ function loaferLaceSaddle(p,design,camera='product'){
  }
  p.stroke();p.restore();
 }
-A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern,drawTextile,drawFinish,velvetRim,meshPanel,loadLace,laceTrim,loaferLaceSaddle});
+// Native-resolution construction on the loafer. The dyed upper masks soften
+// the painted seams, so redraw the piping and individually spaced stitches at
+// each camera's original coordinates. They follow the apron underneath the
+// saddle; a tiny highlight alongside the shadow gives the welt its volume.
+function loaferDetails(p,design,camera='product'){
+ if(design.heel!=='loafer')return;
+ const rgb=(COLORS[design.color]||COLORS.pink).match(/[a-f\d]{2}/gi).map(v=>parseInt(v,16));
+ const shade=(factor,add=0)=>`rgb(${rgb.map(v=>Math.min(255,Math.round(v*factor+add))).join(',')})`;
+ const worn=camera==='worn';
+ const apron=()=>{p.beginPath();if(worn){p.moveTo(319,775);p.bezierCurveTo(289,808,255,840,239,865);p.bezierCurveTo(219,897,250,903,291,901);p.bezierCurveTo(351,899,433,875,490,843);}else{p.moveTo(305,349);p.bezierCurveTo(260,369,191,394,158,416);p.bezierCurveTo(135,431,144,445,174,451);p.bezierCurveTo(232,463,337,453,423,434);}};
+ const lower=()=>{p.beginPath();if(worn){p.moveTo(319,775);p.bezierCurveTo(384,777,459,815,514,860);p.lineTo(568,819);}else{p.moveTo(305,349);p.bezierCurveTo(352,351,414,405,443,460);p.lineTo(545,435);}};
+ const upper=()=>{p.beginPath();if(worn){p.moveTo(369,718);p.bezierCurveTo(431,719,511,764,568,819);}else{p.moveTo(370,292);p.bezierCurveTo(435,310,505,367,545,435);}};
+ const slit=()=>{p.beginPath();if(worn){p.moveTo(364,746);p.bezierCurveTo(390,744,433,760,466,779);}else{p.moveTo(363,321);p.bezierCurveTo(383,316,418,341,445,369);}};
+ p.save();p.lineCap='round';p.lineJoin='round';
+ // Apron piping remains visible on both sides of the stitched moc toe.
+ p.strokeStyle=shade(.48);p.globalAlpha=.55;p.lineWidth=4;apron();p.stroke();
+ p.strokeStyle=shade(.9,24);p.globalAlpha=.9;p.lineWidth=2;apron();p.stroke();
+ // Distinct saddle edges and its characteristic penny slot.
+ p.strokeStyle=shade(.40);p.globalAlpha=.60;p.lineWidth=3;lower();p.stroke();upper();p.stroke();
+ p.strokeStyle=shade(.9,22);p.globalAlpha=.9;p.lineWidth=1.1;lower();p.stroke();upper();p.stroke();
+ p.strokeStyle=shade(.35);p.globalAlpha=.82;p.lineWidth=3.2;slit();p.stroke();
+ p.save();p.translate(0,2);p.strokeStyle=shade(.96,30);p.globalAlpha=.75;p.lineWidth=.9;slit();p.stroke();p.restore();
+ // A fine thread alternates light and shadow rather than a blurred solid line.
+ p.setLineDash([2.3,3]);p.lineDashOffset=1;p.strokeStyle=shade(.45);p.globalAlpha=.65;p.lineWidth=1.2;
+ p.save();p.translate(0,3);apron();p.stroke();p.restore();
+ p.save();p.translate(0,-3);lower();p.stroke();p.translate(0,6);upper();p.stroke();p.restore();
+ p.setLineDash([]);p.restore();
+}
+A.CoutureFinish=Object.freeze({drawMaterial:drawRichMaterial,drawPattern,drawTextile,drawFinish,velvetRim,meshPanel,loadLace,laceTrim,loaferLaceSaddle,loaferDetails});
 function materialLayer(design,upper){
  const out=canvas(),p=out.getContext('2d');drawFinish(p,design,WIDTH,HEIGHT);
  clip(p,upper);laceTrim(p,upper,design,WIDTH,HEIGHT);loaferLaceSaddle(p,design);if(design.material==='velvet')velvetRim(p,upper,WIDTH,HEIGHT);return out;
@@ -442,7 +482,7 @@ async function composite(input){
   if(!parts.upper){p.drawImage(parts.base,0,0);cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);return out;}
   q.drawImage(parts.upper,0,0);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[design.color]||COLORS.pink;q.fillRect(0,0,WIDTH,HEIGHT);
   q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(design.material)?.80:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0);
-  q.globalAlpha=design.material==='suede'?.08:design.material==='velvet'?.16:design.material==='mesh'?.34:design.material==='brocade'?.42:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0);q.globalAlpha=1;
+  q.globalAlpha=design.material==='suede'?.08:design.material==='velvet'?.16:design.material==='mesh'?.34:design.material==='brocade'?.42:design.material==='pearlescent'?.12:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0);q.globalAlpha=1;
   p.drawImage(parts.base,0,0);
   // source-atop preserves the original destination alpha exactly; fabrics and
   // motifs cannot grow the outline or paint into a cream footbed/sole.
@@ -454,25 +494,21 @@ async function composite(input){
    // and the welt with adjacent shaded upper pixels; preserve the sole edge.
    const repair=canvas(),rp=repair.getContext('2d');rp.drawImage(out,0,0);
    p.save();p.beginPath();p.moveTo(750,440);p.lineTo(780,429);p.lineTo(800,422);p.lineTo(830,416);p.lineTo(860,409);p.lineTo(890,400);p.lineTo(915,389);p.lineTo(915,394);p.lineTo(890,405);p.lineTo(860,415);p.lineTo(830,423);p.lineTo(800,430);p.lineTo(780,435);p.lineTo(750,443);p.closePath();p.clip();p.drawImage(repair,0,9);p.restore();
-   p.save();p.lineCap='round';p.lineJoin='round';
-   if(design.material==='satin'){
-    // The painted saddle is recoloured with the upper; its lower edge used to
-    // dissolve into a translucent blur. Restore a continuous, opaque seam in
-    // a shade of the chosen leather, with a separate restrained contact shadow.
-    const saddleEdge=()=>{p.beginPath();p.moveTo(314,348);p.bezierCurveTo(354,343,415,405,443,460);p.quadraticCurveTo(447,461,451,459);p.lineTo(544,435);};
-    p.save();p.shadowColor='rgba(57,27,30,.35)';p.shadowBlur=2;p.shadowOffsetY=2;
-    p.strokeStyle='rgba(57,27,30,.28)';p.lineWidth=2;saddleEdge();p.stroke();p.restore();
-    const colour=COLORS[design.color]||COLORS.pink;
-    const rgb=colour.match(/[a-f\d]{2}/gi).map(v=>Math.round(parseInt(v,16)*.60));
-    p.strokeStyle=`rgb(${rgb.join(',')})`;p.lineWidth=1.5;saddleEdge();p.stroke();
-   }
-   p.restore();
+   loaferDetails(p,design);
   }
   drawAccessories(p,design,sprites,parts.base,parts.binding,parts.upper);
   cache.set(id,out);while(cache.size>CACHE_LIMIT)cache.delete(cache.keys().next().value);
   return out;
  }).finally(()=>jobs.delete(id));
  jobs.set(id,job);return job;
+}
+// Rigid fitting keeps crossing straps above the generated foot, using the
+// exact same source pixels and coordinates as the product camera.
+async function openingAccessories(input){
+ const d=clean({...input,decoration:'none',charm:'none'}),out=canvas();
+ if(d.strap==='none')return out;
+ const [parts,sprites]=await Promise.all([load(d.heel),accessories(d.heel)]);
+ drawAccessories(out.getContext('2d'),d,sprites,parts.base,parts.binding,parts.upper);return out;
 }
 // Every reviewed edit is extracted onto its original 1024×640 source frame.
 // Its perspective and contact shading are already painted: drawing it at the
@@ -604,6 +640,6 @@ function mount(host,input,options={}){
  },dispose(){disposed=true;paintTokens.set(target,{});target.remove();host.classList.remove('shoe2d-host');},debug(){return {renderer:'painted-2d',ready:target.dataset.shoe2dReady==='true',design:{...design},width:WIDTH,height:HEIGHT,toe:[96,540],ground:540,length:832,error,fallback:fallbacks.get(design.heel)||null,cacheEntries:cache.size};}};
  controller.ready=controller.update(design);return controller;
 }
-const api={mount,render,composite,preload:()=>Promise.allSettled(HEELS.flatMap(heel=>[load(heel),accessories(heel)])),anchors:ANCHORS,frame:Object.freeze({width:WIDTH,height:HEIGHT,toeX:96,groundY:540,length:832}),info:()=>({renderer:'painted-2d',cacheEntries:cache.size,cacheLimit:CACHE_LIMIT,loadedHeels:[...loads.keys()],fallbacks:Object.fromEntries(fallbacks),pendingComposites:jobs.size,perspectiveLayers:Object.fromEntries(Object.entries(perspectiveLayers).map(([heel,layers])=>[heel,Object.values(layers).filter(Boolean).length])),accessoryFallbacks:Object.fromEntries(accessoryFallbacks),tintMasks:Object.fromEntries(Object.entries(perspectiveTints).map(([heel,masks])=>[heel,Object.values(masks).filter(Boolean).length])),tintFallbacks:Object.fromEntries(tintFallbacks)})};
+const api={mount,render,composite,openingAccessories,preload:()=>Promise.allSettled(HEELS.flatMap(heel=>[load(heel),accessories(heel)])),anchors:ANCHORS,frame:Object.freeze({width:WIDTH,height:HEIGHT,toeX:96,groundY:540,length:832}),info:()=>({renderer:'painted-2d',cacheEntries:cache.size,cacheLimit:CACHE_LIMIT,loadedHeels:[...loads.keys()],fallbacks:Object.fromEntries(fallbacks),pendingComposites:jobs.size,perspectiveLayers:Object.fromEntries(Object.entries(perspectiveLayers).map(([heel,layers])=>[heel,Object.values(layers).filter(Boolean).length])),accessoryFallbacks:Object.fromEntries(accessoryFallbacks),tintMasks:Object.fromEntries(Object.entries(perspectiveTints).map(([heel,masks])=>[heel,Object.values(masks).filter(Boolean).length])),tintFallbacks:Object.fromEntries(tintFallbacks)})};
 A.Shoe2D=api;globalThis.Shoe2D=api;
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
