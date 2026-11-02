@@ -3,7 +3,7 @@
 // Original code-native jewellery, authored in each immutable source camera.
 // Every control point belongs to the shoe/foot, never to the viewport.
 const OPTIONS={strap:['cross','pearl','pearltrim','studs','heartbuckle','anklet','crystalband','satinbraid'],decoration:['puffy','doublebow','heelcrystal','rosette','camellia','heelbow'],charm:['oval','heart','spray','toeglitter','butterfly','pearlcluster']};
-const PALETTE={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#696883'};
+const PALETTE={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#555158'};
 // Far mounts sit four source pixels inside the painted collar silhouette;
 // near mounts are sewn into the outer upper, below its rolled binding. Newer
 // high-arch kits have no far-binding mask, so their opaque collar edge is the
