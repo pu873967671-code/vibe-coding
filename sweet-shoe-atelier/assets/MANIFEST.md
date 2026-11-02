@@ -1,5 +1,24 @@
 # Asset manifest (all WebP, transparent unless noted). Some files may still be arriving; code must tolerate missing art with a tasteful fallback.
 
+## User-reference rigid pair — flat / stiletto6 (2026-10-29)
+
+The twelve `fitting-rigid/{flat,stiletto6}_{front,rear}_{skin,cloth,black}.webp`
+layers derive only from the immutable front/rear PNGs in
+`src-user-legs-20261029/`. The pair reference determines the close crossed
+stance: raised front leg passes in front of the standing rear leg, whose
+complete shoe/foot stack is uniformly scaled to 0.78 of the front shoe.
+Both styles use the same responsive stage anchors in `js/fitting-rigid.js`.
+
+Rebuild with `python3 dev/build-rigid-legs.py --styles flat stiletto6`.
+The dedicated user-leg exporters apply whole-image uniform scale and
+translation only, preserving source angles and anatomy. Original shoe
+openings provide occlusion; shoes and ornaments are never warped.
+Black/white cloth derives volume from the same painted luminance and shares
+exact outline alpha. WebP quality 82 keeps alpha lossless and RGB mean error
+below 1.5 levels, preserving package budget. Source PNGs are never overwritten
+or included in the runtime ZIP. Per-style provenance records placements,
+source/output hashes and decoded compression error in `qa/user-{style}/`.
+
 
 ## 05:19 fitting polish
 
@@ -114,7 +133,7 @@ mentor_neutral (Madame Odette, guide, waist-up portrait, transparent). Existing 
 ## Local Chinese type
 `fonts/atelier-sc.ttf`: Noto Sans SC variable, subset to the Chinese and full-width characters used in the game, SIL Open Font License (`fonts/OFL.txt`). Source: https://github.com/notofonts/noto-cjk (Sans/Variable/TTF/Subset/NotoSansSC-VF.ttf). Served locally; no runtime font/CDN request. Regenerate the subset when adding Chinese copy.
 
-Font subset rebuild: `python3 dev/subset-font.py /path/to/NotoSansSC-VF.ttf` (requires fontTools). The helper collects all Chinese/full-width characters from local HTML/JS and verifies source coverage before replacing the font. Current subset: 634 characters, covering all current runtime Chinese/full-width copy, including scene Share/Buy labels and the extended introduction. Rebuilt for Supervisor 18:05 after actual screenshots exposed missing 分享 glyphs.
+Font subset rebuild: `python3 dev/subset-font.py /path/to/NotoSansSC-VF.ttf` (requires fontTools). The helper collects all Chinese/full-width characters from local HTML/JS and verifies source coverage before replacing the font. Current subset: 664 characters (rebuilt 2026-11-02 for scene-customer copy), covering all current runtime Chinese/full-width copy, including scene Share/Buy labels and the extended introduction. Rebuilt for Supervisor 18:05 after actual screenshots exposed missing 分享 glyphs.
 ## Music — assets/audio/ (CC0 public domain, no attribution required; credits optional)
 bgm_cozy.mp3 — "Heavenly Loop" (OGA, CC0, https://opengameart.org/content/heavenly-loop), soft ambient, 34 s loop → Atelier. User 2026-10-26: wants very soft light music; rejected beeps, music box, piano lofi, upbeat game track.
 bgm_tea.mp3 — "A cup of tea" by TAD, CC0, lofi, 169 s (https://opengameart.org/content/lofi-compilation) → use for Boutique/Studio/Try-on.
@@ -454,3 +473,200 @@ worn renderer projects these same paintings. The other three shared Grand
 families retain their existing short tails. Rebuild the four derivatives from
 retained pre-trim paintings with `python3 dev/fitting-polish/shorten-grand-tails.py`
 after any earlier Grand extraction repair. No shoe body or camera mount changes.
+
+### Accepted gen5 half-on anatomy (2026-10-28)
+
+`fitting-rigid/{studpump,flat,maryjane}_{front,rear}_{skin,cloth,black}.webp`
+are local quality-92 WebP derivatives of Supervisor-approved
+`qa/research-rigid/gen5/*-leg-{front,rear}.png` (1024×1840, showcase y offset1200).
+The retained gen4 gpt-image-2 sources and gen5 exporter document original
+provenance. No new image generation or network dependency was introduced.
+`python3 dev/build-rigid-legs.py` (Pillow/NumPy) derives the near shoe-opening cut
+from each exact product insole/binding mask and bakes skin and cloth volume with
+soft contact occlusion. Front feet show the accepted raised heel; the separate
+rear source stands inside its shoe. Runtime uses alpha compositing only, with
+one uniform transform per original `Shoe2D.composite` shoe, preserving its body,
+heel, piping and ornaments. Colours, yarn and fishnet are local Canvas layers.
+These three styles form the initial reviewed rollout; the stiletto9
+continuation below adds a fourth. Other styles retain the previous complete
+renderer until their own source is accepted.
+`fitting-rigid/maryjane_strap.webp` retains the accepted source strap alpha;
+the renderer draws matching dynamically dyed product pixels through this mask
+after the foot, keeping the integral buckle and strap visible.
+
+
+### Stiletto 9cm out4 rollout (2026-10-28)
+
+`fitting-rigid/stiletto9_{front,rear}_{skin,cloth,black}.webp` are quality-92
+local derivatives, rebuilt by `python3 dev/build-rigid-legs.py --styles stiletto9`.
+The front reuses the approved gen5 studpump high-heel whole-foot painting;
+the rear uses the independent standing `qa/research-rigid/gen/stiletto9-leg-rear.png`.
+Its matching approved pump calf continues above the source crop, blended only
+at y220–320 so the 1220×1000 shared picture has no flat leg cutoff. The ankle
+and foot retain their source coordinates. Each camera is cut against the
+stiletto9 product insole/binding, with the existing skin/cloth volume exporter.
+No model-painted shoe pixels, fresh generation or external runtime dependency.
+The exact stiletto9 product composite, finishes and ornaments are drawn with
+uniform transforms; contact shadows use this shoe's own heel-tip position.
+This is the fourth reviewed rigid style; sixteen styles retain legacy fitting.
+
+
+### Stiletto 6cm out4 rollout (2026-10-28)
+
+`fitting-rigid/stiletto6_{front,rear}_{skin,cloth,black}.webp` are six local
+quality-92 derivatives (330,314 bytes total). Rebuild with
+`python3 dev/build-rigid-legs.py --styles stiletto6` (Pillow/NumPy).
+Both sources are the approved `qa/research-rigid/gen5/studpump-leg-{front,rear}.png`:
+the front is half-on with a raised heel, while the independently painted rear
+stands inside its shoe. Their existing full-height calves continue above frame.
+The exporter cuts each foot against stiletto6's own product insole and binding;
+no generated shoe pixels enter runtime. Product body, heel, binding, finishes
+and optional ornaments keep their original uniform transforms. Contact shadows
+use the 6cm pump's own heel-tip position. A targeted build writes only the
+requested style, including the Mary Jane strap only when Mary Jane is requested.
+This is the fifth rigid style; fifteen styles retain the prior complete fitting.
+The user-owned `qa/research-rigid/out4/flat-pink-satin-black-hires.png` is untouched.
+
+2026-10-29 runtime polish: the six committed stiletto6 WebPs remain byte-exact.
+`js/fitting-rigid.js` trims two small front heel/arch extraction ledges with
+antialiased Canvas curves after hosiery composition (source y1208–1280 and
+y1300–1388). No shoe pixels or rear anatomy are changed. Native contour,
+all-hosiery edge and actual uniform shoe-transform checks are reproducible with
+`python3 qa/rigid-contour-test.py`; evidence is in `qa/stiletto6-polish/`.
+
+
+### Kitten closed-pump out4 rollout (2026-10-28)
+
+`fitting-rigid/kitten_{front,rear}_{skin,cloth,black}.webp` are six local
+quality-92 derivatives (321,478 bytes total). Rebuild only this style with
+`python3 dev/build-rigid-legs.py --styles kitten` (Pillow/NumPy).
+Both sources are the approved `qa/research-rigid/gen5/studpump-leg-{front,rear}.png`:
+the front has a raised heel and visible arch; the independent rear stands in
+its own shoe. Each is cut against kitten's original product insole/binding.
+No generated shoe pixels are used: original product body, low heel, cream
+piping, finishes and ornaments retain uniform transforms. Contact shadows use
+the kitten painting's measured heel tip (815,445), with a smaller rear shoe
+on a separate ground line. Six rigid styles are now enabled; fourteen retain
+the complete prior fitting. No fresh generation or external runtime dependency.
+
+The user's three hand-editing sources remain untouched:
+
+| Protected path | SHA-256 |
+| --- | --- |
+| `qa/research-rigid/out4/flat-pink-satin-black-hires.png` | `b198a36d4f0890124f9689cdec11f3943c9c38c7ff8b5c8536f79976b8a1cc88` |
+| `qa/research-rigid/gen5/flat-leg-front.png` | `c36dfb87eeed17db53c7b174ebb2a13cbf491e07f342a94d7dc32b4712a77a51` |
+| `qa/research-rigid/gen5/flat-leg-rear.png` | `e6e03e0a5cd30025a09023d987fb7972af7decc5d80f0edc0e84fe065a1997a0` |
+
+These hashes identify the pre-return files; the user's returned corrections
+are authoritative and must replace this baseline when supplied.
+
+2026-10-29 kitten contour polish: all six kitten WebPs and the protected flat
+files remain byte-exact. The runtime applies the accepted stiletto6 exterior
+heel/arch trims to kitten's shared front-foot source frame, after hosiery
+composition. Its own throat cut, full rear painting and original product shoe
+remain intact. Reproduce the native outline, hosiery and rigid-transform audit
+with `python3 qa/rigid-contour-test.py --style kitten`; source hashes and reports
+are in `qa/kitten-polish/`.
+
+
+### User-returned flat anatomy — REVIEW19:05 (2026-10-29)
+
+The six `fitting-rigid/flat_{front,rear}_{skin,cloth,black}.webp` files now derive
+exclusively from `src-user-legs-20261029/leg-front-left-user.png` and
+`leg-rear-right-user.png`. `pair-reference-user.png` supplies pose reference.
+These three originals are immutable and source-only. Rebuild using
+`python3 dev/build-user-flat-legs.py` or the existing builder with `--styles flat`.
+Only whole-image uniform scale/translation and rigid-shoe occlusion are used;
+lossless skin preserves transformed RGB, and cloth uses source luminance with
+identical alpha. Exact hashes, transforms and rebuild evidence are in
+`qa/user-flat/{asset-provenance,rebuild}.json`. Other style kits are unchanged.
+
+
+### Kitten returned user anatomy — USER23:52 (2026-10-29)
+
+The six `fitting-rigid/kitten_{front,rear}_{skin,cloth,black}.webp` derivatives
+now come only from the immutable `src-user-legs-20261029/` front/rear PNGs.
+Rebuild with `python3 dev/build-rigid-legs.py --styles kitten` or
+`python3 dev/build-user-kitten-legs.py`. Both legs retain their original angles
+and contours through whole-image uniform scale/translation, then the original
+kitten insole/binding/upper masks occlude the covered foot. Black/white cloth
+uses the source luminance and identical alpha; the obsolete runtime front-foot
+contour trims have been removed. Runtime uses the accepted flat/stiletto6
+close crossed composition and 0.78 rear stack, with rigid product shoe pixels.
+
+Six 1024×2140 WebPs total **441,208 bytes**, encoded from transformed original
+PNG pixels at quality82 with lossless alpha (never recompressed derivatives).
+Per-export fidelity metrics, source SHA256 and placements are retained in
+`qa/user-kitten/asset-provenance.json`. No original user or product pixels are
+modified. Full-size captures and native/3× evidence: `qa/user-kitten/after/`;
+reference-side-by-side review: `qa/contact/20261029-190959.jpg`.
+
+Authoritative returned-source styles expose `RigidFitting.userStyles`: their
+legacy `fitting2d/<style>_{shoe,upper,shadow,highlight,occlusion,legs,hosiery}`
+body cameras remain retained/validated source assets but are excluded from
+the upload ZIP. Runtime retries the approved legs with grounded rigid shoes
+on missing imagery; these styles never fall back to obsolete anatomy. Shared
+accessories and all other styles keep their required camera files.
+
+### Studded pump returned user anatomy — USER23:52 (2026-10-29)
+
+The six `fitting-rigid/studpump_{front,rear}_{skin,cloth,black}.webp` layers
+derive only from the immutable returned front/rear PNGs in
+`src-user-legs-20261029/`. Rebuild with
+`python3 dev/build-rigid-legs.py --styles studpump` or
+`python3 dev/build-user-studpump-legs.py` (Pillow/NumPy). Whole-source uniform
+scale/translation retains the hand-fixed contours and angles. Studpump's own
+original insole/binding/upper masks occlude the covered foot; its original
+product artwork, gold studs, piping and sole are unchanged.
+
+The original 6cm last shares the accepted stiletto6 source placements and
+close crossed composition, including the snug 0.78 rear shoe/foot/ornament
+stack. Black/white cloth derives from painted luminance with identical alpha.
+Six 1024×2140 WebPs total **456,180 bytes**: quality82 RGB, lossless alpha,
+encoded directly from transformed user PNGs. Source hashes, placements and
+per-export fidelity metrics are in `qa/user-studpump/asset-provenance.json`.
+The style joins `RigidFitting.userStyles`, so packaging validates but omits
+its seven unused legacy body-camera layers. Shared accessories remain local.
+
+### Mary Jane returned user anatomy — USER23:52 (2026-10-29)
+
+The six `fitting-rigid/maryjane_{front,rear}_{skin,cloth,black}.webp` layers
+derive only from the immutable returned front/rear PNGs in
+`src-user-legs-20261029/`. Rebuild with
+`python3 dev/build-rigid-legs.py --styles maryjane` or
+`python3 dev/build-user-maryjane-legs.py` (Pillow/NumPy). Whole-source uniform
+scale/translation preserves the hand-fixed contours and source angles;
+original product insole/binding masks occlude the covered foot. The upper dye
+mask is intentionally excluded: its far-collar line belongs behind the foot
+and would otherwise cut a diagonal slit through opaque hosiery.
+
+The original `maryjane_strap.webp` mask stays byte-exact. Runtime restores the
+dynamically tinted original product band/buckle above each foot. Both shoes
+use translation and uniform scale only, with the approved close crossed pose
+and0.78rear shoe/foot/ornament stack. Black/white cloth retains source alpha
+and luminance volume. Six1024×2140quality82WebPs preserve lossless alpha;
+source hashes, transforms and per-export RGB fidelity are recorded in
+`qa/user-maryjane/asset-provenance.json`. Rebuild and actual native/3× fitting,
+saved/share/recovery evidence are in `qa/user-maryjane/`.
+
+Mary Jane joins authoritative `RigidFitting.userStyles`; packaging validates
+but omits its seven unused legacy body-camera layers. Missing leg or integral
+band shows grounded original shoes until draw-only retry succeeds, without
+requesting the retired anatomy. No original user/product/strap art or audio
+was changed; no external CDN or generation service is required.
+
+### USER 2026-10-30 approved heel rear / individual collar calibration
+
+Four heeled returned-source rear layers use the immutable approved candidate v2
+white-background PNG. `dev/key-user-heel.py` extracts a source-only derivative
+under `dev/user-heel-derived/`; its provenance records the unchanged original
+SHA256. Flat retains `leg-rear-right-user.png`. Each style has independent
+front/rear similarity placements and near-collar traces/masks in
+`dev/fitting-calibration/`. Rebuild via `dev/build-calibrated-user-legs.py` or
+the existing per-style builder. No product shoe pixels are modified. White
+cloth retains soft source luminance at221–253; runtime WebPs retain lossless
+alpha. Final visual limitations and QA are in the newest PROGRESS entry.
+
+### Stiletto6 hosiery relief / SUPERVISOR12:00 (2026-10-30)
+
+Only stiletto6's six `fitting-rigid` derivatives were rebuilt from the same immutable front source and approved keyed rear candidate v2. The independent near-collar traces now follow the returning counter lip after x850. White cloth maps original luminance to190–254 with soft source-painted ankle/Achilles/heel/instep/toe relief; runtime omits the former22% white wash and reduces straight yarn opacity. Alpha remains identical across skin/cloth/black; original source PNGs, product shoes and all other style layers are unchanged. Rebuild: `python3 dev/build-calibrated-user-legs.py --styles stiletto6`. Artistic seat limits and exact QA/package evidence are recorded in the newest PROGRESS entry; no final supervisor acceptance is implied.
