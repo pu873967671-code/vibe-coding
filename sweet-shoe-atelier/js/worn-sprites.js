@@ -2,7 +2,7 @@
 (function(A){
 // Authored registration from assets/worn/worn.json; no fetch, including file://.
 const SPRITES={"flat":{"x":193,"y":0,"w":550,"h":860},"block":{"x":200,"y":0,"w":532,"h":862},"kitten":{"x":197,"y":0,"w":535,"h":863},"stiletto6":{"x":198,"y":0,"w":535,"h":853},"stiletto9":{"x":203,"y":0,"w":524,"h":868},"wedge":{"x":204,"y":0,"w":527,"h":863},"maryjane":{"x":185,"y":0,"w":550,"h":856},"ballet":{"x":182,"y":0,"w":550,"h":860},"slingback":{"x":192,"y":0,"w":547,"h":854},"loafer":{"x":160,"y":0,"w":575,"h":855},"platform":{"x":203,"y":0,"w":526,"h":889},"bootie":{"x":176,"y":0,"w":526,"h":854},"pearlpump":{"x":180,"y":0,"w":548,"h":859},"bowsling":{"x":185,"y":0,"w":544,"h":857},"crystalpump":{"x":201,"y":0,"w":534,"h":857},"studpump":{"x":202,"y":0,"w":524,"h":864},"bowmule":{"x":170,"y":0,"w":568,"h":854},"pearlheel":{"x":190,"y":0,"w":539,"h":862},"luciteheel":{"x":198,"y":0,"w":540,"h":866},"crystalsandal":{"x":198,"y":0,"w":521,"h":862},"flat_frill":{"x":193,"y":0,"w":551,"h":860},"flat_lace":{"x":193,"y":0,"w":550,"h":860},"block_frill":{"x":200,"y":0,"w":532,"h":862},"block_lace":{"x":200,"y":0,"w":532,"h":861},"kitten_frill":{"x":197,"y":0,"w":535,"h":863},"kitten_lace":{"x":197,"y":0,"w":535,"h":863},"stiletto6_frill":{"x":198,"y":0,"w":535,"h":853},"stiletto6_lace":{"x":198,"y":0,"w":535,"h":854},"stiletto9_frill":{"x":203,"y":0,"w":524,"h":869},"stiletto9_lace":{"x":204,"y":0,"w":523,"h":868},"wedge_frill":{"x":204,"y":0,"w":527,"h":863},"wedge_lace":{"x":204,"y":0,"w":527,"h":863},"maryjane_frill":{"x":186,"y":0,"w":549,"h":856},"maryjane_lace":{"x":186,"y":0,"w":549,"h":855},"ballet_frill":{"x":183,"y":0,"w":549,"h":860},"ballet_lace":{"x":182,"y":0,"w":550,"h":860},"slingback_frill":{"x":190,"y":0,"w":549,"h":854},"slingback_lace":{"x":192,"y":0,"w":548,"h":854},"loafer_frill":{"x":160,"y":0,"w":575,"h":855},"loafer_lace":{"x":160,"y":0,"w":575,"h":855},"platform_frill":{"x":203,"y":0,"w":526,"h":889},"platform_lace":{"x":203,"y":0,"w":526,"h":889},"bootie_frill":{"x":176,"y":0,"w":526,"h":854},"bootie_lace":{"x":176,"y":0,"w":526,"h":854},"pearlpump_frill":{"x":180,"y":0,"w":548,"h":859},"pearlpump_lace":{"x":180,"y":0,"w":549,"h":860},"bowsling_frill":{"x":185,"y":0,"w":546,"h":858},"bowsling_lace":{"x":185,"y":0,"w":546,"h":857},"crystalpump_frill":{"x":201,"y":0,"w":534,"h":856},"crystalpump_lace":{"x":201,"y":0,"w":534,"h":856},"studpump_frill":{"x":202,"y":0,"w":524,"h":864},"studpump_lace":{"x":202,"y":0,"w":524,"h":864},"bowmule_frill":{"x":171,"y":0,"w":567,"h":854},"bowmule_lace":{"x":171,"y":0,"w":567,"h":854},"pearlheel_frill":{"x":192,"y":0,"w":537,"h":862},"pearlheel_lace":{"x":192,"y":0,"w":537,"h":863},"luciteheel_frill":{"x":198,"y":0,"w":539,"h":866},"luciteheel_lace":{"x":198,"y":0,"w":541,"h":866},"crystalsandal_frill":{"x":196,"y":0,"w":524,"h":863},"crystalsandal_lace":{"x":196,"y":0,"w":524,"h":863}};
-const ASSET_V='20261103a';
+const ASSET_V='20261103b';
 const LIMIT=8, sources=new Map(), loading=new Map(), cache=new Map(), jobs=new Map(), tokens=new WeakMap();
 const make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 function remember(map,key,value,limit=LIMIT){map.delete(key);map.set(key,value);while(map.size>limit)map.delete(map.keys().next().value);return value;}
@@ -99,7 +99,13 @@ async function tinted(d,o){
   q.drawImage(finish,0,0);q.globalCompositeOperation='destination-in';q.drawImage(mask,0,0);
   // Re-keyed shoe masks can overlap a few yarn pixels at narrow openings.
   if(source.sockMask){q.globalCompositeOperation='destination-out';q.drawImage(source.sockMask,0,0);}
-  p.drawImage(sprite,0,0);if(o.sock!=='none')p.drawImage(hosiery(source,o,w,h),0,0);
+  p.drawImage(sprite,0,0);
+  if(o.sock!=='none'){
+   // Full-leg hosiery replaces the bare skin (not over it), so partially
+   // transparent silhouette pixels carry no pale skin fringe.
+   if(!source.sockMask){p.globalCompositeOperation='destination-out';p.drawImage(source.skin,0,0);p.globalCompositeOperation='source-over';}
+   p.drawImage(hosiery(source,o,w,h),0,0);
+  }
   // Shoe is always the final layer, covering the sock at the original opening.
   p.globalCompositeOperation='source-atop';p.drawImage(dye,0,0);p.globalCompositeOperation='source-over';
   return remember(cache,key,out);
