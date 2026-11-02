@@ -4,7 +4,7 @@
 // mask only; the shared calf treatment and pair transforms remain identical
 // across every finish, ornament and heel choice.
 const SIZE=1024,LIMIT=8;
-const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#696883'};
+const COLORS={pink:'#ffadc9',cream:'#fff0d2',blue:'#a9daff',green:'#c6e7a5',purple:'#d6b9ff',peach:'#ffc09e',rose:'#f478a4',black:'#555158'};
 const sources=new Map(),cache=new Map(),pending=new Map(),tokens=new WeakMap();
 const ornaments=new Map();
 // The showcase's layered lilac rosette is the same physical ornament when
@@ -478,7 +478,7 @@ async function composite(input,options){
   p.drawImage(parts.shoe,0,0,SIZE,SIZE);
   if(parts.upper){
    const tint=canvas(),q=tint.getContext('2d');q.drawImage(parts.upper,0,0,SIZE,SIZE);q.globalCompositeOperation='source-in';q.fillStyle=COLORS[d.color]||COLORS.pink;q.fillRect(0,0,SIZE,SIZE);
-   q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(d.material)?.8:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0,SIZE,SIZE);q.globalAlpha=d.material==='suede'?.08:d.material==='velvet'?.16:d.material==='mesh'?.34:d.material==='brocade'?.42:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0,SIZE,SIZE);q.globalAlpha=1;
+   q.globalCompositeOperation='source-atop';q.globalAlpha=['velvet','suede'].includes(d.material)?.8:.72;if(parts.shadow)q.drawImage(parts.shadow,0,0,SIZE,SIZE);q.globalAlpha=d.material==='suede'?.08:d.material==='velvet'?.16:d.material==='mesh'?.34:d.material==='brocade'?.42:d.material==='pearlescent'?.12:.78;if(parts.highlight)q.drawImage(parts.highlight,0,0,SIZE,SIZE);q.globalAlpha=1;
    p.drawImage(tint,0,0);
    // Finishes change colour and surface detail, never the antialiased shoe
    // silhouette. Match the product compositor instead of accumulating alpha
@@ -497,6 +497,17 @@ async function composite(input,options){
    p.fillStyle=heel;p.beginPath();p.moveTo(696,750);p.bezierCurveTo(735,730,775,708,793,697);p.lineTo(795,738);p.quadraticCurveTo(793,746,781,752);p.lineTo(728,779);p.lineTo(696,767);p.closePath();p.fill();
    p.strokeStyle='#714b30';p.lineWidth=1.5;p.beginPath();p.moveTo(696,750);p.lineTo(696,767);p.lineTo(728,779);p.stroke();
    p.strokeStyle='#69462f';p.lineWidth=3;p.beginPath();p.moveTo(696,750);p.bezierCurveTo(735,730,775,708,793,697);p.stroke();p.restore();
+   // Continue the narrow outsole into the front of the low stacked heel.
+   // It is behind the painted upper, so the arch remains uninterrupted.
+   p.save();p.globalCompositeOperation='destination-over';p.fillStyle='#946440';p.beginPath();
+   p.moveTo(662,799);p.bezierCurveTo(674,785,686,770,696,750);
+   p.lineTo(706,761);p.lineTo(696,773);p.bezierCurveTo(683,779,673,790,662,799);p.closePath();p.fill();p.restore();
+  }
+  if(d.heel==='loafer'){
+   // The native apron stitching reaches the toe silhouette. Clip its fine
+   // threads to the painted shoe so no line tips protrude into the scene.
+   const details=canvas(),dp=details.getContext('2d');A.CoutureFinish?.loaferDetails(dp,d,'worn');
+   dp.globalCompositeOperation='destination-in';dp.drawImage(parts.shoe,0,0);p.drawImage(details,0,0);
   }
   // Some source paintings include a tiny skin-coloured ankle sliver inside
   // the shoe extraction. Extend the same cloth through that camera-specific
@@ -614,7 +625,16 @@ function soleShadow(p,contacts){
  }
 }
 async function render(target,input,options,sceneId,cropped=false){
- const token={};tokens.set(target,token);target.dataset.fitting2dReady='false';const d=clean(input),o=fittingOptions(options),result=await composite(d,o);if(tokens.get(target)!==token)return false;
+ const token={};tokens.set(target,token);target.dataset.fitting2dReady='false';const d=clean(input),o=fittingOptions(options);
+ const spriteStage=target.closest?.('.runway-scene');
+ if(A.WornSprites?.has(d.heel)){
+  const painted=await A.WornSprites.paint(target,d,o,sceneId||spriteStage?.dataset.showcaseScene||'salon',!!spriteStage||cropped,()=>tokens.get(target)===token);
+  if(tokens.get(target)!==token)return false;if(painted)return true;
+ }
+ const rigid=await A.RigidFitting?.prepare?.(d,o);if(tokens.get(target)!==token)return false;
+ const stageForRigid=target.closest?.('.runway-scene');
+ if(rigid)return A.RigidFitting.paint(target,d,o,rigid,sceneId||stageForRigid?.dataset.showcaseScene||'salon',!!stageForRigid||cropped);
+ const result=await composite(d,o);if(tokens.get(target)!==token)return false;
  const p=target.getContext('2d');p.clearRect(0,0,target.width,target.height);p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';
  // One transform covers skin, socks, shoe and every ornament. Slender fashion
  // proportions therefore cannot open a gap at a collar or move a fastening.
@@ -639,7 +659,7 @@ function mount(host,input,options){
   // Assigning an unchanged canvas size erases the painted pair unnecessarily.
   if(target.width===width&&target.height===height)return false;
   target.width=width;target.height=height;return true;
- };fit();let observer;const controller={canvas:target,ready:null,update(next,nextOptions=fitting){if(disposed)return Promise.resolve(false);design=clean(next);fitting=fittingOptions(nextOptions);controller.ready=render(target,design,fitting);return controller.ready;},dispose(){disposed=true;observer?.disconnect();tokens.set(target,{});target.remove();},debug(){return {renderer:'painted-fitting',ready:target.dataset.fitting2dReady==='true',fallback:target.dataset.fallback,design:{...design},fitting:{...fitting},feet:2,frame:[0,0,SIZE,SIZE],cacheEntries:cache.size,cacheLimit:LIMIT};}};controller.update(design);observer=new ResizeObserver(()=>{if(disposed||!fit())return;controller.update(design);});observer.observe(host);return controller;
+ };fit();let observer;const controller={canvas:target,ready:null,update(next,nextOptions=fitting){if(disposed)return Promise.resolve(false);design=clean(next);fitting=fittingOptions(nextOptions);controller.ready=render(target,design,fitting);return controller.ready;},dispose(){disposed=true;observer?.disconnect();tokens.set(target,{});target.remove();},debug(){return {renderer:target.dataset.renderer||'painted-fitting',ready:target.dataset.fitting2dReady==='true',fallback:target.dataset.fallback,design:{...design},fitting:{...fitting},feet:2,frame:[0,0,SIZE,SIZE],cacheEntries:cache.size,cacheLimit:LIMIT};}};controller.update(design);observer=new ResizeObserver(()=>{if(disposed||!fit())return;controller.update(design);});observer.observe(host);return controller;
 }
 A.Fitting2D={mount,render,composite,sideCameraPixels,frame:Object.freeze({width:SIZE,height:SIZE}),info:()=>({cacheEntries:cache.size,cacheLimit:LIMIT,loadedHeels:[...sources.keys()],pendingComposites:pending.size})};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
