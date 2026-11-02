@@ -15,6 +15,20 @@
  function sanitize(value){const owned=['salon',...new Set((Array.isArray(value?.owned)?value.owned:[]).filter(id=>id!=='salon'&&find(id)))];return {version:1,owned,selected:owned.includes(value?.selected)?value.selected:'salon'};}
  function choose(state,id,artwork){const scene=find(id);if(!scene)return {ok:false,reason:'scene'};const room=state.showcase||(state.showcase=sanitize());const unlocked=!room.owned.includes(id);if(unlocked){if(!Number.isFinite(state.coins)||state.coins<scene.price)return {ok:false,reason:'coins'};state.coins-=scene.price;room.owned.push(id);}room.selected=id;if(artwork)artwork.scene=id;return {ok:true,unlocked,scene};}
  function picker(state,id){const room=state.showcase||sanitize(),zh=A.lang==='zh';return `<div class="showcase-heading"><span>${zh?'展示场景':'Your little escapes'}</span><span><img src="assets/icon_coin.webp" alt=""> ${state.coins}</span></div><div class="showcase-picker" role="group" aria-label="${zh?'展示场景':'Showcase scenes'}">${scenes.map(s=>{const owned=room.owned.includes(s.id),name=zh?s.zh:s.en;return `<button class="showcase-chip ${id===s.id?'selected':''} ${owned?'owned':'locked'}" data-showcase="${s.id}" aria-pressed="${id===s.id}" aria-label="${owned?name:(zh?'解锁 ':'Unlock ')+name+' · '+s.price+(zh?' 金币':' coins')}"><img src="assets/${s.thumbnail}.webp" alt=""><span>${name}</span><small>${owned?(id===s.id?'✓':(zh?'已拥有':'Owned')):'<img class="scene-lock" src="assets/items/ui_lock.webp" alt=""> '+(zh?'解锁 ':'Buy ')+s.price}</small></button>`;}).join('')}</div>`;}
+ // A retired/missing recommended room falls back without changing saved people.
+ function recommended(themeId){const theme=A.themes.find(t=>t.id===themeId);return find(theme?.scene)||find('mirror_lounge');}
+ function sceneHint(state,themeId){const scene=recommended(themeId),owned=state.showcase?.owned.includes(scene.id),name=A.lang==='zh'?scene.zh:scene.en;return `<span class="scene-recommendation"><img src="assets/${scene.thumbnail}.webp" alt=""><span>${A.t('sceneRecommended').replace('{scene}',name)}${owned?'':` <span class="scene-hint-price"><img src="assets/items/ui_lock.webp" alt="${A.t('unlock')}"> ${scene.price} ${A.t('coins')}</span>`}</span></span>`;}
+ function bonusAmount(artwork){return Number.isFinite(artwork?.orderEarned)&&artwork.orderEarned>0?Math.round(artwork.orderEarned*1.2)-artwork.orderEarned:0;}
+ function claimSceneBonus(state,artwork,sceneId){
+  if(!artwork||artwork.sceneBonusClaimed||!A.themes.some(t=>t.id===artwork.customerTheme)||!state.showcase?.owned.includes(sceneId)||recommended(artwork.customerTheme).id!==sceneId)return 0;
+  const amount=bonusAmount(artwork);if(!amount)return 0;
+  artwork.sceneBonusClaimed=true;artwork.sceneBonus=amount;artwork.sceneAppearance=sceneId;
+  state.coins+=amount;state.dayCoins+=amount;
+  if(state.best?.customerTheme===artwork.customerTheme&&state.best.day===artwork.day&&state.best.earned===artwork.orderEarned){state.best.earned+=amount;}
+  return amount;
+ }
+ function bonusLine(artwork){if(!artwork?.customerTheme||!bonusAmount(artwork))return '';const scene=recommended(artwork.customerTheme),name=A.lang==='zh'?scene.zh:scene.en;return `<p class="scene-bonus-line" data-scene-bonus="${artwork.sceneBonusClaimed?'claimed':'pending'}"><strong>${A.t('sceneBonus')} +${bonusAmount(artwork)}</strong><span>${artwork.sceneBonusClaimed?A.t('sceneAppearance'):A.t('scenePending').replace('{scene}',name)}</span></p>`;}
+ function appearance(artwork){return artwork?.sceneBonusClaimed?`<div class="scene-photo-caption"><strong>${A.t('sceneAppearance')}</strong><p>“${A.t('appearance_'+artwork.customerTheme)}”</p></div>`:'';}
  // Fixed camera authored against user_fixed_framing_1155.webp. These are
  // measured source pixels on the BAKED top surface, excluding the front rim.
  // Every room shares the same 610 x 620 camera. USER12:47 reveals only its
@@ -94,5 +108,5 @@
   const socks=root?.querySelector('.runway-sock-styles'),selected=socks?.querySelector('[aria-pressed="true"]');
   revealChoice(socks,selected,selected?.dataset.fittingSock);
  }
- A.Showcase={scenes,find,sanitize,choose,picker,frame,framing,project,composition};
+ A.Showcase={scenes,find,sanitize,choose,picker,frame,framing,project,composition,recommended,sceneHint,bonusAmount,claimSceneBonus,bonusLine,appearance};
 })(globalThis.SweetShoe=globalThis.SweetShoe||{});
