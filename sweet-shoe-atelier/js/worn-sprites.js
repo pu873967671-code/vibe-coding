@@ -6,38 +6,33 @@ const LIMIT=8, sources=new Map(), loading=new Map(), cache=new Map(), jobs=new M
 const make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 function remember(map,key,value,limit=LIMIT){map.delete(key);map.set(key,value);while(map.size>limit)map.delete(map.keys().next().value);return value;}
 function image(src){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('Missing worn sprite: '+src));im.src=src;});}
-function maskFilter(){
- const id='worn-sprite-luminance-alpha';if(document.getElementById(id))return id;
- const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),defs=document.createElementNS(ns,'defs'),filter=document.createElementNS(ns,'filter'),matrix=document.createElementNS(ns,'feColorMatrix');
- svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');
- filter.id=id;filter.setAttribute('color-interpolation-filters','sRGB');
- matrix.setAttribute('type','matrix');matrix.setAttribute('values','0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .2126 .7152 .0722 0 0');
- filter.append(matrix);defs.append(filter);svg.append(defs);document.body.append(svg);return id;
+// WebKit ignores CanvasRenderingContext2D.filter and file:// forbids pixel
+// reads, so colour transforms use composite blend modes, masks ship with
+// real alpha (white RGB), and blur is done by down/up sampling.
+function gray(src,w,h){
+ const c=make(w,h),p=c.getContext('2d');p.drawImage(src,0,0);
+ p.globalCompositeOperation='saturation';p.fillStyle='#808080';p.fillRect(0,0,w,h);
+ p.globalCompositeOperation='destination-in';p.drawImage(src,0,0);return c;
+}
+function tint(src,colour,w,h){
+ // colour * luminance / 205: multiply, then lift by 255/205 with 'lighter'.
+ const c=gray(src,w,h),p=c.getContext('2d');
+ p.globalCompositeOperation='multiply';p.fillStyle=colour;p.fillRect(0,0,w,h);
+ p.globalCompositeOperation='destination-in';p.drawImage(src,0,0);
+ const t=make(w,h),q=t.getContext('2d');q.drawImage(c,0,0);q.globalCompositeOperation='lighter';q.globalAlpha=.24;q.drawImage(c,0,0);
+ q.globalAlpha=1;q.globalCompositeOperation='destination-in';q.drawImage(src,0,0);return t;
+}
+function blurred(src,w,h,r){
+ const k=Math.max(2,Math.round(r/2)),sw=Math.max(1,Math.round(w/k)),sh=Math.max(1,Math.round(h/k));
+ const a=make(sw,sh),pa=a.getContext('2d');pa.imageSmoothingEnabled=true;pa.imageSmoothingQuality='high';pa.drawImage(src,0,0,sw,sh);
+ const b=make(sw,sh),pb=b.getContext('2d');pb.drawImage(a,0,0);pa.clearRect(0,0,sw,sh);
+ for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1],[0,0]]){pa.globalAlpha=.2;pa.drawImage(b,dx,dy);}pa.globalAlpha=1;
+ const c=make(w,h),pc=c.getContext('2d');pc.imageSmoothingEnabled=true;pc.imageSmoothingQuality='high';pc.drawImage(a,0,0,w,h);return c;
 }
 const SOCK_COLOURS={pink:'#ffd4e4',mint:'#d6f4e7',cream:'#fff1d6',white:'#fffdfa',black:'#292735'};
 function alphaMask(gray,sprite,w,h){
- const c=make(w,h),p=c.getContext('2d');p.filter='url(#'+maskFilter()+')';p.drawImage(gray,0,0);p.filter='none';
+ const c=make(w,h),p=c.getContext('2d');p.drawImage(gray,0,0);
  p.globalCompositeOperation='destination-in';p.drawImage(sprite,0,0);return c;
-}
-function sockFilter(colour){
- const id='worn-sock-'+colour.slice(1);if(document.getElementById(id))return id;
- const ns='http://www.w3.org/2000/svg',filter=document.createElementNS(ns,'filter'),matrix=document.createElementNS(ns,'feColorMatrix');
- filter.id=id;filter.setAttribute('color-interpolation-filters','sRGB');matrix.setAttribute('type','matrix');
- // Output = chosen RGB * source luminance / 205. Keep black cloth readable.
- const rgb=colour.slice(1).match(/../g).map(v=>Math.max(34,parseInt(v,16))/205);
- matrix.setAttribute('values',rgb.map(v=>[.3*v,.59*v,.11*v,0,0].join(' ')).join(' ')+' 0 0 0 1 0');
- filter.append(matrix);document.getElementById(maskFilter()).parentNode.append(filter);return id;
-}
-function greenSockFilter(){
- const id='worn-sock-green-alpha';if(document.getElementById(id))return id;
- const ns='http://www.w3.org/2000/svg',filter=document.createElementNS(ns,'filter'),matrix=document.createElementNS(ns,'feColorMatrix');
- filter.id=id;filter.setAttribute('color-interpolation-filters','sRGB');matrix.setAttribute('type','matrix');
- // The supplied masks feather or miss green yarn beside narrow ribbons.
- // Recover only green source cloth; skin, white shoes and pink ribbons have R >= G.
- matrix.setAttribute('values','0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -1 1 0 0 0');
- const transfer=document.createElementNS(ns,'feComponentTransfer'),alpha=document.createElementNS(ns,'feFuncA');
- alpha.setAttribute('type','linear');alpha.setAttribute('slope','128');alpha.setAttribute('intercept','-1');transfer.append(alpha);
- filter.append(matrix,transfer);document.getElementById(maskFilter()).parentNode.append(filter);return id;
 }
 async function load(heel){
  if(sources.has(heel))return remember(sources,heel,sources.get(heel));if(loading.has(heel))return loading.get(heel);
@@ -45,10 +40,6 @@ async function load(heel){
  const job=Promise.all([image('assets/worn/'+heel+'.webp'),image('assets/worn/'+heel+'_mask.webp'),short?image('assets/worn/'+heel+'_sock.webp'):null]).then(([sprite,gray,sockGray])=>{
   const {w,h}=SPRITES[heel];if([sprite,gray,...(sockGray?[sockGray]:[])].some(im=>im.naturalWidth!==w||im.naturalHeight!==h))throw new Error('Invalid worn sprite dimensions: '+heel);
   const mask=alphaMask(gray,sprite,w,h),sockMask=sockGray?alphaMask(sockGray,sprite,w,h):null;
-  if(sockMask){
-   const recovered=make(w,h),r=recovered.getContext('2d');r.filter='url(#'+greenSockFilter()+')';r.drawImage(sprite,0,0);r.filter='none';
-   r.globalCompositeOperation='destination-in';r.drawImage(sprite,0,0);const sm=sockMask.getContext('2d');sm.globalCompositeOperation='source-over';sm.drawImage(recovered,0,0);
-  }
   // Dye masks stop at the upper: preserve the painted outsole immediately
   // below it as footwear too, rather than laying fishnet over the sole.
   const shoeCover=make(w,h),cover=shoeCover.getContext('2d');
@@ -58,15 +49,15 @@ async function load(heel){
   // Extend the top alpha before blurring: hosiery must have no horizontal seam.
   const padded=make(w+72,h+72),b=padded.getContext('2d');b.drawImage(sprite,36,36);b.drawImage(sprite,0,0,w,1,36,0,w,36);
   const edge=make(w,h),e=edge.getContext('2d');e.drawImage(skin,0,0);e.globalCompositeOperation='source-in';e.fillStyle='#211a30';e.fillRect(0,0,w,h);
-  e.globalCompositeOperation='destination-out';e.filter='blur(18px)';e.drawImage(padded,-36,-36);e.filter='none';
+  e.globalCompositeOperation='destination-out';e.drawImage(blurred(padded,w+72,h+72,18),-36,-36);
   return remember(sources,heel,{sprite,mask,sockMask,skin,edge});
  }).finally(()=>loading.delete(heel));loading.set(heel,job);return job;
 }
 function hosiery(source,o,w,h){
- const {sprite,sockMask,skin,edge}=source,c=make(w,h),p=c.getContext('2d');
+ const {sprite,sockMask,skin,edge}=source,c=make(w,h),p=c.getContext('2d'),mono=()=>source.gray||(source.gray=gray(sprite,w,h));
  let colour=SOCK_COLOURS[o.color]||SOCK_COLOURS.cream;
  if(sockMask){
-  p.filter='url(#'+sockFilter(colour)+')';p.drawImage(sprite,0,0);p.filter='none';
+  p.drawImage(tint(sprite,colour,w,h),0,0);
   p.globalCompositeOperation='destination-in';p.drawImage(sockMask,0,0);return c;
  }
  if(o.sock==='blacksheer')colour='#262430';
@@ -75,14 +66,14 @@ function hosiery(source,o,w,h){
  p.drawImage(sprite,0,0);
  if(['opaque','knee','thigh'].includes(o.sock)){
   // Neutral source luminance retains the calf's volume beneath solid cloth.
-  p.filter='grayscale(1)';p.drawImage(sprite,0,0);p.filter='none';
+  p.drawImage(mono(),0,0);
   p.globalCompositeOperation='source-atop';p.globalAlpha=opacity;p.fillStyle=colour;p.fillRect(0,0,w,h);p.globalAlpha=1;
-  p.globalCompositeOperation='multiply';p.globalAlpha=.16;p.filter='grayscale(1)';p.drawImage(sprite,0,0);p.filter='none';
+  p.globalCompositeOperation='multiply';p.globalAlpha=.16;p.drawImage(mono(),0,0);
  }else{
   p.globalCompositeOperation='multiply';p.globalAlpha=opacity;p.fillStyle=colour;p.fillRect(0,0,w,h);
  }
  p.globalCompositeOperation='source-atop';p.globalAlpha=o.sock==='blacksheer'?.85:.5;p.drawImage(edge,0,0);
- p.globalCompositeOperation='screen';p.globalAlpha=.035;p.filter='grayscale(1)';p.drawImage(sprite,0,0);p.filter='none';p.globalAlpha=1;
+ p.globalCompositeOperation='screen';p.globalAlpha=.035;p.drawImage(mono(),0,0);p.globalAlpha=1;
  if(o.sock==='fishnet'){
   p.globalCompositeOperation='source-atop';p.strokeStyle=colour;p.lineWidth=1.1;p.globalAlpha=.8;p.beginPath();
   for(let x=-h;x<w+h;x+=14){p.moveTo(x,0);p.lineTo(x+h,h);p.moveTo(x,0);p.lineTo(x-h,h);}p.stroke();p.globalAlpha=1;
