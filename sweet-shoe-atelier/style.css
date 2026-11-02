@@ -1643,3 +1643,40 @@ body:has(.runway-modal) #toast{top:80px;bottom:auto;max-width:min(340px,calc(100
 @media (orientation:landscape) and (min-width:1201px) and (min-height:850px){
  #studioScreen:has(.free-brief) .stage{width:min(1024px,calc(100% - 48px),calc((100dvh - 300px)*1.6))}
 }
+
+/* P1 accessibility: keep the candy palette and give action labels solid ink. */
+:root{--action-ink:#542238}
+.primary:not(:disabled),
+header #nav button.active,
+.collection-detail .primary,
+.atelier-order.ready .order-deliver,
+.runway-segments .primary,
+.runway-dock .runway-actions button,
+.studio-angles button[aria-pressed=true],
+.studio-angles [data-studio-closeup][aria-pressed=true],
+.vn-box .vn-name{color:var(--action-ink);text-shadow:none}
+.renovate-button.primary:not(:disabled){background:var(--action);color:var(--action-ink)}
+
+/* On phones, resource recovery belongs beside the unavailable renovation.
+   Keep the story and reward below the actions, within the existing scroller. */
+@media (orientation:portrait){
+ .renovation-task:has(.renovate-button:disabled){display:flex;flex-direction:column}
+ .renovation-task:has(.renovate-button:disabled)>.renovation-story{order:1}
+ .renovation-task:has(.renovate-button:disabled)>.inspiration-reward{order:2}
+}
+
+/* Scene-customer hints share the commission and collection visual language. */
+.scene-recommendation{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;line-height:1.3;color:#426358;text-wrap:pretty}
+.scene-recommendation>img{width:28px;height:28px;object-fit:cover;border-radius:6px;flex-shrink:0}
+.scene-hint-price{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.scene-hint-price img{width:12px;height:12px;object-fit:contain}
+.scene-bonus-line{display:flex;flex-wrap:wrap;justify-content:center;gap:3px 10px;margin:6px 0;font-size:12px;line-height:1.35;color:#426358}
+.scene-bonus-line span{font-size:11px}
+.scene-photo-caption{color:#426358;font-size:12px;line-height:1.4}
+.scene-photo-caption p{margin:4px 0 0}
+.collection-thumbnail{position:relative}
+.scene-photo-badge{position:absolute;bottom:3px;left:3px;right:3px;padding:2px;background:#eef8f0;color:#355a4b;font-size:9px;line-height:1.25;border-radius:4px;white-space:normal}
+@media(max-height:560px) and (orientation:landscape){.scene-recommendation{font-size:10px;margin-top:3px}.scene-recommendation>img{width:20px;height:20px}.runway-dock .scene-bonus-line{margin:2px 0;font-size:11px}}
+.runway-modal .runway-dock:has([data-scene-bonus="claimed"]) .runway-reaction{display:block;grid-column:1/-1;font-size:12px;line-height:1.3;margin:2px 0;color:#426358}
+.runway-modal .runway-dock .scene-bonus-line{grid-column:1/-1;margin:2px 0}
+.runway-modal .runway-dock:has(.scene-bonus-line){overflow-y:auto}
