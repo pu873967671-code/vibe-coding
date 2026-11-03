@@ -3,7 +3,7 @@
 // Authored registration from assets/worn/worn.json; no fetch, including file://.
 const STRAPS={"block":["cross","pearl","ribbon","thin"],"flat":["cross","pearl","ribbon","thin"],"kitten":["cross","pearl","ribbon","thin"],"luciteheel":["cross","pearl","ribbon","thin"],"pearlheel":["cross","pearl","ribbon","thin"],"platform":["cross","pearl","ribbon","thin"],"stiletto6":["cross","pearl","ribbon","thin"],"stiletto9":["cross","pearl","ribbon","thin"],"wedge":["cross","pearl","ribbon","thin"]};
 const SPRITES={"flat":{"x":193,"y":0,"w":550,"h":860,"ox":144,"rc":0.922},"block":{"x":200,"y":0,"w":532,"h":862,"ox":144,"rc":0.923},"kitten":{"x":115,"y":0,"w":619,"h":865,"ox":186,"rc":0.891},"stiletto6":{"x":152,"y":0,"w":585,"h":855,"ox":166,"rc":0.91},"stiletto9":{"x":203,"y":0,"w":524,"h":868,"ox":146,"rc":0.929},"wedge":{"x":204,"y":0,"w":527,"h":863,"ox":143,"rc":0.924},"maryjane":{"x":185,"y":0,"w":550,"h":856,"ox":150,"rc":0.936},"ballet":{"x":182,"y":0,"w":550,"h":860,"ox":154,"rc":0.927},"slingback":{"x":130,"y":0,"w":612,"h":856,"ox":176,"rc":0.891},"loafer":{"x":160,"y":0,"w":575,"h":855,"ox":162,"rc":0.929},"platform":{"x":203,"y":0,"w":526,"h":889,"ox":144,"rc":0.917},"bootie":{"x":176,"y":0,"w":526,"h":854,"ox":172,"rc":0.922},"pearlpump":{"x":118,"y":0,"w":612,"h":862,"ox":186,"rc":0.903},"bowsling":{"x":107,"y":0,"w":627,"h":860,"ox":191,"rc":0.886},"crystalpump":{"x":136,"y":0,"w":604,"h":859,"ox":172,"rc":0.903},"studpump":{"x":125,"y":0,"w":603,"h":866,"ox":184,"rc":0.901},"bowmule":{"x":122,"y":0,"w":619,"h":855,"ox":179,"rc":0.906},"pearlheel":{"x":190,"y":0,"w":539,"h":862,"ox":152,"rc":0.926},"luciteheel":{"x":135,"y":0,"w":606,"h":868,"ox":172,"rc":0.9},"crystalsandal":{"x":198,"y":0,"w":521,"h":862,"ox":153,"rc":0.935},"flat_frill":{"x":193,"y":0,"w":551,"h":860,"ox":144},"flat_lace":{"x":193,"y":0,"w":550,"h":860,"ox":144},"block_frill":{"x":200,"y":0,"w":532,"h":862,"ox":144},"block_lace":{"x":200,"y":0,"w":532,"h":861,"ox":144},"kitten_frill":{"x":116,"y":0,"w":618,"h":866,"ox":186},"kitten_lace":{"x":116,"y":0,"w":619,"h":867,"ox":186},"stiletto6_frill":{"x":152,"y":0,"w":585,"h":855,"ox":166},"stiletto6_lace":{"x":152,"y":0,"w":585,"h":855,"ox":166},"stiletto9_frill":{"x":203,"y":0,"w":524,"h":869,"ox":146},"stiletto9_lace":{"x":204,"y":0,"w":523,"h":868,"ox":146},"wedge_frill":{"x":204,"y":0,"w":527,"h":863,"ox":143},"wedge_lace":{"x":204,"y":0,"w":527,"h":863,"ox":143},"maryjane_frill":{"x":186,"y":0,"w":549,"h":856,"ox":150},"maryjane_lace":{"x":186,"y":0,"w":549,"h":855,"ox":150},"ballet_frill":{"x":183,"y":0,"w":549,"h":860,"ox":154},"ballet_lace":{"x":182,"y":0,"w":550,"h":860,"ox":154},"slingback_frill":{"x":130,"y":0,"w":612,"h":856,"ox":176},"slingback_lace":{"x":130,"y":0,"w":612,"h":855,"ox":176},"loafer_frill":{"x":160,"y":0,"w":575,"h":855,"ox":162},"loafer_lace":{"x":160,"y":0,"w":575,"h":855,"ox":162},"platform_frill":{"x":203,"y":0,"w":526,"h":889,"ox":144},"platform_lace":{"x":203,"y":0,"w":526,"h":889,"ox":144},"bootie_frill":{"x":176,"y":0,"w":526,"h":854,"ox":172},"bootie_lace":{"x":176,"y":0,"w":526,"h":854,"ox":172},"pearlpump_frill":{"x":118,"y":0,"w":613,"h":862,"ox":186},"pearlpump_lace":{"x":118,"y":0,"w":612,"h":862,"ox":186},"bowsling_frill":{"x":107,"y":0,"w":627,"h":860,"ox":191},"bowsling_lace":{"x":107,"y":0,"w":627,"h":860,"ox":191},"crystalpump_frill":{"x":137,"y":0,"w":603,"h":858,"ox":172},"crystalpump_lace":{"x":136,"y":0,"w":604,"h":859,"ox":172},"studpump_frill":{"x":125,"y":0,"w":603,"h":866,"ox":184},"studpump_lace":{"x":125,"y":0,"w":603,"h":866,"ox":184},"bowmule_frill":{"x":122,"y":0,"w":619,"h":855,"ox":179},"bowmule_lace":{"x":123,"y":0,"w":619,"h":855,"ox":179},"pearlheel_frill":{"x":192,"y":0,"w":537,"h":862,"ox":152},"pearlheel_lace":{"x":192,"y":0,"w":537,"h":863,"ox":152},"luciteheel_frill":{"x":135,"y":0,"w":606,"h":868,"ox":172},"luciteheel_lace":{"x":135,"y":0,"w":606,"h":868,"ox":172},"crystalsandal_frill":{"x":196,"y":0,"w":524,"h":863,"ox":153},"crystalsandal_lace":{"x":196,"y":0,"w":524,"h":863,"ox":153}};
-const ASSET_V='20261103m';
+const ASSET_V='20261103n';
 const LIMIT=8, sources=new Map(), loading=new Map(), cache=new Map(), jobs=new Map(), tokens=new WeakMap();
 const make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 function remember(map,key,value,limit=LIMIT){map.delete(key);map.set(key,value);while(map.size>limit)map.delete(map.keys().next().value);return value;}
@@ -41,8 +41,10 @@ async function load(heel){
  if(sources.has(heel))return remember(sources,heel,sources.get(heel));if(loading.has(heel))return loading.get(heel);
  const short=heel.endsWith('_frill')||heel.endsWith('_lace');
  const base=short?heel.replace(/_(frill|lace)$/,''):heel;
- const job=Promise.all([image('assets/worn/'+heel+'.webp'+'?v='+ASSET_V),image('assets/worn/'+heel+'_mask.webp'+'?v='+ASSET_V),short?image('assets/worn/'+heel+'_sock.webp'+'?v='+ASSET_V):null,image('assets/worn/'+base+'_legs.webp'+'?v='+ASSET_V).catch(()=>null)]).then(([sprite,gray,sockGray,legs])=>{
+ const job=Promise.all([image('assets/worn/'+heel+'.webp'+'?v='+ASSET_V),image('assets/worn/'+heel+'_mask.webp'+'?v='+ASSET_V),short?image('assets/worn/'+heel+'_sock.webp'+'?v='+ASSET_V):null,image('assets/worn/'+base+'_legs.webp'+'?v='+ASSET_V).catch(()=>null),image('assets/worn/'+base+'_sole.webp?v='+ASSET_V)]).then(([sprite,gray,sockGray,legs,sole])=>{
   const {w,h}=SPRITES[heel];if([sprite,gray,...(sockGray?[sockGray]:[])].some(im=>im.naturalWidth!==w||im.naturalHeight!==h))throw new Error('Invalid worn sprite dimensions: '+heel);
+  if(sole.naturalWidth!==SPRITES[base].w||sole.naturalHeight!==SPRITES[base].h)throw new Error('Invalid worn sole mask: '+base);
+  const noDye=make(w,h);noDye.getContext('2d').drawImage(sole,SPRITES[base].x-SPRITES[heel].x,SPRITES[base].y-SPRITES[heel].y);
   if(legs&&(legs.naturalWidth!==SPRITES[base].w||legs.naturalHeight!==SPRITES[base].h))legs=null;
   if(short&&legs){const aligned=make(w,h);aligned.getContext('2d').drawImage(legs,SPRITES[base].x-SPRITES[heel].x,SPRITES[base].y-SPRITES[heel].y);legs=aligned;}
   const mask=alphaMask(gray,sprite,w,h),sockMask=sockGray?alphaMask(sockGray,sprite,w,h):null;
@@ -60,7 +62,7 @@ async function load(heel){
   const padded=make(w+72,h+72),b=padded.getContext('2d');b.drawImage(sprite,36,36);b.drawImage(sprite,0,0,w,1,36,0,w,36);
   const edge=make(w,h),e=edge.getContext('2d');e.drawImage(skin,0,0);e.globalCompositeOperation='source-in';e.fillStyle='#211a30';e.fillRect(0,0,w,h);
   e.globalCompositeOperation='destination-out';e.drawImage(blurred(padded,w+72,h+72,18),-36,-36);
-  return remember(sources,heel,{sprite,mask,sockMask,sockShade:sockGray,skin,edge,legs});
+  return remember(sources,heel,{sprite,mask,noDye,sockMask,sockShade:sockGray,skin,edge,legs});
  }).finally(()=>loading.delete(heel));loading.set(heel,job);return job;
 }
 function skinTone(source,colour,w,h){
@@ -124,6 +126,10 @@ async function tinted(d,o){
   const finish=make(w,h),f=finish.getContext('2d');f.save();f.translate(0,h*.62);f.scale(w/1024,h*.38/640);
   A.CoutureFinish?.drawFinish(f,d,1024,640,'product');A.CoutureFinish?.drawPattern(f,d,1024,640,'product');f.restore();
   q.drawImage(finish,0,0);q.globalCompositeOperation='destination-in';q.drawImage(mask,0,0);
+  // Keep natural soles, welt/piping, insoles and non-fabric heel details
+  // in their original painting, for dye, material finish and every motif.
+  // Sock variants share the base matte with authored registration offsets.
+  q.globalCompositeOperation='destination-out';q.drawImage(source.noDye,0,0);
   // Re-keyed shoe masks can overlap a few yarn pixels at narrow openings.
   if(source.sockMask){q.globalCompositeOperation='destination-out';q.drawImage(source.sockMask,0,0);}
   if(o.skin&&!source.legs)throw new Error('Missing worn skin mask: '+variant);
