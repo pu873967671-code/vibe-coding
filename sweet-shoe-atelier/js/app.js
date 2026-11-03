@@ -241,7 +241,7 @@ function fittingOptionsMarkup(value){
 function chooseFitting(key,value){
  const artwork=state.gallery[runwayIndex];if(!artwork||modalKind!=='runway')return;
  const selected=A.cleanFittingOptions({...artwork.fitting,[key]:value});
- state.fitting={...selected};artwork.fitting={...selected};persist(true);
+ state.fitting=A.cleanFittingOptions({...selected,skin:undefined});artwork.fitting={...selected};persist(true);
  const root=$('modalRoot');root.querySelectorAll('[data-fitting-sock]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.fittingSock===selected.sock)));
  root.querySelectorAll('[data-fitting-color]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.fittingColor===selected.color));b.disabled=selected.sock==='none';b.setAttribute('aria-disabled',String(b.disabled));});
  runwayFitting?.update(artwork.design,selected);refreshFitting(root.querySelector('.runway-scene'));
@@ -250,7 +250,7 @@ function openRunway(index=0,refresh=false){
  const artwork=state.gallery[index];if(!artwork)return;
  clearTimeout(toastTimer);$('toast').classList.remove('show');
  if(!refresh){runwayReturn={kind:modalKind};audio.sfx('tryon');}
- artwork.fitting=A.cleanFittingOptions(artwork.fitting||state.fitting);
+ artwork.fitting=A.cleanFittingOptions({...(artwork.fitting||state.fitting),skin:themes.find(theme=>theme.id===artwork.customerTheme)?.skin});
  runwayIndex=index;const sceneId=state.showcase.owned.includes(artwork.scene)?artwork.scene:state.showcase.selected;
  const sceneBonus=A.Showcase.claimSceneBonus(state,artwork,sceneId);if(sceneBonus){if(commissionReady&&index===0)commissionReady.coins+=sceneBonus;renderHeader();}
  modal('runway',`<div class="runway"><div class="runway-heading"><button class="secondary runway-return" data-runway-back aria-label="${runwayText('Back','返回')}">‹</button><span class="section-kicker">${t('brand')} · ${runwayText('THE FITTING ROOM','试穿沙龙')}</span><h2>${runwayText('The fitting room','试穿沙龙')}</h2><p>${option('color',artwork.design.color)[1]} · ${option('material',artwork.design.material)[1]} · ${option('heel',artwork.design.heel)[1]}</p></div><div class="runway-scene" data-showcase-scene="${sceneId}" data-material="${artwork.design.material}" style="--scene-image:url('assets/${A.Showcase.find(sceneId).closeImage}.webp')" data-runway-pose="stand" data-runway-angle="front34"><div class="runway-contact contact-back"></div><div class="runway-contact contact-front"></div><div class="runway-mirror" aria-hidden="true"></div><div class="runway-light"></div><div class="runway-painted-window runway-worn-window"></div><div class="scene-atmosphere" aria-hidden="true">${Array.from({length:6},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div><img class="runway-spark spark-one" src="assets/sparkle.webp" alt=""><img class="runway-spark spark-two" src="assets/sparkle.webp" alt=""><span class="runway-monogram">${A.lang==='zh'?'小鞋铺':'SSA'}</span></div><div class="runway-dock"><div class="showcase-strip">${A.Showcase.picker(state,sceneId)}</div>${fittingOptionsMarkup(artwork.fitting)}${A.Showcase.bonusLine(artwork)}<p class="runway-reaction" role="status">“${artwork.sceneBonusClaimed&&artwork.sceneAppearance===sceneId?t('appearance_'+artwork.customerTheme):runwayText('Exactly the pair I dreamed of.','就是我梦里的那双鞋。')}”</p><div class="runway-actions"><button class="secondary" data-runway-share>${runwayText('Share','分享')} ↗</button><button class="primary" data-runway-collection>✓ ${runwayText('Continue','继续')}</button></div></div></div>`);
@@ -303,7 +303,7 @@ function refreshFitting(scene){
  A.Showcase.frame(scene);hydrateCanvases(scene);
 }
 
-function saveArtwork(stars=0){if(!state.gallery.some(a=>a.design.heel===design.heel))collectionMoment=design.heel;const art={design:{...design},stars,day:state.day,scene:state.showcase.selected,fitting:A.cleanFittingOptions(state.fitting)};state.gallery.unshift(art);state.gallery=state.gallery.slice(0,60);return art;}
+function saveArtwork(stars=0){if(!state.gallery.some(a=>a.design.heel===design.heel))collectionMoment=design.heel;const art={design:{...design},stars,day:state.day,scene:state.showcase.selected,fitting:A.cleanFittingOptions({...state.fitting,skin:mode==='order'?themes[state.order?.person]?.skin:undefined})};state.gallery.unshift(art);state.gallery=state.gallery.slice(0,60);return art;}
 function clearPacking(){$('stage').classList.remove('packing','closed');$('pack').disabled=false;}
 async function pack(){
  if(busy||modalKind||adActive||mode==='order'&&(!state.order||state.served>=customersForDay(state.day)))return;designUndo=null;busy=true;syncGameplay();state.tutorial=true;$('tutorial').hidden=true;$('pack').disabled=true;
