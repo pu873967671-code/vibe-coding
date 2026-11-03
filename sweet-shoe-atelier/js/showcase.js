@@ -1,7 +1,7 @@
 'use strict';
 (function(A){
  const sockStyles=['none','frill','lace','sheer','knee','thigh','blacksheer','pantyhose','opaque','fishnet'],sockColors=['pink','mint','cream','white','black'];
- function cleanFittingOptions(value){return {sock:sockStyles.includes(value?.sock)?value.sock:'none',color:sockColors.includes(value?.color)?value.color:'cream'};}
+ function cleanFittingOptions(value){const o={sock:sockStyles.includes(value?.sock)?value.sock:'none',color:sockColors.includes(value?.color)?value.color:'cream'};if(typeof value?.skin==='string'&&/^#[0-9a-f]{6}$/i.test(value.skin))o.skin=value.skin.toLowerCase();return o;}
  A.cleanFittingOptions=cleanFittingOptions;
  const scenes=[
   {id:'salon',en:'Atelier salon',zh:'试穿沙龙',price:0,image:'bg_fitting'},
