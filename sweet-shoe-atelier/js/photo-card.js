@@ -15,7 +15,7 @@ const sockFor=s=>s==='thigh'?'opaque':SOCKS.has(s)?s:'none';
 const has=heel=>SHAPES.has(heel);
 const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
 function load(src){
- if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.decoding='async';im.onload=()=>resolve(im);im.onerror=()=>{images.delete(src);reject(new Error('photo card: '+src));};im.src=src;}));
+ if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const im=new Image();im.decoding='async';im.crossOrigin='anonymous'; // preview hosts redirect images to another domain; CORS keeps them readable for tintingim.onload=()=>resolve(im);im.onerror=()=>{images.delete(src);reject(new Error('photo card: '+src));};im.src=src;}));
  return images.get(src);
 }
 // Multiply the masked white areas by a colour, keeping the satin's own shading
