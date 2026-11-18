@@ -670,3 +670,9 @@ alpha. Final visual limitations and QA are in the newest PROGRESS entry.
 ### Stiletto6 hosiery relief / SUPERVISOR12:00 (2026-10-30)
 
 Only stiletto6's six `fitting-rigid` derivatives were rebuilt from the same immutable front source and approved keyed rear candidate v2. The independent near-collar traces now follow the returning counter lip after x850. White cloth maps original luminance to190–254 with soft source-painted ankle/Achilles/heel/instep/toe relief; runtime omits the former22% white wash and reduces straight yarn opacity. Alpha remains identical across skin/cloth/black; original source PNGs, product shoes and all other style layers are unchanged. Rebuild: `python3 dev/build-calibrated-user-legs.py --styles stiletto6`. Artistic seat limits and exact QA/package evidence are recorded in the newest PROGRESS entry; no final supervisor acceptance is implied.
+
+## 2026-11-14 — calm background music (replaces bgm_tea / bgm_cozy)
+User request: quiet, reflective background music; players switch freely (pause menu → Music track).
+- bgm_forget.mp3 — "Forget Me Not" (looped version) by kistol, CC0, https://opengameart.org/content/forget-me-not — default.
+- bgm_bluebonnet.mp3 — "Bluebonnet" (looped version) by kistol, CC0, https://opengameart.org/content/bluebonnet
+Both loudness-normalised to about -20 LUFS, 80 kbps stereo MP3, and played at 30% music-bus gain with a slow (0.8 s) crossfade.

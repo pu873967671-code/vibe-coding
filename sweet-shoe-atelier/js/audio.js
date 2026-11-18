@@ -1,9 +1,12 @@
 'use strict';
 (function(A){
   // All action cues are local Kenney CC0 recordings; no oscillator substitutes.
-  const SAMPLES=['tap','spawn','merge','coin','switch','pick','drop','box','ribbon','delivery','level','error','unlock','sparkle'];
+  const SAMPLES=['tap','spawn','merge','coin','switch','pick','drop','box','ribbon','delivery','level','error','unlock','sparkle','tryon'];
   const ALIASES={click:'tap',generate:'spawn',pop:'spawn',navigation:'switch',whoosh:'switch',
-    discovery:'unlock',renovate:'level',renovation:'level',chapter:'level',guide:'sparkle',crate:'box',ding:'sparkle',tryon:'sparkle'};
+    discovery:'unlock',renovate:'level',renovation:'level',chapter:'level',guide:'sparkle',crate:'box',ding:'sparkle'};
+  // Calm background music (CC0, kistol on OpenGameArt). Players switch freely.
+  A.MUSIC_TRACKS=[{id:'forget',en:'Forget Me Not',zh:'勿忘我'},{id:'bluebonnet',en:'Bluebonnet',zh:'矢车菊'}];
+  const trackName=state=>A.MUSIC_TRACKS.some(x=>x.id===state?.musicTrack)?state.musicTrack:'forget';
   A.SFX_FILES=SAMPLES.flatMap(name=>['ogg','mp3'].map(ext=>'assets/sfx/'+name+'.'+ext));
   A.createAudioEngine=function(getState,blocked,getScene=()=> 'merge'){
     const engine={ctx:null,master:null,effects:null,music:null,tick:null,step:0,voices:new Set(),lastCue:new Map(),limit:32,
@@ -20,7 +23,7 @@
         if(typeof fetch!=='function'||!this.ctx?.decodeAudioData)return Promise.resolve(null);
         const load=(async()=>{
           for(const ext of ['ogg','mp3'])try{
-            const response=await fetch('assets/sfx/'+name+'.'+ext);
+            const response=await fetch('assets/sfx/'+name+'.'+ext+'?v=20261116');
             if(!response.ok)continue;
             const bytes=await response.arrayBuffer();
             const buffer=await new Promise((resolve,reject)=>this.ctx.decodeAudioData(bytes,resolve,reject));
@@ -63,7 +66,7 @@
         if(!getState().music||!window.Audio||!this.ctx.createMediaElementSource)return;
         // Safari grants playback per element. Warm both local scene tracks in
         // the first gesture so an automatic post-pack scene change can play too.
-        for(const name of ['tea']){
+        for(const name of [trackName(getState())]){
           if(this.failedTracks.has(name))continue;
           const track=this.track(name);if(track.primed)continue;
           track.primed=true;
@@ -98,7 +101,7 @@
           }
           this.currentTrack=null;return false;
         }
-        const name='tea'; // user 2026-10-26: the reception track fits everywhere, keep one soft track
+        const name=trackName(getState()); // user 2026-11-14: quiet, reflective; player-selectable
         if(this.failedTracks.has(name)||!window.Audio||!this.ctx.createMediaElementSource)return false;
         if(this.currentTrack===name&&!this.tracks.get(name)?.audio.paused)return true;
         try{
@@ -106,7 +109,7 @@
           this.currentTrack=name;
           for(const [id,other] of this.tracks){
             clearTimeout(other.stopTimer);other.gain.gain.cancelScheduledValues(this.ctx.currentTime);
-            other.gain.gain.setTargetAtTime(id===name?.35:0,this.ctx.currentTime,.35);
+            other.gain.gain.setTargetAtTime(id===name?.3:0,this.ctx.currentTime,.8);
             if(id!==name)other.stopTimer=setTimeout(()=>{if(this.currentTrack!==id)other.audio.pause();},1500);
           }
           const play=track.audio.play();
@@ -188,7 +191,8 @@
         const name=ALIASES[kind]||kind;
         if(!SAMPLES.includes(name))return;
         const now=this.ctx.currentTime,last=this.lastCue.get(name);
-        if(last!==undefined&&now-last<.06)return;
+        // The gentle 'not now' cue speaks once, never as a repeated buzz.
+        if(last!==undefined&&now-last<(name==='error'?1.2:.06))return;
         this.lastCue.set(name,now);
         const generation=this.effectGeneration;
         const play=()=>{
@@ -198,8 +202,9 @@
             const count=Math.min(3,Math.max(1,Math.ceil(Math.sqrt(Math.max(1,tier))/1.5)));
             for(let i=0;i<count;i++)this.sample('coin',variation*(1.06+i*.05),.5,i*.09);
             this.sample('sparkle',variation*1.12,.14,.04);
+          }else if(name==='tryon'){this.sample('tryon',variation,.5);this.sample('sparkle',variation*1.1,.16,.22);
           }else if(kind==='merge')this.sample(name,variation*Math.pow(1.055,Math.min(7,Math.max(1,tier))-1),.55);
-          else this.sample(name,variation,name==='tap'?.18:name==='error'?.28:.48);
+          else this.sample(name,variation,name==='tap'?.18:name==='error'?.2:.48);
         };
         if(this.buffers.has(name))play();
         else {

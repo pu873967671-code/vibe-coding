@@ -58,7 +58,7 @@
   function renovationAction(s,next){
     const affordable=s.stars>=next.cost;
     const need=A.lang==='zh'?`需要 ${next.cost} ★ · 已有 ${s.stars}`:`Need ${next.cost} ★ · you have ${s.stars}`;
-    return `<button class="primary renovate-button" data-renovate="${next.id}" ${affordable?'':'disabled'}><span class="renovate-label">${tr('renovate')} <img src="assets/icon_star.webp" alt="${tr('stars')}"> ${next.cost}</span><small>${affordable?starCount(s.stars):need}</small></button>`;
+    return `<button class="primary renovate-button" data-renovate="${next.id}" ${affordable?'':'disabled'}><span class="renovate-label">${tr('renovate')} <img src="assets/icons/star.svg" alt="${tr('stars')}"> ${next.cost}</span><small>${affordable?starCount(s.stars):need}</small></button>`;
   }
   const decorAsset=(slot,level=1)=>`assets/decor/mint_${slot}${level}.svg`;
   // Dressing follows the room painting's own 1600x900 camera and cover crop.

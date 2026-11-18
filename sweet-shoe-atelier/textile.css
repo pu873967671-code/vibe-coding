@@ -1,0 +1,212 @@
+/* Sweet Shoe Atelier — "Ribbon, Lace, Nylon & Tulle" theme (2026-11-15)
+   Every surface is one of four dressing-room materials:
+   · RIBBON  dusty-pink satin: navigation ribbons, the main action, progress fills, bows
+   · LACE    white scalloped trim with eyelets sewn along the top of every card
+   · NYLON   sheer taupe with white Swiss dots: tracks, locked squares, chosen states
+   · TULLE   soft hexagonal net: the page, card bodies, empty squares and backdrops
+   Tiles come from dev/build-textiles.py (assets/ui/textile). Loaded after layout.css;
+   ":root body" outranks its "html body" rules. */
+
+:root{
+  --t-blush:#eff7f4;--t-card:#fdfefedb;--t-ink:#384a45;--t-muted:#6f7e78;--t-edge:#badecf;
+  --t-satin:#7ccaab;--t-satin-deep:#5da789;--t-satin-lite:#b1e5d0;
+  --t-nude:#83a396;--t-nude-deep:#708c81;
+  --t-shadow:0 12px 28px #58817617,0 2px 6px #58817612;
+  --t-tulle:url('assets/ui/textile/tulle.svg');
+  --t-lace:url('assets/ui/textile/lace-trim.svg');
+  --t-bow:url('assets/ui/textile/bow.svg');
+  --t-rosette:url('assets/ui/textile/rosette.svg');
+  --t-dots:radial-gradient(circle,#fff 0 1.2px,transparent 1.7px) 0 0/9px 9px,radial-gradient(circle,#fff 0 1.2px,transparent 1.7px) 4.5px 4.5px/9px 9px;
+  --t-dots-soft:radial-gradient(circle,#ffffffcc 0 1px,transparent 1.5px) 0 0/8px 8px,radial-gradient(circle,#ffffffcc 0 1px,transparent 1.5px) 4px 4px/8px 8px;
+  --t-satin-fill:linear-gradient(180deg,#93dcbf 0,#62c29c 38%,#47aa85 62%,#79cdab 100%);
+  --t-ribbon:polygon(0 0,100% 0,calc(100% - 12px) 50%,100% 100%,0 100%,12px 50%);
+}
+
+/* ── Tulle page ───────────────────────────────────────────────────────── */
+:root body{background:var(--t-tulle),linear-gradient(180deg,#f4faf8,#ebf3f0)!important;background-size:14px 24.25px,auto!important;color:var(--t-ink)}
+:root body::before{background:radial-gradient(50% 40% at 50% 0%,#fafefc 0,transparent 70%),radial-gradient(45% 45% at 0% 100%,#e1f7ee 0,transparent 70%),radial-gradient(45% 45% at 100% 100%,#e4edec 0,transparent 70%)!important}
+:root body #app{padding-top:0!important}
+
+/* ── Lace-trimmed tulle cards ─────────────────────────────────────────── */
+:root body :is(#studioScreen #customer,#studioScreen .custom,.modal:not(.collection-modal):not(.boutique-modal):not(.runway-modal),.collection-stage,.collection-detail,.boutique-visual,.boutique-tasks,.runway-modal .runway-dock){
+  position:relative;background:var(--t-tulle),linear-gradient(180deg,#fdfffef2,#f9fdfbe6)!important;background-size:14px 24.25px,auto!important;
+  border:1px solid var(--t-edge)!important;border-radius:22px!important;box-shadow:var(--t-shadow)!important;outline:0!important;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+:root body :is(#studioScreen #customer,#studioScreen .custom,.modal:not(.collection-modal):not(.boutique-modal):not(.runway-modal):not(.title-card),.collection-detail,.boutique-tasks,.runway-modal .runway-dock)::after{
+  content:""!important;position:absolute!important;display:block!important;left:18px!important;right:18px!important;top:-1px!important;height:24px!important;bottom:auto!important;width:auto!important;
+  background:var(--t-lace) 0 0/48px 24px repeat-x!important;border:0!important;border-radius:0!important;opacity:1!important;pointer-events:none!important;z-index:3!important;transform:none!important;
+  filter:drop-shadow(0 2px 2px #7ab79f26)}
+:root body :is(#studioScreen #customer,#studioScreen .custom,.modal:not(.collection-modal):not(.boutique-modal):not(.runway-modal):not(.title-card),.collection-detail,.boutique-tasks){padding-top:max(30px,var(--pt,30px))!important}
+
+/* ── Satin ribbon navigation ─────────────────────────────────────────── */
+:root body header{align-items:flex-start!important}
+:root body header #nav{gap:10px!important;padding:0 0 0 4px!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+:root body header #nav button{--rb:#e4f6ef;--rb2:#aedbc9;position:relative!important;flex-direction:column!important;justify-content:flex-end!important;gap:3px!important;white-space:nowrap!important;
+  width:96px!important;min-height:76px!important;padding:12px 6px 20px!important;border-radius:0!important;border:0!important;box-shadow:none!important;
+  background:linear-gradient(90deg,var(--rb2),var(--rb) 28%,#ffffffa0 44%,var(--rb) 58%,var(--rb2))!important;
+  clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 12px),0 100%)!important;color:var(--t-ink)!important;font:600 12.5px/1.1 var(--v-font)!important;
+  transform-origin:top center;transition:min-height .4s var(--v-ease),transform .4s var(--v-ease)!important}
+:root body header #nav button:nth-child(2){--rb:#effaf6;--rb2:#bbded0}
+:root body header #nav button:nth-child(3){--rb:#e3eeea;--rb2:#b3ccc2}
+:root body header #nav button:nth-child(4){--rb:#e0f2eb;--rb2:#add1c2}
+:root body header #nav button:nth-child(5){--rb:#e6f6f0;--rb2:#b0dac9}
+:root body header #nav button::before{content:none!important}
+:root body header #nav button:has(.nav-label-short) .nav-label{display:none!important}
+:root body header #nav button .nav-label-short{display:inline!important;font-size:inherit!important}
+:root body header #nav button img.ui-icon{width:30px!important;height:30px!important}
+:root body header #nav button:hover{background:linear-gradient(90deg,var(--rb2),var(--rb) 28%,#ffffffa0 44%,var(--rb) 58%,var(--rb2))!important;transform:rotate(-1.5deg)}
+:root body header #nav button.active{--rb:#7fcbac;--rb2:#62ac8e;min-height:94px!important;color:#fff!important;text-shadow:0 1px 0 #508671;
+  background:linear-gradient(90deg,var(--rb2),var(--rb) 28%,#ffffff55 44%,var(--rb) 58%,var(--rb2))!important}
+:root body header #nav button.active img.ui-icon{filter:brightness(0) invert(1) drop-shadow(0 1px 0 #508671)!important}
+
+/* ── Resources: tulle pills edged with satin ─────────────────────────── */
+:root body header .header-right{padding-top:12px!important;gap:8px!important}
+:root body header :is(.hud-pill,.coin-pill,.header-energy){height:42px!important;padding:0 14px 0 8px!important;border:1.5px solid #afe0cc!important;border-radius:999px!important;clip-path:none!important;transform:none!important;
+  background:var(--t-tulle),#fcfefde6!important;background-size:14px 24.25px,auto!important;box-shadow:0 4px 12px #58817614!important;color:var(--t-ink)!important}
+:root body header .icon-button{border:0!important;outline:0!important;background:var(--t-rosette) center/100% 100% no-repeat!important;box-shadow:none!important;filter:drop-shadow(0 3px 5px #58817624)}
+
+/* ── Satin ribbon buttons ────────────────────────────────────────────── */
+:root body :is(#studioScreen #pack,.modal .primary:not(.modal-dismiss),.title-card .title-actions .primary){position:relative;
+  border:0!important;border-radius:0!important;box-shadow:none!important;padding-left:28px!important;padding-right:28px!important;clip-path:var(--t-ribbon)!important;
+  background:linear-gradient(105deg,transparent 30%,#ffffff59 42%,transparent 54%),var(--t-satin-fill)!important;background-size:250% 100%,auto!important;background-position:100% 0,0 0!important;
+  color:#fff!important;text-shadow:0 1px 0 #50867180;transition:background-position .7s var(--v-ease)!important}
+:root body :is(#studioScreen #pack,.modal .primary:not(.modal-dismiss),.title-card .title-actions .primary):hover{background-position:0 0,0 0!important}
+:root body :is(#inspire,.modal .secondary:not(.modal-dismiss):not(.sock-chip):not(.showcase-chip):not(.sock-color),.title-card .title-actions .secondary:not(:last-child)){
+  background:var(--t-tulle),#fdfffe!important;background-size:14px 24.25px,auto!important;border:1.5px solid #afe0cc!important;outline:0!important;box-shadow:0 4px 12px #58817614!important;color:var(--t-ink)!important}
+:root body .modal-dismiss{background:var(--t-rosette) center/100% 100% no-repeat!important;border:0!important;outline:0!important;box-shadow:none!important;filter:drop-shadow(0 3px 5px #58817624)}
+
+/* ── Atelier: tulle board, nylon locked squares, satin bows ──────────── */
+  background:var(--t-rosette) center/100% 100% no-repeat!important;box-shadow:none!important;filter:drop-shadow(0 4px 6px #58817626)}
+  background:var(--t-bow) center/contain no-repeat!important;z-index:4!important;transform:rotate(-14deg)!important;filter:drop-shadow(0 2px 2px #58817633)}
+
+/* ── Studio ──────────────────────────────────────────────────────────── */
+:root body #studioScreen #customer{clip-path:none!important}
+/* patience: a nylon stocking track filled with satin ribbon */
+:root body #customer .timer-track{height:14px!important;border-radius:999px!important;border:0!important;overflow:hidden!important;
+  background:var(--t-dots-soft),linear-gradient(90deg,#87a69a,#9abbad 45%,#83a396)!important;box-shadow:inset 0 1px 3px #4d676033!important}
+:root body #customer #timerFill{height:100%!important;border-radius:999px!important;background:linear-gradient(180deg,#ffffff66,transparent 45%),var(--t-satin-fill)!important}
+/* stage: a tulle-draped mirror edged in satin */
+:root body #studioScreen #stage{border-radius:50% 50% 24px 24px/28% 28% 24px 24px!important;border:6px solid #fff!important;outline:2px solid #a5dbc6!important;outline-offset:3px!important;
+  background:radial-gradient(65% 55% at 50% 40%,#fdfffe 0,#f1fcf8 55%,#e7f3ee 100%)!important;box-shadow:var(--t-shadow),inset 0 0 50px #bddfd1!important}
+:root body #studioScreen #stage::before{content:"";position:absolute;inset:0;background:var(--t-tulle);background-size:14px 24.25px;opacity:.55;pointer-events:none;
+  -webkit-mask:radial-gradient(70% 60% at 50% 55%,transparent 45%,#000 100%);mask:radial-gradient(70% 60% at 50% 55%,transparent 45%,#000 100%)}
+/* tabs: lace medallions; the chosen one is pink nylon */
+:root body .custom #tabs button{background:none!important;border:0!important;box-shadow:none!important;color:var(--t-muted)!important}
+:root body .custom #tabs button img.ui-icon{border-radius:50%!important;width:52px!important;height:52px!important;padding:11px!important;box-sizing:border-box!important;outline:0!important;
+  background:var(--t-rosette) center/100% 100% no-repeat!important;box-shadow:none!important;filter:drop-shadow(0 3px 5px #5881761f)}
+:root body .custom #tabs button.active{color:var(--t-satin-deep)!important;background:none!important}
+:root body .custom #tabs button.active img.ui-icon{background:radial-gradient(circle,transparent 0 17px,#0000 17.5px),var(--t-rosette) center/100% 100% no-repeat!important;
+  box-shadow:inset 0 0 0 12px #fff0,0 0 0 0 #0000!important;filter:drop-shadow(0 0 0 #0000) drop-shadow(0 3px 6px #61ad8f55)}
+:root body .custom #tabs button.active::after{content:""!important;position:absolute!important;display:block!important;width:30px!important;height:20px!important;left:50%!important;top:-6px!important;margin-left:6px!important;background:var(--t-bow) center/contain no-repeat!important;border:0!important}
+:root body .custom #tabs button{position:relative!important}
+/* options: tulle swatches with a scalloped lace hem; chosen = pink nylon */
+:root body .custom #options .option{border:0!important;border-radius:14px 14px 0 0!important;clip-path:none!important;outline:0!important;box-shadow:none!important;padding-bottom:16px!important;
+  background:var(--t-tulle),#fbfefd!important;background-size:14px 24.25px,auto!important;
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 6px) no-repeat,radial-gradient(circle 6px at 50% 0,#000 98%,#0000) bottom/12px 6px repeat-x;
+          mask:linear-gradient(#000 0 0) top/100% calc(100% - 6px) no-repeat,radial-gradient(circle 6px at 50% 0,#000 98%,#0000) bottom/12px 6px repeat-x}
+:root body .custom #options .option:nth-child(even){background:var(--t-tulle),#f7fcfa!important;background-size:14px 24.25px,auto!important}
+:root body .custom #options .option.selected{background:var(--t-dots-soft),linear-gradient(180deg,#b6e7d3,#a1dfc6)!important;color:var(--t-satin-deep)!important}
+:root body .custom #options .option.selected::after{content:""!important;position:absolute!important;top:4px!important;right:4px!important;left:auto!important;width:30px!important;height:21px!important;border-radius:0!important;
+  background:var(--t-bow) center/contain no-repeat!important;box-shadow:none!important;border:0!important;display:block!important}
+
+/* ── Fitting room, loading, title ────────────────────────────────────── */
+:root body .runway-scene .styling-brief{clip-path:none!important;outline:0!important;border:1px solid var(--t-edge)!important;border-radius:18px!important;padding-top:14px!important;
+  background:var(--t-tulle),#fdfefeee!important;background-size:14px 24.25px,auto!important}
+:root body #loading .load-track{height:16px!important;border-radius:999px!important;border:0!important;background:var(--t-dots-soft),linear-gradient(90deg,#87a69a,#9abbad 45%,#83a396)!important}
+:root body #loading #loadFill{border-radius:999px!important;background:linear-gradient(180deg,#ffffff66,transparent 45%),var(--t-satin-fill)!important}
+:root body .modal.title-card::before{content:"";position:absolute;left:50%;top:-22px;width:92px;height:62px;margin-left:-46px;background:var(--t-bow) center/contain no-repeat;z-index:4;filter:drop-shadow(0 3px 4px #58817633)}
+:root body .modal.title-card{overflow:visible!important}
+:root body .modal :is(.primary,.secondary){font-family:var(--v-font)!important}
+
+/* ── Small landscape ─────────────────────────────────────────────────── */
+@media (max-height:560px) and (orientation:landscape){
+  :root body header #nav{gap:5px!important}
+  :root body header #nav button{width:64px!important;min-height:54px!important;padding:6px 4px 15px!important;font-size:10px!important}
+  :root body header #nav button.active{min-height:64px!important}
+  :root body header #nav button img.ui-icon{width:22px!important;height:22px!important}
+  :root body header .header-right{padding-top:8px!important;gap:4px!important}
+  :root body header .header-energy small{display:none!important}
+  :root body header :is(.hud-pill,.coin-pill,.header-energy){height:32px!important;padding:0 8px 0 6px!important;font-size:13px!important}
+  :root body header :is(.hud-pill,.coin-pill,.header-energy) img{width:18px!important;height:18px!important}
+  :root body header .icon-button{width:34px!important;height:34px!important;min-width:34px!important}
+  :root body .custom #tabs button img.ui-icon{width:40px!important;height:40px!important;padding:8px!important}
+  :root body :is(#studioScreen #customer,#studioScreen .custom){padding-top:24px!important}
+}
+/* ── Phones ──────────────────────────────────────────────────────────── */
+@media (orientation:portrait) and (max-width:700px){
+  :root body #app{padding-top:10px!important}
+  :root body header .header-right{padding-top:0!important;gap:3px!important;max-width:100%!important}
+  :root body header .header-energy small{display:none!important}
+  :root body header :is(.hud-pill,.coin-pill,.header-energy){height:34px!important;padding:0 7px 0 5px!important;font-size:13px!important}
+  :root body header :is(.hud-pill,.coin-pill,.header-energy) img{width:18px!important;height:18px!important}
+  :root body header .icon-button{width:34px!important;height:34px!important;min-width:34px!important}
+  :root body header #nav{padding:0!important;gap:6px!important;left:8px!important;right:8px!important;bottom:0!important;background:none!important;align-items:flex-end!important;justify-content:center!important}
+  :root body header #nav button{width:auto!important;flex:1 1 0!important;min-height:66px!important;padding:16px 2px calc(8px + env(safe-area-inset-bottom,0px))!important;justify-content:flex-start!important;
+    clip-path:polygon(0 0,50% 11px,100% 0,100% 100%,0 100%)!important;font-size:11px!important}
+  :root body header #nav button.active{min-height:80px!important}
+  :root body .custom #tabs button img.ui-icon{width:44px!important;height:44px!important;padding:9px!important}
+}
+
+/* ── Pass 2: stronger lace, clearer chosen states ────────────────────── */
+:root body :is(#studioScreen #customer,#studioScreen .custom,.modal:not(.collection-modal):not(.boutique-modal):not(.runway-modal),.collection-stage,.collection-detail,.boutique-visual,.boutique-tasks,.runway-modal .runway-dock){
+  background:var(--t-tulle),linear-gradient(180deg,#f1fcf8f0,#f9fefce8 90px)!important;background-size:14px 24.25px,auto!important}
+:root body :is(#studioScreen #customer,#studioScreen .custom,.modal:not(.collection-modal):not(.boutique-modal):not(.runway-modal):not(.title-card),.collection-detail,.boutique-tasks,.runway-modal .runway-dock)::after{
+  filter:drop-shadow(0 1px 0 #87c5ac) drop-shadow(0 3px 3px #7ab79f40)!important}
+:root body .custom #tabs button.active img.ui-icon{background:radial-gradient(circle,#ffffff 0 1px,transparent 1.5px) 0 0/6px 6px,radial-gradient(circle at 40% 35%,#b6e7d3,#90d8bb 70%) center/62% 62% no-repeat,var(--t-rosette) center/100% 100% no-repeat!important}
+:root body .custom #tabs button.active img.ui-icon{background:radial-gradient(circle at 40% 35%,#e3f8f0,#96dbbf 72%,transparent 74%) center/66% 66% no-repeat,var(--t-rosette) center/100% 100% no-repeat!important}
+:root body .custom #options .option.selected,:root body .custom #options .option.selected *{color:#4e8670!important}
+:root body .custom #options .option.selected::after{width:26px!important;height:18px!important;top:3px!important;right:3px!important}
+:root body .custom #tabs button.active img.ui-icon{background:radial-gradient(circle closest-side,#e3f8f0 0,#96dbbf 88%,transparent 92%) center/64% 64% no-repeat,var(--t-rosette) center/100% 100% no-repeat!important}
+
+/* ══ Pass 3 (user feedback): no net inside any frame; finer, softer materials ══ */
+/* Inner frames are clean: the net var becomes transparent everywhere it was used */
+:root{--t-tulle:linear-gradient(#0000,#0000)}
+/* The page alone is tulle: a very fine net over soft drape folds */
+:root body{background:url('assets/ui/textile/tulle-fine.svg') 0 0/6px 10px,
+  repeating-linear-gradient(90deg,#ffffff00 0,#ffffff70 70px,#ffffff00 140px,#e4f4ee00 190px),
+  linear-gradient(180deg,#f5faf8,#ebf4f0)!important}
+/* clean card bodies: soft blush paper under the lace trim */
+:root body :is(#studioScreen #customer,#studioScreen .custom,.modal:not(.collection-modal):not(.boutique-modal):not(.runway-modal),.collection-stage,.collection-detail,.boutique-visual,.boutique-tasks,.runway-modal .runway-dock){
+  background:linear-gradient(180deg,#f4fcf9,#fcfefd 110px)!important;border-color:#dff0e9!important}
+:root body #studioScreen #stage::before{content:none!important}
+:root body :is(#inspire,.modal .secondary:not(.modal-dismiss):not(.sock-chip):not(.showcase-chip):not(.sock-color),.title-card .title-actions .secondary:not(:last-child)){background:#fdfffe!important;border:1px solid #b0dbca!important}
+:root body .title-card .title-actions .secondary:last-child{background:none!important;border:0!important;box-shadow:none!important;min-height:36px!important;color:var(--t-muted)!important;font-size:14px!important}
+:root body header :is(.hud-pill,.coin-pill,.header-energy){background:#fdfffeeb!important;border:1px solid #b7dece!important}
+:root body .custom #options .option{background:#fdfffe!important;border:1px solid #e2f2ec!important}
+:root body .custom #options .option:nth-child(even){background:#fafefc!important}
+:root body .custom #options .option.selected{background:var(--t-dots-soft),linear-gradient(180deg,#b6e7d3,#a1dfc6)!important;border-color:#92d5ba!important}
+:root body .runway-scene .styling-brief{background:#fdfefeee!important}
+:root body .modal.title-card::before{width:96px;height:64px;margin-left:-48px;top:-26px}
+
+/* Navigation: one satin ribbon band, the chosen item a lace-white keeper */
+:root body header{align-items:center!important}
+:root body header .header-right{padding-top:0!important}
+:root body #app{padding-top:12px!important}
+:root body header #nav{position:relative!important;gap:2px!important;padding:6px 30px!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:linear-gradient(180deg,#ffffff00 0 22%,#ffffff70 34%,#ffffff00 50%),linear-gradient(180deg,#ace3cd,#8ed0b6 55%,#80c6aa 80%,#96d4bb)!important;
+  clip-path:polygon(0 0,100% 0,calc(100% - 16px) 50%,100% 100%,0 100%,16px 50%)!important;filter:drop-shadow(0 4px 8px #5d907b22)}
+:root body header #nav button,:root body header #nav button:hover,:root body header #nav button.active{
+  width:auto!important;min-height:46px!important;padding:6px 14px!important;flex-direction:row!important;justify-content:center!important;gap:7px!important;
+  clip-path:none!important;transform:none!important;border-radius:999px!important;background:none!important;color:#fff!important;text-shadow:0 1px 1px #5d907b80!important;font:600 14px/1 var(--v-font)!important}
+:root body header #nav button img.ui-icon{width:26px!important;height:26px!important;filter:drop-shadow(0 1px 0 #ffffffaa)!important}
+:root body header #nav button:hover{background:#ffffff26!important}
+:root body header #nav button.active{background:#fdfffe!important;color:#569079!important;text-shadow:none!important;box-shadow:0 2px 6px #5d907b33,inset 0 0 0 1px #b8e5d3!important}
+:root body header #nav button.active img.ui-icon{filter:none!important}
+@media (max-height:560px) and (orientation:landscape){
+  :root body #app{padding-top:6px!important}
+  :root body header #nav{padding:4px 22px!important}
+  :root body header #nav button,:root body header #nav button:hover,:root body header #nav button.active{min-height:36px!important;padding:4px 8px!important;font-size:11.5px!important;gap:4px!important;width:auto!important}
+  :root body header #nav button img.ui-icon{width:20px!important;height:20px!important}
+  :root body header .header-right{padding-top:0!important}
+}
+@media (orientation:portrait) and (max-width:700px){
+  :root body header #nav{position:fixed!important;left:6px!important;right:6px!important;bottom:max(8px,env(safe-area-inset-bottom,0px))!important;padding:6px 22px!important;gap:0!important;justify-content:space-between!important;align-items:center!important}
+  :root body header #nav button,:root body header #nav button:hover,:root body header #nav button.active{flex:1 1 0!important;flex-direction:column!important;min-height:56px!important;padding:5px 2px!important;gap:2px!important;font-size:10.5px!important;border-radius:18px!important}
+  :root body header #nav button img.ui-icon{width:24px!important;height:24px!important}
+}
+/* the board has room again under the slimmer header */
+@media (max-height:560px) and (orientation:landscape){
+  :root body header #nav{padding:4px 18px!important;gap:0!important}
+  :root body header #nav button,:root body header #nav button:hover,:root body header #nav button.active{padding:4px 6px!important;font-size:11px!important}
+  :root body header{gap:6px!important}
+}

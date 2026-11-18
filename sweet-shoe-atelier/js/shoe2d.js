@@ -3,6 +3,7 @@
 // A design is a finish applied to one immutable painting. Neither a colour nor
 // a fabric selection changes the source frame, silhouette, or camera.
 const WIDTH=1024,HEIGHT=640,HEELS=A.opts.heel.map(o=>o[0]);
+const PRODUCT_EDGE_V='20261107a';
 // The binding mask restores the painted inner seam over the sewn strap tab.
 // Insole/sole pixels stay in the immutable base and need no extra bitmap decode.
 const PARTS=['base','upper','shadow','highlight','binding'];
@@ -61,7 +62,7 @@ function image(url){return new Promise(resolve=>{const im=new Image();im.decodin
 function load(heel){
  if(loads.has(heel))return loads.get(heel);
  const promise=Promise.all(PARTS.map(async part=>{
-  const im=await image('assets/shoe2d/'+heel+'_'+part+'.webp');
+  const im=await image('assets/shoe2d/'+heel+'_'+part+'.webp'+(part==='upper'?'?v='+PRODUCT_EDGE_V:''));
   return [part,im?.naturalWidth===WIDTH&&im?.naturalHeight===HEIGHT?im:null];
  })).then(async entries=>{
   const parts=Object.fromEntries(entries);
@@ -239,7 +240,7 @@ function drawTextile(p,d,width,height,camera='product'){
  p.save();textilePlane(p,camera);
  // The rotated worn canvas needs extra source extent, including negative rows.
  // Translation keeps every repeat continuous through the visible upper.
- if(camera==='worn')[width,height]=repeatExtent(p,width,height);
+ if(camera!=='product')[width,height]=repeatExtent(p,p.canvas.width,p.canvas.height);
  if(d.material==='mesh'){
   const colour=COLORS[d.color]||COLORS.pink;const channels=[1,3,5].map(offset=>Math.min(255,parseInt(colour.slice(offset,offset+2),16)+38));
   p.strokeStyle='rgba('+channels.join(',')+',.6)';p.lineWidth=1;
@@ -270,7 +271,7 @@ function drawMotifs(p,d,width,height){
 function drawPattern(p,d,width,height,camera='product'){
  if(d.pattern==='none')return;
  p.save();textilePlane(p,camera);
- if(camera==='worn')[width,height]=repeatExtent(p,width,height);
+ if(camera!=='product')[width,height]=repeatExtent(p,p.canvas.width,p.canvas.height);
  if(['rosebuds','diamonds','gingham','scallops','pinstripes'].includes(d.pattern))drawRichPattern(p,d,width,height);
  else drawMotifs(p,d,width,height);
  p.restore();
@@ -281,7 +282,7 @@ function drawFinish(p,design,width,height,camera='product'){
  const type=design.material;
  if(type==='mesh'||type==='lace'){drawTextile(p,design,width,height,camera);return;}
  p.save();textilePlane(p,camera);
- const [left,top,right,bottom]=camera==='worn'?surfaceBounds(p,width,height):[0,0,width,height],projected=camera==='worn';
+ const [left,top,right,bottom]=camera!=='product'?surfaceBounds(p,p.canvas.width,p.canvas.height):[0,0,width,height],projected=camera!=='product';
  p.lineCap='round';p.lineJoin='round';
  if(type==='satin'||type==='patent'){
   const g=p.createLinearGradient(130,530,730,80);
@@ -339,41 +340,8 @@ function velvetRim(p,mask,width,height){
 function meshPanel(design,upper,width,height,camera='product',underlay='#e8d1b8',shadow=null,highlight=null){
  const make=()=>{const layer=document.createElement('canvas');layer.width=width;layer.height=height;return layer;};
  const mask=make(),m=mask.getContext('2d');m.drawImage(upper,0,0,width,height);
- for(const [dx,dy] of [[-8,0],[8,0],[0,-8],[0,8]]){m.globalCompositeOperation='destination-in';m.drawImage(upper,dx,dy,width,height);}
- m.globalCompositeOperation='destination-out';m.fillStyle='#fff';m.beginPath();
- if(camera==='worn'){m.moveTo(0,0);m.lineTo(240,0);m.bezierCurveTo(225,650,205,860,235,1024);}else{m.moveTo(0,0);m.lineTo(150,0);m.bezierCurveTo(160,300,135,460,155,640);}
- m.lineTo(0,height);m.closePath();m.fill();
- if(design.heel==='kitten'){
-  m.beginPath();
-  if(camera==='worn'){m.moveTo(694,754);m.lineTo(762,754);m.lineTo(762,860);m.lineTo(694,860);}
-  else{m.moveTo(806,324);m.lineTo(855,324);m.lineTo(855,440);m.lineTo(806,440);}
-  m.closePath();m.fill();
- }
- if(['block','platform','stiletto6','stiletto9'].includes(design.heel)){
-  m.beginPath();
-  if(camera==='worn'){m.moveTo(670,790);m.lineTo(810,710);m.lineTo(810,900);m.lineTo(670,900);}
-  else{m.moveTo(740,395);m.lineTo(940,300);m.lineTo(940,520);m.lineTo(740,520);}
-  m.closePath();m.fill();
- }
- if(design.heel==='bootie'){
-  m.beginPath();
-  if(camera==='worn'){
-   m.moveTo(0,0);m.lineTo(width,0);m.lineTo(width,710);m.bezierCurveTo(730,710,650,680,570,700);m.bezierCurveTo(490,720,420,770,360,800);m.lineTo(0,800);
-  }else{
-   m.moveTo(0,0);m.lineTo(width,0);m.lineTo(width,345);m.bezierCurveTo(790,345,690,315,610,335);m.bezierCurveTo(520,355,455,400,390,420);m.lineTo(0,420);
-  }
-  m.closePath();m.fill();
-  m.beginPath();
-  if(camera==='worn'){m.moveTo(660,780);m.lineTo(810,680);m.lineTo(810,900);m.lineTo(660,900);}
-  else{m.moveTo(740,405);m.lineTo(940,300);m.lineTo(940,520);m.lineTo(740,520);}
-  m.closePath();m.fill();
- }
- if(design.heel==='loafer'){
-  m.beginPath();
-  if(camera==='worn'){m.moveTo(319,775);m.quadraticCurveTo(345,735,369,718);m.bezierCurveTo(431,719,511,764,568,819);m.lineTo(514,860);m.bezierCurveTo(459,815,384,777,319,775);}
-  else{m.moveTo(305,349);m.lineTo(370,290);m.bezierCurveTo(435,310,505,367,547,421);m.lineTo(443,460);m.bezierCurveTo(404,411,352,365,305,349);}
-  m.closePath();m.fill();
- }
+ // Material ownership is exactly the camera's per-base dyed upper. Eroding
+ // it or reserving generic toe/counter panels leaves plain bands of dye.
  const layer=make(),p=layer.getContext('2d');p.fillStyle=underlay;p.fillRect(0,0,width,height);
  const shade=p.createLinearGradient(0,camera==='worn'?650:300,0,camera==='worn'?960:540);
  shade.addColorStop(0,'rgba(58,34,38,.22)');shade.addColorStop(.38,'rgba(255,244,224,.12)');shade.addColorStop(1,'rgba(52,31,38,.28)');p.fillStyle=shade;p.fillRect(0,0,width,height);
@@ -397,14 +365,6 @@ function meshPanel(design,upper,width,height,camera='product',underlay='#e8d1b8'
  if(shadow){p.globalAlpha=bareMesh?.65:.8;p.drawImage(shadow,0,0,width,height);p.globalAlpha=1;}
  if(highlight){p.globalAlpha=bareMesh?.42:.55;p.drawImage(highlight,0,0,width,height);p.globalAlpha=1;}
  drawTextile(p,design,width,height,camera);p.globalCompositeOperation='destination-in';p.drawImage(mask,0,0);
- if(design.heel==='bootie'){
-  const trim=make(),t=trim.getContext('2d');t.beginPath();
-  if(camera==='worn'){t.moveTo(360,800);t.bezierCurveTo(420,770,490,720,570,700);t.bezierCurveTo(650,680,730,710,width,710);}
-  else{t.moveTo(390,420);t.bezierCurveTo(455,400,520,355,610,335);t.bezierCurveTo(690,315,790,345,width,345);}
-  t.lineCap='round';t.lineJoin='round';t.strokeStyle='rgba(74,38,47,.65)';t.lineWidth=5;t.stroke();
-  t.strokeStyle=COLORS[design.color]||COLORS.pink;t.lineWidth=3;t.stroke();
-  t.globalCompositeOperation='destination-in';t.drawImage(upper,0,0,width,height);p.globalCompositeOperation='source-over';p.drawImage(trim,0,0);
- }
  return layer;
 }
 function laceTrim(p,mask,design,width,height,camera='product'){

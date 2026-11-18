@@ -1,0 +1,594 @@
+/* Sweet Shoe Atelier — layout v2 (2026-11-14)
+   A clean rebuild of the main screens on top of the legacy stylesheet.
+   Principles: the shoe is the hero; one card per job (customer · stage ·
+   design box); one rose action per screen; cute, rounded, lilac & blush.
+   This file is loaded last and intentionally overrides layout from style.css. */
+
+:root{
+  --v-bg:#f3fbfa;--v-bg2:#edfbf5;--v-card:#fdfffe;--v-ink:#324540;--v-muted:#6c7a75;
+  --v-line:#e6f2f0;--v-lilac:#e8f8f6;--v-blush:#e9f9f3;--v-rose:#67cca4;--v-rose-deep:#409b76;
+  --v-shadow:0 10px 30px #4f756e14,0 2px 6px #4f756e0f;--v-radius:28px;
+  --v-font:'Atelier Round','Atelier CJK','PingFang SC','Microsoft YaHei',Arial,sans-serif;
+}
+
+/* ── Page ─────────────────────────────────────────────────────────────── */
+html body{background:var(--v-bg) radial-gradient(#dff3f0 1.2px,transparent 1.4px) 0 0/22px 22px!important;font-family:var(--v-font)}
+html body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60% 50% at 15% 0%,#e7f9f2 0,transparent 70%),radial-gradient(50% 45% at 100% 100%,#e3f6f3 0,transparent 70%)}
+html body #app{display:flex!important;flex-direction:column!important;gap:14px!important;height:100dvh!important;padding:12px 20px 16px!important;color:var(--v-ink)}
+html body footer{display:none!important}
+
+/* ── Header: one tidy bar ─────────────────────────────────────────────── */
+html body header{flex:none!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;height:auto!important;min-height:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+html body header .brand{display:none!important}
+html body header #nav{display:flex!important;flex:none!important;gap:4px!important;padding:5px!important;background:var(--v-card)!important;border:1px solid var(--v-line)!important;border-radius:999px!important;box-shadow:var(--v-shadow)!important;width:auto!important}
+html body header #nav button{display:flex!important;flex-direction:row!important;align-items:center!important;gap:7px!important;padding:8px 16px!important;min-height:44px!important;border-radius:999px!important;border:0!important;background:none!important;box-shadow:none!important;color:var(--v-muted)!important;font:600 14px/1 var(--v-font)!important}
+html body header #nav button img.ui-icon{display:block!important;width:26px!important;height:26px!important}
+html body header #nav button .nav-label{display:inline!important;font-size:14px!important;color:inherit!important}
+html body header #nav button:hover{background:#f8fdfc!important;color:var(--v-ink)!important}
+html body header #nav button.active{background:var(--v-blush)!important;color:var(--v-rose-deep)!important}
+html body header .header-right{display:flex!important;align-items:center!important;gap:8px!important;flex:none!important;width:auto!important}
+html body header :is(.hud-pill,.coin-pill,.header-energy){display:inline-flex!important;align-items:center!important;gap:6px!important;height:44px!important;padding:0 14px 0 8px!important;background:var(--v-card)!important;border:1px solid var(--v-line)!important;border-radius:999px!important;box-shadow:var(--v-shadow)!important;font:700 15px var(--v-font)!important;color:var(--v-ink)!important}
+html body header .header-energy:empty{display:none!important}
+html body header .hud-level{display:none!important}
+html body header .atelier-hud{display:flex!important;gap:8px!important}
+html body header :is(.hud-pill,.coin-pill) img{width:26px!important;height:26px!important}
+html body header .icon-button{width:44px!important;height:44px!important;min-width:44px!important;padding:0!important;display:grid!important;place-items:center!important;background:var(--v-card)!important;border:1px solid var(--v-line)!important;border-radius:50%!important;box-shadow:var(--v-shadow)!important}
+html body header .icon-button img.ui-icon{width:26px!important;height:26px!important}
+
+/* ── Shared card look ─────────────────────────────────────────────────── */
+html body #studioScreen>.panel,html body #studioScreen .custom,html body #studioScreen #customer{background:var(--v-card)!important;border:1px solid var(--v-line)!important;border-radius:var(--v-radius)!important;box-shadow:var(--v-shadow)!important}
+
+/* ── Design studio: customer · stage · design box ─────────────────────── */
+html body #studioScreen[hidden],html body #atelierScreen[hidden]{display:none!important}
+html body #studioScreen{flex:1!important;min-height:0!important;display:grid!important;grid-template-columns:290px minmax(0,1fr) 370px!important;grid-template-rows:minmax(0,1fr)!important;gap:16px!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;height:auto!important;overflow:visible!important}
+html body #studioScreen>*{grid-row:1!important;margin:0!important;min-height:0!important;max-height:none!important}
+html body #studioScreen #customer{grid-column:1!important;display:flex!important;flex-direction:column!important;gap:14px!important;padding:22px 20px!important;overflow:auto!important;position:relative!important;width:auto!important;height:auto!important}
+html body #studioScreen .work-area{grid-column:2!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:12px!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;min-width:0!important;height:auto!important}
+html body #studioScreen .custom{grid-column:3!important;display:flex!important;flex-direction:column!important;gap:14px!important;padding:20px!important;overflow:hidden!important;width:auto!important;height:auto!important}
+
+/* Customer card */
+html body #customer .commission-identity{display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important;gap:6px!important;grid-row:auto!important}
+html body #customer .portrait-wrap{width:104px!important;height:104px!important;flex:none!important;margin:0!important;border-radius:50%!important;overflow:hidden!important;background:radial-gradient(circle at 50% 35%,#fff,var(--v-blush))!important;border:4px solid #fff!important;box-shadow:0 6px 16px #409b7622!important;position:relative!important}
+html body #customer .portrait-wrap img{width:100%!important;height:118%!important;object-fit:cover!important;object-position:50% 8%!important;position:static!important;transform:none!important;max-width:none!important}
+html body #customer .section-kicker{font:600 11px var(--v-font)!important;letter-spacing:.12em!important;color:var(--v-muted)!important;text-transform:uppercase}
+html body #customer .customer-name{font:600 26px/1.1 var(--v-font)!important;margin:2px 0 0!important;color:var(--v-ink)!important;white-space:normal!important}
+html body #customer .theme{display:inline-block!important;margin:4px 0 0!important;padding:4px 12px!important;border-radius:999px!important;background:var(--v-lilac)!important;color:#508479!important;font:600 12px var(--v-font)!important;white-space:nowrap!important}
+html body #customer .commission-brief{display:flex!important;flex-direction:column!important;gap:12px!important;padding:0!important;background:none!important;border:0!important;grid-row:auto!important;grid-column:auto!important}
+html body #customer .speech{position:relative!important;margin:6px 0 0!important;padding:12px 14px!important;background:#f8fdfc!important;border:0!important;border-radius:18px!important;font:500 14px/1.45 var(--v-font)!important;color:var(--v-ink)!important;text-align:center!important;box-shadow:none!important}
+html body #customer .speech::before{content:"";position:absolute;top:-7px;left:50%;margin-left:-8px;border:8px solid transparent;border-top:0;border-bottom-color:#f8fdfc}
+html body #customer .scene-recommendation,html body #customer .commission-shoe{display:none!important}
+html body #customer .requirements{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;grid-template-columns:none!important;margin:0!important}
+html body #customer .req{display:inline-flex!important;align-items:center!important;gap:6px!important;width:auto!important;height:auto!important;min-height:36px!important;padding:6px 12px 6px 8px!important;border-radius:999px!important;background:#fff!important;border:1.5px dashed #d2e5e2!important;font:600 13px var(--v-font)!important;color:var(--v-ink)!important;box-shadow:none!important;flex:none!important}
+html body #customer .req img.ui-icon{width:22px!important;height:22px!important}
+html body #customer .req b{display:none!important}
+html body #customer .req.match{background:var(--v-blush)!important;border:1.5px solid #a1e0c7!important;color:var(--v-rose-deep)!important}
+html body #customer .req.match::after{content:"✓";font-weight:700;margin-left:2px}
+html body #customer .commission-status{margin-top:auto!important;display:grid!important;gap:8px!important;padding:12px 0 0!important;border-top:1px solid var(--v-line)!important;background:none!important;grid-row:auto!important;grid-column:auto!important}
+html body #customer .timer-row{display:flex!important;justify-content:space-between!important;align-items:center!important;font:600 13px var(--v-font)!important;color:var(--v-muted)!important}
+html body #customer .timer-track{height:10px!important;border-radius:999px!important;background:var(--v-lilac)!important;overflow:hidden!important}
+html body #customer .timer-track i{border-radius:999px!important;background:linear-gradient(90deg,#91dabd,var(--v-rose))!important}
+html body #customer .customer-top{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:8px!important;position:static!important}
+html body #customer .time-ad{min-height:34px!important;padding:4px 12px!important;border-radius:999px!important;font:600 12px var(--v-font)!important;background:#f8fdfc!important;border:1px solid var(--v-line)!important;color:var(--v-muted)!important}
+html body #customer.free-brief .commission-status{display:none!important}
+
+/* Stage */
+html body #studioScreen .work-heading,html body #studioScreen .stage-note,html body #studioScreen #stageLabel,html body #studioScreen .stage .spark,html body #studioScreen .design-caption img{display:none!important}
+html body #studioScreen .stage{flex:1!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:auto!important;margin:0!important;border:0!important;box-shadow:none!important;border-radius:var(--v-radius)!important;background:radial-gradient(60% 18% at 50% 80%,#d8eeeb 0,transparent 70%),radial-gradient(70% 70% at 50% 45%,#fff 0,#f9fefc 45%,transparent 75%)!important;display:grid!important;place-items:center!important;position:relative!important}
+html body #studioScreen .stage #preview{width:min(100%,760px)!important;height:auto!important;max-height:100%!important;position:relative!important;inset:auto!important;transform:none!important}
+html body #studioScreen .stage #preview canvas{width:100%!important;height:auto!important;max-height:100%!important;object-fit:contain!important}
+html body #studioScreen .design-caption{display:block!important;padding:0!important;margin:0!important;font:600 14px var(--v-font)!important;color:var(--v-muted)!important;text-align:center!important;background:none!important}
+html body #studioScreen .work-actions{display:flex!important;gap:12px!important;justify-content:center!important;align-items:center!important;width:min(100%,520px)!important;padding:0!important;margin:0!important;position:static!important;grid-template-columns:none!important}
+html body #studioScreen .work-actions button{min-height:58px!important;border-radius:999px!important;font:600 17px var(--v-font)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;margin:0!important}
+html body #studioScreen #inspire{flex:none!important;padding:0 22px!important;background:var(--v-card)!important;border:1px solid var(--v-line)!important;color:var(--v-ink)!important;box-shadow:var(--v-shadow)!important}
+html body #studioScreen #pack{flex:1!important;padding:0 28px!important;background:linear-gradient(135deg,#7dd4b1,var(--v-rose))!important;border:0!important;color:#fff!important;box-shadow:0 10px 24px #67cca455!important;text-shadow:0 1px 0 #409b7644}
+html body #studioScreen .work-actions img.ui-icon{width:24px!important;height:24px!important}
+html body #studioScreen #pack img.ui-icon{filter:brightness(0) invert(1)}
+
+/* Design box */
+html body .custom .panel-heading,html body .custom #sampleNote,html body .custom #designSummary,html body .custom #recentChoices,html body .custom #optionCount,html body .custom #partTitle{display:none!important}
+html body .custom #tabs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;padding:0!important;margin:0!important;overflow:visible!important;background:none!important}
+html body .custom #tabs button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;min-height:66px!important;height:auto!important;padding:8px 2px!important;border-radius:18px!important;background:#f8fdfc!important;border:1.5px solid transparent!important;box-shadow:none!important;color:var(--v-muted)!important;font:600 12px var(--v-font)!important;width:auto!important}
+html body .custom #tabs button img.ui-icon{width:30px!important;height:30px!important}
+html body .custom #tabs button.active{background:var(--v-blush)!important;border-color:#a1e0c7!important;color:var(--v-rose-deep)!important}
+html body .custom .options-heading{display:flex!important;justify-content:flex-end!important;align-items:center!important;min-height:0!important;margin:-4px 0 -6px!important;padding:0!important;border:0!important}
+html body .custom .design-undo{min-height:32px!important;padding:2px 12px!important;border-radius:999px!important;font:600 12px var(--v-font)!important;background:none!important;border:1px solid var(--v-line)!important;color:var(--v-muted)!important}
+html body .custom .design-undo:disabled{visibility:hidden}
+html body .custom #options{flex:1!important;min-height:0!important;max-height:none!important;overflow:auto!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-content:start!important;gap:10px!important;padding:2px 2px 8px!important;margin:0!important}
+html body .custom #options .option{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;min-height:96px!important;height:auto!important;padding:10px 4px!important;border-radius:20px!important;background:#fff!important;border:1.5px solid var(--v-line)!important;box-shadow:none!important;font:600 12.5px/1.2 var(--v-font)!important;color:var(--v-ink)!important;text-align:center!important;position:relative!important}
+html body .custom #options .option .swatch{width:46px!important;height:46px!important;border-radius:50%!important;margin:0!important;box-shadow:inset 0 -3px 6px #0000001a,0 2px 6px #4f756e22!important}
+html body .custom #options .option canvas{max-width:100%!important;height:46px!important}
+html body .custom #options .option.selected{background:var(--v-blush)!important;border-color:var(--v-rose)!important;color:var(--v-rose-deep)!important}
+html body .custom #options .option.selected::after{content:"✓";position:absolute;top:6px;right:9px;font-weight:700;color:var(--v-rose)}
+html body .custom #options .option.craft-locked,html body .custom #options .option.locked{background:#fafcfc!important;color:var(--v-muted)!important}
+html body .custom #options .option small{display:inline-flex!important;align-items:center!important;gap:3px!important;font:600 11px var(--v-font)!important;color:var(--v-muted)!important}
+html body .custom #options .option small img{width:15px!important;height:15px!important}
+html body .custom .heel-height-choices:not([hidden]){display:flex!important;gap:6px!important;flex-wrap:wrap!important}
+
+/* ── Atelier: orders · board · materials ──────────────────────────────── */
+
+/* ── Short landscape (800x450, 844x390) ───────────────────────────────── */
+@media (max-height:560px) and (orientation:landscape){
+  html body #app{gap:8px!important;padding:8px 12px!important}
+  html body header #nav{padding:3px!important}
+  html body header #nav button{flex-direction:column!important;gap:1px!important;padding:3px 9px!important;min-height:40px!important;font-size:10.5px!important}
+  html body header #nav button img.ui-icon{width:20px!important;height:20px!important}
+  html body header #nav button .nav-label{font-size:10.5px!important}
+  html body header :is(.hud-pill,.coin-pill,.header-energy){height:38px!important;padding:0 10px 0 6px!important;font-size:13px!important}
+  html body header :is(.hud-pill,.coin-pill) img{width:22px!important;height:22px!important}
+  html body header .icon-button{width:38px!important;height:38px!important;min-width:38px!important}
+  html body header .icon-button img.ui-icon{width:22px!important;height:22px!important}
+  html body #studioScreen{grid-template-columns:220px minmax(0,1fr) 290px!important;gap:10px!important}
+  html body #studioScreen #customer{padding:12px!important;gap:8px!important}
+  html body #customer .portrait-wrap{width:64px!important;height:64px!important;border-width:3px!important}
+  html body #customer .customer-name{font-size:19px!important}
+  html body #customer .speech{display:none!important}
+  html body #customer .req{min-height:30px!important;padding:3px 10px 3px 6px!important;font-size:11.5px!important}
+  html body #customer .req img.ui-icon{width:18px!important;height:18px!important}
+  html body #studioScreen .custom{padding:12px!important;gap:8px!important}
+  html body .custom #tabs button{min-height:50px!important;padding:4px 2px!important;font-size:10.5px!important}
+  html body .custom #tabs button img.ui-icon{width:22px!important;height:22px!important}
+  html body .custom #options{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+  html body .custom #options .option{min-height:72px!important;padding:6px 2px!important;font-size:11px!important}
+  html body .custom #options .option .swatch{width:34px!important;height:34px!important}
+  html body #studioScreen .work-actions button{min-height:46px!important;font-size:15px!important}
+  html body #studioScreen .design-caption{font-size:12px!important}
+}
+
+/* ── Phone portrait: stacked, with a bottom dock ──────────────────────── */
+@media (orientation:portrait) and (max-width:700px){
+  html body #app{padding:10px 12px calc(92px + env(safe-area-inset-bottom,0px))!important;gap:10px!important;height:100dvh!important}
+  html body header{justify-content:flex-end!important}
+  html body header #nav{position:fixed!important;z-index:60!important;left:max(10px,env(safe-area-inset-left,0px))!important;right:max(10px,env(safe-area-inset-right,0px))!important;bottom:max(10px,env(safe-area-inset-bottom,0px))!important;justify-content:space-between!important;padding:6px!important;border-radius:28px!important;order:9}
+  html body header #nav button{flex:1 1 0!important;flex-direction:column!important;gap:2px!important;padding:6px 2px!important;min-height:58px!important;border-radius:22px!important;font-size:11px!important}
+  html body header #nav button img.ui-icon{width:26px!important;height:26px!important}
+  html body header #nav button .nav-label{font-size:11px!important;white-space:nowrap!important}
+  html body header .header-right{width:100%!important;justify-content:space-between!important;gap:6px!important}
+  html body header :is(.hud-pill,.coin-pill,.header-energy){height:40px!important;padding:0 10px 0 6px!important;font-size:14px!important}
+  html body header .header-energy{flex-direction:row!important}
+  html body header .header-energy small,html body header .header-energy span span{display:none!important}
+  html body header :is(.hud-pill,.coin-pill) img{width:24px!important;height:24px!important}
+  html body header .icon-button{width:40px!important;height:40px!important;min-width:40px!important}
+
+  html body #studioScreen{display:flex!important;flex-direction:column!important;gap:10px!important;overflow:auto!important}
+  html body #studioScreen>*{flex:none!important}
+  html body #studioScreen #customer{display:grid!important;grid-template-columns:64px minmax(0,1fr)!important;column-gap:12px!important;row-gap:8px!important;padding:12px!important;overflow:visible!important}
+  html body #customer .commission-identity{display:contents!important}
+  html body #customer .portrait-wrap{grid-column:1!important;grid-row:1/3!important;width:64px!important;height:64px!important;border-width:3px!important}
+  html body #customer .commission-identity>div:last-child{grid-column:2!important;grid-row:1/3!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;text-align:left!important}
+  html body #customer .customer-name{font-size:20px!important}
+  html body #customer .commission-brief{grid-column:1/-1!important}
+  html body #customer .speech{display:none!important}
+  html body #customer .requirements{justify-content:flex-start!important;gap:6px!important}
+  html body #customer .req{min-height:32px!important;font-size:12px!important;padding:4px 10px 4px 6px!important}
+  html body #customer .commission-status{grid-column:1/-1!important;padding-top:8px!important}
+  html body #studioScreen .work-area{gap:8px!important}
+  html body #studioScreen .stage{flex:none!important;height:min(30dvh,260px)!important;width:100%!important}
+  html body #studioScreen .design-caption{display:none!important}
+  html body #studioScreen .work-actions{width:100%!important}
+  html body #studioScreen .work-actions button{min-height:52px!important;font-size:16px!important}
+  html body #studioScreen .custom{padding:12px!important;gap:10px!important;overflow:visible!important}
+  html body .custom #tabs{display:flex!important;overflow-x:auto!important;gap:6px!important;scrollbar-width:none}
+  html body .custom #tabs button{flex:0 0 64px!important;min-height:62px!important;font-size:11px!important}
+  html body .custom #tabs button img.ui-icon{width:26px!important;height:26px!important}
+  html body .custom #options{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important;gap:8px!important}
+  html body .custom #options .option{min-height:86px!important;font-size:12px!important}
+
+}
+@media (prefers-reduced-motion:reduce){html body *{transition-duration:.01ms!important}}
+
+/* ── Fixes: board fits the height; phone order; short nav labels ──────── */
+html body #nav .nav-label-short{display:none!important}
+@media (max-height:560px) and (orientation:landscape){
+}
+@media (orientation:portrait) and (max-width:700px){
+  html body #nav .nav-label{display:none!important}
+  html body #nav .nav-label-short{display:inline!important;font-size:11px!important;white-space:nowrap!important}
+  html body #studioScreen:not([hidden]){justify-content:flex-start!important}
+}
+html body #studioScreen .work-actions button{white-space:nowrap!important}
+@media (max-height:560px) and (orientation:landscape){
+  html body #studioScreen #inspire span{display:none!important}
+  html body #studioScreen #inspire{padding:0 16px!important}
+  html body #customer .timer-row{font-size:11px!important}
+  html body #customer .commission-status{gap:4px!important;padding-top:6px!important}
+  html body #customer .time-ad{min-height:28px!important;padding:2px 8px!important;font-size:10.5px!important}
+  html body #customer .commission-identity .section-kicker{display:none!important}
+}
+@media (orientation:portrait) and (max-width:700px){
+  html body header #nav button .nav-label{display:none!important}
+  html body header #nav button .nav-label-short{display:inline!important}
+  html body #studioScreen .stage{height:min(24dvh,210px)!important}
+}
+html body header .header-energy img{width:24px!important;height:24px!important}
+html body header .header-energy>span{display:flex!important;flex-direction:column!important;line-height:1.05!important}
+html body header .header-energy small{font:600 10px var(--v-font)!important;color:var(--v-muted)!important}
+@media (max-height:560px) and (orientation:landscape){
+  html body header .header-energy small{display:none!important}
+  html body header .header-right{gap:5px!important}
+  html body header :is(.hud-pill,.coin-pill,.header-energy){padding:0 8px 0 5px!important;gap:4px!important}
+}
+@media (orientation:portrait) and (max-width:700px){
+  html body header .header-energy small{display:none!important}
+  html body header .header-right{gap:4px!important;min-width:0!important}
+  html body header .atelier-hud{gap:4px!important}
+  html body header :is(.hud-pill,.coin-pill,.header-energy){padding:0 8px 0 4px!important;gap:3px!important;font-size:13px!important}
+  html body header :is(.hud-pill,.coin-pill,.header-energy) img{width:22px!important;height:22px!important}
+  html body header .icon-button{width:38px!important;height:38px!important;min-width:38px!important}
+}
+/* Locked options show their price: give them room. */
+html body .custom #options .option{overflow:visible!important}
+@media (max-height:560px) and (orientation:landscape){html body .custom #options .option{min-height:84px!important}}
+@media (orientation:portrait) and (max-width:700px){
+  html body header #nav button .nav-label{display:inline!important;font-size:11px!important;white-space:nowrap!important}
+  html body header #nav button:has(.nav-label-short) .nav-label{display:none!important}
+}
+
+/* ── Guide: pearl touch point, softer veil ────────────────────────────── */
+html body .guide-hand{width:60px!important;height:60px!important;animation:none!important;filter:drop-shadow(0 4px 10px #409b7633)!important;pointer-events:none}
+html body .guide-ring{border:2px solid #fff!important;border-radius:20px!important;box-shadow:0 0 0 4px #dcf6ec99,0 0 28px 6px #7dd4b140!important}
+html body .guide-label{background:#fdfffe!important;border:1px solid var(--v-line)!important;border-radius:999px!important;box-shadow:var(--v-shadow)!important;color:var(--v-ink)!important;font:600 15px var(--v-font)!important;padding:10px 18px!important}
+
+/* ── Phone fit fixes ──────────────────────────────────────────────────── */
+html body #studioScreen .stage{overflow:hidden!important}
+html body #studioScreen .stage #preview{position:absolute!important;inset:10px!important;width:auto!important;height:auto!important;max-height:none!important;display:grid!important;grid-template:100% / 100%!important;place-items:center!important}
+/* The canvas box always equals the stage's inner box; the bitmap is letterboxed
+   inside it with object-fit. (width/height:auto plus the 1024/640 aspect-ratio
+   let the box grow taller than short phone stages, cropping the shoe.) */
+html body #studioScreen .stage #preview canvas{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;aspect-ratio:auto!important;object-fit:contain!important}
+/* Phones: the two actions share the row instead of spilling past its edges */
+@media (max-width:700px){
+  html body #studioScreen .work-actions{width:100%!important;justify-content:stretch!important;gap:10px!important}
+  html body #studioScreen .work-actions #inspire{flex:0 1 auto!important;min-width:0!important;padding:0 16px!important;white-space:nowrap!important}
+  html body #studioScreen .work-actions #pack{flex:1 1 0!important;min-width:0!important;padding:0 22px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
+html body #saveNotice{top:auto!important;right:auto!important;left:50%!important;bottom:calc(18px + env(safe-area-inset-bottom,0px))!important;translate:-50% 0!important;border-radius:999px!important;border:1px solid var(--v-line)!important;background:#fdfffeee!important;color:var(--v-muted)!important;font:600 12px var(--v-font)!important;box-shadow:var(--v-shadow)!important;padding:7px 16px!important}
+@media (orientation:portrait) and (max-width:700px){html body #saveNotice{bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}}
+
+/* ── Motion: soft, slow, satin ─────────────────────────────────────────── */
+:root{--v-ease:cubic-bezier(.22,.8,.24,1)}
+@keyframes v-rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes v-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes v-sheen{0%,72%{background-position:-160% 0}100%{background-position:260% 0}}
+@keyframes v-glow{0%,100%{box-shadow:0 10px 24px #67cca440}50%{box-shadow:0 12px 32px #67cca466}}
+@media (prefers-reduced-motion:no-preference){
+  html body #studioScreen:not([hidden])>*,html body #atelierScreen:not([hidden])>*{animation:v-rise .6s var(--v-ease) both}
+  html body #studioScreen:not([hidden])>:nth-child(2),html body #atelierScreen:not([hidden])>:nth-child(2){animation-delay:.08s}
+  html body #studioScreen:not([hidden])>:nth-child(3),html body #atelierScreen:not([hidden])>:nth-child(3){animation-delay:.16s}
+  html body #studioScreen .stage #preview canvas{animation:v-float 6s ease-in-out infinite}
+  html body #studioScreen #pack{background-image:linear-gradient(110deg,transparent 35%,#ffffff55 50%,transparent 65%),linear-gradient(135deg,#7dd4b1,var(--v-rose))!important;background-size:250% 100%,100% 100%!important;animation:v-sheen 5.5s ease-in-out infinite,v-glow 3.6s ease-in-out infinite}
+  html body #customer .req{transition:background .35s var(--v-ease),border-color .35s,color .35s,transform .35s var(--v-ease)}
+  html body #customer .req.match{animation:v-rise .5s var(--v-ease)}
+}
+html body :is(header #nav button,header .icon-button,#studioScreen .work-actions button,.custom #tabs button,.custom #options .option,#atelierScreen .order-deliver,#atelierScreen .atelier-tools button,#atelierScreen .merge-cell){transition:transform .28s var(--v-ease),box-shadow .28s var(--v-ease),background-color .28s,border-color .28s,color .28s!important}
+@media (hover:hover){
+  html body :is(#studioScreen .work-actions button,.custom #options .option,#atelierScreen .order-deliver,#atelierScreen .atelier-tools button):hover{transform:translateY(-2px)}
+  html body .custom #options .option:hover{border-color:#a1e0c7!important;box-shadow:0 8px 18px #409b7614!important}
+}
+html body :is(#studioScreen .work-actions button,.custom #options .option,.custom #tabs button,header #nav button,#atelierScreen .order-deliver,#atelierScreen .merge-cell):active{transform:scale(.96)!important}
+html body .custom #options .option.selected .swatch{transform:scale(1.08);transition:transform .35s var(--v-ease)}
+html body .backdrop{backdrop-filter:blur(6px)!important;background:#2d474233!important}
+html body .modal{animation:v-rise .5s var(--v-ease)!important}
+html body #app[inert] header #nav,html body.dialogue-active header #nav{display:none!important}
+
+/* ══ Pop-up screens (2026-11-15): one calm family ═════════════════════════ */
+/* Loading */
+html body #loading::before{background:radial-gradient(ellipse at 50% 45%,#fdfffee6 0,#f3fbfacc 45%,#e8f8f699 100%)!important}
+html body #loading .load-track{height:14px!important;border-radius:999px!important;background:#fff!important;border:1px solid var(--v-line)!important;box-shadow:var(--v-shadow)!important;overflow:visible!important}
+html body #loading #loadFill{border-radius:999px!important;background:linear-gradient(90deg,#a8e2cb,var(--v-rose))!important}
+html body #loading :is(#loadProgress,#loadText){font:600 15px var(--v-font)!important;color:var(--v-muted)!important}
+
+/* Title */
+html body .title-backdrop{background:radial-gradient(ellipse at 50% 40%,#fdfffe 0,#f3fbfa 55%,#e8f8f6 100%)!important;backdrop-filter:none!important}
+html body .title-backdrop::before{content:"";position:absolute;inset:0;background:url('assets/ui/loading_bg.webp') center/cover no-repeat;opacity:.28;filter:saturate(.8)}
+html body .modal.title-card{position:relative!important;width:min(520px,92vw)!important;max-width:none!important;padding:36px 36px 28px!important;border-radius:36px!important;background:#fdfffef2!important;border:1px solid #fff!important;box-shadow:0 30px 70px #4f756e26,0 4px 12px #4f756e12!important;gap:14px!important;display:flex!important;flex-direction:column!important;align-items:center!important}
+html body .title-card .title-logo{width:min(400px,78vw)!important;max-height:none!important}
+html body .title-card>p{font:600 17px var(--v-font)!important;color:var(--v-muted)!important;margin:0!important}
+html body .title-card .title-actions{display:grid!important;gap:10px!important;width:min(320px,100%)!important}
+html body .title-card .title-actions button{min-height:56px!important;border-radius:999px!important;font:600 17px var(--v-font)!important}
+html body .title-card .title-actions .primary{background:linear-gradient(135deg,#7dd4b1,var(--v-rose))!important;color:#fff!important;border:0!important;box-shadow:0 10px 24px #67cca455!important}
+html body .title-card .title-actions .secondary{background:#fff!important;border:1px solid var(--v-line)!important;color:var(--v-ink)!important}
+html body .title-card .title-actions .secondary:last-child{min-height:40px!important;border:0!important;background:none!important;color:var(--v-muted)!important;font-size:14px!important}
+
+/* All dialogs: readable type, one close button, rounded controls */
+html body .modal{font-family:var(--v-font)!important;color:var(--v-ink)!important}
+html body .modal :is(p,li,dd,small){font-size:max(13px,1em)}
+html body .modal h2{font:600 clamp(24px,2.6vw,32px)/1.15 var(--v-font)!important;color:var(--v-ink)!important}
+html body .modal :is(.eyebrow,.section-kicker,.kicker){font:600 11.5px var(--v-font)!important;letter-spacing:.14em!important;color:var(--v-muted)!important}
+html body .modal :is(.primary,.secondary):not(.modal-dismiss):not(.sock-chip):not(.showcase-chip):not(.sock-color){min-height:48px!important;border-radius:999px!important;font:600 15px var(--v-font)!important}
+html body .modal .primary{background:linear-gradient(135deg,#7dd4b1,var(--v-rose))!important;color:#fff!important;border:0!important;box-shadow:0 8px 20px #67cca444!important}
+html body .modal .secondary:not(.modal-dismiss){background:#fff!important;border:1px solid var(--v-line)!important;color:var(--v-ink)!important;box-shadow:none!important}
+html body .modal-dismiss{width:44px!important;height:44px!important;border-radius:50%!important;background:#fff!important;border:1px solid var(--v-line)!important;box-shadow:var(--v-shadow)!important;color:var(--v-ink)!important;font:400 24px/1 var(--v-font)!important}
+html body .collection-back,html body .boutique-heading>button.secondary{display:none!important}
+
+/* Full-screen sheets: Collection and Boutique */
+html body .modal:is(.collection-modal,.boutique-modal){background:var(--v-bg) radial-gradient(#dff3f0 1.2px,transparent 1.4px) 0 0/22px 22px!important;border-radius:0!important}
+html body :is(.collection-heading,.boutique-heading){padding:22px 28px 10px!important;background:none!important;border:0!important;box-shadow:none!important}
+html body :is(.collection-heading,.boutique-heading) h2{font-size:clamp(26px,3vw,36px)!important}
+html body :is(.collection-heading,.boutique-heading) p{font:500 14px var(--v-font)!important;color:var(--v-muted)!important}
+html body :is(.collection-layout,.boutique-layout){gap:18px!important;padding:0 28px 24px!important}
+html body :is(.collection-stage,.collection-detail,.boutique-visual,.boutique-tasks){border-radius:28px!important;border:1px solid var(--v-line)!important;box-shadow:var(--v-shadow)!important;background:var(--v-card)!important;overflow:hidden}
+html body .collection-detail{padding:26px!important;gap:14px!important}
+html body .collection-detail h3{font:600 26px var(--v-font)!important}
+html body .boutique-tasks{padding:22px!important}
+html body .boutique-tasks h3{font:600 20px var(--v-font)!important}
+html body .boutique-tasks :is(p,small,span){font-size:13.5px}
+
+/* Collection filmstrip becomes photocards */
+html body .collection-filmstrip{gap:16px!important;padding:16px 28px 26px!important;background:none!important;border:0!important;box-shadow:none!important}
+html body .collection-filmstrip .gallery-item{width:112px!important;min-width:112px!important;padding:6px 6px 10px!important;border-radius:14px!important;background:#fff!important;border:0!important;box-shadow:0 8px 18px #4f756e1f!important;transform:rotate(-2deg);transition:transform .35s var(--v-ease),box-shadow .35s!important;font:600 12px var(--v-font)!important;color:var(--v-muted)!important}
+html body .collection-filmstrip .gallery-item:nth-child(even){transform:rotate(2deg)}
+html body .collection-filmstrip .gallery-item:hover,html body .collection-filmstrip .gallery-item.selected{transform:rotate(0) translateY(-6px)!important;box-shadow:0 14px 26px #409b7626!important}
+html body .collection-filmstrip .gallery-item.selected{outline:3px solid var(--v-rose)!important;outline-offset:2px}
+html body .collection-thumbnail{border-radius:10px!important;background:linear-gradient(160deg,#fff,var(--v-blush))!important;overflow:hidden}
+html body .scene-photo-badge{font:600 10px var(--v-font)!important;border-radius:999px!important;background:#fdfffee6!important;color:var(--v-rose-deep)!important}
+
+/* Result card */
+html body .modal[data-modal-kind=result]{border-radius:32px!important;padding:28px!important}
+html body .modal[data-modal-kind=result] .stats{border-radius:22px!important;background:#f8fdfc!important;border:0!important}
+html body .modal[data-modal-kind=result] .stats strong{font:600 24px var(--v-font)!important}
+html body .modal[data-modal-kind=result] .stats small{font:600 12px var(--v-font)!important;color:var(--v-muted)!important}
+
+/* Pause */
+html body .modal[data-modal-kind=pause]{border-radius:32px!important;padding:30px!important}
+html body .atelier-settings{border-radius:24px!important;background:#f8fdfc!important;border:0!important}
+html body .settings-toggle{min-height:56px!important;font:600 15px var(--v-font)!important}
+html body .audio-credits{font:500 12px var(--v-font)!important;color:var(--v-muted)!important}
+
+/* Fitting room controls: readable and roomy */
+html body .runway-modal .runway-heading h2{font-size:24px!important}
+html body .runway-modal .runway-dock{border-radius:28px!important;background:#fdfffeee!important;border:1px solid #fff!important;box-shadow:0 18px 40px #4f756e24!important}
+html body .runway-dock .sock-chip{min-height:42px!important;padding:6px 14px!important;border-radius:999px!important;font:600 13.5px var(--v-font)!important;background:#fff!important;border:1px solid var(--v-line)!important;color:var(--v-ink)!important}
+html body .runway-dock .sock-chip[aria-pressed=true]{background:var(--v-blush)!important;border-color:var(--v-rose)!important;color:var(--v-rose-deep)!important}
+html body .runway-dock .sock-color{width:38px!important;height:38px!important;min-width:38px!important}
+html body .runway-dock .showcase-chip span{font:600 13.5px var(--v-font)!important}
+html body .runway-dock .showcase-chip small{font:600 12px var(--v-font)!important}
+html body .runway-dock .showcase-heading{font:600 13px var(--v-font)!important;color:var(--v-muted)!important}
+html body .runway-scene .styling-brief{font-size:13.5px!important;padding:14px 16px!important;border-radius:22px!important;max-width:290px!important}
+html body .runway-scene .styling-brief .styling-title{font-size:14px!important}
+html body .runway-scene .styling-brief .styling-hearts{font-size:18px!important}
+
+@media (max-height:560px) and (orientation:landscape){
+  html body :is(.collection-heading,.boutique-heading){padding:12px 18px 6px!important}
+  html body :is(.collection-layout,.boutique-layout){padding:0 18px 12px!important;gap:12px!important}
+  html body .collection-filmstrip{padding:10px 18px 14px!important}
+  html body .collection-filmstrip .gallery-item{width:88px!important;min-width:88px!important}
+  html body .modal.title-card{padding:20px 24px!important;gap:8px!important}
+  html body .title-card .title-logo{width:min(300px,60vw)!important;max-height:34vh!important}
+  html body .title-card .title-actions button{min-height:44px!important}
+  html body .runway-dock .sock-chip{min-height:36px!important;font-size:12px!important}
+  html body .runway-scene .styling-brief{font-size:11.5px!important;padding:8px 10px!important}
+}
+@media (orientation:portrait) and (max-width:700px){
+  html body :is(.collection-heading,.boutique-heading){padding:16px 16px 6px!important}
+  html body :is(.collection-layout,.boutique-layout){padding:0 14px 14px!important;gap:12px!important}
+  html body .collection-filmstrip{padding:12px 14px 20px!important;gap:12px!important}
+  html body .collection-filmstrip .gallery-item{width:96px!important;min-width:96px!important}
+  html body .runway-scene .styling-brief{font-size:12px!important;padding:9px 11px!important;max-width:230px!important}
+}
+/* In the fitting room the autosave note sits under the heading, clear of the dock */
+html body:has(.runway-modal) #saveNotice{top:calc(70px + env(safe-area-inset-top,0px))!important;bottom:auto!important}
+/* A one-colour sock shows its single swatch as chosen, not greyed out */
+html body .runway-dock .sock-color.fixed:disabled{opacity:1!important;cursor:default!important;filter:none!important}
+/* Mint pass: remaining lilac pieces from the base stylesheet */
+html body .settings-toggle[aria-pressed=true] .setting-value i{background:#4fb08c!important}
+html body .modal.runway-modal .runway-heading{background:linear-gradient(#f4fbf8f5,#e3f4eceb)!important}
+html body .modal :is(blockquote,.boutique-quote,.chapter-quote,.task-quote){background:#eef8f4!important;border-color:#d6eee4!important}
+
+/* ══ Ribbon Lane: goal tracker, big-day card, story beat, street map ══════ */
+html body header #laneGoal{flex:0 1 320px;min-width:0;display:flex!important;align-items:center;gap:10px;height:48px;padding:0 14px 0 8px;margin:0 auto 0 12px;
+  border-radius:999px;border:1px solid #cfeee1;background:#fbfffd;box-shadow:0 6px 16px #2f7a5e17;color:var(--v-ink);font:inherit;text-align:left;cursor:pointer;transition:transform .3s var(--v-ease),box-shadow .3s}
+html body header #laneGoal:hover{transform:translateY(-1px);box-shadow:0 10px 22px #2f7a5e24}
+html body header #laneGoal .lane-ribbon{flex:none;width:34px;height:24px;background:url('assets/ui/textile/bow.svg') center/contain no-repeat}
+html body header #laneGoal .lane-text{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+html body header #laneGoal .lane-text b{font:700 13.5px var(--v-font);white-space:nowrap}
+html body header #laneGoal .lane-text small{font:600 11.5px var(--v-font);color:var(--v-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body header #laneGoal .lane-meter{flex:none;width:54px;height:8px;margin-left:auto;border-radius:999px;background:#e3f4ec;overflow:hidden}
+html body header #laneGoal .lane-meter i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#8fdcbe,#47aa85)}
+html body #app[inert] header #laneGoal{visibility:hidden}
+
+/* big-day customer card */
+html body #studioScreen #customer.big-day{box-shadow:0 0 0 3px #d6f2e6,var(--v-shadow)!important}
+html body #studioScreen #customer.big-day .section-kicker{color:#2f8a67!important;letter-spacing:.14em}
+html body #studioScreen #customer.big-day .section-kicker::before{content:"";display:inline-block;width:20px;height:13px;margin-right:5px;vertical-align:-2px;background:url('assets/ui/textile/bow.svg') center/contain no-repeat}
+html body #studioScreen #customer.big-day .theme{background:#e3f6ee!important;color:#2f7a5e!important;font-weight:700!important}
+
+/* story beat on the result card */
+html body .lane-beat{margin:10px 0 4px;padding:14px 16px;border-radius:20px;background:linear-gradient(180deg,#f0fbf6,#fbfffd);border:1px solid #d3efe2;text-align:center}
+html body .lane-beat .eyebrow{display:block;color:#2f8a67!important;margin-bottom:6px}
+html body .lane-beat p{margin:0 0 8px!important;font:600 15px/1.45 var(--v-font)!important;color:var(--v-ink)!important}
+html body .lane-beat small{display:block;margin-top:6px;color:var(--v-muted);font:600 12px var(--v-font)}
+html body .lane-beat.retry{background:#fbfcfb;border-style:dashed}
+html body .lane-beat.retry p{font-weight:500!important;color:var(--v-muted)!important;margin:0!important}
+html body .lane-dots{display:inline-flex;gap:5px}
+html body .lane-dots i{width:11px;height:11px;border-radius:50%;background:#e1f1ea;box-shadow:inset 0 0 0 1.5px #bfe3d3}
+html body .lane-dots i.on{background:#4fb08c;box-shadow:none}
+@media (prefers-reduced-motion:no-preference){html body .lane-beat:not(.retry){animation:v-rise .7s var(--v-ease) .35s both}}
+
+/* street map */
+html body .modal[data-modal-kind=lane]{width:min(560px,94vw)!important;max-height:92dvh;overflow:auto}
+html body .lane-progress-line{color:var(--v-muted)!important;font-weight:600!important;margin-top:-4px!important}
+html body .lane-street{list-style:none;margin:14px 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+html body .lane-house{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:18px;background:#fbfffd;border:1px solid #dcf1e7;text-align:left}
+html body .lane-house img{flex:none;width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:top;background:#e9f8f1;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #cdeedf}
+html body .lane-house div{display:flex;flex-direction:column;gap:3px;min-width:0}
+html body .lane-house b{font:700 15px var(--v-font)}
+html body .lane-house small{font:600 11.5px/1.3 var(--v-font);color:var(--v-muted)}
+html body .lane-house.complete{background:linear-gradient(180deg,#eefaf4,#fbfffd);border-color:#bfe8d6}
+html body .lane-house.away{opacity:.55}
+html body .lane-house.away img{filter:grayscale(.6)}
+html body .lane-party{padding:12px 14px;border-radius:18px;border:1.5px dashed #c6e8d9;color:var(--v-muted);display:flex;flex-direction:column;gap:3px;margin-bottom:12px}
+html body .lane-party b{color:var(--v-ink);font:700 15px var(--v-font)}
+html body .lane-party.ready{border-style:solid;background:#eefaf4}
+
+@media (max-height:560px) and (orientation:landscape){
+  html body header #laneGoal{flex-basis:200px;height:38px;margin-left:6px;padding:0 10px 0 6px;gap:6px}
+  html body header #laneGoal .lane-meter,html body header #laneGoal .lane-ribbon{display:none}
+  html body header #laneGoal .lane-text b{font-size:12px}html body header #laneGoal .lane-text small{font-size:10px}
+}
+@media (orientation:portrait) and (max-width:700px){
+  html body header{flex-wrap:wrap!important;row-gap:8px!important}
+  html body header #laneGoal{order:2;flex:1 1 100%;margin:0;height:44px}
+  html body .lane-street{grid-template-columns:1fr}
+}
+@media (min-width:701px) and (max-width:1180px) and (min-height:561px){
+  html body header #laneGoal .lane-meter{display:none}
+  html body header #laneGoal{flex-basis:220px}
+}
+/* Narrower desktops: the tracker gets its own slim centred row under the header */
+@media (max-width:1599px) and (min-height:561px) and (min-width:701px){
+  html body header{flex-wrap:wrap!important;row-gap:6px!important}
+  html body header #laneGoal{order:3;flex:0 0 auto;width:min(520px,100%);height:38px;margin:0 auto;padding:0 12px 0 8px}
+  html body header #laneGoal .lane-text{flex-direction:row;align-items:baseline;gap:10px}
+  html body header #laneGoal .lane-meter{display:block!important;width:80px}
+  html body header #laneGoal .lane-ribbon{width:28px;height:18px}
+  html body #atelierScreen:not([hidden]){--cell:clamp(34px,min(calc((100dvh - 344px)/7),calc((min(100vw,1560px) - clamp(220px,17vw,300px) - clamp(250px,20vw,340px) - 200px)/9)),86px)!important}
+}
+/* The result card stays inside the screen; a big-day story trims the extras */
+html body .modal[data-modal-kind=result]{max-height:94dvh!important;overflow:auto!important}
+html body .modal[data-modal-kind=result]:has(.lane-beat) .result-portrait{max-height:110px!important;width:auto!important}
+html body .modal[data-modal-kind=result]:has(.lane-beat) .result-shoes{max-height:90px!important;overflow:hidden}
+html body .modal[data-modal-kind=result]:has(.lane-beat) .result-shoes canvas{max-height:90px!important;width:auto!important}
+html body .modal[data-modal-kind=result]:has(.lane-beat) .result-portrait{display:none!important}
+html body .modal[data-modal-kind=result]:has(.lane-beat) h2{margin:4px 0!important}
+html body .modal[data-modal-kind=result]:has(.lane-beat) .stats{padding:8px!important;margin:6px 0!important}
+html body .modal[data-modal-kind=result]:has(.lane-beat)>p{margin:4px 0!important}
+@media (max-height:560px) and (orientation:landscape){
+  html body header #laneGoal{flex:0 0 auto;width:auto;padding:0 10px 0 4px}
+  html body header #laneGoal .lane-ribbon{display:block!important;width:24px;height:16px}
+  html body header #laneGoal .lane-text small{display:none}
+  html body header #laneGoal .lane-text b{font-size:0}
+  html body header #laneGoal .lane-text b::after{content:attr(data-short);font-size:12px}
+}
+@media (max-height:560px) and (orientation:landscape){
+  html body header #nav button:not(.active) :is(.nav-label,.nav-label-short){display:none!important}
+  html body header #nav button:not(.active){padding:4px 8px!important}
+}
+
+/* ══ Guided fitting ═══════════════════════════════════════════════════════ */
+html body #studioScreen.guided .custom>:not(#guided):not(#guidedBack):not(#guidedVoice){display:none!important}
+html body #guided[hidden],html body #guidedBack[hidden]{display:none!important}
+html body #guidedBack{align-self:flex-start;min-height:36px!important;padding:0 14px!important;border-radius:999px!important;font:600 13px var(--v-font)!important}
+html body #guided{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow:auto;padding:2px}
+html body .guided-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+html body .guided-head .eyebrow{color:#2f8a67!important;font:700 11.5px var(--v-font)!important;letter-spacing:.14em}
+html body .guided-more{min-height:32px;padding:0 12px;border-radius:999px;border:1px solid #d6efe4;background:#fff;color:var(--v-muted);font:600 12px var(--v-font);cursor:pointer}
+html body .guided-dots{display:flex;gap:6px}
+html body .guided-dots i{flex:1;height:6px;border-radius:999px;background:#e3f2ec;transition:background .4s}
+html body .guided-dots i.on{background:#4fb08c}
+html body .guided-dots i.now{background:linear-gradient(90deg,#4fb08c 0 40%,#cdeee0 40%)}
+html body .guided-dots i.touch{max-width:28px;background-image:none;border:1.5px dashed #bfe3d3;background-color:transparent}
+html body .guided-dots i.touch.on{background-color:#f3c46b;border-color:#f3c46b}
+html body .guided-step{margin:4px 0 0!important;font:600 12.5px var(--v-font)!important;color:var(--v-muted)!important}
+html body .guided-ask{margin:0!important;font:600 clamp(18px,1.6vw,22px)/1.25 var(--v-font)!important;color:var(--v-ink)!important}
+html body .guided-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+html body .guided-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:132px;padding:12px 6px;border-radius:22px;border:1.5px solid #e1f2ea;background:#fff;
+  box-shadow:0 6px 16px #2f7a5e12;color:var(--v-ink);font:600 13.5px/1.2 var(--v-font);text-align:center;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s}
+html body .guided-choice>:first-child{width:62px!important;height:62px!important;max-width:100%}
+html body .guided-choice canvas{width:100%!important;height:auto!important;max-height:62px}
+html body .guided-choice:hover{transform:translateY(-3px);box-shadow:0 12px 24px #2f7a5e22;border-color:#bfe8d6}
+html body .guided-choice[aria-pressed=true]{border-color:#4fb08c;box-shadow:0 0 0 3px #d6f2e6,0 10px 22px #2f7a5e22}
+html body .guided-skip{align-self:center;min-height:36px!important;padding:0 18px!important;font-size:13px!important}
+html body .guided-ready{text-align:center;padding:10px 4px}
+html body .guided-ready h3{margin:4px 0!important;font:600 24px var(--v-font)!important}
+html body .guided-ready p{margin:0 0 12px!important;color:var(--v-muted)!important}
+html body .guided-recap{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+html body .guided-recap span{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 6px;border-radius:999px;background:#f3fbf7;border:1px solid #d6efe4;font:600 12.5px var(--v-font)}
+html body .guided-recap span>:first-child{width:26px!important;height:26px!important}
+html body .guided-recap span.ok{background:#e3f6ee;border-color:#a9dcc6}
+html body #studioScreen #pack.guided-ready-glow{animation:g-glow 1.6s ease-in-out infinite}
+@keyframes g-glow{0%,100%{filter:drop-shadow(0 0 0 #4fb08c00)}50%{filter:drop-shadow(0 0 12px #4fb08c99)}}
+/* customer reacts */
+html body #customer .portrait-wrap{position:relative}
+html body .guided-reaction{position:absolute;left:50%;top:-10px;translate:-50% -100%;z-index:5;white-space:nowrap;padding:7px 12px;border-radius:16px;background:#fff;border:1px solid #d6efe4;
+  box-shadow:0 8px 18px #2f7a5e22;font:600 13px var(--v-font);color:var(--v-ink);animation:g-pop .45s cubic-bezier(.34,1.56,.64,1) both}
+html body .guided-reaction.ok{background:#e9f9f1;border-color:#a9dcc6;color:#2f7a5e}
+html body .guided-reaction.no{color:#9a6b5a;background:#fff8f3;border-color:#f1dccf}
+html body .guided-reaction::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;margin-left:-5px;background:inherit;border:inherit;border-top:0;border-left:0;rotate:45deg}
+@keyframes g-pop{0%{opacity:0;transform:translateY(6px) scale(.85)}100%{opacity:1;transform:none}}
+/* wishes reveal themselves as you guess them */
+html body #customer.guided .req:not(.revealed)>span{font-size:0!important}
+html body #customer.guided .req:not(.revealed)>span::after{content:"?";font-size:14px;font-weight:700}
+html body #customer.guided .req:not(.revealed){background:#fff!important;border-color:#e3f2ec!important;color:var(--v-muted)!important}
+html body #customer.guided .req:not(.revealed)>b{visibility:hidden}
+@media (prefers-reduced-motion:reduce){html body .guided-reaction,html body #studioScreen #pack.guided-ready-glow{animation:none}}
+@media (max-height:560px) and (orientation:landscape){
+  html body .guided-choice{min-height:84px;gap:4px;padding:6px 4px;font-size:12px;border-radius:16px}
+  html body .guided-choice>:first-child{width:40px!important;height:40px!important}
+  html body .guided-ask{font-size:15px!important}html body #guided{gap:6px}
+}
+@media (orientation:portrait) and (max-width:700px){
+  html body .guided-choice{min-height:104px}
+  html body .guided-choice>:first-child{width:50px!important;height:50px!important}
+  html body .guided-reaction{top:auto;bottom:-6px;left:calc(100% + 8px);translate:0 0;font-size:12px}
+  html body .guided-reaction::after{display:none}
+}
+html body #studioScreen #customer{position:relative!important;overflow:visible!important}
+html body #customer>.guided-reaction{left:var(--gx,50%);top:var(--gy,20px)}
+@media (orientation:portrait) and (max-width:700px){html body #customer>.guided-reaction{top:calc(var(--gy,20px) + 8px);left:calc(var(--gx,40px) + 34px);translate:0 0;bottom:auto}}
+html body .guided-choice{min-height:150px}
+/* story payoffs */
+html body .lane-beat .lane-arc{display:block;margin-top:8px;color:#2f7a5e;font:700 14px var(--v-font)}
+html body .lane-beat .lane-arc small{display:block;margin:2px 0 0;color:#b8862f}
+html body .lane-beat.arc{background:linear-gradient(180deg,#e7f8f0,#fffdf6);border-color:#bfe8d6}
+html body .modal[data-modal-kind=party]{width:min(640px,94vw)!important;text-align:center;max-height:94dvh;overflow:auto;background:linear-gradient(180deg,#effbf5,#fffefb)!important}
+html body .party-row{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:14px 0}
+html body .party-guest{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;width:84px}
+html body .party-guest img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:top;background:#fff;box-shadow:0 0 0 3px #fff,0 0 0 5px #bfe8d6,0 8px 18px #2f7a5e22}
+html body .party-guest figcaption{font:700 13px var(--v-font);color:var(--v-ink)}
+html body .party-lead{font:600 16px/1.5 var(--v-font)!important;color:var(--v-ink)!important}
+html body .party-reward{display:inline-block;padding:6px 16px;border-radius:999px;background:#fff8e6;color:#9a6a1f!important;font:700 14px var(--v-font)!important}
+@media (prefers-reduced-motion:no-preference){
+  html body .party-guest{animation:party-hop .7s cubic-bezier(.34,1.56,.64,1) both}
+  html body .party-guest:nth-child(2){animation-delay:.08s}html body .party-guest:nth-child(3){animation-delay:.16s}
+  html body .party-guest:nth-child(4){animation-delay:.24s}html body .party-guest:nth-child(5){animation-delay:.32s}html body .party-guest:nth-child(6){animation-delay:.4s}
+}
+@keyframes party-hop{0%{opacity:0;transform:translateY(18px) scale(.8)}100%{opacity:1;transform:none}}
+
+/* phones: the customer's reaction also shows at the top of the guided panel */
+html body #guidedVoice{display:none}
+@media (max-width:700px){
+  html body #studioScreen.guided .custom>#guidedVoice:not([hidden]){display:flex!important;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:999px;background:#fff;border:1px solid #d6efe4;box-shadow:0 6px 14px #2f7a5e1a;animation:g-pop .4s cubic-bezier(.34,1.56,.64,1) both}
+  html body #guidedVoice img{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;background:#eefaf4}
+  html body #guidedVoice span{font:600 13px var(--v-font)}
+  html body #guidedVoice span.ok{color:#2f7a5e}html body #guidedVoice span.no{color:#9a6b5a}
+}
+
+/* ══ Fitting room as a photo card (rooms retired) ═════════════════════════ */
+html body .runway-scene.card-mode{background:radial-gradient(70% 60% at 50% 35%,#f8fcfa,#eaf5f0)!important}
+html body .runway-scene.card-mode::before,html body .runway-scene.card-mode::after{display:none!important;content:none!important}
+html body .runway-scene.card-mode>.runway-worn-window{border-radius:22px!important;overflow:hidden!important;box-shadow:0 22px 44px #2f5a4a2e,0 3px 8px #2f5a4a1f!important;border:5px solid #fff!important;box-sizing:border-box;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .28 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --vignette:radial-gradient(90% 75% at 50% 45%,transparent 55%,#3a2e2a2e 100%)}
+html body .runway-scene.card-mode[data-floor=carpet]>.runway-worn-window{background:var(--vignette),var(--grain),radial-gradient(80% 60% at 50% 72%,#ddd5ce,#bdb3aa)!important}
+html body .runway-scene.card-mode[data-floor=wood]>.runway-worn-window{background:var(--vignette),var(--grain),repeating-linear-gradient(97deg,transparent 0 62px,#9b744f30 62px 64px),linear-gradient(180deg,#ead6bf,#cfb08e)!important}
+html body .runway-scene.card-mode[data-floor=marble]>.runway-worn-window{background:var(--vignette),var(--grain),radial-gradient(40% 18% at 30% 30%,#ffffff 0,transparent 70%),linear-gradient(115deg,transparent 40%,#c9c2bd55 42%,transparent 45%,transparent 70%,#d4cdc855 72%,transparent 74%),linear-gradient(180deg,#f6f2ee,#e2dbd5)!important}
+html body .runway-scene.card-mode .fitting2d-canvas{filter:saturate(.97) contrast(1.02)}
+html body .photo-caption{position:absolute;z-index:4;left:0;right:0;bottom:0;display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fffdfdeb;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+html body .photo-caption img{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top;background:#eefaf4;flex:none}
+html body .photo-caption span{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+html body .photo-caption b{font:700 13px var(--v-font);color:var(--v-ink);white-space:nowrap}
+html body .photo-caption small{font:600 10.5px var(--v-font);color:var(--v-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body .photo-caption i{margin-left:auto;font:700 12px var(--v-font);font-style:normal;color:#e07a98;white-space:nowrap}
+/* landscape: the photo card on the left, its controls in a rail on the right */
+html body .runway.card-rail .runway-dock{position:fixed!important;left:auto!important;right:20px!important;bottom:auto!important;translate:none!important;width:var(--rail-w,420px)!important;max-height:calc(100dvh - 92px)!important;overflow-y:auto!important;
+  display:flex!important;flex-direction:column!important;gap:12px!important;padding:24px 18px 18px!important}
+html body .runway.card-rail .runway-sock-panel{display:flex!important;flex-direction:column!important;gap:10px!important}
+html body .runway.card-rail .runway-sock-styles{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;overflow:visible!important}
+html body .runway.card-rail .runway-sock-styles .sock-chip{min-width:0!important;white-space:normal!important}
+html body .runway.card-rail .runway-sock-colors{justify-content:center!important}
+html body .runway.card-rail .runway-actions{order:5;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+html body .runway.card-rail .runway-actions button{width:100%!important}
+html body .runway.card-rail .runway-reaction{display:none!important}
+@media (max-height:560px){
+  html body .runway.card-rail .runway-dock{padding:16px 12px 12px!important;gap:8px!important;max-height:calc(100dvh - 64px)!important}
+  html body .runway.card-rail .runway-sock-styles{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  html body .runway.card-rail .runway-sock-styles .sock-chip{min-height:30px!important;font-size:11px!important;padding:2px 4px!important}
+}
+/* portrait: the styling wish is one tidy line above the card; sock styles scroll in one row */
+@media (orientation:portrait){
+  html body .runway-scene.card-mode .styling-brief{left:12px!important;right:12px!important;max-width:none!important;display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:4px 10px!important;padding:8px 12px!important;bottom:auto!important}
+  html body .runway-scene.card-mode .styling-brief ul{display:flex!important;gap:10px!important;margin:0!important;padding:0!important}
+  html body .runway-scene.card-mode .styling-brief .styling-reward{margin-left:auto!important}
+  html body .runway-modal:has(.card-mode) .runway-sock-styles{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none;gap:6px!important;flex-basis:100%!important}
+  html body .runway-modal:has(.card-mode) .runway-sock-styles .sock-chip{flex:none!important;white-space:nowrap!important;min-height:38px!important}
+}
